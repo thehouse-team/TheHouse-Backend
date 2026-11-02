@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="TheHouse/TheHouse.csproj" />
+  <Project Path="TheHouse.Application/TheHouse.Application.csproj" />
+  <Project Path="TheHouse.Domain/TheHouse.Domain.csproj" />
+  <Project Path="TheHouse.Infrastructure/TheHouse.Infrastructure.csproj" />
+  <Project Path="TheHouse.UnitTests/TheHouse.UnitTests.csproj" />
+  <Project Path="TheHouse.IntegrationTests/TheHouse.IntegrationTests.csproj" />
+  <Project Path="TheHouse.SecurityTests/TheHouse.SecurityTests.csproj" />
+</Solution>
