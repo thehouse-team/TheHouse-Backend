@@ -1,119 +1,115 @@
-# NV-03 — Scaling Cloud
+# NV-03 — Scaling Cloud U2
 
 | Campo | Valor |
 | --- | --- |
 | ID | NV-03 |
 | Documento | `spec.md` |
-| Versión | 1.0.0-borrador |
-| Fecha | 2026-10-30 |
-| Estado | **⛔ NO EJECUTAR** |
-| Aprobación humana | **NINGUNA** |
+| Versión | 1.1.0-u2 |
+| Fecha | 2026-11-02 |
+| Estado documental | **✅ APROBADA PARA U2** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Plan | `plan.md` 1.0.0-borrador |
-| Tasks | `task.md` 1.0.0-borrador |
-| Precondición | Bootstrap existente; NV-01 y NV-02 como dependencias funcionales |
-| Relación | No autoriza NV-01 ni NV-02; su aprobación es independiente |
+| Plan | `plan.md` 1.1.0-u2 |
+| Tasks | `task.md` 1.1.0-u2 |
+| Precondición | NV-01 U2 y specs funcionales U2 aprobadas documentalmente; M-BE-028; COST-001 |
+| Relación | No autoriza NV-01, NV-02 ni specs funcionales por transitividad |
+| Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
 
-Este documento es un borrador. No autoriza crear recursos, seleccionar proveedor, escribir Terraform, crear Dockerfile o desplegar. **⛔ NO EJECUTAR** prevalece hasta la aprobación humana de los tres documentos.
+Este documento está aprobado documentalmente para la Entrega Unidad 2. No autoriza crear recursos, ejecutar Docker, ejecutar Terraform ni desplegar. **La ejecución requiere autorización humana de Fase B y, para `terraform apply` o `terraform destroy`, una confirmación humana separada.**
 
 ## 1. Contexto
 
-La arquitectura objetivo debe funcionar con al menos dos instancias de la API, un Load Balancer, estado compartido en Redis, conectividad a MongoDB, HTTPS/TLS, observabilidad con OpenTelemetry y empaquetado en Docker. La infraestructura se describirá con Terraform y deberá poder crearse y destruirse con costo $0.
+La Entrega Unidad 2 requiere desplegar los siete endpoints funcionales con al menos dos réplicas, HTTPS, health checks, conectividad MongoDB/Redis y evidencia de funcionamiento. Azure Container Apps es el objetivo de despliegue U2 conforme a M-BE-028, condicionado a COST-001.
 
-Hoy no existe ninguna de esas capacidades implementada. La solución solo contiene el bootstrap y proyectos vacíos. Este documento planifica; no afirma despliegue, escalado ni gratuidad.
-
-Tampoco existe un proveedor cloud seleccionado. AWS, Azure y Google Cloud son los únicos permitidos y la comparación sigue pendiente.
+La solución local parte del bootstrap y de las specs NV-01 y NV-04 a NV-08. Este documento define el contrato de infraestructura, no afirma que el despliegue exista ni que el costo $0 esté garantizado.
 
 ## 2. Objetivo
 
-Definir los requisitos verificables para una arquitectura escalable, stateless y reproducible, con dos o más instancias, balanceo, TLS, datos/caché compartidos, observabilidad y ciclo de vida de infraestructura, sin violar COST-001.
+Definir los requisitos verificables para contenerizar, publicar, aprovisionar, desplegar, verificar, apagar y destruir la API U2 en Azure Container Apps, manteniendo stateless, dos o más réplicas, TLS, observabilidad y costo objetivo $0.
 
 ## 3. Precondiciones
 
 1. Bootstrap técnico existente y sin modificar.
-2. NV-01 define la base stateless y los health checks.
-3. NV-02 define el escaneo y la firma de la imagen. La dependencia es por fase: la imagen de NV-03 se entrega a NV-02 F5; NV-03 no requiere que NV-02 esté cerrado para crearla.
-4. Existe una decisión aprobada de proveedor y servicios, precedida por la matriz.
-5. Existe evidencia vigente de costo $0 para el conjunto completo.
-6. Existe autorización de rutas para Docker, Terraform, workflows y configuración.
-7. Existe un entorno aislado para pruebas de carga y fallos.
-8. La aprobación de NV-01 o NV-02 no aprueba NV-03.
+2. NV-01 U2 aprobada documentalmente: DI, configuración, health checks, Problem Details y boundaries.
+3. NV-04 a NV-08 aprobadas documentalmente para U2.
+4. M-BE-028 registra Azure Container Apps como objetivo U2.
+5. Existe evidencia de costo compatible con COST-001 antes de `terraform apply`; si no, BLOCKED.
+6. Existe autorización humana de Fase B para Docker, GHCR, Terraform y Azure.
+7. Existe una suscripción Azure, región autorizada y credenciales temporales suministradas por el humano.
+8. NV-02 permanece **⛔ NO EJECUTAR**; sus scanners y quality gates no forman parte de U2.
 
-## 4. Alcance
+## 4. Alcance U2
 
-1. API stateless.
-2. Dos o más instancias.
-3. Load Balancer.
-4. Redis distribuido.
-5. Conectividad MongoDB.
-6. HTTPS/TLS.
-7. OpenTelemetry.
-8. Docker.
-9. Terraform.
-10. Nube y matriz AWS/Azure/Google Cloud.
-11. Creación de infraestructura.
-12. Destrucción de infraestructura.
-13. Arquitectura de costo $0.
+1. `Dockerfile` multi-stage y `.dockerignore`.
+2. Imagen y publicación en GHCR con tag trazable.
+3. Terraform reproducible en `infra/terraform/`.
+4. Azure Container Apps con mínimo dos réplicas durante la evaluación.
+5. HTTPS y TLS gestionado.
+6. `/health/live` y `/health/ready`.
+7. Observabilidad mínima U2 sin PII ni secretos.
+8. Conectividad MongoDB y Redis.
+9. Verificación de despliegue y smoke tests de los siete endpoints.
+10. Scale-to-zero al finalizar la evaluación, si la arquitectura lo permite.
+11. Destrucción con `terraform destroy` y verificación de recursos residuales.
+12. `VERSIONING.md` con versión, fecha, imagen, tag, commit, entorno, URL y estado.
 
 ## 5. Fuera de alcance
 
-- Implementar código, endpoints, entidades o repositorios.
-- Crear Dockerfile, Terraform, workflows o recursos cloud en esta entrega.
-- Seleccionar AWS, Azure o Google Cloud.
-- Provisionar, desplegar, escalar o destruir recursos.
-- Cambiar proyectos, referencias, `Program.cs` o configuración.
-- Implementar JWT, Refresh Tokens, Logout, MongoDB o Redis.
+- Implementar código, endpoints, entidades, repositorios o autenticación; pertenece a NV-01 y NV-04 a NV-08.
+- Ejecutar SAST, SCA, SBOM, Trivy, Dockle, Cosign, DAST, RESTler, mutación, contrato o performance de NV-02.
+- Comparar AWS, Azure y Google Cloud para una selección general; M-BE-011 sigue pendiente y M-BE-028 solo aplica a U2.
+- Crear recursos pagos sin evidencia de costo $0.
+- Ejecutar `terraform apply` sin `OK PARA APPLY` humano.
+- Ejecutar `terraform destroy` sin autorización humana.
+- Usar sticky sessions para ocultar estado local.
 - Declarar métricas, latencias, disponibilidad o costos no medidos.
-- Aprobar gasto, tarjeta, créditos o free tiers.
-- Usar sticky sessions como solución al estado local.
 
 ## 6. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
-| NV-03-R01 | API stateless | Ningún estado necesario para la corrección depende de una instancia; el estado compartido se identifica y se externaliza; reemplazar una instancia no pierde sesión, revocación, cuota ni dato de negocio. | F1 | T01, T02, T05, T19 |
-| NV-03-R02 | Dos o más instancias | La misma imagen y configuración se ejecuta en al menos dos instancias independientes; cada una reporta salud; el reemplazo no requiere afinidad de sesión. | F3 | T08, T18, T19 |
-| NV-03-R03 | Load Balancer | Distribuye tráfico, usa health checks, retira instancias no listas, propaga cabeceras de proxy de forma controlada y no depende de sticky sessions. | F3 | T09, T18, T19 |
-| NV-03-R04 | Redis distribuido | Redis tiene topología, claves con namespace, TTL, invalidación, autenticación/TLS cuando aplique, timeouts y comportamiento ante fallo; no es fuente de verdad. | F2 | T03, T04, T05, T18, T19 |
-| NV-03-R05 | Conectividad MongoDB | La conexión usa pooling, timeouts, cancelación, reintentos justificados, credenciales protegidas, TLS y límites; los índices responden a consultas reales y el costo es $0. | F2 | T06, T07, T18, T19 |
+| NV-03-R01 | API stateless | Ningún estado necesario para la corrección depende de una instancia; revocación, cuotas y sesión se externalizan; reemplazar una instancia no pierde estado ni control de seguridad. | F1 | T01, T02, T05, T19 |
+| NV-03-R02 | Dos o más instancias | La misma imagen y configuración se ejecuta en al menos dos réplicas independientes; cada una reporta salud; el reemplazo no requiere afinidad de sesión. | F3 | T08, T18, T19 |
+| NV-03-R03 | Load balancing y health checks | Azure Container Apps distribuye tráfico, usa `/health/live` y `/health/ready`, retira réplicas no listas y no depende de sticky sessions. | F3 | T09, T18, T19 |
+| NV-03-R04 | Redis distribuido | Redis tiene topología, namespace, TTL, autenticación/TLS cuando aplique, timeouts y comportamiento ante fallo; no es fuente de verdad ni fallback local de seguridad. | F2 | T03, T04, T05, T18, T19 |
+| NV-03-R05 | Conectividad MongoDB | La conexión usa pooling, timeouts, cancelación, TLS, credenciales protegidas e índices justificados; el fallo se refleja en readiness sin filtrar secretos. | F2 | T06, T07, T18, T19 |
 | NV-03-R06 | HTTPS/TLS | Todo acceso público usa HTTPS con certificado válido; HSTS, terminación, renovación y confianza en cabeceras de proxy están definidos y probados; no se desactiva la validación. | F3 | T10, T18, T19 |
-| NV-03-R07 | OpenTelemetry | Trazas, métricas y logs comparten correlación; se controlan cardinalidad, PII y retención; health checks no sustituyen telemetría; el exportador cumple COST-001. | F4 | T11, T12, T19 |
-| NV-03-R08 | Docker | La imagen es multi-stage, mínima, no root, sin secretos, con base fijada, healthcheck y compatibilidad con dos instancias; se entrega a NV-02 para escaneo. | F4 | T13, T14 |
-| NV-03-R09 | Terraform | La infraestructura se describe declarativamente, con módulos, variables, estado protegido, versiones fijadas, plan/apply/destroy y etiquetado; no contiene secretos. | F5 | T15, T18, T20 |
-| NV-03-R10 | Nube y matriz AWS/Azure/Google Cloud | Existe una matriz comparativa completa con los criterios exigidos; ningún proveedor se selecciona antes de la revisión humana; la decisión registra evidencia y riesgos. | F5 | T16, T17 |
-| NV-03-R11 | Creación de infraestructura | La creación sigue un plan aprobado, usa el proveedor seleccionado, incluye dos instancias, Load Balancer, TLS, Redis, conectividad MongoDB y observabilidad, y produce evidencia de inventario y costo. | F6 | T18 |
-| NV-03-R12 | Destrucción de infraestructura | Existe inventario, plan de destrucción, verificación de recursos residuales y evidencia de costo posterior; no se eliminan recursos externos ni se asume limpieza automática. | F6 | T20 |
-| NV-03-R13 | Arquitectura de costo $0 | El costo total del ciclo de vida es $0, incluidos compute, dos instancias, Load Balancer, TLS, almacenamiento, logs, Redis, MongoDB y egress; si no se demuestra, el resultado es BLOCKED. | F6 | T12, T17, T20, T21 |
+| NV-03-R07 | Observabilidad U2 | Trazas, métricas y logs comparten correlación; se controlan cardinalidad, PII y retención; el exportador y la retención caben en COST-001. | F4 | T11, T12, T19 |
+| NV-03-R08 | Imagen Docker y GHCR | La imagen es multi-stage, mínima, no root, sin secretos, con base fijada, healthcheck y tag inmutable; se publica en GHCR con trazabilidad a commit. | F4 | T13, T14, T22 |
+| NV-03-R09 | Terraform | La infraestructura se describe declarativamente con módulos, variables, versiones fijadas, estado protegido, etiquetado y plan/apply/destroy; no contiene secretos. | F5 | T15, T18, T20 |
+| NV-03-R10 | Azure U2 y evidencia de costo | Azure Container Apps se usa conforme a M-BE-028; existe evidencia vigente de región, SKU, free allowance, cuotas, tarjeta, riesgo y costo esperado; si no se demuestra $0, BLOCKED. | F5 | T16, T17 |
+| NV-03-R11 | Creación de infraestructura | La creación sigue un plan aprobado, incluye dos réplicas, HTTPS, Redis, MongoDB y observabilidad, y produce inventario y evidencia de costo inicial. | F6 | T18 |
+| NV-03-R12 | Destrucción y apagado | Existe inventario, scale-to-zero cuando aplique, plan de destrucción, verificación de recursos residuales y evidencia de costo posterior. | F6 | T20, T23 |
+| NV-03-R13 | Arquitectura de costo $0 | El costo total del ciclo de vida es $0, incluidos compute, dos réplicas, TLS, logs, Redis, MongoDB, registry y egress; si no se demuestra, BLOCKED. | F6 | T12, T17, T20, T21, T23 |
+| NV-03-R14 | Versionamiento del despliegue | `VERSIONING.md` registra versión, fecha, imagen, tag, commit, entorno, URL y estado, sin secretos; la información coincide con GHCR y Azure. | F4 | T22 |
 
-## 7. Matriz cloud pendiente — AWS vs Azure vs Google Cloud
+## 7. Azure Container Apps U2 — condiciones COST-001
 
-**Ningún proveedor está seleccionado.** La matriz se completará con evidencia vigente antes de cualquier decisión. Una celda vacía o "PENDIENTE" no es una aprobación.
+Azure Container Apps es el compute U2. La siguiente tabla debe completarse con evidencia **antes** de `terraform apply`; una celda pendiente no autoriza gasto.
 
-| Criterio | AWS | Azure | Google Cloud |
-| --- | --- | --- | --- |
-| Compute | PENDIENTE | PENDIENTE | PENDIENTE |
-| Dos instancias | PENDIENTE | PENDIENTE | PENDIENTE |
-| Load Balancer | PENDIENTE | PENDIENTE | PENDIENTE |
-| HTTPS / certificado | PENDIENTE | PENDIENTE | PENDIENTE |
-| Container hosting | PENDIENTE | PENDIENTE | PENDIENTE |
-| Observabilidad | PENDIENTE | PENDIENTE | PENDIENTE |
-| Storage / CDN | PENDIENTE | PENDIENTE | PENDIENTE |
-| Redis | PENDIENTE | PENDIENTE | PENDIENTE |
-| Conectividad MongoDB | PENDIENTE | PENDIENTE | PENDIENTE |
-| Terraform | PENDIENTE | PENDIENTE | PENDIENTE |
-| Requiere tarjeta | PENDIENTE | PENDIENTE | PENDIENTE |
-| Riesgo de cobro | PENDIENTE | PENDIENTE | PENDIENTE |
-| Costo esperado total | PENDIENTE | PENDIENTE | PENDIENTE |
+| Componente | Requisito U2 | Evidencia previa a apply |
+| --- | --- | --- |
+| Compute | Azure Container Apps, Consumption cuando aplique | Región, SKU/plan, cuota, free allowance vigente y estimación mensual |
+| Réplicas | Mínimo 2 durante la evaluación | Configuración `minReplicas=2`, `maxReplicas` acotado y costo de dos réplicas |
+| Registry | GHCR | Visibilidad, free allowance, autenticación y tag inmutable |
+| Logging | Azure Monitor / Log Analytics o alternativa gratuita | Retención, ingestión, límite y costo esperado |
+| Egress | Salida a MongoDB, Redis y clientes | Estimación y free allowance |
+| Redis | Servicio Redis con TLS | Proveedor, plan, free allowance, límite y fallback definido |
+| MongoDB | MongoDB Atlas M0 o alternativa elegible | Plan, cuota, límite, TLS y costo $0 |
+| TLS | HTTPS gestionado por Container Apps o certificado válido | Dominio, certificado, renovación y HSTS |
+| Estado Terraform | Local protegido o backend gratuito | Ubicación, cifrado, exclusión de Git y acceso |
+| Tarjeta y cobro | Riesgo explícito | Si requiere tarjeta, política de cobro y mecanismo de apagado |
+| Scale-to-zero | Mínimo de réplicas a 0 al finalizar | Comando exacto con nombres reales |
+| Destrucción | `terraform destroy` y verificación | Inventario, plan y evidencia posterior |
 
-Reglas de la matriz:
+Reglas:
 
-1. Se evalúa el conjunto completo, no un servicio aislado.
-2. Se registra región, cuota, duración, elegibilidad y fecha de consulta.
-3. Un free tier no equivale a costo $0 permanente.
-4. Se incluyen egress, logs, almacenamiento, IP pública, certificado y registro de imágenes.
-5. Se registra si exige tarjeta y si el cobro es automático al exceder cuotas.
-6. Si no se puede demostrar $0 con dos instancias y Load Balancer, se reporta BLOCKED.
-7. La selección requiere aprobación humana separada de esta spec.
+1. No se afirma costo $0 sin evidencia vigente del conjunto completo.
+2. Un free tier, crédito o alerta de presupuesto no es un límite duro de gasto.
+3. Si dos réplicas o algún componente no pueden demostrarse $0, el resultado es **BLOCKED**.
+4. El apply requiere mostrar el plan y recibir **OK PARA APPLY** humano.
+5. El destroy requiere autorización humana separada.
 
 ## 8. Decisiones y restricciones aplicables
 
@@ -121,89 +117,93 @@ Reglas de la matriz:
 - M-BE-008: Redis para caché y estado compartido que la spec requiera.
 - M-BE-009: stateless, dos instancias y Load Balancer.
 - M-BE-010: COST-001, costo obligatorio $0.
-- M-BE-011: proveedor pendiente y matriz reservada.
+- M-BE-011: matriz general de proveedor pendiente; no se resuelve por esta spec.
 - M-BE-018: OpenTelemetry y correlación.
 - M-BE-019: Docker, Terraform y GitHub Actions futuros.
+- M-BE-028: Azure Container Apps como objetivo U2, sin autorizar apply.
+- Nota de reemisión: M-BE-028 se aprobó antes de `1.1.0-u2`; en esta versión, R10/T16 documentan evidencia de costo Azure U2, no una matriz comparativa general. M-BE-011 sigue pendiente.
 - COST-001: ningún recurso puede quedar fuera del cálculo.
-
-Propuestas pendientes de aprobación:
-
-| Tema | Propuesta inicial | Estado |
-| --- | --- | --- |
-| Topología | Dos instancias detrás de un Load Balancer | PROPUESTO |
-| TLS | Terminación en Load Balancer con certificado gratuito | PENDIENTE |
-| Observabilidad | OpenTelemetry con exportador gratuito/local | PENDIENTE |
-| Redis | Servicio gratuito o contenedor autogestionado | PENDIENTE |
-| MongoDB | Free tier elegible o instancia autogestionada | PENDIENTE |
-| Estado Terraform | Local protegido o backend gratuito | PENDIENTE |
-| Región | La más cercana con cuota y costo $0 verificados | PENDIENTE |
 
 ## 9. Seguridad
 
 - No exponer MongoDB ni Redis a Internet sin control.
 - Usar TLS para conexiones públicas y para dependencias cuando el proveedor lo permita.
 - Aplicar mínimo privilegio a identidades, roles, tokens y claves.
-- No almacenar secretos en Terraform, imágenes, repositorio o logs.
+- No almacenar secretos en Terraform, imágenes, repositorio, `VERSIONING.md` ni logs.
+- Usar variables de entorno, secretos de Azure Container Apps o variables sensibles no versionadas.
 - Validar cabeceras de proxy antes de confiar en IP o esquema.
 - No desactivar la validación de certificados.
-- No usar sticky sessions para ocultar estado local.
-- No usar fallbacks locales de seguridad que diverjan entre instancias.
+- No usar sticky sessions ni fallbacks locales de seguridad.
 - Revisar la exposición de health checks, métricas y paneles.
-- Firmar y verificar la imagen antes de desplegar.
-- Destruir credenciales y recursos temporales al finalizar.
+- La imagen debe ejecutarse como usuario no root y sin secretos embebidos.
+- El escaneo y la firma de imagen quedan en NV-02; no se ejecutan en U2.
 
 ## 10. Testing y evidencia
 
-La verificación futura debe incluir:
+La verificación U2 debe incluir:
 
-- Reemplazo de una instancia sin pérdida de estado ni control de seguridad.
-- Distribución de tráfico entre dos instancias y retirada por health check.
-- TLS válido, HSTS y cabeceras de proxy.
-- Fallo y recuperación de Redis sin abrir controles.
-- Fallo y recuperación de MongoDB con timeouts controlados.
-- Trazas y métricas correlacionadas entre instancias.
-- Prueba de carga en entorno aislado y con SLO aprobado.
-- Destrucción completa y verificación de costo posterior.
+- Smoke test HTTPS de los siete endpoints U2.
+- `/health/live` y `/health/ready` con semántica correcta.
+- Login rate limit hasta HTTP 429 con el umbral real.
+- Logout con token válido, reutilización y rechazo.
+- Dos réplicas activas verificadas con Azure CLI.
+- Fallo de MongoDB: readiness no-ready, error controlado y sin stack trace.
+- Fallo de Redis: funciones dependientes fallan de forma controlada y sin abrir controles.
+- Distribución de tráfico y reemplazo de una réplica.
+- TLS válido y redirección HTTPS cuando aplique.
+- Cost Management consultado y registrado.
+- Scale-to-zero o destroy al finalizar, con autorización humana.
 
-Ninguna de estas pruebas se ejecuta en esta entrega. No se declaran latencias, disponibilidad ni costos sin evidencia.
+Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran latencias, disponibilidad ni costos sin evidencia.
 
 ## 11. Riesgos
 
-| ID | Riesgo | Impacto | Mitigación propuesta |
+| ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
-| NV-03-RK01 | Free tier con expiración o cuota insuficiente | Cobro inesperado | Verificar elegibilidad y plan de destrucción |
-| NV-03-RK02 | Dos instancias o Load Balancer no cubiertos por $0 | Arquitectura inviable | BLOCKED y revisión humana |
-| NV-03-RK03 | Egress, logs o almacenamiento no contabilizados | Costo oculto | Inventario completo y monitoreo |
-| NV-03-RK04 | Estado local en revocación, cuotas o sesión | Comportamiento divergente | Externalizar en Redis y probar fallos |
-| NV-03-RK05 | Sticky sessions como atajo | Escalado frágil | Prohibidas como solución |
-| NV-03-RK06 | Terraform con secretos o estado expuesto | Compromiso | Variables protegidas y estado seguro |
-| NV-03-RK07 | Recursos residuales tras destroy | Cobro continuo | Inventario y verificación posterior |
-| NV-03-RK08 | Proveedor elegido sin matriz | Decisión no justificada | Gate de matriz y aprobación |
-| NV-03-RK09 | Certificado o DNS mal configurado | Interrupción o TLS inválido | Pruebas y renovación |
-| NV-03-RK10 | Observabilidad con cardinalidad o retención excesiva | Costo y ruido | Límites y muestreo |
+| NV-03-RK01 | Free allowance insuficiente para dos réplicas | Cobro inesperado | Evidencia previa y scale-to-zero/destroy |
+| NV-03-RK02 | Redis o MongoDB sin opción $0 elegible | Arquitectura inviable | BLOCKED y revisión humana |
+| NV-03-RK03 | Logs o egress no contabilizados | Costo oculto | Límites, retención y monitoreo |
+| NV-03-RK04 | Estado local en revocación o cuotas | Divergencia entre réplicas | Redis compartido y pruebas |
+| NV-03-RK05 | Terraform con secretos o estado expuesto | Compromiso | Variables protegidas y estado fuera de Git |
+| NV-03-RK06 | Recursos residuales tras destroy | Cobro continuo | Inventario y verificación posterior |
+| NV-03-RK07 | Apply automático tras plan | Gasto no autorizado | Gate `OK PARA APPLY` obligatorio |
+| NV-03-RK08 | GHCR con token expuesto | Acceso no autorizado | Token efímero, nunca impreso ni versionado |
+| NV-03-RK09 | Certificado o DNS mal configurado | TLS inválido | Verificación HTTPS y renovación |
+| NV-03-RK10 | Observabilidad con cardinalidad excesiva | Costo y ruido | Muestreo, límites y retención |
 
 ## 12. Dependencias
 
 - Bootstrap existente (precondición).
-- NV-01 para stateless, salud y correlación.
-- NV-02 para escaneo, firma y gates de imagen.
-- Aprobación humana independiente de NV-03.
-- Matriz de proveedor completa y evidencia de costo $0.
-- Autorización de rutas para Docker, Terraform, workflows y configuración.
-- Entorno aislado para pruebas de fallo y carga.
+- NV-01 U2 para stateless, salud, correlación y configuración.
+- NV-04 a NV-08 para los siete endpoints.
+- M-BE-028 para Azure Container Apps U2.
+- Evidencia de costo $0 y autorización de Fase B.
+- Suscripción, región y credenciales temporales proporcionadas por el humano.
+- NV-02 no se ejecuta y no es precondición de U2.
 
 ## 13. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 13 |
+| Requisitos | 14 |
 | Fases del plan | 6 |
-| Tasks | 21 |
+| Tasks | 23 |
+| Tasks U2 | 22 |
+| Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado de ejecución | **⛔ NO EJECUTAR** |
+| Estado documental | **✅ APROBADA PARA U2** |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
 
-## 14. Aprobación pendiente
+## 14. Aprobación documental y ejecución
 
-La aprobación futura debe registrar aprobador, fecha, versiones, IDs, rutas, proveedor y servicios autorizados, presupuesto $0, evidencia de elegibilidad y plan de destrucción. Sin ese registro, NV-03 permanece **BLOCKED** y **⛔ NO EJECUTAR**.
+La aprobación documental U2 quedó registrada con:
+
+1. Aprobador: Victor Manuel Jose Jose.
+2. Fecha: 2026-11-02.
+3. Versión aprobada: `1.1.0-u2` de `spec.md`, `plan.md` y `task.md`.
+4. Proveedor U2: Microsoft Azure; compute: Azure Container Apps; mínimo 2 réplicas.
+5. Restricciones: COST-001, sin apply automático y sin destroy automático.
+
+La ejecución sigue bloqueada. El apply y el destroy requieren confirmación humana explícita. Sin ese registro, el estado permanece **BLOCKED**.

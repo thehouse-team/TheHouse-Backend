@@ -211,3 +211,43 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** Evitar que un agente interprete la creación de una spec como autorización de implementación y detectar contradicciones, secretos, fallos de autorización, validación o exposición de datos antes de cerrar cada task.
 - **Impacto:** Todos los agentes, specs y futuras implementaciones del Backend deberán respetar este flujo. Ninguna task podrá cerrarse con contradicciones SDD o hallazgos bloqueantes de seguridad dentro del alcance.
+
+## M-BE-028 — Azure Container Apps como objetivo de despliegue U2
+
+- **ID:** M-BE-028
+- **Decisión:** Designar Microsoft Azure con Azure Container Apps como objetivo de despliegue exclusivo de la Entrega Unidad 2, condicionado a COST-001 y a la demostración de viabilidad de costo $0.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-02.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** autorización humana explícita para la entrega U2; permite planificar imagen, registry, Container Apps, réplicas y observabilidad sobre un proveedor concreto.
+- **Impacto:** autorización limitada a U2; no resuelve la matriz comparativa NV-03-R10/T16 ni la decisión general M-BE-011, y no autoriza `terraform apply`, creación de recursos ni gasto. Antes de aplicar debe documentarse servicios, SKU, free allowance, dos réplicas, registry, logging, egress, Redis, MongoDB, tarjeta, riesgo y destrucción; si no se demuestra compatibilidad con COST-001, el resultado es BLOCKED.
+
+## M-BE-029 — Endpoints U2 aprobados
+
+- **ID:** M-BE-029
+- **Decisión:** Unidad 2 utilizará exactamente estos siete endpoints: `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `POST /api/v1/auth/logout`, `GET /api/v1/properties`, `GET /api/v1/properties/{id}`, `GET /api/v1/universities` y `GET /api/v1/universities/{id}`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-02.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** cerrar el alcance académico de U2 y evitar invención, sustitución o fusión de endpoints durante la implementación.
+- **Impacto:** no se agregan endpoints a U2 sin nueva spec y aprobación humana. La decisión no autoriza implementación; la ejecución sigue bloqueada hasta la autorización de Fase B. Los contratos y tasks están en NV-04 a NV-08.
+
+## M-BE-030 — División funcional NV-04 a NV-08
+
+- **ID:** M-BE-030
+- **Decisión:** dividir U2 en cinco specs funcionales independientes: NV-04 User Registration, NV-05 Login, NV-06 Logout, NV-07 Property Core (solo lectura de listado y detalle) y NV-08 University Catalog (solo lectura de listado y detalle, con seed mínimo).
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-02.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** aplicar SDD-002 y mantener requisitos, planes, tasks y evidencia separados por incremento, sin fusionar scopes.
+- **Impacto:** cada una de las cinco specs funcionales tiene `spec.md`, `plan.md` y `task.md` en versión `1.0.0-u2`, aprobación documental y ejecución bloqueada. NV-07 no autoriza CRUD ni módulos de favoritos, visitas, chat o Smart Match. NV-08 no autoriza búsqueda avanzada ni catálogo masivo. NV-02 permanece ⛔ NO EJECUTAR.
+
+## M-BE-031 — Reemisión documental NV-01/NV-03 1.1.0-u2
+
+- **ID:** M-BE-031
+- **Decisión:** reemitir NV-01 Foundation y NV-03 Scaling Cloud como versión `1.1.0-u2`, con tasks U2 explícitas, límites técnicos de MongoDB/Redis/JWT en NV-01 y Azure Container Apps en NV-03.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-02.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** superar el bloqueo del preflight U2 sin implementar, manteniendo la separación entre documentación aprobada y ejecución autorizada.
+- **Impacto:** la documentación queda aprobada para U2, pero la implementación sigue **BLOCKED** hasta la autorización de Fase B. `terraform apply` y `terraform destroy` requieren confirmación humana separada. M-BE-028 sigue vigente y M-BE-011 continúa pendiente para la selección general de proveedor. La referencia de M-BE-028 a NV-03-R10/T16 se interpreta conforme a esta versión: R10/T16 documentan evidencia de costo Azure U2, no una matriz comparativa general.
