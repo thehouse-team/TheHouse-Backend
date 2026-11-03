@@ -1,5 +1,6 @@
 using Microsoft.OpenApi;
 using Microsoft.AspNetCore.Mvc;
+using TheHouse.Application.Contracts.Auth;
 
 namespace TheHouse.Http;
 
@@ -14,10 +15,10 @@ public static class ApiConventions
         {
             options.AddDocumentTransformer((document, _, _) =>
             {
-                document.Info.Title = "TheHouse Foundation";
+                document.Info.Title = "TheHouse U2 — Foundation y Registration";
                 document.Info.Version = Version;
-                document.Info.Description = "Foundation U2. API futura bajo /api/v1; health es operacional y no versionado. " +
-                    "Sin endpoints de negocio ni autenticación JWT implementada. Errores RFC 9457 con traceId.";
+                document.Info.Description = "Foundation y Registration U2 bajo /api/v1; health es operacional y no versionado. " +
+                    "Solo registro; sin Login, Logout ni JWT. Errores RFC 9457 con traceId.";
                 return Task.CompletedTask;
             });
             options.AddSchemaTransformer((schema, context, _) =>
@@ -29,6 +30,17 @@ public static class ApiConventions
                     schema.Required ??= new HashSet<string>();
                     foreach (var property in new[] { "type", "title", "status", "traceId" })
                         schema.Required.Add(property);
+                }
+                if (context.JsonTypeInfo.Type == typeof(RegisterRequest))
+                {
+                    schema.AdditionalPropertiesAllowed = false;
+                    if (schema.Properties?.TryGetValue("password", out var password) == true && password is OpenApiSchema value)
+                    {
+                        value.Format = "password";
+                        value.WriteOnly = true;
+                        value.MinLength = 12;
+                        value.MaxLength = 128;
+                    }
                 }
                 return Task.CompletedTask;
             });

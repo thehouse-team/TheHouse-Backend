@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="3.13.0" />
+    <PackageReference Include="StackExchange.Redis" Version="3.4.31" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TheHouse.Application\TheHouse.Application.csproj" />
     <ProjectReference Include="..\TheHouse.Domain\TheHouse.Domain.csproj" />
   </ItemGroup>

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddFoundationConfiguration();
+builder.AddRegistration();
 
 builder.Services.AddFoundationHttp();
 builder.Services.AddFoundationOpenApi();
@@ -47,6 +48,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapFoundationHealth();
+app.MapRegistration();
 
 app.Run();
 

@@ -7,7 +7,7 @@ namespace TheHouse.IntegrationTests;
 public sealed class OpenApiContractTests
 {
     [Fact]
-    public async Task Openapi_is_reproducible_versioned_and_contains_no_business_operations()
+    public async Task Openapi_is_reproducible_versioned_and_contains_only_authorized_operations()
     {
         using var factory = new FoundationFactory();
         using var client = factory.CreateHttpsClient();
@@ -19,9 +19,10 @@ public sealed class OpenApiContractTests
         Assert.Equal(ApiConventions.Version, document.RootElement.GetProperty("info").GetProperty("version").GetString());
         Assert.Equal("/api/v1", ApiConventions.Prefix);
         foreach (var path in document.RootElement.GetProperty("paths").EnumerateObject())
-            Assert.StartsWith("/health/", path.Name);
+            Assert.True(path.Name.StartsWith("/health/", StringComparison.Ordinal) || path.Name == RegistrationEndpoint.Path);
         Assert.DoesNotContain("WeatherForecast", first, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("/auth/", first);
+        Assert.DoesNotContain("/auth/login", first);
+        Assert.DoesNotContain("/auth/logout", first);
         Assert.DoesNotContain("/properties", first);
         Assert.DoesNotContain("/universities", first);
         Assert.DoesNotContain("SigningKey", first);
@@ -31,7 +32,7 @@ public sealed class OpenApiContractTests
     [Theory]
     [InlineData("/api/v2/foundation-test")]
     [InlineData("/weatherforecast")]
-    [InlineData("/api/v1/auth/register")]
+    [InlineData("/api/v1/auth/register/not-a-route")]
     [InlineData("/api/v1/auth/login")]
     [InlineData("/api/v1/auth/logout")]
     [InlineData("/api/v1/properties")]

@@ -59,7 +59,7 @@ public static class FoundationConfiguration
         builder.Services.AddSingleton<IRedisHealthProbe, UnconfiguredRedisHealthProbe>();
     }
 
-    private static T AddValidated<T>(WebApplicationBuilder builder, string section, Func<T, bool> valid)
+    internal static T AddValidated<T>(WebApplicationBuilder builder, string section, Func<T, bool> valid)
         where T : class, new()
     {
         // Validación antes de Build; sin inner exceptions ni valores del binder en diagnósticos.

@@ -37,6 +37,8 @@ public static class ProblemResponses
         problem.Instance = null;
         problem.Extensions.Clear();
         problem.Extensions["traceId"] = context.TraceIdentifier;
+        if (RegistrationProblems.IsRegistration(context))
+            RegistrationProblems.Normalize(problem, status);
     }
 
     public static async Task WriteAsync(HttpContext context, int status, bool validation = false)
