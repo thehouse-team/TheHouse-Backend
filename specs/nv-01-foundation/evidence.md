@@ -5,12 +5,52 @@
 | Spec / plan / task | NV-01, `1.1.0-u2`, en esta carpeta |
 | Fecha de esta revisión | 2026-11-03 |
 | Rama / baseline | `feature/u2-entrega` / `53bd45681aa0295da943b639151c93c2191bdea9` |
+| Commit probado | `024d5f7` (`024d5f73190f2973d2d79b4f1faec634241aac4e`) |
 | Autorización de ejecución | Instrucción humana explícita del usuario en esta sesión: **APROBADO — FASE B U2** |
 | Tasks autorizadas | T01–T12, T14–T18 |
 | Exclusiones | T13, NV-02, NV-03, NV-04 a NV-08, Terraform y cloud |
-| Resultado del cierre | **BLOCKED — NV-01 no cerrada; sin commit ni push** |
+| Resultado del cierre U2 | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — T01–T12, T14–T18; T13 excluida |
 
-## Autorización y preservación
+## Validación CI utilizada para el cierre
+
+El usuario comunicó como **estado comprobado** la validación remota ya realizada de `024d5f7`. Este cierre documental usa esa confirmación humana y la revisión en lectura de los artefactos del commit; no vuelve a ejecutar restore, build, tests ni controles de NV-02.
+
+| Campo / paso | Evidencia comunicada por el usuario |
+| --- | --- |
+| Rama | `feature/u2-entrega` |
+| Commit probado | `024d5f7` |
+| Workflow | `U2 Linux Validation` |
+| Entorno | GitHub Actions / Ubuntu |
+| Restore | **PASS** |
+| Build | **PASS** |
+| Run tests | **PASS** |
+| Workflow completo | **SUCCESS** |
+| Artifact | `u2-test-results` |
+
+Se comprobó localmente mediante lectura de Git que HEAD corresponde al commit completo indicado, sin modificaciones de código rastreado. `.github/workflows/u2-linux-validation.yml` concuerda con el nombre, Ubuntu (`ubuntu-latest`), SDK `10.0.x`, pasos y artifact comunicados. Sus comandos son:
+
+```text
+dotnet restore TheHouse.slnx
+dotnet build TheHouse.slnx --configuration Release --no-restore --nologo
+dotnet test TheHouse.slnx --configuration Release --no-build --nologo --logger trx --results-directory "${{ github.workspace }}/TestResults"
+```
+
+**Procedencia:** resultados CI y existencia del artifact confirmados por el usuario; workflow, commit y contenido de las suites inspeccionados en lectura. GitHub CLI no tiene autenticación en este entorno: no se descargaron ni se inspeccionaron independientemente los TRX remotos. No se inventan URL/run ID, duración, cantidad de tests CI, cobertura o evidencia de scanners. El artifact indicado es la referencia de resultados; los números Windows de la sección histórica no son números CI.
+
+La validación integrada Linux supera la limitación probatoria del intento Windows. **Windows local bloqueado por Smart App Control / Code Integrity no es un fallo funcional de NV-01** ni exige desactivar esos controles para cerrar U2. El resultado CI no se presenta como ejecución de NV-02 o validación de despliegue Azure.
+
+### Brechas conocidas y decisión de cierre
+
+| Tema | Resultado NV-01 | Soporte de aceptación |
+| --- | --- | --- |
+| Configuración inválida | **RESUELTA** | Validación antes de Build y al arranque, rangos y binding estricto; `ConfigurationTests` verifica rechazo y ausencia de valores sensibles en errores |
+| Compression negotiation | **RESUELTA** | Negociación oficial `Accept-Encoding`, Brotli/Gzip, q=0, identity, umbral, MIME y exclusiones; matriz de `CompressionTests` |
+| Forwarded headers | **CONFIGURACIÓN SEGURA** | Deshabilitados por defecto; confianza explícita, límite de saltos, simetría y For/Proto únicamente; `ForwardedHeadersTests` |
+| Azure ingress real | **PENDIENTE SOLO EN NV-03** | Verificación de rangos, TLS, cadena de proxies y dos réplicas requiere despliegue separado; no es aceptación pendiente de Foundation |
+
+Se revisaron esos criterios y el resto de R01–R12 contra las suites incluidas en el commit probado y el resultado CI comunicado. No se detectaron criterios U2 incumplidos ni hallazgos bloqueantes dentro de NV-01. Las advertencias no bloqueantes y sus responsables están en la revisión M-BE-027 más abajo.
+
+## Autorización y preservación — registro de implementación previo
 
 Se leyeron, en orden, `constitution.md`, `AGENTS.md`, `memoria.md` (incluida M-BE-027), `spec.md`, `plan.md` y `task.md`. Los tres documentos NV-01 están aprobados documentalmente por Victor Manuel Jose Jose el 2026-11-02. La autorización posterior de ejecución es la instrucción del usuario de esta sesión; no se presume otra identidad para ese mensaje.
 
@@ -23,7 +63,9 @@ TASK ACTIVA: T01-T12, T14-T18
 ESTADO AUTORIZADO: APROBADO — FASE B U2
 ```
 
-La autorización permite únicamente Foundation, sus pruebas y evidencia. Las prohibiciones históricas de preparación documental se levantan solo en ese alcance por la instrucción humana; no se cambia el diseño aprobado ni se aprueba otra spec. Las leyendas documentales «hasta autorización de Fase B» deben leerse con este registro posterior. La autorización de ejecución no equivale a un cierre aprobado.
+La autorización permitió únicamente Foundation, sus pruebas y evidencia. Las prohibiciones históricas de preparación documental se levantaron solo en ese alcance por la instrucción humana; no se cambió el diseño aprobado ni se aprobó otra spec. Las leyendas documentales «hasta autorización de Fase B» deben leerse con ese registro posterior. La autorización de ejecución no equivalía por sí sola a un cierre aprobado: el cierre actual añade la validación CI y la revisión documental de aceptación.
+
+La solicitud humana actual autoriza exclusivamente este cierre en `task.md` y `evidence.md`. `spec.md` y `plan.md` `1.1.0-u2` conservan su contenido aprobado y sus estados de planificación originales; el estado posterior de ejecución/cierre se registra aquí y en `task.md`, sin cambiar requisitos, versiones o alcance. No es una nueva autorización de implementación.
 
 Se ejecutaron `git status --short`, `git stash push -u -m "wip: interrupted u2 phase b before nv01 cleanup"`, `git stash list` y `git status`. El stash terminó correctamente y dejó el árbol limpio. El estado observado antes del stash tenía 3 archivos rastreados modificados y archivos nuevos, sin eliminaciones rastreadas; no coincidía con las cantidades del resumen humano. No se asumió que los otros stashes fueran descartables.
 
@@ -37,7 +79,7 @@ Se conservaron los tres snapshots existentes después de la preservación:
 
 Ningún stash se reaplicó, eliminó ni sobrescribió. No se usó reset, restore, clean o checkout forzado. El código nuevo se preparó sobre el baseline limpio, no reaplicando el trabajo mezclado.
 
-## Entorno y ejecución real
+## Histórico de ejecución local Windows — no es el resultado final CI
 
 - Windows x64; SDK fijado por `global.json` a .NET `10.0.114`, `latestPatch`, sin prereleases. Antes de fijarlo se seleccionaba SDK 11 RC.
 - Target existente `net10.0`; runtime de pruebas .NET `10.0.14`; xUnit `2.9.3`, adaptador `3.1.4`.
@@ -56,7 +98,7 @@ Ejecuciones incrementales reales; **no sustituyen la validación del árbol fina
 | `dotnet test TheHouse.UnitTests/TheHouse.UnitTests.csproj --filter FullyQualifiedName~PaginationTests` | 15 PASS |
 | `dotnet test TheHouse.IntegrationTests/TheHouse.IntegrationTests.csproj --filter FullyQualifiedName~PaginationHttpTests` | 11 FAIL por carga de assembly bloqueada, no por aserciones del contrato |
 
-Validación final del código preparado:
+Intento de validación final local anterior a CI:
 
 | Comando | Resultado |
 | --- | --- |
@@ -66,24 +108,24 @@ Validación final del código preparado:
 | `git diff --stat` | Revisado; describe archivos rastreados, no incluye los nuevos sin stage |
 | `git diff --check` | PASS; sin errores de whitespace; avisos de conversión LF/CRLF de Git |
 
-| Suite final | PASS | FAIL | Omitidas |
+| Suite local Windows (histórica) | PASS | FAIL por ejecución bloqueada | Omitidas |
 | --- | ---: | ---: | ---: |
 | TheHouse.UnitTests | 16 | 0 | 0 |
 | TheHouse.IntegrationTests | 2 | 95 | 0 |
 | TheHouse.SecurityTests | 0 | 6 | 0 |
 | Total | 18 | 101 | 0 |
 
-Una de las 16 pruebas unitarias es el placeholder preexistente `TheHouse.UnitTests/UnitTest1.cs`; no representa cobertura funcional. Los dos PASS de integración finales son comprobaciones directas de cancelación/correlación que no necesitan arrancar el host. No se declara cobertura, rendimiento ni equivalencia con los 73 PASS de una ejecución anterior ajena a esta sesión.
+Una de las 16 pruebas unitarias locales es el placeholder preexistente `TheHouse.UnitTests/UnitTest1.cs`; no representa cobertura funcional. Los dos PASS de integración locales son comprobaciones directas de cancelación/correlación que no necesitan arrancar el host. Los FAIL del intento Windows se debieron a carga de assemblies bloqueada y no se clasifican como defectos funcionales de Foundation. No se declara cobertura, rendimiento ni equivalencia con los 73 PASS de una ejecución anterior.
 
 ### Bloqueo de plataforma confirmado
 
-`System.IO.FileLoadException`, HRESULT **`0x800711C7`**: «Una directiva de Control de aplicaciones bloqueó este archivo». La ejecución final no puede cargar `TheHouse.Application.dll` desde los directorios de salida de integración y seguridad. Una ejecución anterior tampoco pudo cargar el assembly de SecurityTests.
+`System.IO.FileLoadException`, HRESULT **`0x800711C7`**: «Una directiva de Control de aplicaciones bloqueó este archivo». El intento Windows no pudo cargar `TheHouse.Application.dll` desde los directorios de salida de integración y seguridad. Una ejecución anterior tampoco pudo cargar el assembly de SecurityTests.
 
 La lectura de `Microsoft-Windows-CodeIntegrity/Operational` confirmó eventos **3077 y 3033**, a las 11:05:17 hora local del 2026-11-03, que indican incumplimiento de requisitos de firma Enterprise / política de integridad. El SHA-256 de las copias de Application en su salida, UnitTests e IntegrationTests era idéntico: `E12C0AD06DBA885CA9405C39D396DD020BB856E01F972B5617E5FD15D33F01DE`. No hay evidencia de que modificar lógica resuelva esa política.
 
-No se deshabilitaron, alteraron ni eludieron controles de Windows; tampoco se movieron assemblies para evitar la política. **Requiere decisión humana:** el administrador debe revisar la política/firma por el procedimiento aprobado o proporcionar un entorno de desarrollo autorizado. Después hay que repetir build, todas las pruebas, revisión SDD y revisión de seguridad antes de cerrar o publicar. No se cambia código para alterar hashes con ese fin.
+No se deshabilitaron, alteraron ni eludieron controles de Windows; tampoco se movieron assemblies para evitar la política ni se cambió código para alterar hashes con ese fin. La validación posterior en GitHub Actions / Ubuntu satisface la revalidación integrada para este cierre documental. La limitación local permanece como incidencia del entorno: su eventual tratamiento corresponde al administrador por el procedimiento aprobado, no es remediación funcional pendiente de NV-01.
 
-## Diseño Foundation preparado y límites
+## Diseño Foundation revisado en el commit validado y límites
 
 ### Composición y configuración — T01/T02
 
@@ -114,7 +156,7 @@ Los nombres conceptuales de secretos de la spec no se convierten automáticament
 - Se materializa la decisión U2 de la spec: versión inicial `/api/v1` (constantes `ApiConventions`), OpenAPI `v1`. Cambios compatibles son aditivos sin ampliar exposición; cambios incompatibles requieren nueva versión/ruta y aprobación humana. Deprecación debe anunciarse y documentarse con plazo revisado antes de retirar una versión; no se inventa una fecha de retiro para v1.
 - Health es operacional y no versionado. OpenAPI se genera con el paquete existente y solo se expone en Development. No se anuncian esquemas de seguridad JWT o endpoints funcionales inexistentes.
 - El controller WeatherForecast del bootstrap se conserva con `[NonController]`, retirando el scaffold de discovery/rutas; no se borran sus archivos.
-- Falta revalidar en el árbol final el documento con health y sus esquemas Problem Details/traceId, bloqueado por la carga del host. No se reporta como contrato final aprobado el documento vacío validado antes de F4.
+- La validación CI comunicada corresponde al commit completo, incluidas las rutas health, no al documento vacío anterior a F4. Se revisaron `ApiConventions`, el registro de respuestas/esquemas en `FoundationHealth`, la fábrica de errores y `OpenApiContractTests`: versión, generación reproducible, rutas operacionales y ausencia de endpoints de negocio/secretos. No se anuncian esquemas JWT o ejemplos sensibles ficticios. No se afirma haber descargado el OpenAPI generado remotamente.
 
 ### Operación y protección — T07–T10
 
@@ -127,55 +169,57 @@ Los nombres conceptuales de secretos de la spec no se convierten automáticament
 
 - Deshabilitados por defecto (`ForwardedHeaders.None`). Se desactiva expresamente el auto-startup permisivo `forwardedHeaders_enabled`; no se confía en habilitación indiscriminada por entorno.
 - Al habilitar: allowlist explícita de proxies/IP networks validada al inicio, sin direcciones any ni redes /0; límite 1 por defecto, máximo 3; simetría de headers requerida. Solo se procesan For/Proto, nunca Host/Prefix. Se preservan las restricciones de host y la redirección HTTPS/HSTS.
-- `ForwardedHeadersTests` incluye proxy desconocido, proxy permitido, cabeceras asimétricas, hop extra y red permitida. **No tiene PASS final** por la política Windows.
+- `ForwardedHeadersTests` incluye proxy desconocido, proxy permitido, cabeceras asimétricas, hop extra y red permitida; forma parte de la solución validada con Run tests **PASS** en CI Linux. El bloqueo Windows no invalida esa validación.
 - Antes de desplegar en Azure: comprobar IP/rangos reales del ingress, cambios de rango, cadena/número de saltos, simetría, terminación TLS, redirección/HSTS, host público y direcciones IPv4/IPv6; probar spoofing y clave IP efectiva detrás de dos réplicas. No habilitar Proxy con rangos supuestos ni usar confianza universal para resolverlo. Es validación de despliegue futura, no evidencia de Azure obtenida en NV-01.
 
 ### Paginación — T11
 
-`PageRequest` y `PageResult<T>`: page ≥ 1, pageSize 1–50 (default 20); metadatos exactos `items`, `page`, `pageSize`, `totalItems`, `totalPages`. Offset en long y cálculo de techo sin overflow; máximo de items validado. Página vacía permite 200; continuación cuando page < totalPages. El repositorio futuro debe aplicar el orden estable aprobado: NV-07 `createdAt`/`_id` descendente; NV-08 `name`/`_id` ascendente. Aquí no se implementan esos repositorios, consultas o endpoints. Las pruebas unitarias pasan; el contrato HTTP de paginación permanece sin validar por el bloqueo.
+`PageRequest` y `PageResult<T>`: page ≥ 1, pageSize 1–50 (default 20); metadatos exactos `items`, `page`, `pageSize`, `totalItems`, `totalPages`. Offset en long y cálculo de techo sin overflow; máximo de items validado. Página vacía permite 200; continuación cuando page < totalPages. El repositorio futuro debe aplicar el orden estable aprobado: NV-07 `createdAt`/`_id` descendente; NV-08 `name`/`_id` ascendente. Aquí no se implementan esos repositorios, consultas o endpoints. `PaginationTests` y `PaginationHttpTests` cubren límites, metadatos, vacío, overflow y entradas malformadas, incluidos en la solución con Tests PASS comunicado en CI.
 
 ## Trazabilidad y cierre de tasks
 
 | Requisito | Fase / tasks | Artefactos / pruebas principales | Estado final |
 | --- | --- | --- | --- |
-| R01 | F1 / T01, T18 | FoundationConfiguration, puertos/probes, ConfigurationTests | Revalidación integrada bloqueada |
-| R02 | F1 / T02, T17, T18 | Opciones/configuración, ConfigurationTests | Revalidación integrada bloqueada |
-| R03 | F2 / T03, T14, T17, T18 | ProblemResponses, ErrorContractTests | Revalidación integrada bloqueada |
-| R04 | F2 / T04, T16, T18 | MVC/JSON, RequestBodyLimitMiddleware, ErrorContractTests | Revalidación integrada bloqueada |
-| R05 | F3 / T05, T14, T18 | ApiConventions, política de evolución, OpenApiContractTests | Revalidación integrada bloqueada |
-| R06 | F3 / T06, T14, T18 | OpenAPI/schema transformers, OpenApiContractTests | Contrato final con health pendiente |
-| R07 | F4 / T07, T15, T18 | FoundationHealth, DependencyReadinessCheck, HealthAndRateLimitTests | Revalidación integrada bloqueada |
-| R08 | F4 / T08, T15, T17, T18 | CorrelationIdMiddleware, CorrelationTests | Solo test directo PASS final; HTTP bloqueado |
-| R09 | F4 / T09, T15, T18 | PublicResponseCompressionMiddleware, CompressionTests | PASS incremental; revalidación bloqueada |
-| R10 | F4 / T10, T15, T17, T18 | FoundationRateLimits, HealthAndRateLimitTests | Revalidación integrada bloqueada |
-| R11 | F5 / T11, T16, T18 | PageRequest/PageResult, PaginationTests/PaginationHttpTests | Unitarias PASS; HTTP bloqueado |
-| R12 | F2 / T12, T17, T18 | FoundationExceptionMiddleware, RequestTimeouts, ErrorContractTests | Solo cancelación directa PASS final; HTTP bloqueado |
+| R01 | F1 / T01, T18 | FoundationConfiguration, puertos/probes, ConfigurationTests | CUMPLIDO: revisión DI/lifetimes + CI PASS |
+| R02 | F1 / T02, T17, T18 | Opciones/configuración, ConfigurationTests | CUMPLIDO: validación temprana y matriz de entornos + CI PASS |
+| R03 | F2 / T03, T14, T17, T18 | ProblemResponses, ErrorContractTests | CUMPLIDO: contrato y ausencia de fugas + CI PASS |
+| R04 | F2 / T04, T16, T18 | MVC/JSON, RequestBodyLimitMiddleware, ErrorContractTests | CUMPLIDO: validación HTTP/400/413 + CI PASS |
+| R05 | F3 / T05, T14, T18 | ApiConventions, política de evolución, OpenApiContractTests | CUMPLIDO: /api/v1 y política documentada + CI PASS |
+| R06 | F3 / T06, T14, T18 | OpenAPI/schema transformers, FoundationHealth, OpenApiContractTests | CUMPLIDO: contrato operacional reproducible + CI PASS |
+| R07 | F4 / T07, T15, T18 | FoundationHealth, DependencyReadinessCheck, HealthAndRateLimitTests | CUMPLIDO: live/ready/boundaries/timeouts + CI PASS |
+| R08 | F4 / T08, T15, T17, T18 | CorrelationIdMiddleware, CorrelationTests | CUMPLIDO: formato, longitud, propagación y eco + CI PASS |
+| R09 | F4 / T09, T15, T18 | PublicResponseCompressionMiddleware, CompressionTests | CUMPLIDO: negociación, umbral, exclusiones y HTTPS + CI PASS |
+| R10 | F4 / T10, T15, T17, T18 | FoundationRateLimits, HealthAndRateLimitTests | CUMPLIDO: políticas, 429/Retry-After y alcance local + CI PASS |
+| R11 | F5 / T11, T16, T18 | PageRequest/PageResult, PaginationTests/PaginationHttpTests | CUMPLIDO: límites/metadatos y convención de orden + CI PASS |
+| R12 | F2 / T12, T17, T18 | FoundationExceptionMiddleware, RequestTimeouts, ErrorContractTests | CUMPLIDO: clasificación, cancelación y timeout + CI PASS |
 | R13 | Futura / T13 | Ninguna implementación | NO EJECUTADA; fuera de U2 |
 
-Se comprobó que las huellas SHA-256 de los seis documentos normativos leídos permanecían sin cambios durante las revisiones incrementales. La instrucción humana vigente limita todas las iteraciones a NV-01. No se cierra ninguna task: resultados incrementales anteriores no permiten obviar el fallo de la puerta final ni la revisión de seguridad de T17. T01–T12 y T14–T18 permanecen abiertas/en verificación; T13 permanece futura. La fase de cierre no se considera superada ni habilita otro incremento.
+En la implementación se comprobaron las huellas de los documentos normativos durante las revisiones incrementales. En este cierre se releen constitución, AGENTS, memoria, spec, plan y task en orden y se contrasta aceptación con los artefactos existentes y el resultado CI comunicado. R01–R12 tienen traza requisito → fase → task → implementación/pruebas → CI/revisión; no hay tasks U2 sin requisito ni requisitos U2 pendientes. T14 cubre contrato, T15 operación/protección y T16 negativos; T17 es la revisión de seguridad siguiente y T18 este paquete de evidencia y acta de cierre. Las 17 tasks U2 se marcan completadas tras esa revisión; T13 queda abierta y no bloquea U2 según spec/plan. No se habilita otro incremento.
 
-## Revisión de alcance y seguridad — M-BE-027
+## Revisión documental de cierre SDD y seguridad — M-BE-027
 
 **Hallazgos encontrados:**
 
 | ID | Severidad | Hallazgo / impacto | Decisión y responsable |
 | --- | --- | --- | --- |
-| NV01-E01 | Medium | Política Windows impide pruebas obligatorias; no se puede asegurar aceptación integrada | **BLOCKED**, administrador/usuario: revisar política o facilitar entorno aprobado; repetir verificaciones |
-| NV01-E02 | Informational | PASS incrementales no corresponden al árbol final completo | No usarlos para cierre; agente: todas las casillas permanecen abiertas |
-| NV01-E03 | Informational | Topología ingress/TLS Azure y cuota distribuida no demostradas localmente | Fuera de implementación NV-01; responsable del despliegue: validación posterior con autorización separada |
+| NV01-E01 | Informational (Medium en el intento previo) | Bloqueo local Windows de Code Integrity / Smart App Control; no defecto funcional NV-01 | Bloqueo de cierre **SUPERADO** con CI Ubuntu de `024d5f7`; administrador: tratar incidencia local por proceso aprobado si se requiere ejecución Windows |
+| NV01-E02 | Informational | PASS incrementales no corresponden al árbol final completo | **RESUELTO** para cierre: se usa CI del commit completo y revisión de aceptación, no resultados incrementales aislados |
+| NV01-E03 | Informational | Topología ingress/TLS Azure y cuota distribuida no demostradas por pruebas Foundation | Fuera de cierre NV-01; responsable NV-03/despliegue: validar topología Azure antes de desplegar, con autorización separada; sin conexiones o cuota global ficticias |
 | NV01-E04 | Low | Placeholder unitario preexistente no aporta comprobación funcional | Conservar, excluir de afirmaciones de cobertura; responsable de testing: tratar en revisión futura autorizada |
 
-**Correcciones aplicadas:** validación temprana y diagnósticos sin valores; compresión negociada, acotada y opt-in; forwarded headers deny-by-default y allowlist explícita; límites de entrada; errores/correlación controlados. Se verificó comportamiento parcial con los comandos registrados, sin elevarlo a PASS final.
+**Correcciones aplicadas en el commit validado:** validación temprana y diagnósticos sin valores; compresión negociada, acotada y opt-in; forwarded headers deny-by-default y allowlist explícita; límites de entrada; errores/correlación controlados. CI comunicado: Restore/Build/Tests PASS. En este cierre solo se actualizan estados/evidencia; no se modifica código.
 
-**Hallazgos pendientes:** NV01-E01 bloquea T14–T18 y el cierre; falta revalidación HTTP/headers y contrato final. No se ha confirmado un Critical/High o secreto expuesto en el código preparado; la revisión parcial **no acredita ausencia total** de vulnerabilidades.
+**Hallazgos pendientes:** sin bloqueantes NV-01. NV01-E01 queda como limitación del entorno local, NV01-E03 es validación futura fuera de alcance y NV01-E04 es la advertencia Low del placeholder, no contabilizado como cobertura. T13 queda futura por autorización expresa. En la revisión acotada del commit no se identificaron secretos confirmados, Critical/High, fugas internas, validaciones obligatorias ausentes ni confianza indiscriminada en headers. Esto no equivale a ausencia universal de vulnerabilidades ni a auditoría DevSecOps completa.
 
-Se revisaron por lectura entradas externas, errores/logging, configuración, secretos, compresión, límites y confianza en proxies. Auth, autorización por recurso, BOLA/BFLA, mass assignment de entidades y datos personales de negocio no se implementan aquí: no existen endpoints/entidades funcionales. Se rechazan miembros JSON desconocidos en el boundary MVC; esto no se presenta como autorización por recurso futura. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación o performance, ni se declara que hayan pasado.
+Se revisaron por lectura entradas externas, errores/logging, configuración, secretos, compresión, límites, exposición de OpenAPI y confianza en proxies, junto con los casos de pruebas existentes. Auth, autorización por recurso, BOLA/BFLA, mass assignment de entidades y datos personales de negocio no se implementan aquí: no existen endpoints/entidades funcionales. Se rechazan miembros JSON desconocidos en el boundary MVC; esto no se presenta como autorización por recurso futura. La clave IP no usa X-Forwarded-For sin el middleware confiable; respuestas de error/logs propios no incluyen mensajes de excepción ni entradas; opciones de secretos no tienen valores reales en configuración versionada. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación o performance, ni se declara que hayan pasado. El workflow existente se lee solo para trazar esta validación, no se crea, modifica, dispara ni convierte en ejecución de NV-02.
 
-**Resultado de verificación SDD: BLOCKED** — evidencia final insuficiente para cerrar tasks.
+**Resultado de verificación SDD: PASS WITH WARNINGS** — aceptación R01–R12 cubierta por revisión y CI comunicado, con procedencia explícita; 17 tasks U2 completas y T13 excluida. Las advertencias enumeradas no bloquean Foundation ni conceden autorización transitiva.
 
-**Resultado de seguridad: BLOCKED** — pruebas de cabeceras y revalidación final no completadas.
+**Resultado de seguridad: PASS WITH WARNINGS** — configuración segura y suites negativas incluidas en la validación CI, sin hallazgos bloqueantes en el alcance revisado; Azure sigue pendiente exclusivamente en NV-03 y el placeholder no aporta cobertura.
 
-## Archivos afectados y preservados
+**Verificación documental ejecutada:** `git diff --check` PASS; comprobación de texto UTF-8 contra HEAD PASS: exactamente 17 casillas `[x]`, T13 como única `[ ]`, 17 estados COMPLETADA en la matriz y R01–R12 con evidencia de cierre. Descripciones, criterios de aceptación, IDs y dependencias de las 18 tasks permanecen idénticos a HEAD salvo el marcado de completitud. No se usó un nuevo build/test para validar Markdown.
+
+## Archivos de la implementación previa y preservación del cierre
 
 - Host: `TheHouse/Program.cs`, `TheHouse/appsettings.json`, `TheHouse/Controllers/WeatherForecastController.cs`; archivos nuevos en `TheHouse/Configuration/`, `TheHouse/Http/`, `TheHouse/Health/`.
 - Application: archivos nuevos en `TheHouse.Application/Abstractions/Health/` y `TheHouse.Application/Pagination/`.
@@ -183,7 +227,12 @@ Se revisaron por lectura entradas externas, errores/logging, configuración, sec
 - Pruebas: `TheHouse.IntegrationTests/TheHouse.IntegrationTests.csproj`; fixtures/tests nuevos en ese proyecto; `TheHouse.UnitTests/PaginationTests.cs`; `TheHouse.SecurityTests/ForwardedHeadersTests.cs`.
 - Documentación: `specs/nv-01-foundation/evidence.md` y nota de seguimiento en `task.md`; `global.json` fija el SDK de Foundation.
 - Sin cambios: Domain, solución, otros seis `.csproj`, referencias entre proyectos, gobierno raíz, `.opencode/`, specs posteriores y `UnitTest/` residual (solo `obj/`, no eliminado). No se recrearon/movieron proyectos.
-- Sin entidades, repositories, seed, Register/Login/Logout, tokens, endpoints de propiedades/universidades, contenedores, workflows o Terraform. El grep de revisión del host no encontró registros de autenticación, clientes Mongo/Redis, repositories, seed o endpoints POST/PUT/DELETE.
-- No se hicieron `git add`, commit o push: la condición humana exige que pasen build, tests, SDD y seguridad y no se satisface. Los cambios NV-01 quedan sin commit, y los tres stashes quedan **CONSERVADOS**.
+- Sin entidades, repositories, seed, Register/Login/Logout, tokens, endpoints de propiedades/universidades, contenedores o Terraform. El host no incorpora autenticación, clientes Mongo/Redis, repositories, seed o endpoints POST/PUT/DELETE. Existe el workflow independiente de validación Linux ya aportado; no se audita o ejecuta NV-02 por utilizar su resultado.
+- El registro local previo terminó sin commit/push; posteriormente el código quedó en `024d5f7`, que es el commit probado indicado por el usuario y verificado en HEAD. En **esta revisión documental** no se hacen `git add`, commit, push, restore, build, tests o scanners.
+- Solo se modifican `specs/nv-01-foundation/task.md` y `specs/nv-01-foundation/evidence.md`. Código, pruebas, `.csproj`, solución, workflow, gobierno y otros documentos permanecen intactos. `global.json` ya estaba sin seguimiento al comenzar y se conserva sin tocar; no se atribuye ese archivo local al commit probado.
+- Inventario SHA-256 antes/después de los 92 archivos rastreados o no ignorados fuera de los dos documentos editables: `B54C8EBE3333E55707339EABF94985340AE587334E037E478B1E9C7653780E50`. Incluye los siete proyectos, solución y `global.json`; no incluye salidas ignoradas de build. Los tres stashes conservan sus referencias y SHA registrados; no se reaplican ni eliminan.
+- COST-001 no se relaja: esta revisión solo lee evidencia y modifica Markdown; no dispara CI, servicios, despliegue ni gasto. No se afirma validación de elegibilidad/facturación de Azure o de la plataforma CI por el hecho de que el workflow termine SUCCESS.
 
-**Estado: BLOCKED. Detenerse; no avanzar a NV-04 ni a otra spec.**
+**NV-01 Foundation 1.1.0-u2: ✅ EJECUTADA, VALIDADA Y CERRADA PARA U2**
+
+Tasks U2 pendientes: **ninguna**. T13: **NO EJECUTADA, [ ] abierta, fuera de U2**. NV-02 continúa **⛔ NO EJECUTAR**. Terraform no autorizado. Detenerse; no avanzar a NV-04 ni ejecutar otra spec.
