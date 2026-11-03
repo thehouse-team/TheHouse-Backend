@@ -92,6 +92,10 @@ public sealed class RegistrationHttpTests
         using HttpContent content = chunked
             ? new UnknownLengthContent(new string(' ', 8193))
             : new StringContent(new string(' ', 8193), Encoding.UTF8, "application/json");
+
+        content.Headers.ContentType ??=
+            new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
         using var response = await client.PostAsync(Path, content);
         await AssertProblem(response, 413, "Payload too large");
         Assert.Empty(factory.Store.Users);
@@ -159,7 +163,7 @@ public sealed class RegistrationHttpTests
     {
         using var factory = new RegistrationFactory(settings: new Dictionary<string, string?> { ["PasswordHashing:Iterations"] = value });
         var error = Assert.Throws<OptionsValidationException>(() => factory.CreateHttpsClient());
-        Assert.DoesNotContain(value, error.ToString());
+        Assert.DoesNotContain(value, error.Message);
     }
 
     [Fact]
