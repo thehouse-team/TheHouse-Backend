@@ -119,3 +119,9 @@
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
 
 Ninguna task puede ejecutarse hasta que exista autorización humana de Fase B con versiones, IDs, rutas y restricciones explícitas. La aprobación documental de esta lista no completa ninguna task.
+
+## Seguimiento de Fase B — 2026-11-03
+
+La instrucción humana de esta sesión autorizó NV-01 `1.1.0-u2`, T01–T12 y T14–T18, exclusivamente Foundation y sus pruebas/evidencia. El registro posterior y las rutas afectadas están en `evidence.md`; no constituye autorización de otra spec. T13 no se ejecutó.
+
+Se preparó implementación parcial, pero **el cierre queda BLOCKED**: build PASS; `dotnet test` falla por Windows Application Control (`0x800711C7`), confirmado mediante eventos Code Integrity. No se cerró ninguna casilla ni se sustituyó la evidencia integrada por PASS incrementales. Las 17 tasks U2 requieren revalidación y revisión final; T13 sigue abierta como futura. Sin commit ni push. Ver hallazgos, comandos y siguiente decisión humana en `evidence.md`.

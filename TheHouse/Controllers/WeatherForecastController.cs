@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TheHouse.Controllers
 {
+    // Scaffold conservado, pero fuera de la superficie Foundation/U2.
+    [NonController]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
