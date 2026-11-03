@@ -201,3 +201,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO.
 - **Justificación:** completar exclusivamente gobierno y planificación, no implementación.
 - **Impacto:** las tres specs, planes y task lists siguen en borrador: **⛔ NO EJECUTAR**. Pendientes de revisión humana: convenciones HTTP, umbrales de calidad, contratos consumidores, SLO de carga, módulos de negocio, proveedor/servicios cloud, elegibilidad $0 y autorización de rutas futuras. Siguiente paso: revisar y autorizar la primera spec, sin iniciar código automáticamente.
+
+## M-BE-027 — Separación SDD/implementación y verificación iterativa DevSecOps
+
+- **ID:** M-BE-027
+- **Decisión:** Separar obligatoriamente la preparación SDD de la implementación y exigir verificación iterativa de coherencia SDD y seguridad durante cada incremento ejecutable.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-02.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** Evitar que un agente interprete la creación de una spec como autorización de implementación y detectar contradicciones, secretos, fallos de autorización, validación o exposición de datos antes de cerrar cada task.
+- **Impacto:** Todos los agentes, specs y futuras implementaciones del Backend deberán respetar este flujo. Ninguna task podrá cerrarse con contradicciones SDD o hallazgos bloqueantes de seguridad dentro del alcance.
