@@ -7,7 +7,7 @@ public static class ProblemResponses
     public static ProblemDetails Create(HttpContext context, int status, bool validation = false)
     {
         ProblemDetails problem = validation
-            ? new HttpValidationProblemDetails(new Dictionary<string, string[]> { ["request"] = ["Entrada inválida."] })
+            ? new HttpValidationProblemDetails(new Dictionary<string, string[]> { ["request"] = ["Entrada invÃ¡lida."] })
             : new ProblemDetails();
         Normalize(context, problem, status);
         return problem;
@@ -19,11 +19,11 @@ public static class ProblemResponses
         problem.Type = $"https://httpstatuses.io/{status}";
         problem.Title = status switch
         {
-            400 => "Solicitud inválida",
-            401 => "Autenticación requerida",
+            400 => "Solicitud invÃ¡lida",
+            401 => "AutenticaciÃ³n requerida",
             403 => "Acceso denegado",
             404 => "Recurso no encontrado",
-            405 => "Método no permitido",
+            405 => "MÃ©todo no permitido",
             408 => "Tiempo de solicitud agotado",
             409 => "Conflicto",
             413 => "Solicitud demasiado grande",
@@ -39,6 +39,8 @@ public static class ProblemResponses
         problem.Extensions["traceId"] = context.TraceIdentifier;
         if (RegistrationProblems.IsRegistration(context))
             RegistrationProblems.Normalize(problem, status);
+        else if (LoginProblems.IsLogin(context))
+            LoginProblems.Normalize(problem, status);
     }
 
     public static async Task WriteAsync(HttpContext context, int status, bool validation = false)

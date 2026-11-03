@@ -4,5 +4,11 @@ namespace TheHouse.Application.Abstractions.Persistence;
 
 public interface IUserRepository
 {
-    Task<User> CreateAsync(User user, CancellationToken cancellationToken);
+    Task<User?> GetByEmailAsync(
+        string normalizedEmail,
+        CancellationToken cancellationToken);
+
+    Task<User> CreateAsync(
+        User user,
+        CancellationToken cancellationToken);
 }

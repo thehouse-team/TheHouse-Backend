@@ -1,0 +1,21 @@
+using System.Security.Cryptography;
+using System.Text;
+
+namespace TheHouse.Application.Common;
+
+public static class RateLimitKeys
+{
+    public static string LoginIp(string ipAddress) =>
+        "thehouse:u2:login:ip:v1:" + Hash(ipAddress);
+
+    public static string LoginEmail(
+        string ipAddress,
+        string normalizedEmail) =>
+        "thehouse:u2:login:email:v1:" +
+        Hash(ipAddress + "\n" + normalizedEmail);
+
+    private static string Hash(string value) =>
+        Convert.ToHexString(
+            SHA256.HashData(Encoding.UTF8.GetBytes(value)))
+        .ToLowerInvariant();
+}

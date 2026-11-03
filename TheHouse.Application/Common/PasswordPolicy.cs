@@ -7,17 +7,25 @@ public static class PasswordPolicy
 
     public static void EnsureValidRegistrationPassword(string? password)
     {
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            throw new RequestValidationException("password", "password is required.");
-        }
-
-        if (password.Length is < RegistrationMinimumLength or > MaximumLength)
+        if (string.IsNullOrWhiteSpace(password) ||
+            password.Length < RegistrationMinimumLength ||
+            password.Length > MaximumLength)
         {
             throw new RequestValidationException(
                 "password",
-                $"password must be between {RegistrationMinimumLength} and {MaximumLength} characters.");
+                $"password must contain between {RegistrationMinimumLength} and {MaximumLength} characters.");
         }
     }
 
+    public static void EnsureValidLoginPassword(string? password)
+    {
+        if (password is null ||
+            password.Length < 1 ||
+            password.Length > MaximumLength)
+        {
+            throw new RequestValidationException(
+                "password",
+                $"password must contain between 1 and {MaximumLength} characters.");
+        }
+    }
 }

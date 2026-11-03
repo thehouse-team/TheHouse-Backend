@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 var builder = WebApplication.CreateBuilder(args);
 builder.AddFoundationConfiguration();
 builder.AddRegistration();
+builder.AddLogin();
 
 builder.Services.AddFoundationHttp();
 builder.Services.AddFoundationOpenApi();
@@ -14,7 +15,7 @@ builder.Services.AddFoundationRateLimits();
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddResponseCompression(options =>
 {
-    options.EnableForHttps = true; // Unicamente contenido público con opt-in explícito.
+    options.EnableForHttps = true; // Unicamente contenido pÃºblico con opt-in explÃ­cito.
     options.Providers.Add<BrotliCompressionProvider>();
     options.Providers.Add<GzipCompressionProvider>();
     options.MimeTypes = ["application/json", "text/plain"];
@@ -49,6 +50,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapFoundationHealth();
 app.MapRegistration();
+app.MapLogin();
 
 app.Run();
 

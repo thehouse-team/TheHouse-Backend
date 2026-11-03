@@ -15,7 +15,7 @@ public static class ApiConventions
         {
             options.AddDocumentTransformer((document, _, _) =>
             {
-                document.Info.Title = "TheHouse U2 — Foundation y Registration";
+                document.Info.Title = "TheHouse U2 â€” Foundation y Registration";
                 document.Info.Version = Version;
                 document.Info.Description = "Foundation y Registration U2 bajo /api/v1; health es operacional y no versionado. " +
                     "Solo registro; sin Login, Logout ni JWT. Errores RFC 9457 con traceId.";
@@ -31,14 +31,14 @@ public static class ApiConventions
                     foreach (var property in new[] { "type", "title", "status", "traceId" })
                         schema.Required.Add(property);
                 }
-                if (context.JsonTypeInfo.Type == typeof(RegisterRequest))
+                if (context.JsonTypeInfo.Type == typeof(RegisterRequest) || context.JsonTypeInfo.Type == typeof(LoginRequest))
                 {
                     schema.AdditionalPropertiesAllowed = false;
                     if (schema.Properties?.TryGetValue("password", out var password) == true && password is OpenApiSchema value)
                     {
                         value.Format = "password";
                         value.WriteOnly = true;
-                        value.MinLength = 12;
+                        value.MinLength = context.JsonTypeInfo.Type == typeof(RegisterRequest) ? 12 : 1;
                         value.MaxLength = 128;
                     }
                 }

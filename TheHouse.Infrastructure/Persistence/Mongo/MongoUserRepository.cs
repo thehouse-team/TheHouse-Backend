@@ -1,8 +1,8 @@
 using MongoDB.Driver;
 using TheHouse.Application.Abstractions.Persistence;
+using TheHouse.Application.Common;
 using TheHouse.Domain.Entities;
 using TheHouse.Domain.Exceptions;
-using TheHouse.Application.Common;
 using TheHouse.Infrastructure.Persistence.Mongo.Documents;
 
 namespace TheHouse.Infrastructure.Persistence.Mongo;
@@ -17,23 +17,72 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
 
     private async Task EnsureIndexAsync(CancellationToken cancellationToken)
     {
-        if (indexReady) return;
+        if (indexReady)
+        {
+            return;
+        }
+
         await indexGate.WaitAsync(cancellationToken);
+
         try
         {
-            if (indexReady) return;
-            await Collection.Indexes.CreateOneAsync(new CreateIndexModel<UserDocument>(
-                Builders<UserDocument>.IndexKeys.Ascending(user => user.Email),
-                new CreateIndexOptions { Unique = true, Name = "ux_users_email" }), cancellationToken: cancellationToken);
+            if (indexReady)
+            {
+                return;
+            }
+
+            await Collection.Indexes.CreateOneAsync(
+                new CreateIndexModel<UserDocument>(
+                    Builders<UserDocument>.IndexKeys.Ascending(user => user.Email),
+                    new CreateIndexOptions
+                    {
+                        Unique = true,
+                        Name = "ux_users_email"
+                    }),
+                cancellationToken: cancellationToken);
+
             indexReady = true;
         }
-        finally { indexGate.Release(); }
+        finally
+        {
+            indexGate.Release();
+        }
     }
 
-    public async Task<User> CreateAsync(User user, CancellationToken cancellationToken)
+    public async Task<User?> GetByEmailAsync(
+        string normalizedEmail,
+        CancellationToken cancellationToken)
     {
-        if (user.Email != EmailNormalizer.Normalize(user.Email) || !EmailNormalizer.IsValid(user.Email))
+        if (normalizedEmail != EmailNormalizer.Normalize(normalizedEmail) ||
+            !EmailNormalizer.IsValid(normalizedEmail))
+        {
             throw new RequestValidationException("email", "Invalid email.");
+        }
+
+        try
+        {
+            var document = await Collection
+                .Find(user => user.Email == normalizedEmail)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return document is null ? null : Map(document);
+        }
+        catch (Exception exception) when (exception is MongoException or TimeoutException)
+        {
+            throw MongoFailure.Unavailable();
+        }
+    }
+
+    public async Task<User> CreateAsync(
+        User user,
+        CancellationToken cancellationToken)
+    {
+        if (user.Email != EmailNormalizer.Normalize(user.Email) ||
+            !EmailNormalizer.IsValid(user.Email))
+        {
+            throw new RequestValidationException("email", "Invalid email.");
+        }
+
         var document = new UserDocument
         {
             Id = MongoDB.Bson.ObjectId.GenerateNewId(),
@@ -45,9 +94,12 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
 
         try
         {
-            // Nunca insertar antes de confirmar el índice único; sin preconsulta vulnerable a carreras.
             await EnsureIndexAsync(cancellationToken);
-            await Collection.InsertOneAsync(document, cancellationToken: cancellationToken);
+
+            await Collection.InsertOneAsync(
+                document,
+                cancellationToken: cancellationToken);
+
             return Map(document);
         }
         catch (MongoWriteException exception)

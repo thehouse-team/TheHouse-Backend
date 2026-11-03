@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="3.13.0" />
     <PackageReference Include="StackExchange.Redis" Version="3.4.31" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,12 +4,13 @@ public interface IPasswordHasher
 {
     string Hash(string password);
 
-    PasswordVerification Verify(string password, string encodedHash);
+    PasswordVerification Verify(
+        string password,
+        string encodedHash);
+
+    void VerifyDummy(string password);
 }
 
-// Sin ToString generado que pueda imprimir un hash actualizado.
-public sealed class PasswordVerification(bool isValid, string? replacementHash = null)
-{
-    public bool IsValid { get; } = isValid;
-    public string? ReplacementHash { get; } = replacementHash;
-}
+public sealed record PasswordVerification(
+    bool IsValid,
+    string? ReplacementHash = null);

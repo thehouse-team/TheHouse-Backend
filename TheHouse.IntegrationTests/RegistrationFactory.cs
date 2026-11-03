@@ -45,12 +45,28 @@ public sealed class RegistrationFactory(RegistrationTestStore? store = null, Reg
     }
 }
 
-// Dobles aislados solo en pruebas HTTP; NO demuestran índices Mongo o atomicidad Redis.
+// Dobles aislados solo en pruebas HTTP; NO demuestran Ã­ndices Mongo o atomicidad Redis.
 public sealed class RegistrationTestStore : IUserRepository
 {
     public ConcurrentDictionary<string, User> Users { get; } = new(StringComparer.Ordinal);
     public bool Unavailable { get; set; }
     public bool UnexpectedFailure { get; set; }
+
+    public Task<User?> GetByEmailAsync(
+        string normalizedEmail,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+
+        Users.TryGetValue(normalizedEmail, out var user);
+        return Task.FromResult<User?>(user);
+    }
+
     public Task<User> CreateAsync(User user, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
