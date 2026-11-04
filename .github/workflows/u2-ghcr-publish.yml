@@ -1,6 +1,14 @@
 name: U2 GHCR Publish
 
 on:
+  push:
+    branches:
+      - feature/u2-entrega
+    paths:
+      - Dockerfile
+      - VERSIONING.md
+      - .github/workflows/u2-ghcr-publish.yml
+
   workflow_dispatch:
     inputs:
       confirm_publish:
@@ -14,20 +22,86 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  packages: read
 
 concurrency:
-  group: u2-ghcr-publish
+  group: u2-ghcr-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
+  validate:
+    name: Validate GHCR publication contract
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate immutable versioning policy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f VERSIONING.md
+          test -f Dockerfile
+
+          if grep -R \
+            --line-number \
+            --fixed-strings \
+            "thehouse-backend:latest" \
+            VERSIONING.md \
+            Dockerfile \
+            .github/workflows; then
+
+            echo "ERROR: mutable latest tag detected."
+            exit 1
+          fi
+
+          echo "Immutable versioning policy validated."
+
+      - name: Validate Docker image locally
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          IMAGE="thehouse-backend:sha-${GITHUB_SHA}"
+
+          docker build \
+            --file Dockerfile \
+            --tag "${IMAGE}" \
+            .
+
+          USER_NAME="$(
+            docker image inspect \
+              "${IMAGE}" \
+              --format '{{.Config.User}}'
+          )"
+
+          echo "Configured user: ${USER_NAME}"
+
+          test "${USER_NAME}" = "app"
+
+          echo "Container contract validated."
+          echo "Candidate tag: sha-${GITHUB_SHA}"
+
   publish:
     name: Publish immutable GHCR image
+
     if: >-
+      github.event_name == 'workflow_dispatch' &&
       github.ref == 'refs/heads/feature/u2-entrega' &&
       inputs.confirm_publish == 'PUBLISH'
 
+    needs:
+      - validate
+
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout exact commit
@@ -41,7 +115,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          OWNER="$(printf '%s' "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          OWNER="$(
+            printf '%s' "${GITHUB_REPOSITORY_OWNER}" |
+            tr '[:upper:]' '[:lower:]'
+          )"
+
           IMAGE="ghcr.io/${OWNER}/thehouse-backend"
           TAG="sha-${GITHUB_SHA}"
 
@@ -50,7 +128,7 @@ jobs:
           echo "reference=${IMAGE}:${TAG}" >> "${GITHUB_OUTPUT}"
 
           echo "Image: ${IMAGE}"
-          echo "Tag:   ${TAG}"
+          echo "Tag: ${TAG}"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.4.1
@@ -89,7 +167,7 @@ jobs:
           set -euo pipefail
 
           if [ -z "${DIGEST}" ]; then
-            echo "ERROR: build-push-action returned an empty digest."
+            echo "ERROR: empty OCI digest."
             exit 1
           fi
 
@@ -102,11 +180,8 @@ jobs:
               ;;
           esac
 
-          echo "Published image:"
-          echo "${IMAGE}:${TAG}"
-          echo
-          echo "Immutable reference:"
-          echo "${IMAGE}@${DIGEST}"
+          echo "Image: ${IMAGE}:${TAG}"
+          echo "Immutable: ${IMAGE}@${DIGEST}"
 
           docker buildx imagetools inspect \
             "${IMAGE}@${DIGEST}"
