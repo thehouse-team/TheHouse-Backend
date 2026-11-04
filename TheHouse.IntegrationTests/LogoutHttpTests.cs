@@ -12,7 +12,7 @@ using TheHouse.Domain.Entities;
 
 namespace TheHouse.IntegrationTests;
 
-// NV-06 T08: 204, reutilizaciÃ³n 401, token ausente/invÃ¡lido/expirado
+// NV-06 T08: 204, reutilizaciÃƒÂ³n 401, token ausente/invÃƒÂ¡lido/expirado
 // 401, Authorization mal formado y cuerpo 400, Redis falla 503,
 // rate limit 429, cabeceras y Problem Details sanitizados.
 public sealed class LogoutHttpTests
@@ -68,7 +68,7 @@ public sealed class LogoutHttpTests
             logs,
             StringComparison.Ordinal);
 
-        // ReutilizaciÃ³n: el token ya estÃ¡ revocado.
+        // ReutilizaciÃƒÂ³n: el token ya estÃƒÂ¡ revocado.
         using var second = await PostLogout(client, token);
 
         Assert.Equal(
@@ -252,7 +252,7 @@ public sealed class LogoutHttpTests
         using var first = await PostLogout(client, token);
         Assert.Equal(HttpStatusCode.NoContent, first.StatusCode);
 
-        // ReutilizaciÃ³n (revocado): cuenta contra el lÃ­mite IP.
+        // ReutilizaciÃƒÂ³n (revocado): cuenta contra el lÃƒÂ­mite IP.
         using var second = await PostLogout(client, token);
         Assert.Equal(HttpStatusCode.Unauthorized, second.StatusCode);
 
@@ -279,12 +279,12 @@ public sealed class LogoutHttpTests
         var token =
             await LoginTokenAsync(replicaA, "shared@example.com");
 
-        // Logout en la rÃ©plica B con un token emitido por la A.
+        // Logout en la rÃƒÂ©plica B con un token emitido por la A.
         using var clientB = replicaB.CreateHttpsClient();
         using var logoutB = await PostLogout(clientB, token);
         Assert.Equal(HttpStatusCode.NoContent, logoutB.StatusCode);
 
-        // ReutilizaciÃ³n en la rÃ©plica A: rechazada 401.
+        // ReutilizaciÃƒÂ³n en la rÃƒÂ©plica A: rechazada 401.
         using var clientA = replicaA.CreateHttpsClient();
         using var reuseA = await PostLogout(clientA, token);
         Assert.Equal(HttpStatusCode.Unauthorized, reuseA.StatusCode);
@@ -337,7 +337,9 @@ public sealed class LogoutHttpTests
                     or "/api/v1/auth/login"
                     or "/api/v1/auth/logout"
                     or "/api/v1/properties"
-                    or "/api/v1/properties/{id}",
+                    or "/api/v1/properties/{id}"
+                    or "/api/v1/universities"
+                    or "/api/v1/universities/{id}",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

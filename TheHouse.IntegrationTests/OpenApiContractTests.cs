@@ -41,8 +41,7 @@ public sealed class OpenApiContractTests
             ApiConventions.Prefix);
 
         var paths =
-            document.RootElement
-                .GetProperty("paths");
+            document.RootElement.GetProperty("paths");
 
         foreach (var path in paths.EnumerateObject())
         {
@@ -54,7 +53,9 @@ public sealed class OpenApiContractTests
                 path.Name == LoginEndpoint.Path ||
                 path.Name == LogoutEndpoint.Path ||
                 path.Name == PropertyEndpoint.ListPath ||
-                path.Name == PropertyEndpoint.DetailPath,
+                path.Name == PropertyEndpoint.DetailPath ||
+                path.Name == UniversityEndpoint.ListPath ||
+                path.Name == UniversityEndpoint.DetailPath,
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 
@@ -68,14 +69,20 @@ public sealed class OpenApiContractTests
                 PropertyEndpoint.DetailPath,
                 out _));
 
+        Assert.True(
+            paths.TryGetProperty(
+                UniversityEndpoint.ListPath,
+                out _));
+
+        Assert.True(
+            paths.TryGetProperty(
+                UniversityEndpoint.DetailPath,
+                out _));
+
         Assert.DoesNotContain(
             "WeatherForecast",
             first,
             StringComparison.OrdinalIgnoreCase);
-
-        Assert.DoesNotContain(
-            "/universities",
-            first);
 
         Assert.DoesNotContain(
             "SigningKey",
@@ -93,7 +100,7 @@ public sealed class OpenApiContractTests
     [InlineData("/api/v1/auth/login/not-a-route")]
     [InlineData("/api/v1/auth/logout/not-a-route")]
     [InlineData("/api/v1/properties/not-a-route/extra")]
-    [InlineData("/api/v1/universities")]
+    [InlineData("/api/v1/universities/not-a-route/extra")]
     public async Task Unsupported_or_unimplemented_routes_are_not_exposed(
         string path)
     {

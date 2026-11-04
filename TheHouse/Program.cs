@@ -9,6 +9,7 @@ builder.AddRegistration();
 builder.AddLogin();
 builder.AddLogout();
 builder.AddProperties();
+builder.AddUniversities();
 
 builder.Services.AddFoundationHttp();
 builder.Services.AddFoundationOpenApi();
@@ -17,13 +18,56 @@ builder.Services.AddFoundationRateLimits();
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddResponseCompression(options =>
 {
-    options.EnableForHttps = true; // Unicamente contenido pÃƒÂºblico con opt-in explÃƒÂ­cito.
+    options.EnableForHttps = true; // Unicamente contenido pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºblico con opt-in explÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­cito.
     options.Providers.Add<BrotliCompressionProvider>();
     options.Providers.Add<GzipCompressionProvider>();
     options.MimeTypes = ["application/json", "text/plain"];
 });
 
 var app = builder.Build();
+
+if (args.Contains(
+        "--seed-universities",
+        StringComparer.Ordinal))
+{
+    var seedOptions =
+        app.Services.GetRequiredService<
+            TheHouse.Application.Common.UniversitySeedOptions>();
+
+    if (!seedOptions.Enabled)
+    {
+        Console.Error.WriteLine(
+            "University seed is disabled. Set UniversitySeed__Enabled=true only in an authorized environment.");
+
+        Environment.ExitCode = 2;
+        return;
+    }
+
+    if (app.Environment.IsProduction())
+    {
+        Console.Error.WriteLine(
+            "University seed is not allowed in Production.");
+
+        Environment.ExitCode = 2;
+        return;
+    }
+
+    await using var scope =
+        app.Services.CreateAsyncScope();
+
+    var seed =
+        scope.ServiceProvider
+            .GetRequiredService<
+                TheHouse.Application.UseCases.UniversitySeedService>();
+
+    await seed.SeedAsync(
+        CancellationToken.None);
+
+    Console.WriteLine(
+        "University seed completed.");
+
+    return;
+}
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<FoundationExceptionMiddleware>();
@@ -56,6 +100,7 @@ app.MapRegistration();
 app.MapLogin();
 app.MapLogout();
 app.MapProperties();
+app.MapUniversities();
 
 app.Run();
 
