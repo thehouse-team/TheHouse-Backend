@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddFoundationConfiguration();
 builder.AddRegistration();
 builder.AddLogin();
+builder.AddLogout();
 
 builder.Services.AddFoundationHttp();
 builder.Services.AddFoundationOpenApi();
@@ -44,6 +45,7 @@ app.UseRouting();
 app.UseRequestTimeouts();
 app.UseMiddleware<PublicResponseCompressionMiddleware>();
 app.UseRateLimiter();
+app.UseMiddleware<TokenRevocationMiddleware>();
 
 app.UseAuthorization();
 
@@ -51,6 +53,7 @@ app.MapControllers();
 app.MapFoundationHealth();
 app.MapRegistration();
 app.MapLogin();
+app.MapLogout();
 
 app.Run();
 

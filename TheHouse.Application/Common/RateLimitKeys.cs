@@ -14,6 +14,9 @@ public static class RateLimitKeys
         "thehouse:u2:login:email:v1:" +
         Hash(ipAddress + "\n" + normalizedEmail);
 
+    public static string LogoutIp(string ipAddress) =>
+        "thehouse:u2:logout:ip:v1:" + Hash(ipAddress);
+
     private static string Hash(string value) =>
         Convert.ToHexString(
             SHA256.HashData(Encoding.UTF8.GetBytes(value)))

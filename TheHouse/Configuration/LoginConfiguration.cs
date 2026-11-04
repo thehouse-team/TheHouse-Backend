@@ -1,4 +1,3 @@
-using System.Net;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using TheHouse.Application.Abstractions.Security;
@@ -87,37 +86,7 @@ public static class LoginConfiguration
         {
             try
             {
-                redisConfiguration =
-                    ConfigurationOptions.Parse(
-                        redis.ConnectionString!);
-
-                if (!redisConfiguration.Ssl &&
-                    redisConfiguration.EndPoints.Any(endpoint =>
-                        endpoint switch
-                        {
-                            DnsEndPoint dns =>
-                                !IsLoopback(dns.Host),
-
-                            IPEndPoint ip =>
-                                !IPAddress.IsLoopback(ip.Address),
-
-                            _ => true
-                        }))
-                {
-                    throw new ArgumentException();
-                }
-
-                redisConfiguration.AbortOnConnectFail = false;
-                redisConfiguration.ConnectRetry = 0;
-                redisConfiguration.ConnectTimeout =
-                    redis.TimeoutMilliseconds;
-                redisConfiguration.AsyncTimeout =
-                    redis.TimeoutMilliseconds;
-                redisConfiguration.SyncTimeout =
-                    redis.TimeoutMilliseconds;
-                redisConfiguration.BacklogPolicy =
-                    BacklogPolicy.FailFast;
-                redisConfiguration.AllowAdmin = false;
+                redisConfiguration = RedisAccess.Build(redis);
             }
             catch (Exception exception)
                 when (exception is ArgumentException
@@ -130,13 +99,6 @@ public static class LoginConfiguration
         builder.Services.AddSingleton<IRateLimitStore>(
             _ => new RedisRateLimitStore(redisConfiguration));
     }
-
-    private static bool IsLoopback(string host) =>
-        host.Equals(
-            "localhost",
-            StringComparison.OrdinalIgnoreCase) ||
-        (IPAddress.TryParse(host, out var ip) &&
-         IPAddress.IsLoopback(ip));
 
     private static OptionsValidationException Invalid(
         string section) =>

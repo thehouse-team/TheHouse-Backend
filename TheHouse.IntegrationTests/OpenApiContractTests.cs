@@ -19,9 +19,8 @@ public sealed class OpenApiContractTests
         Assert.Equal(ApiConventions.Version, document.RootElement.GetProperty("info").GetProperty("version").GetString());
         Assert.Equal("/api/v1", ApiConventions.Prefix);
         foreach (var path in document.RootElement.GetProperty("paths").EnumerateObject())
-            Assert.True(path.Name.StartsWith("/health/", StringComparison.Ordinal) || path.Name == RegistrationEndpoint.Path || path.Name == LoginEndpoint.Path);
+            Assert.True(path.Name.StartsWith("/health/", StringComparison.Ordinal) || path.Name == RegistrationEndpoint.Path || path.Name == LoginEndpoint.Path || path.Name == LogoutEndpoint.Path);
         Assert.DoesNotContain("WeatherForecast", first, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("/auth/logout", first);
         Assert.DoesNotContain("/properties", first);
         Assert.DoesNotContain("/universities", first);
         Assert.DoesNotContain("SigningKey", first);
@@ -33,7 +32,7 @@ public sealed class OpenApiContractTests
     [InlineData("/weatherforecast")]
     [InlineData("/api/v1/auth/register/not-a-route")]
     [InlineData("/api/v1/auth/login/not-a-route")]
-    [InlineData("/api/v1/auth/logout")]
+    [InlineData("/api/v1/auth/logout/not-a-route")]
     [InlineData("/api/v1/properties")]
     [InlineData("/api/v1/universities")]
     public async Task Unsupported_or_functional_routes_are_not_exposed(string path)

@@ -41,6 +41,8 @@ public static class ProblemResponses
             RegistrationProblems.Normalize(problem, status);
         else if (LoginProblems.IsLogin(context))
             LoginProblems.Normalize(problem, status);
+        else if (LogoutProblems.IsLogout(context))
+            LogoutProblems.Normalize(problem, status);
     }
 
     public static async Task WriteAsync(HttpContext context, int status, bool validation = false)
