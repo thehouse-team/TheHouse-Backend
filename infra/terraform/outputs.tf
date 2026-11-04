@@ -20,7 +20,7 @@ output "container_app_fqdn" {
 
 output "container_app_url" {
   description = "Public HTTPS endpoint."
-  value       = "https://${azurerm_container_app.this.latest_revision_fqdn}"
+  value       = "https://${azurerm_container_app.this.ingress[0].fqdn}"
 }
 
 output "image" {
