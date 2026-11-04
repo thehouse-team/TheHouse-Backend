@@ -8,6 +8,7 @@ builder.AddFoundationConfiguration();
 builder.AddRegistration();
 builder.AddLogin();
 builder.AddLogout();
+builder.AddProperties();
 
 builder.Services.AddFoundationHttp();
 builder.Services.AddFoundationOpenApi();
@@ -16,7 +17,7 @@ builder.Services.AddFoundationRateLimits();
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddResponseCompression(options =>
 {
-    options.EnableForHttps = true; // Unicamente contenido pÃºblico con opt-in explÃ­cito.
+    options.EnableForHttps = true; // Unicamente contenido pÃƒÂºblico con opt-in explÃƒÂ­cito.
     options.Providers.Add<BrotliCompressionProvider>();
     options.Providers.Add<GzipCompressionProvider>();
     options.MimeTypes = ["application/json", "text/plain"];
@@ -54,6 +55,7 @@ app.MapFoundationHealth();
 app.MapRegistration();
 app.MapLogin();
 app.MapLogout();
+app.MapProperties();
 
 app.Run();
 
