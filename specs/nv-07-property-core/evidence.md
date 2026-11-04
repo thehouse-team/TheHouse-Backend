@@ -1,0 +1,299 @@
+# NV-07 — Evidencia Property Core U2
+
+## Estado
+
+**✅ EJECUTADA, VALIDADA Y CERRADA PARA U2**
+
+Resultado:
+
+**PASS WITH WARNINGS**
+
+## Endpoints
+
+### Listado
+
+`GET /api/v1/properties`
+
+Validado:
+
+- `page` default `1`;
+- `pageSize` default `20`;
+- `page >= 1`;
+- `pageSize` entre `1` y `50`;
+- resultado vacío: `200`;
+- página fuera de rango: `200` con `items: []`;
+- `totalItems`;
+- `totalPages`;
+- orden estable `createdAt DESC, _id DESC`.
+
+### Detalle
+
+`GET /api/v1/properties/{id}`
+
+Validado:
+
+- ObjectId hexadecimal de 24 caracteres;
+- `200` para propiedad existente;
+- `400` para identificador inválido;
+- `404` para ObjectId válido inexistente.
+
+## Datos públicos
+
+Las respuestas públicas contienen únicamente los campos aprobados por NV-07.
+
+Listado:
+
+- id;
+- title;
+- price;
+- currency;
+- city;
+- universityId;
+- bedrooms;
+- bathrooms;
+- areaM2;
+- createdAt.
+
+Detalle agrega:
+
+- description;
+- amenities.
+
+Se verificó que las respuestas no expongan:
+
+- ownerId;
+- exactAddress;
+- address;
+- latitude;
+- longitude;
+- contactEmail;
+- moderationStatus.
+
+## MongoDB
+
+Colección:
+
+`properties`
+
+Se implementó:
+
+- repositorio de solo lectura;
+- proyección explícita;
+- sin N+1;
+- orden `createdAt DESC, _id DESC`;
+- índice compuesto `createdAt DESC, _id DESC`;
+- fail-closed ante indisponibilidad.
+
+La implementación no devuelve documentos MongoDB completos.
+
+## Rate limiting
+
+Properties utiliza:
+
+`60 solicitudes / 60 segundos / IP`
+
+mediante el store Redis compartido.
+
+Se validó:
+
+- listado y detalle comparten el mismo límite por IP;
+- múltiples réplicas comparten el mismo estado en pruebas;
+- exceso devuelve `429`;
+- `Retry-After: 60`;
+- fallo del store produce `503`;
+- no existe fallback en memoria.
+
+## Problem Details
+
+Se validaron:
+
+- `400 Validation failed`;
+- `404 Not found`;
+- `429 Too many requests`;
+- `503 Service unavailable`;
+- `500 Internal server error`.
+
+Los errores usan:
+
+`application/problem+json`
+
+y contienen `traceId`.
+
+No exponen:
+
+- stack trace;
+- rutas locales;
+- detalles MongoDB;
+- connection strings;
+- Redis;
+- campos privados.
+
+## OpenAPI
+
+Se autorizaron únicamente los endpoints nuevos de NV-07:
+
+- `/api/v1/properties`
+- `/api/v1/properties/{id}`
+
+Los contratos heredados de NV-01/NV-04/NV-05/NV-06 fueron actualizados sin cambiar su comportamiento funcional.
+
+NV-08 Universities continúa sin exponerse.
+
+## Pruebas
+
+### Unit
+
+Resultado:
+
+**92 PASS**
+
+NV-07 agregó 26 pruebas para:
+
+- page;
+- pageSize;
+- totalPages;
+- límites;
+- ObjectId;
+- DTOs;
+- mapping;
+- serialización pública.
+
+### Security
+
+Resultado:
+
+**28 PASS**
+
+La suite global de seguridad continúa verde.
+
+NV-07 agregó validaciones específicas dentro de integración para ausencia de campos privados y errores sanitizados.
+
+### Integration
+
+Resultado:
+
+**183 PASS**
+
+NV-07 agregó pruebas para:
+
+- listado con datos;
+- listado vacío;
+- página fuera de rango;
+- defaults;
+- detalle 200;
+- detalle 404;
+- id inválido 400;
+- paginación inválida 400;
+- query duplicada 400;
+- 429;
+- Retry-After;
+- Mongo/Redis fail-closed 503;
+- rate limit compartido;
+- comportamiento multi-réplica;
+- errores sanitizados.
+
+## Resultado total
+
+`dotnet test TheHouse.slnx --no-build`
+
+Resultado local:
+
+**303 / 303 PASS**
+
+Distribución:
+
+- Unit: 92;
+- Security: 28;
+- Integration: 183.
+
+## Build
+
+`dotnet build TheHouse.slnx`
+
+Resultado:
+
+- 0 errores;
+- 0 advertencias.
+
+## GitHub Actions
+
+Workflow:
+
+`U2 Linux Validation`
+
+Branch:
+
+`feature/u2-entrega`
+
+Commit técnico:
+
+`faafa46`
+
+Run:
+
+`41776038583`
+
+Job:
+
+`126396500905`
+
+Resultado:
+
+**SUCCESS**
+
+Artifact:
+
+`u2-test-results`
+
+## Matriz de evidencia
+
+| Requisito | Resultado |
+| --- | --- |
+| R01 listado paginado | PASS |
+| R02 detalle | PASS |
+| R03 validación | PASS |
+| R04 MongoDB/proyección/índice | PASS WITH WARNING |
+| R05 datos públicos seguros | PASS |
+| R06 Problem Details/rate limit | PASS |
+| R07 testing/evidencia | PASS |
+
+## Brechas
+
+### W01 — MongoDB real
+
+MongoPropertyRepository no ha sido validado todavía contra una instancia MongoDB cloud real.
+
+La implementación está validada mediante revisión, build, unitarias e integración aislada.
+
+La comprobación real corresponde a NV-03.
+
+### W02 — Orden real e índice
+
+La consulta e índice:
+
+`createdAt DESC, _id DESC`
+
+están implementados y reproducidos por el fake de integración.
+
+Su validación final con datos reales queda pendiente del entorno desplegado de NV-03.
+
+## Seguridad
+
+Resultado:
+
+**PASS**
+
+No existen hallazgos:
+
+- Critical;
+- High.
+
+## Decisión final
+
+**PASS WITH WARNINGS**
+
+NV-07 cumple el alcance funcional y de seguridad aprobado para U2.
+
+Las advertencias restantes pertenecen a la validación desplegada de NV-03.
+
+**NV-07 queda EJECUTADA, VALIDADA Y CERRADA PARA U2.**

@@ -1,0 +1,20 @@
+location                       = "eastus2"
+resource_group_name            = "rg-thehouse-u2"
+container_app_environment_name = "cae-thehouse-u2"
+container_app_name             = "ca-thehouse-u2"
+
+image = "ghcr.io/thehouse-team/thehouse-backend@sha256:15f196af9c32fc843cf1723b4615f896668b0368b292e1246807ab0d03194775"
+
+service_version = "sha-c6518862788407fe678c1a524ad4d4b764dc6a71"
+
+min_replicas = 2
+max_replicas = 2
+
+cpu    = 0.25
+memory = "0.5Gi"
+
+evaluation_mode = true
+
+tags = {
+  project = "thehouse"
+}
