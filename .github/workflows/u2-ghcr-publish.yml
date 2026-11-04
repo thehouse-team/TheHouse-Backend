@@ -47,10 +47,13 @@ jobs:
           test -f VERSIONING.md
           test -f Dockerfile
 
+          MUTABLE_TAG="thehouse-backend:"
+          MUTABLE_TAG="${MUTABLE_TAG}latest"
+
           if grep -R \
             --line-number \
             --fixed-strings \
-            "thehouse-backend:latest" \
+            "${MUTABLE_TAG}" \
             VERSIONING.md \
             Dockerfile \
             .github/workflows; then
