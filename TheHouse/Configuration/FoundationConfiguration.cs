@@ -12,9 +12,9 @@ public static class FoundationConfiguration
 {
     public static void AddFoundationConfiguration(this WebApplicationBuilder builder)
     {
-        // NV-05: el secreto JWT se recibe únicamente desde
-        // configuración externa. Se proyecta en memoria al nombre
-        // de opción usado por Foundation antes de validarlo.
+        // NV-05: el secreto JWT se recibe ÃƒÆ’Ã‚Âºnicamente desde
+        // configuraciÃƒÆ’Ã‚Â³n externa. Se proyecta en memoria al nombre
+        // de opciÃƒÆ’Ã‚Â³n usado por Foundation antes de validarlo.
         var externalJwtSigningKey =
             builder.Configuration["JWT_SIGNING_KEY"];
 
@@ -35,6 +35,12 @@ public static class FoundationConfiguration
 
         var limits = AddValidated<FoundationOptions>(builder, "Foundation", _ => true);
         var proxy = AddValidated<ProxyOptions>(builder, "Proxy", options => options.IsValid());
+
+        if (proxy.TrustAzureContainerAppsIngress &&
+            !IsAzureContainerApps(builder.Configuration))
+        {
+            throw Invalid<ProxyOptions>("Proxy");
+        }
         AddValidated<MongoOptions>(builder, "MongoDB", options => options.IsValid());
         AddValidated<RedisOptions>(builder, "Redis", options => options.IsValid());
         AddValidated<JwtOptions>(builder, "Jwt", options => options.IsValid());
@@ -51,19 +57,45 @@ public static class FoundationConfiguration
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = proxy.Enabled
-                ? ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                ? ForwardedHeaders.XForwardedFor |
+                  ForwardedHeaders.XForwardedProto
                 : ForwardedHeaders.None;
+
             options.ForwardLimit = proxy.ForwardLimit;
             options.RequireHeaderSymmetry = true;
-            // Solo se eliminan defaults cuando existe una allowlist explÃ­cita vÃ¡lida.
-            if (proxy.Enabled)
+
+            if (!proxy.Enabled)
             {
-                options.KnownProxies.Clear();
-                options.KnownIPNetworks.Clear();
-                foreach (var address in proxy.KnownProxies)
-                    options.KnownProxies.Add(IPAddress.Parse(address));
-                foreach (var network in proxy.KnownNetworks)
-                    options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+                return;
+            }
+
+            options.KnownProxies.Clear();
+            options.KnownIPNetworks.Clear();
+
+            if (proxy.TrustAzureContainerAppsIngress)
+            {
+                // Azure Container Apps:
+                // - TLS termina en el ingress administrado.
+                // - X-Forwarded-Proto es sobrescrito por la plataforma.
+                // - ACA agrega el valor derecho de X-Forwarded-For.
+                // - ForwardLimit=1 consume Ãºnicamente ese salto.
+                //
+                // Las listas permanecen vacÃ­as deliberadamente solo
+                // despuÃ©s de validar que realmente estamos ejecutando
+                // dentro de Azure Container Apps.
+                return;
+            }
+
+            foreach (var address in proxy.KnownProxies)
+            {
+                options.KnownProxies.Add(
+                    IPAddress.Parse(address));
+            }
+
+            foreach (var network in proxy.KnownNetworks)
+            {
+                options.KnownIPNetworks.Add(
+                    System.Net.IPNetwork.Parse(network));
             }
         });
 
@@ -74,7 +106,7 @@ public static class FoundationConfiguration
     internal static T AddValidated<T>(WebApplicationBuilder builder, string section, Func<T, bool> valid)
         where T : class, new()
     {
-        // ValidaciÃ³n antes de Build; sin inner exceptions ni valores del binder en diagnÃ³sticos.
+        // ValidaciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n antes de Build; sin inner exceptions ni valores del binder en diagnÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³sticos.
         var value = new T();
         try
         {
@@ -95,10 +127,18 @@ public static class FoundationConfiguration
             foreach (var property in typeof(T).GetProperties().Where(property => property.CanWrite))
                 property.SetValue(options, property.GetValue(value));
         }).Validate(options => Validator.TryValidateObject(options, new ValidationContext(options), [], true) && valid(options),
-            $"ConfiguraciÃ³n invÃ¡lida en {section}; no se muestran valores.").ValidateOnStart();
+            $"ConfiguraciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lida en {section}; no se muestran valores.").ValidateOnStart();
         return value;
     }
 
+    private static bool IsAzureContainerApps(
+        IConfiguration configuration) =>
+        !string.IsNullOrWhiteSpace(
+            configuration["CONTAINER_APP_NAME"]) &&
+        !string.IsNullOrWhiteSpace(
+            configuration["CONTAINER_APP_REVISION"]) &&
+        !string.IsNullOrWhiteSpace(
+            configuration["CONTAINER_APP_ENV_DNS_SUFFIX"]);
     private static OptionsValidationException Invalid<T>(string section) =>
-        new(Options.DefaultName, typeof(T), [$"ConfiguraciÃ³n invÃ¡lida en {section}; no se muestran valores."]);
+        new(Options.DefaultName, typeof(T), [$"ConfiguraciÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³n invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lida en {section}; no se muestran valores."]);
 }

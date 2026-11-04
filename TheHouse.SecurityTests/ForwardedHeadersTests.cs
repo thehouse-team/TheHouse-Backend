@@ -91,4 +91,89 @@ public sealed class ForwardedHeadersTests
         context.Request.Headers["X-Forwarded-Prefix"] = "/untrusted";
         return context;
     }
+
+    [Fact]
+    public void Azure_container_apps_proxy_mode_requires_platform_metadata()
+    {
+        var builder =
+            Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder();
+
+        builder.Configuration.AddInMemoryCollection(
+            new Dictionary<string, string?>
+            {
+                ["Proxy:Enabled"] = "true",
+                ["Proxy:TrustAzureContainerAppsIngress"] = "true",
+                ["Proxy:ForwardLimit"] = "1"
+            });
+
+        Assert.Throws<Microsoft.Extensions.Options.OptionsValidationException>(
+            () =>
+                TheHouse.Configuration.FoundationConfiguration
+                    .AddFoundationConfiguration(builder));
+    }
+
+    [Fact]
+    public async Task Azure_container_apps_mode_accepts_only_one_forwarded_hop()
+    {
+        var builder =
+            Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder();
+
+        builder.Configuration.AddInMemoryCollection(
+            new Dictionary<string, string?>
+            {
+                ["Proxy:Enabled"] = "true",
+                ["Proxy:TrustAzureContainerAppsIngress"] = "true",
+                ["Proxy:ForwardLimit"] = "1",
+
+                ["CONTAINER_APP_NAME"] = "thehouse",
+                ["CONTAINER_APP_REVISION"] =
+                    "thehouse--test",
+                ["CONTAINER_APP_ENV_DNS_SUFFIX"] =
+                    "test.azurecontainerapps.io"
+            });
+
+        TheHouse.Configuration.FoundationConfiguration
+            .AddFoundationConfiguration(builder);
+
+        var app = builder.Build();
+
+        var middleware = Middleware(app);
+
+        var context =
+            new Microsoft.AspNetCore.Http.DefaultHttpContext();
+
+        context.Connection.RemoteIpAddress =
+            System.Net.IPAddress.Parse("10.0.0.10");
+
+        context.Request.Headers["X-Forwarded-For"] =
+            "198.51.100.99, 203.0.113.5";
+
+        context.Request.Headers["X-Forwarded-Proto"] =
+            "http, https";
+
+        await middleware.Invoke(context);
+
+        Assert.Equal(
+            System.Net.IPAddress.Parse("203.0.113.5"),
+            context.Connection.RemoteIpAddress);
+
+        Assert.Equal(
+            "https",
+            context.Request.Scheme);
+    }
+
+    [Fact]
+    public void Azure_container_apps_mode_rejects_manual_proxy_allowlist()
+    {
+        var options =
+            new TheHouse.Configuration.ProxyOptions
+            {
+                Enabled = true,
+                TrustAzureContainerAppsIngress = true,
+                ForwardLimit = 1,
+                KnownProxies = ["10.0.0.10"]
+            };
+
+        Assert.False(options.IsValid());
+    }
 }
