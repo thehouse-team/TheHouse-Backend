@@ -43,6 +43,10 @@ resource "azurerm_container_app" "this" {
   workload_profile_name        = "Consumption"
   revision_mode                = "Single"
 
+  # Los valores de secretos de Container Apps se administran fuera de
+  # Terraform para impedir que credenciales MongoDB, Redis o JWT entren
+  # en archivos .tf, tfvars o en el flujo normal de IaC.
+
   template {
     min_replicas = var.min_replicas
     max_replicas = var.max_replicas
@@ -88,9 +92,9 @@ resource "azurerm_container_app" "this" {
         value = "false"
       }
 
-      # Bootstrap U2 deliberately starts without external secrets.
-      # Runtime secrets will never be stored in Terraform state.
-
+      # Bootstrap U2: Terraform crea el recurso sin secretos.
+      # Secretos y configuracion runtime final se administran
+      # posteriormente mediante Azure Container Apps.
       env {
         name  = "MongoDB__Enabled"
         value = "false"
@@ -152,6 +156,13 @@ resource "azurerm_container_app" "this" {
   tags = local.common_tags
 
   lifecycle {
+    # Secretos y variables runtime son administrados fuera de Terraform.
+    # CREATE usa el bootstrap sin secretos; actualizaciones posteriores
+    # no deben revertir la configuracion runtime validada en Azure.
+    ignore_changes = [
+      secret,
+      template[0].container[0].env
+    ]
     precondition {
       condition     = var.min_replicas <= var.max_replicas
       error_message = "min_replicas cannot be greater than max_replicas."
