@@ -21,7 +21,6 @@ public sealed class OpenApiContractTests
         foreach (var path in document.RootElement.GetProperty("paths").EnumerateObject())
             Assert.True(path.Name.StartsWith("/health/", StringComparison.Ordinal) || path.Name == RegistrationEndpoint.Path || path.Name == LoginEndpoint.Path);
         Assert.DoesNotContain("WeatherForecast", first, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("/auth/login", first);
         Assert.DoesNotContain("/auth/logout", first);
         Assert.DoesNotContain("/properties", first);
         Assert.DoesNotContain("/universities", first);

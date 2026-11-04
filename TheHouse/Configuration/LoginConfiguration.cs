@@ -27,12 +27,14 @@ public static class LoginConfiguration
             Enabled = configuredJwt.Enabled,
             Issuer = configuredJwt.Issuer,
             Audience = configuredJwt.Audience,
+            AccessTokenMinutes =
+                configuredJwt.AccessTokenMinutes,
             ExpirationSeconds =
                 configuredJwt.ExpirationSeconds,
             ClockSkewSeconds =
                 configuredJwt.ClockSkewSeconds,
 
-            // El secreto de U2 solo se obtiene desde configuración
+            // El secreto de U2 solo se obtiene desde configuraciÃ³n
             // externa, principalmente JWT_SIGNING_KEY.
             SigningKey =
                 builder.Configuration["JWT_SIGNING_KEY"]
@@ -141,5 +143,5 @@ public static class LoginConfiguration
         new(
             Options.DefaultName,
             typeof(LoginConfiguration),
-            [$"Configuración inválida en {section}; no se muestran valores."]);
+            [$"ConfiguraciÃ³n invÃ¡lida en {section}; no se muestran valores."]);
 }

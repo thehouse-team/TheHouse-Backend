@@ -12,6 +12,18 @@ public static class FoundationConfiguration
 {
     public static void AddFoundationConfiguration(this WebApplicationBuilder builder)
     {
+        // NV-05: el secreto JWT se recibe únicamente desde
+        // configuración externa. Se proyecta en memoria al nombre
+        // de opción usado por Foundation antes de validarlo.
+        var externalJwtSigningKey =
+            builder.Configuration["JWT_SIGNING_KEY"];
+
+        if (!string.IsNullOrWhiteSpace(externalJwtSigningKey))
+        {
+            builder.Configuration["Jwt:SigningKey"] =
+                externalJwtSigningKey;
+        }
+
         builder.Host.UseDefaultServiceProvider(options =>
         {
             options.ValidateOnBuild = true;
@@ -43,7 +55,7 @@ public static class FoundationConfiguration
                 : ForwardedHeaders.None;
             options.ForwardLimit = proxy.ForwardLimit;
             options.RequireHeaderSymmetry = true;
-            // Solo se eliminan defaults cuando existe una allowlist explícita válida.
+            // Solo se eliminan defaults cuando existe una allowlist explÃ­cita vÃ¡lida.
             if (proxy.Enabled)
             {
                 options.KnownProxies.Clear();
@@ -62,7 +74,7 @@ public static class FoundationConfiguration
     internal static T AddValidated<T>(WebApplicationBuilder builder, string section, Func<T, bool> valid)
         where T : class, new()
     {
-        // Validación antes de Build; sin inner exceptions ni valores del binder en diagnósticos.
+        // ValidaciÃ³n antes de Build; sin inner exceptions ni valores del binder en diagnÃ³sticos.
         var value = new T();
         try
         {
@@ -83,10 +95,10 @@ public static class FoundationConfiguration
             foreach (var property in typeof(T).GetProperties().Where(property => property.CanWrite))
                 property.SetValue(options, property.GetValue(value));
         }).Validate(options => Validator.TryValidateObject(options, new ValidationContext(options), [], true) && valid(options),
-            $"Configuración inválida en {section}; no se muestran valores.").ValidateOnStart();
+            $"ConfiguraciÃ³n invÃ¡lida en {section}; no se muestran valores.").ValidateOnStart();
         return value;
     }
 
     private static OptionsValidationException Invalid<T>(string section) =>
-        new(Options.DefaultName, typeof(T), [$"Configuración inválida en {section}; no se muestran valores."]);
+        new(Options.DefaultName, typeof(T), [$"ConfiguraciÃ³n invÃ¡lida en {section}; no se muestran valores."]);
 }
