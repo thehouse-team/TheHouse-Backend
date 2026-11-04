@@ -1,6 +1,7 @@
 using StackExchange.Redis;
 using TheHouse.Application.Abstractions.Security;
 using TheHouse.Application.Common;
+using TheHouse.Infrastructure.Observability;
 
 namespace TheHouse.Infrastructure.Security;
 
@@ -39,6 +40,15 @@ public sealed class RedisRateLimitStore(
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            using var activity =
+                TelemetrySources.Redis.StartActivity(
+                    "redis.rate_limit",
+                    System.Diagnostics.ActivityKind.Client);
+
+            activity?.SetTag(
+                "db.system.name",
+                "redis");
 
             var timeout =
                 TimeSpan.FromMilliseconds(configuration.AsyncTimeout);

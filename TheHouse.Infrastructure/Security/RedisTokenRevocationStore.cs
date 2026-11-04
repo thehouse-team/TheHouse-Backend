@@ -1,13 +1,14 @@
 using StackExchange.Redis;
 using TheHouse.Application.Abstractions.Security;
 using TheHouse.Application.Common;
+using TheHouse.Infrastructure.Observability;
 
 namespace TheHouse.Infrastructure.Security;
 
-// NV-06: revocación en Redis compartido. `SET NX` con expiración
-// es una operación atómica; la consulta usa `EXISTS`. Fallo cerrado:
+// NV-06: revocaciÃƒÂ³n en Redis compartido. `SET NX` con expiraciÃƒÂ³n
+// es una operaciÃƒÂ³n atÃƒÂ³mica; la consulta usa `EXISTS`. Fallo cerrado:
 // cualquier error de Redis produce DependencyUnavailableException,
-// nunca un éxito silencioso ni un fallback local.
+// nunca un ÃƒÂ©xito silencioso ni un fallback local.
 public sealed class RedisTokenRevocationStore(
     ConfigurationOptions? configuration) :
     ITokenRevocationStore,
@@ -33,6 +34,15 @@ public sealed class RedisTokenRevocationStore(
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            using var activity =
+                TelemetrySources.Redis.StartActivity(
+                    "redis.token_revoke",
+                    System.Diagnostics.ActivityKind.Client);
+
+            activity?.SetTag(
+                "db.system.name",
+                "redis");
 
             var timeout =
                 TimeSpan.FromMilliseconds(configuration.AsyncTimeout);
@@ -73,6 +83,15 @@ public sealed class RedisTokenRevocationStore(
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            using var activity =
+                TelemetrySources.Redis.StartActivity(
+                    "redis.token_revocation_check",
+                    System.Diagnostics.ActivityKind.Client);
+
+            activity?.SetTag(
+                "db.system.name",
+                "redis");
 
             var timeout =
                 TimeSpan.FromMilliseconds(configuration.AsyncTimeout);
