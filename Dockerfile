@@ -24,7 +24,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0.14-noble AS runtime
 
 USER root
 
+# Aplica los parches de seguridad del sistema operativo de la imagen base
+# (NV-02-R08: Trivy bloquea Critical/High con corrección disponible).
 RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
