@@ -411,3 +411,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** el requisito académico pide un servicio en la nube para logs de eventos y errores; M-BE-037 dejó los logs solo en streaming. La API de precios de Azure (`eastus2`, 2026-11-05) muestra la ingestión de 0–5 GB/mes a 0.00 USD; el tope diario limita el uso a ~3.1 GB/mes.
 - **Impacto:** sustituye a M-BE-037 una vez ejecutado T24. Antes del apply debe verificarse en la documentación vigente que el tramo gratuito aplica a la cuenta y que 30 días de retención están incluidos; si no, BLOCKED. Al llegar al tope diario se pierden los logs restantes de ese día (NV-03-RK11).
+
+## M-BE-048 — Errores de lecturas públicas con no-store y max-age configurable
+
+- **ID:** M-BE-048
+- **Decisión:** los errores de `/api/v1/properties` y `/api/v1/universities` envían `Cache-Control: no-store`; el `max-age` de las respuestas cacheables se configura con `Foundation:PublicCacheMaxAgeSeconds` (0–300, por defecto 60).
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** al implementar M-BE-046 las pruebas mostraron que esos errores no enviaban `no-store`, contrario a NV-07-R08 y NV-08-R08; también se observó así en Azure el 2026-11-04.
+- **Impacto:** ningún error de estos endpoints es cacheable por clientes o intermediarios. Configurar el `max-age` fuera de rango impide el arranque.

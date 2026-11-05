@@ -397,3 +397,15 @@ Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `f
 - Nota de entorno: `TheHouse/appsettings.Development.json` es un archivo local ignorado por Git, no forma parte del repositorio y habilita JWT sin `JWT_SIGNING_KEY`; para ejecutar la suite se excluyó temporalmente y se restauró byte a byte sin incorporarlo al commit. Esta limitación se declara para no atribuir a la suite una ejecución que dependa de configuración no versionada.
 - Seguridad: revisión de OWASP API Security Top 10, secretos, autenticación, autorización, validación de entrada, exposición de datos, errores, logging, rate limiting y mass assignment. Sin hallazgos Critical/High ni secretos confirmados en el alcance revisado. Resultado: PASS WITH WARNINGS. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación ni performance.
 - SDD: la revisión no crea tasks, no reabre el cierre U2 y no autoriza implementación adicional. Resultado: PASS WITH WARNINGS.
+
+## Addendum 1.1.0-u2 — Caché HTTP condicional (T12 y T13)
+
+Ejecutado el 2026-11-05 en la rama `fix/u2-review` con la autorización humana «EJECUTA» de Victor Manuel Jose Jose (M-BE-046).
+
+- Implementación: `TheHouse/Http/HttpCaching.cs` serializa la respuesta con las opciones JSON del host, calcula un `ETag` débil (SHA-256 en base64url del cuerpo sin comprimir), envía `Cache-Control: public, max-age=60` y `Vary: Accept-Encoding`, y responde 304 sin cuerpo cuando `If-None-Match` coincide (comparación débil, listas y `*`).
+- `max-age` configurable con `Foundation:PublicCacheMaxAgeSeconds` (0–300, por defecto 60); valores fuera de rango impiden el arranque.
+- Corrección encontrada al probar: los errores de este endpoint no enviaban `Cache-Control: no-store`. Ahora todos los errores (400/404/429/503) lo envían y nunca llevan `ETag` (M-BE-048).
+- OpenAPI documenta la respuesta 304. El contrato JSON no cambia.
+- Pruebas (`HttpCachingTests`, `ConfigurationTests`): `ETag` débil y `Cache-Control` en 200, mismo `ETag` para el mismo contenido, 304 sin cuerpo con `If-None-Match`, lista y `*`, comparación débil, `ETag` nuevo cuando cambia el contenido, 200 sin coincidencia, errores sin `ETag` y con `no-store`, el 304 cuenta para el rate limit, `ETag` independiente de `Accept-Encoding` y rechazo de `max-age` fuera de rango.
+- Resultado local: `dotnet build` 0 errores y 0 advertencias; `dotnet test` 429 aprobadas, 0 fallidas (130 unitarias, 47 de seguridad, 252 de integración), con `appsettings.Development.json` presente.
+- Pendiente: la verificación contra Azure requiere publicar y desplegar una imagen nueva; la imagen actual (`c651886`) no incluye este cambio.

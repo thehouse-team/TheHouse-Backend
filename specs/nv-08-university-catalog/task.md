@@ -8,12 +8,12 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 1.0.0-u2 CERRADA; T12 y T13 (1.1.0-u2) ⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **✅ EJECUTADA Y VALIDADA EN LOCAL (1.1.0-u2); VERIFICACIÓN EN AZURE PENDIENTE DE DESPLIEGUE** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks totales | 13 |
 | Tasks U2 | 13 |
-| Tasks completadas | 11 |
+| Tasks completadas | 13 |
 
 ## Reglas
 
@@ -38,7 +38,7 @@
 - [x] **T05 · Endpoint de listado de universidades** — Requisitos: NV-08-R01, NV-08-R05, NV-08-R06 · Fase: F3 · **Alcance: U2** · Aceptación: `GET /api/v1/universities` con paginación, resultado vacío 200, 400/429/503 y Problem Details. · Evidencia: pruebas de integración. · Depende de: T02, T03.
 - [x] **T06 · Endpoint de detalle de universidad** — Requisitos: NV-08-R02, NV-08-R03, NV-08-R05, NV-08-R06 · Fase: F3 · **Alcance: U2** · Aceptación: `GET /api/v1/universities/{id}` con 200/400/404/429/503 y solo campos públicos. · Evidencia: pruebas de integración. · Depende de: T02, T03.
 - [x] **T07 · Problem Details y respuestas seguras** — Requisito: NV-08-R06 · Fase: F3 · **Alcance: U2** · Aceptación: errores con `application/problem+json`, `traceId`, sin stack trace, detalles de Mongo ni campos privados. · Evidencia: pruebas de contrato. · Depende de: T05, T06.
-- [ ] **T12 · Caché HTTP condicional de universidades** — Requisito: NV-08-R08 · Fase: F3 · **Alcance: U2 (1.1.0-u2)** · Aceptación: GET 200 de listado y detalle con `ETag` débil por contenido y `Cache-Control: public, max-age=60`; `If-None-Match` coincidente → 304 sin cuerpo; errores con `no-store` y sin `ETag`; sin cambios al contrato JSON. · Evidencia: diff autorizado y pruebas. · Depende de: T05 y T06 y autorización «EJECUTA».
+- [x] **T12 · Caché HTTP condicional de universidades** — Requisito: NV-08-R08 · Fase: F3 · **Alcance: U2 (1.1.0-u2)** · Aceptación: GET 200 de listado y detalle con `ETag` débil por contenido y `Cache-Control: public, max-age=60`; `If-None-Match` coincidente → 304 sin cuerpo; errores con `no-store` y sin `ETag`; sin cambios al contrato JSON. · Evidencia: diff autorizado y pruebas. · Depende de: T05 y T06 y autorización «EJECUTA».
 
 ## F4 — Pruebas y evidencia
 
@@ -46,7 +46,7 @@
 - [x] **T09 · Pruebas de integración de universidades** — Requisitos: NV-08-R01, NV-08-R04, NV-08-R05, NV-08-R06 · Fase: F4 · **Alcance: U2** · Aceptación: listado con datos, vacío, detalle 200/404, 400/429/503 y seed dos veces sin duplicados. · Evidencia: reporte y respuestas sanitizadas. · Depende de: T03, T04, T05, T06.
 - [x] **T10 · Pruebas de seguridad y seed** — Requisitos: NV-08-R02, NV-08-R04, NV-08-R07 · Fase: F4 · **Alcance: U2** · Aceptación: sin datos personales, errores sin stack trace, rate limit compartido y seed sin duplicados. · Evidencia: informe de seguridad. · Depende de: T04, T06, T07.
 - [x] **T11 · Evidencia y revisión de universidades** — Requisito: NV-08-R07 · Fase: F4 · **Alcance: U2** · Aceptación: cada requisito tiene evidencia o brecha declarada; revisión PASS/PASS WITH WARNINGS/BLOCKED. · Evidencia: matriz y acta. · Depende de: T08, T09, T10.
-- [ ] **T13 · Pruebas y evidencia de caché HTTP de universidades** — Requisitos: NV-08-R07, NV-08-R08 · Fase: F4 · **Alcance: U2 (1.1.0-u2)** · Aceptación: integración y seguridad cubren `ETag` estable, 304 (incluidos lista y `*`), 200 sin coincidencia, errores sin `ETag`, compresión y rate limit; `evidence.md` actualizado. · Evidencia: reporte de pruebas y acta. · Depende de: T10 y T12.
+- [x] **T13 · Pruebas y evidencia de caché HTTP de universidades** — Requisitos: NV-08-R07, NV-08-R08 · Fase: F4 · **Alcance: U2 (1.1.0-u2)** · Aceptación: integración y seguridad cubren `ETag` estable, 304 (incluidos lista y `*`), 200 sin coincidencia, errores sin `ETag`, compresión y rate limit; `evidence.md` actualizado. · Evidencia: reporte de pruebas y acta. · Depende de: T10 y T12.
 
 ## Matriz task → requisito
 
@@ -63,8 +63,8 @@
 | T09 | R01, R04, R05, R06 | F4 | U2 | COMPLETADA |
 | T10 | R02, R04, R07 | F4 | U2 | COMPLETADA |
 | T11 | R07 | F4 | U2 | COMPLETADA |
-| T12 | R08 | F3 | U2 | ABIERTA |
-| T13 | R07, R08 | F4 | U2 | ABIERTA |
+| T12 | R08 | F3 | U2 | COMPLETADA |
+| T13 | R07, R08 | F4 | U2 | COMPLETADA |
 
 ## Cobertura requisito → task
 
@@ -86,12 +86,12 @@
 | Requisitos | 8 |
 | Tasks | 13 |
 | Tasks U2 | 13 |
-| Tasks abiertas | 2 |
-| Tasks completadas | 11 |
+| Tasks abiertas | 0 |
+| Tasks completadas | 13 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 1.0.0-u2 CERRADA; T12 y T13 (1.1.0-u2) ⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **✅ EJECUTADA Y VALIDADA EN LOCAL (1.1.0-u2); VERIFICACIÓN EN AZURE PENDIENTE DE DESPLIEGUE** |
 ## Cierre U2 NV-08
 
 | Campo | Resultado |

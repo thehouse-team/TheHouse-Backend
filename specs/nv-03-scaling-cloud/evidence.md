@@ -155,3 +155,14 @@ No se detectaron secretos en los artefactos citados ni se imprimieron valores se
 - Tasks abiertas: **20**; las 19 U2 restantes no pueden cerrarse sin la evidencia indicada.
 - Implementación y ejecución de tasks abiertas: **BLOCKED**.
 - `terraform apply` y `terraform destroy`: **NO EJECUTADOS**.
+
+## Addendum 1.2.0-u2 — Observabilidad persistente (T24 en curso)
+
+Ejecutado el 2026-11-05 en la rama `fix/u2-review` con la autorización humana «EJECUTA» de Victor Manuel Jose Jose (M-BE-047).
+
+- `infra/terraform/main.tf`: nuevo `azurerm_log_analytics_workspace.this` (`log-thehouse-u2`, `PerGB2018`, `daily_quota_gb = 0.1`, `retention_in_days = 30`) y el entorno `cae-thehouse-u2` con `logs_destination = "log-analytics"`.
+- `variables.tf` valida el tope (mayor que 0 y máximo 0.16 GB/día = 5 GB / 31 días) y fija la retención en 30 días; `outputs.tf` expone el nombre del workspace.
+- `terraform fmt -check -recursive` → exit 0; `terraform validate` → `Success! The configuration is valid.`
+- `terraform plan` (guardado fuera del repositorio): **1 a crear** (workspace), **1 a cambiar en sitio** (entorno: `logs_destination` y `log_analytics_workspace_id`), **0 a destruir**. No reemplaza el entorno ni la app: la opción A es viable y no se necesita la opción B.
+- **`terraform apply` NO ejecutado:** espera el `OK PARA APPLY` humano. T24 queda abierta hasta aplicar y verificar; T25 depende de T24.
+- Tras el apply, el estado de Terraform contendrá las claves compartidas del workspace (atributos sensibles): `terraform.tfstate` debe seguir fuera de Git y no compartirse por chat.

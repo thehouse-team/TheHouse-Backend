@@ -27,6 +27,8 @@ public static class UniversityEndpoint
                 "List public universities")
             .Produces<UniversityListResponse>(
                 StatusCodes.Status200OK)
+            .Produces(
+                StatusCodes.Status304NotModified)
             .ProducesValidationProblem(
                 StatusCodes.Status400BadRequest)
             .ProducesProblem(
@@ -47,6 +49,8 @@ public static class UniversityEndpoint
                 "Get public university details")
             .Produces<UniversityResponse>(
                 StatusCodes.Status200OK)
+            .Produces(
+                StatusCodes.Status304NotModified)
             .ProducesValidationProblem(
                 StatusCodes.Status400BadRequest)
             .ProducesProblem(
@@ -92,7 +96,7 @@ public static class UniversityEndpoint
                     pageSize,
                     context.RequestAborted);
 
-            return Results.Ok(result);
+            return HttpCaching.PublicJson(context, result);
         }
         catch (RequestValidationException)
         {
@@ -131,7 +135,7 @@ public static class UniversityEndpoint
                     id,
                     context.RequestAborted);
 
-            return Results.Ok(result);
+            return HttpCaching.PublicJson(context, result);
         }
         catch (RequestValidationException)
         {
@@ -219,10 +223,15 @@ public static class UniversityEndpoint
 
     private static IResult Error(
         HttpContext context,
-        int status) =>
-        Results.Problem(
+        int status)
+    {
+        // Los errores nunca se cachean (NV-08-R08).
+        context.Response.Headers.CacheControl = "no-store";
+
+        return Results.Problem(
             ProblemResponses.Create(
                 context,
                 status,
                 validation: status == 400));
+    }
 }
