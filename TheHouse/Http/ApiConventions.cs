@@ -9,6 +9,14 @@ public static class ApiConventions
     public const string Version = "v1";
     public const string Prefix = "/api/" + Version;
 
+    // Entorno exclusivo de pruebas automatizadas: se comporta como Development
+    // (OpenAPI visible, sin HSTS) pero no carga appsettings.Development.json.
+    public const string TestingEnvironment = "Testing";
+
+    public static bool ExposesOpenApi(IHostEnvironment environment) =>
+        environment.IsDevelopment() ||
+        environment.IsEnvironment(TestingEnvironment);
+
     public static void AddFoundationOpenApi(this IServiceCollection services)
     {
         services.AddOpenApi(Version, options =>

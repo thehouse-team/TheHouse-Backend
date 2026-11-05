@@ -36,12 +36,12 @@ var app = builder.Build();
 
 var seedUniversities =
     args.Contains(
-        "--seed-universities",
+        SeedCommandPolicy.SeedUniversities,
         StringComparer.Ordinal);
 
 var seedProperties =
     args.Contains(
-        "--seed-properties",
+        SeedCommandPolicy.SeedProperties,
         StringComparer.Ordinal);
 
 if (seedUniversities || seedProperties)
@@ -54,33 +54,38 @@ if (seedUniversities || seedProperties)
         app.Services.GetRequiredService<
             TheHouse.Application.Common.PropertySeedOptions>();
 
-    if (seedUniversities &&
-        !universitySeedOptions.Enabled)
+    var decision = SeedCommandPolicy.Evaluate(
+        args,
+        universitySeedOptions.Enabled,
+        propertySeedOptions.Enabled,
+        app.Environment.IsProduction());
+
+    var rejection = decision switch
     {
-        Console.Error.WriteLine(
-            "University seed is disabled. Set UniversitySeed__Enabled=true only in an authorized environment.");
+        SeedCommandDecision.UniversitySeedDisabled =>
+            "University seed is disabled. Set UniversitySeed__Enabled=true only in an authorized environment.",
+        SeedCommandDecision.PropertySeedDisabled =>
+            "Property seed is disabled. Set PropertySeed__Enabled=true only in an authorized environment.",
+        SeedCommandDecision.ProductionNotAllowed =>
+            $"Seed commands are not allowed in Production without {SeedCommandPolicy.AllowProductionSeed}.",
+        _ => null
+    };
+
+    if (rejection is not null)
+    {
+        Console.Error.WriteLine(rejection);
 
         Environment.ExitCode = 2;
         return;
     }
 
-    if (seedProperties &&
-        !propertySeedOptions.Enabled)
+    if (decision == SeedCommandDecision.RunInProduction)
     {
-        Console.Error.WriteLine(
-            "Property seed is disabled. Set PropertySeed__Enabled=true only in an authorized environment.");
-
-        Environment.ExitCode = 2;
-        return;
-    }
-
-    if (app.Environment.IsProduction())
-    {
-        Console.Error.WriteLine(
-            "Seed commands are not allowed in Production.");
-
-        Environment.ExitCode = 2;
-        return;
+        app.Logger.LogWarning(
+            "Seed autorizado en Production mediante {Flag}: universidades={Universities}, propiedades={Properties}.",
+            SeedCommandPolicy.AllowProductionSeed,
+            seedUniversities,
+            seedProperties);
     }
 
     await using var scope =
@@ -135,7 +140,7 @@ app.UseStatusCodePages(context => ProblemResponses.WriteAsync(context.HttpContex
 app.UseMiddleware<RequestBodyLimitMiddleware>();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (ApiConventions.ExposesOpenApi(app.Environment))
 {
     app.MapOpenApi().WithMetadata(new PublicResponseCompressionAttribute()).DisableRateLimiting();
 }

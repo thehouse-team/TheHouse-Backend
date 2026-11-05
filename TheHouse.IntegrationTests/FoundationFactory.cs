@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using TheHouse.Http;
 
 namespace TheHouse.IntegrationTests;
 
-public class FoundationFactory(IReadOnlyDictionary<string, string?>? settings = null, string environment = "Development")
+// "Testing" evita cargar appsettings.Development.json (configuración local con
+// conexiones reales); las pruebas nunca deben depender de ese archivo.
+public class FoundationFactory(IReadOnlyDictionary<string, string?>? settings = null, string environment = ApiConventions.TestingEnvironment)
     : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)

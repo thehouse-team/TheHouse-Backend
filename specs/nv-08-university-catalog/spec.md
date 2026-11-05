@@ -151,7 +151,7 @@ El seed está deshabilitado por defecto en `appsettings.json` y solo se activa p
 
 - `--seed-universities` requiere `UniversitySeed__Enabled=true`.
 - `--seed-properties` requiere `PropertySeed__Enabled=true`.
-- Ambos comandos se rechazan cuando `ASPNETCORE_ENVIRONMENT=Production`.
+- En `Production` ambos comandos se rechazan salvo con la bandera explícita `--allow-production-seed`, registrada en el log (M-BE-043).
 - El seed de propiedades requiere que el seed de universidades se haya ejecutado primero.
 
 Comando documentado para una ejecución autorizada, sin credenciales embebidas:

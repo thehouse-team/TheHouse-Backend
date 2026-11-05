@@ -30,7 +30,7 @@ Definir el contrato verificable de `GET /api/v1/properties` y `GET /api/v1/prope
 1. NV-01 U2 provee Problem Details, validación, paginación y configuración.
 2. NV-03 U2 aprobada documentalmente para la verificación desplegada; las pruebas locales pueden usar MongoDB y Redis aislados.
 3. Existe autorización de Fase B.
-4. Existe una colección `properties` con datos de prueba o seed controlado. El seed idempotente de seis propiedades de demostración se activa solo por configuración (`PropertySeed__Enabled=true` y `--seed-properties`), requiere el seed de universidades NV-08 y se rechaza en `Production`; no crea contenido masivo.
+4. Existe una colección `properties` con datos de prueba o seed controlado. El seed idempotente de seis propiedades de demostración se activa solo por configuración (`PropertySeed__Enabled=true` y `--seed-properties`), requiere el seed de universidades NV-08 y en `Production` solo se permite con `--allow-production-seed`, registrado en el log; no crea contenido masivo.
 
 ## 4. Alcance
 

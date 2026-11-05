@@ -351,3 +351,43 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** eliminar el drift entre Azure y Terraform sin cambiar el comportamiento operativo ya validado.
 - **Impacto:** la regla queda declarada en `infra/terraform/main.tf`; `terraform plan` no propone cambios en recursos y solo actualiza salidas de estado. No se ejecutó `terraform apply`; cualquier cambio futuro de umbral debe registrarse y reflejarse en IaC.
+
+## M-BE-042 — Entorno Testing para pruebas automatizadas
+
+- **ID:** M-BE-042
+- **Decisión:** los factories de pruebas usan el entorno `Testing` (`ApiConventions.TestingEnvironment`), que se comporta como Development (OpenAPI visible, sin HSTS) pero no carga `appsettings.Development.json`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** la configuración local de desarrollo contiene conexiones reales a MongoDB y Redis; las pruebas no deben depender de ella ni poder escribir en servicios reales.
+- **Impacto:** `dotnet test` pasa con o sin `appsettings.Development.json` presente. Production y Development no cambian su comportamiento.
+
+## M-BE-043 — Seed en Production solo con bandera explícita
+
+- **ID:** M-BE-043
+- **Decisión:** los comandos `--seed-universities` y `--seed-properties` se rechazan en Production salvo con la bandera exacta `--allow-production-seed`; la ejecución autorizada se registra en el log como advertencia. La regla vive en `SeedCommandPolicy` y tiene pruebas de seguridad.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** cargar datos de demostración en el entorno de evaluación es intencional, pero no debe lograrse cambiando el nombre del entorno (`ASPNETCORE_ENVIRONMENT=Staging`), que desactiva la protección sin dejar rastro.
+- **Impacto:** la bandera no omite `UniversitySeed__Enabled` ni `PropertySeed__Enabled`. NV-07 y NV-08 (spec y evidence) documentan el comando `az containerapp exec` actualizado. Requiere desplegar una imagen que incluya este cambio.
+
+## M-BE-044 — Publicación GHCR desde main
+
+- **ID:** M-BE-044
+- **Decisión:** `u2-ghcr-publish.yml` permite la publicación manual (`workflow_dispatch` + `PUBLISH`) desde `main` además de `feature/u2-entrega`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** `feature/u2-entrega` ya se integró a `main` (PR #2); las imágenes nuevas deben salir de la rama integrada.
+- **Impacto:** se mantienen el gate manual, la confirmación explícita y el despliegue por digest. `VERSIONING.md` refleja ambas ramas.
+
+## M-BE-045 — Finales de línea LF en el repositorio
+
+- **ID:** M-BE-045
+- **Decisión:** `.gitattributes` fija `* text=auto eol=lf`, en línea con `.editorconfig`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** evitar mezclas CRLF/LF entre Windows y los runners Linux de CI.
+- **Impacto:** el índice ya estaba en LF; no hubo renormalización de archivos existentes.
