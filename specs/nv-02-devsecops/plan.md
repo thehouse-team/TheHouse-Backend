@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA») |
-| Estado de ejecución | **🟡 CI EN VERDE EN EL PR #3 (run `42122674335`); ABIERTAS T11, T14 Y T15** |
+| Estado de ejecución | **🟡 CI EN VERDE EN EL PR #3 (run `42122674335`); ABIERTAS T14 Y T15** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -184,4 +184,4 @@ F5 Gate/protección/evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza crear workflows, instalar herramientas, modificar la configuración de GitHub ni publicar o desplegar. Estado de ejecución: **⛔ NO EJECUTAR HASTA «EJECUTA»**.
+Este plan no autoriza crear workflows, instalar herramientas, modificar la configuración de GitHub ni publicar o desplegar. Estado de ejecución: autorizado con «EJECUTA» el 2026-11-05; avance en `task.md` y `evidence.md`.

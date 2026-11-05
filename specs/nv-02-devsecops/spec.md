@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA») |
-| Estado de ejecución | **🟡 CI EN VERDE EN EL PR #3 (run `42122674335`); ABIERTAS T11, T14 Y T15** |
+| Estado de ejecución | **🟡 CI EN VERDE EN EL PR #3 (run `42122674335`); ABIERTAS T14 Y T15** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
@@ -181,7 +181,7 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CI EN VERDE; ABIERTAS T11, T14 Y T15** |
+| Estado de ejecución | **🟡 CI EN VERDE; ABIERTAS T14 Y T15** |
 
 ## 14. Aprobación pendiente
 

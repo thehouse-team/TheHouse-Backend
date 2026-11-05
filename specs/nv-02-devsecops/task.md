@@ -8,11 +8,11 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA») |
-| Estado de ejecución | **🟡 CI EN VERDE EN EL PR #3 (run `42122674335`); ABIERTAS T11, T14 Y T15** |
+| Estado de ejecución | **🟡 CI EN VERDE EN EL PR #3 (run `42122674335`); ABIERTAS T14 Y T15** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks totales | 15 |
-| Tasks completadas | 12 |
+| Tasks completadas | 13 |
 
 ## Reglas de esta lista
 
@@ -44,7 +44,7 @@
 
 ## F4 — Mutación
 
-- [ ] **T11 · Job `mutation-stryker` y línea base** — Requisitos: NV-02-R10, NV-02-R13 · Fase: F4 · Aceptación: Stryker.NET sobre Domain y Application con `TheHouse.UnitTests`; programado semanal y manual, no en cada pull request; score y mutantes sobrevivientes registrados; umbral propuesto con evidencia. · Evidencia: reporte Stryker y minutos consumidos. · Depende de: T02.
+- [x] **T11 · Job `mutation-stryker` y línea base** — Requisitos: NV-02-R10, NV-02-R13 · Fase: F4 · Aceptación: Stryker.NET sobre Domain y Application con `TheHouse.UnitTests`; programado semanal y manual, no en cada pull request; score y mutantes sobrevivientes registrados; umbral propuesto con evidencia. · Evidencia: reporte Stryker y minutos consumidos. · Depende de: T02.
 
 ## F5 — Gate, protección y evidencia
 
@@ -66,7 +66,7 @@
 | T08 | R07 | F2 | COMPLETADA |
 | T09 | R08, R09 | F3 | COMPLETADA |
 | T10 | R09 | F3 | COMPLETADA |
-| T11 | R10, R13 | F4 | ABIERTA |
+| T11 | R10, R13 | F4 | COMPLETADA |
 | T12 | R11 | F5 | COMPLETADA |
 | T13 | R01 | F1 | COMPLETADA |
 | T14 | R11 | F5 | ABIERTA |
@@ -96,11 +96,11 @@
 | --- | --- |
 | Requisitos | 13 |
 | Tasks | 15 |
-| Tasks abiertas | 3 |
-| Tasks completadas | 12 |
+| Tasks abiertas | 2 |
+| Tasks completadas | 13 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CI EN VERDE; ABIERTAS T11, T14 Y T15** |
+| Estado de ejecución | **🟡 CI EN VERDE; ABIERTAS T14 Y T15** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

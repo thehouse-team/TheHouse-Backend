@@ -8,9 +8,9 @@
 | Fecha | 2026-11-05 |
 | Aprobación | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» de NV-02 1.1.0-u2) |
 | Rama | `fix/u2-review` |
-| Resultado | **PASS WITH WARNINGS**: CI en verde en el PR #3; pendientes T11 (mutación), T14 (ruleset) y T15 (cierre) |
+| Resultado | **PASS WITH WARNINGS**: CI en verde en el PR #3; pendientes T14 (ruleset) y T15 (cierre) |
 
-Las tasks T01–T10, T12 y T13 se cierran con la evidencia de los runs de GitHub Actions de la §7. T11, T14 y T15 siguen abiertas.
+Las tasks T01–T13 se cierran con la evidencia de los runs de GitHub Actions de las §7 y §8. T14 y T15 siguen abiertas.
 
 ## 1. Archivos creados o modificados
 
@@ -114,3 +114,27 @@ URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42122674335
 - Artefactos (14 días): `test-results` (259 KB), `semgrep-sarif` (23 KB), `sca-sbom` (5 KB), `gitleaks-report` (6 KB) y `container-security` (1 KB).
 - Costo (NV-02-R13): el repositorio es público, por lo que los minutos de GitHub Actions no tienen costo. El run completo tarda ~1.2 minutos de reloj.
 - Los dos avisos INFO de Dockle no bloquean: content trust aplica a la firma de imágenes (NV-09, Cosign) y los binarios setuid/setgid son los de la imagen base de Ubuntu.
+
+## 8. Mutación — run manual `42122968043` (commit `6bd3e92`, `run_mutation=true`)
+
+URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42122968043 — los 8 jobs en éxito; `mutation-stryker` tardó 1 min 40 s.
+
+| Proyecto | Mutantes | Probados | Killed | Survived | NoCoverage | CompileError | Ignored | Score |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `TheHouse.Application` | 457 | 278 | 219 | 59 | 109 | 17 | 53 | **56.59 %** |
+| `TheHouse.Domain` | 17 | 15 | 0 | 15 | 2 | 0 | 0 | **0.00 %** |
+
+Lectura de la línea base:
+
+- **Application**: los validadores tienen la mejor cobertura de mutación (`EmailNormalizer` 46 killed, `PropertyQueryValidation` 44, `UniversityQueryValidation` 44). La mayoría de los mutantes sin cobertura están en datos y opciones sin lógica (`PropertySeedData` 61, opciones de rate limit 25) y en `PropertySeedService` (10), que se prueba en integración, no en `TheHouse.UnitTests`. Los sobrevivientes se concentran en `LogoutService` (8), en los validadores (7 cada uno) y en `PasswordPolicy` (6).
+- **Domain**: el proyecto solo tiene entidades anémicas y excepciones. Los 15 sobrevivientes son valores por defecto de propiedades (`= string.Empty` → `"Stryker was here!"`) y mensajes de excepción; las pruebas siempre asignan esas propiedades, así que estos mutantes son **equivalentes** y el 0 % no mide la calidad de las pruebas.
+- Stryker activó *Safe Mode* en `LogoutService.ValidateRequiredPrincipal` por un error de compilación de un mutante (CS0165); esos mutantes cuentan como `CompileError` y no afectan el score.
+
+Umbral propuesto (requiere aprobación de Victor antes de cambiar `ci.yml`):
+
+| Proyecto | `break-at` | `low` | `high` | Justificación |
+| --- | --- | --- | --- | --- |
+| `TheHouse.Application` | 50 | 60 | 80 | ~6.6 puntos de margen sobre la línea base; se sube a medida que se maten los sobrevivientes de `LogoutService` y `PasswordPolicy` |
+| `TheHouse.Domain` | 0 (informativo) | — | — | Sin lógica que mutar; se reevalúa cuando el dominio tenga reglas de negocio |
+
+Hasta que se apruebe, el job sigue con `--break-at 0`, así que es informativo y no bloquea. Costo: 1 min 40 s por run manual o semanal (repositorio público, $0).
