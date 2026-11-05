@@ -1,130 +1,106 @@
-# NV-02 — Task list DevSecOps
+# NV-02 — Task list CI y DevSecOps U2
 
 | Campo | Valor |
 | --- | --- |
 | ID | NV-02 |
 | Documento | `task.md` |
-| Versión | 1.0.0-borrador |
-| Fecha | 2026-10-30 |
-| Estado | **⛔ NO EJECUTAR** |
-| Aprobación humana | **NINGUNA** |
-| Spec | `spec.md` 1.0.0-borrador |
-| Plan | `plan.md` 1.0.0-borrador |
-| Tasks totales | 24 |
+| Versión | 1.1.0-u2 |
+| Fecha | 2026-11-05 |
+| Estado documental | **📝 PREPARADA PARA REVISIÓN HUMANA** |
+| Aprobación humana | PENDIENTE |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Spec | `spec.md` 1.1.0-u2 |
+| Plan | `plan.md` 1.1.0-u2 |
+| Tasks totales | 15 |
 | Tasks completadas | 0 |
 
 ## Reglas de esta lista
 
-1. Todas las tasks están abiertas y deben permanecer así durante la planificación.
+1. Todas las tasks están abiertas; escribir este documento no completa ninguna.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
-3. Escribir este documento no completa ninguna task.
-4. Cada task declara al menos un requisito.
-5. Las dependencias con NV-01 y NV-03 no conceden autorización.
-6. Ninguna task autoriza escanear producción, terceros o datos reales.
-7. Un control no ejecutado no se reporta como PASS.
+3. Ninguna task usa secretos, publica imágenes ni despliega (eso es NV-09).
+4. Un control no ejecutado no se reporta como PASS.
+5. Las acciones en la configuración de GitHub (ruleset, visibilidad) son humanas; las tasks solo las documentan y verifican.
 
-## F1 — Línea base de pruebas
+## F1 — Workflow base, build y pruebas
 
-- [ ] **T01 · Inventario y plan de suites** — Requisito: NV-02-R01 · Fase: F1 · Aceptación: riesgos mapeados a suites, alcance y limitaciones declarados; los placeholders identificados. · Evidencia: matriz riesgo→suite y revisión. · Depende de: autorización NV-02.
-- [ ] **T02 · Pruebas unitarias de Domain/Application** — Requisito: NV-02-R01 · Fase: F1 · Aceptación: casos de negocio y límites aislados, deterministas y sin infraestructura real. · Evidencia: reporte xUnit y comando reproducible. · Depende de: T01.
-- [ ] **T03 · Harness de integración con WebApplicationFactory** — Requisito: NV-02-R02 · Fase: F1 · Aceptación: composición real, datos aislados, limpieza y ausencia de servicios productivos. · Evidencia: harness revisado y prueba de humo. · Depende de: T01 y NV-01.
-- [ ] **T04 · Integración de fundamentos HTTP** — Requisito: NV-02-R02 · Fase: F1 · Aceptación: salud, errores, versión y correlación verificados contra NV-01. · Evidencia: reporte de integración. · Depende de: T03.
-- [ ] **T05 · Suite de seguridad** — Requisito: NV-02-R03 · Fase: F1 · Aceptación: autorización, abuso, cabeceras, entrada y límites con casos negativos; sin datos productivos. · Evidencia: reporte y hallazgos. · Depende de: T03.
+- [ ] **T01 · Workflow `ci.yml` con disparadores y permisos** — Requisito: NV-02-R01 · Fase: F1 · Aceptación: `pull_request` a `main`, `push` a `main` y `workflow_dispatch`; `permissions: contents: read`; acciones fijadas; `concurrency` y `timeout-minutes`; sin secretos. · Evidencia: workflow revisado y run en un pull request. · Depende de: autorización «EJECUTA».
+- [ ] **T02 · Job `build-test`** — Requisito: NV-02-R02 · Fase: F1 · Aceptación: SDK desde `global.json`; build Release con advertencias como error; suites unitaria, de seguridad e integración con TRX; una prueba fallida rompe el job. · Evidencia: run y TRX. · Depende de: T01.
+- [ ] **T03 · Cobertura informativa** — Requisito: NV-02-R03 · Fase: F1 · Aceptación: cobertura de líneas y ramas por proyecto en el resumen del run y como artefacto; no bloquea. · Evidencia: resumen y archivo Cobertura. · Depende de: T02.
+- [ ] **T13 · Retiro de workflows de validación duplicados** — Requisito: NV-02-R01 · Fase: F1 · Aceptación: `u2-linux-validation.yml` y `u2-container-validation.yml` retirados una vez que `build-test` y `container-security` los cubren; `u2-ghcr-publish.yml` se conserva para NV-09. · Evidencia: diff y run de `ci.yml`. · Depende de: T02, T09.
 
-## F2 — Análisis estático y suministro
+## F2 — Código, dependencias y secretos
 
-- [ ] **T06 · Semgrep con reglas y baseline** — Requisito: NV-02-R04 · Fase: F2 · Aceptación: configuración versionada, baseline medido y supresiones justificadas. · Evidencia: reporte SARIF/JSON y versión de reglas. · Depende de: T01.
-- [ ] **T07 · SonarAnalyzer y SonarCloud condicionado a $0** — Requisito: NV-02-R04 · Fase: F2 · Aceptación: análisis local operativo; SonarCloud solo con elegibilidad gratuita verificada. · Evidencia: configuración, reporte y prueba de costo $0. · Depende de: T01.
-- [ ] **T08 · Auditoría SCA de NuGet** — Requisito: NV-02-R05 · Fase: F2 · Aceptación: inventario de dependencias, vulnerabilidades y licencias; política de versiones fijadas. · Evidencia: reporte de auditoría y plan de tratamiento. · Depende de: T01.
-- [ ] **T09 · SBOM CycloneDX** — Requisito: NV-02-R06 · Fase: F2 · Aceptación: SBOM generado, versionado y trazable a la entrega o imagen. · Evidencia: archivo SBOM y verificación de formato. · Depende de: T01.
+- [ ] **T04 · Job `sast-semgrep`** — Requisito: NV-02-R04 · Fase: F2 · Aceptación: imagen de Semgrep CE fijada; rulesets `p/csharp`, `p/secrets`, `p/dockerfile` y `p/terraform`; ERROR bloquea; SARIF como artefacto. · Evidencia: run y SARIF. · Depende de: T01.
+- [ ] **T05 · Reglas Semgrep propias** — Requisito: NV-02-R04 · Fase: F2 · Aceptación: al menos 8 reglas del proyecto en `.semgrep/` con pruebas de regla (casos que deben y no deben coincidir); supresiones justificadas. · Evidencia: reglas, pruebas y run. · Depende de: T04.
+- [ ] **T06 · Job `sca-sbom`: dependencias vulnerables** — Requisito: NV-02-R05 · Fase: F2 · Aceptación: `dotnet list package --vulnerable --include-transitive` sobre la solución; High o Critical bloquea salvo excepción registrada. · Evidencia: reporte del run. · Depende de: T01.
+- [ ] **T07 · SBOM CycloneDX** — Requisito: NV-02-R06 · Fase: F2 · Aceptación: SBOM de la solución generado en cada run, con el commit en sus metadatos y retenido 14 días. · Evidencia: artefacto `sbom.json`. · Depende de: T06.
+- [ ] **T08 · Job `secrets-gitleaks`** — Requisito: NV-02-R07 · Fase: F2 · Aceptación: imagen de Gitleaks fijada (sin la action que exige licencia), escaneo de todo el historial con `fetch-depth: 0`, valores redactados; un hallazgo bloquea. · Evidencia: run y reporte redactado. · Depende de: T01.
 
-## F3 — Pruebas avanzadas
+## F3 — Contenedor e infraestructura
 
-- [ ] **T10 · Baseline de mutación con Stryker.NET** — Requisito: NV-02-R07 · Fase: F3 · Aceptación: alcance acotado, score medido, mutantes no cubiertos y runtime documentados. · Evidencia: reporte Stryker y configuración. · Depende de: T01, T02.
-- [ ] **T11 · Contrato con PactNet o alcance equivalente** — Requisito: NV-02-R08 · Fase: F3 · Aceptación: consumidor/proveedor identificado y verificación reproducible; sin divergencia con OpenAPI. · Evidencia: pactos y reporte de verificación. · Depende de: T03, T04.
-- [ ] **T12 · Performance con NBomber** — Requisito: NV-02-R09 · Fase: F3 · Aceptación: escenario, datos, concurrencia, duración, entorno y SLO declarados; resultados no extrapolados. · Evidencia: reporte NBomber y configuración. · Depende de: T04.
+- [ ] **T09 · Job `container-security`** — Requisitos: NV-02-R08, NV-02-R09 · Fase: F3 · Aceptación: build de la imagen desde `Dockerfile`; Trivy de imagen (Critical/High corregibles bloquean) y de configuración del Dockerfile y Terraform (High/Critical bloquean); Dockle (FATAL bloquea); usuario no root verificado. · Evidencia: reportes Trivy y Dockle. · Depende de: T01.
+- [ ] **T10 · Job `iac-terraform`** — Requisito: NV-02-R09 · Fase: F3 · Aceptación: Terraform 1.17.x; `fmt -check -recursive`, `init -backend=false` y `validate` sin credenciales. · Evidencia: salida del job. · Depende de: T01.
 
-## F4 — Seguridad dinámica
+## F4 — Mutación
 
-- [ ] **T13 · DAST con OWASP ZAP** — Requisito: NV-02-R10 · Fase: F4 · Aceptación: entorno aislado, alcance y credenciales de prueba aprobados; sin atacar terceros. · Evidencia: reporte ZAP y triage. · Depende de: T04.
-- [ ] **T14 · Fuzzing REST con RESTler** — Requisito: NV-02-R11 · Fase: F4 · Aceptación: OpenAPI aprobado, límites de tasa, datos de prueba y triage de hallazgos. · Evidencia: reporte RESTler y configuración. · Depende de: T04.
+- [ ] **T11 · Job `mutation-stryker` y línea base** — Requisitos: NV-02-R10, NV-02-R13 · Fase: F4 · Aceptación: Stryker.NET sobre Domain y Application con `TheHouse.UnitTests`; programado semanal y manual, no en cada pull request; score y mutantes sobrevivientes registrados; umbral propuesto con evidencia. · Evidencia: reporte Stryker y minutos consumidos. · Depende de: T02.
 
-## F5 — Contenedor y firma
+## F5 — Gate, protección y evidencia
 
-- [ ] **T15 · Escaneo de imagen con Trivy** — Requisito: NV-02-R12 · Fase: F5 · Aceptación: imagen autorizada por NV-03, reporte de capas y bloqueo de críticos/altos corregibles. · Evidencia: reporte Trivy y digest. · Depende de: imagen de NV-03.
-- [ ] **T16 · Lint de contenedor con Dockle** — Requisito: NV-02-R12 · Fase: F5 · Aceptación: usuario no root, sin secretos, configuración revisada y hallazgos fatales tratados. · Evidencia: reporte Dockle. · Depende de: imagen de NV-03.
-- [ ] **T17 · Firma y verificación con Cosign** — Requisito: NV-02-R13 · Fase: F5 · Aceptación: imagen firmada, identidad/clave protegida y verificación previa al despliegue. · Evidencia: firma, digest y verificación. · Depende de: T15.
-
-## F6 — Gates, CI y evidencia
-
-- [ ] **T18 · Catálogo de quality gates** — Requisito: NV-02-R14 · Fase: F6 · Aceptación: cada gate con alcance, criterio, evidencia, bloqueo y excepción. · Evidencia: catálogo revisado. · Depende de: T06 a T14.
-- [ ] **T19 · Registro de hallazgos y excepciones** — Requisito: NV-02-R16 · Fase: F6 · Aceptación: severidad, origen, responsable, vencimiento y estado; excepciones aprobadas. · Evidencia: registro y revisión. · Depende de: T18.
-- [ ] **T20 · Workflow CI de build y pruebas** — Requisito: NV-02-R15 · Fase: F6 · Aceptación: permisos mínimos, acciones fijadas, secretos protegidos y artefactos retenidos; no se crea en esta entrega. · Evidencia: diseño y revisión del workflow futuro. · Depende de: T01 a T12.
-- [ ] **T21 · Pipeline de seguridad** — Requisito: NV-02-R15 · Fase: F6 · Aceptación: SAST/SCA/SBOM/DAST/fuzzing/container/firma integrados con reportes y gates. · Evidencia: diseño y reportes de prueba. · Depende de: T06 a T17.
-- [ ] **T22 · Protección de rama y gates de PR** — Requisito: NV-02-R14, NV-02-R15 · Fase: F6 · Aceptación: revisión obligatoria, checks requeridos y ausencia de bypass silencioso. · Evidencia: configuración revisada. · Depende de: T20, T21.
-- [ ] **T23 · Retención y reproducción de evidencia** — Requisito: NV-02-R16 · Fase: F6 · Aceptación: reportes, comandos, versiones y entorno conservados sin secretos y con costo $0. · Evidencia: inventario de artefactos. · Depende de: T20 a T22.
-- [ ] **T24 · Revisión final de seguridad y cierre** — Requisitos: NV-02-R14, NV-02-R16 · Fase: F6 · Aceptación: hallazgos y excepciones revisados; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: acta y matriz de evidencia. · Depende de: T18 a T23.
+- [ ] **T12 · Job `quality-gate` y resumen de hardening** — Requisito: NV-02-R11 · Fase: F5 · Aceptación: depende de los jobs obligatorios, falla si alguno no terminó en éxito y publica una tabla de resultados en el resumen del run. · Evidencia: run completo. · Depende de: T02, T04, T06, T07, T08, T09, T10.
+- [ ] **T14 · Protección de rama con checks requeridos** — Requisito: NV-02-R11 · Fase: F5 · Aceptación: guía paso a paso para agregar `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks`, `container-security`, `iac-terraform` y `quality-gate` al ruleset de `main`; verificación con la API de GitHub de que el ruleset se aplica, o registro de que sigue sin aplicarse por M-BE-050. · Evidencia: guía y respuesta de la API. · Depende de: T12 y decisión M-BE-050.
+- [ ] **T15 · Evidencia, costo y revisión final** — Requisitos: NV-02-R12, NV-02-R13 · Fase: F5 · Aceptación: `evidence.md` con run, commit, resultados por job, hallazgos, excepciones y minutos consumidos; revisión de seguridad y coherencia con resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md` y acta. · Depende de: T12, T14.
 
 ## Matriz task → requisito
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
 | T01 | R01 | F1 | ABIERTA |
-| T02 | R01 | F1 | ABIERTA |
-| T03 | R02 | F1 | ABIERTA |
-| T04 | R02 | F1 | ABIERTA |
-| T05 | R03 | F1 | ABIERTA |
-| T06 | R04 | F2 | ABIERTA |
-| T07 | R04 | F2 | ABIERTA |
-| T08 | R05 | F2 | ABIERTA |
-| T09 | R06 | F2 | ABIERTA |
-| T10 | R07 | F3 | ABIERTA |
-| T11 | R08 | F3 | ABIERTA |
-| T12 | R09 | F3 | ABIERTA |
-| T13 | R10 | F4 | ABIERTA |
-| T14 | R11 | F4 | ABIERTA |
-| T15 | R12 | F5 | ABIERTA |
-| T16 | R12 | F5 | ABIERTA |
-| T17 | R13 | F5 | ABIERTA |
-| T18 | R14 | F6 | ABIERTA |
-| T19 | R16 | F6 | ABIERTA |
-| T20 | R15 | F6 | ABIERTA |
-| T21 | R15 | F6 | ABIERTA |
-| T22 | R14, R15 | F6 | ABIERTA |
-| T23 | R16 | F6 | ABIERTA |
-| T24 | R14, R16 | F6 | ABIERTA |
+| T02 | R02 | F1 | ABIERTA |
+| T03 | R03 | F1 | ABIERTA |
+| T04 | R04 | F2 | ABIERTA |
+| T05 | R04 | F2 | ABIERTA |
+| T06 | R05 | F2 | ABIERTA |
+| T07 | R06 | F2 | ABIERTA |
+| T08 | R07 | F2 | ABIERTA |
+| T09 | R08, R09 | F3 | ABIERTA |
+| T10 | R09 | F3 | ABIERTA |
+| T11 | R10, R13 | F4 | ABIERTA |
+| T12 | R11 | F5 | ABIERTA |
+| T13 | R01 | F1 | ABIERTA |
+| T14 | R11 | F5 | ABIERTA |
+| T15 | R12, R13 | F5 | ABIERTA |
 
 ## Cobertura requisito → task
 
 | Requisito | Tasks |
 | --- | --- |
-| R01 | T01, T02 |
-| R02 | T03, T04 |
-| R03 | T05 |
-| R04 | T06, T07 |
-| R05 | T08 |
-| R06 | T09 |
-| R07 | T10 |
-| R08 | T11 |
-| R09 | T12 |
-| R10 | T13 |
-| R11 | T14 |
-| R12 | T15, T16 |
-| R13 | T17 |
-| R14 | T18, T22, T24 |
-| R15 | T20, T21, T22 |
-| R16 | T19, T23, T24 |
+| R01 | T01, T13 |
+| R02 | T02 |
+| R03 | T03 |
+| R04 | T04, T05 |
+| R05 | T06 |
+| R06 | T07 |
+| R07 | T08 |
+| R08 | T09 |
+| R09 | T09, T10 |
+| R10 | T11 |
+| R11 | T12, T14 |
+| R12 | T15 |
+| R13 | T11, T15 |
 
 ## Resumen
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 16 |
-| Tasks | 24 |
-| Tasks abiertas | 24 |
+| Requisitos | 13 |
+| Tasks | 15 |
+| Tasks abiertas | 15 |
 | Tasks completadas | 0 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado | **⛔ NO EJECUTAR** |
+| Estado documental | **📝 PREPARADA PARA REVISIÓN HUMANA** |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-Ninguna task puede ejecutarse hasta la aprobación humana de `spec.md`, `plan.md` y `task.md`, con versiones, IDs, rutas, entornos y restricciones explícitas.
+Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

@@ -1,313 +1,187 @@
-# NV-02 — Plan DevSecOps
+# NV-02 — Plan CI y DevSecOps U2
 
 | Campo | Valor |
 | --- | --- |
 | ID | NV-02 |
 | Documento | `plan.md` |
-| Versión | 1.0.0-borrador |
-| Fecha | 2026-10-30 |
-| Estado | **⛔ NO EJECUTAR** |
-| Aprobación humana | **NINGUNA** |
-| Spec | `spec.md` 1.0.0-borrador |
-| Tasks | `task.md` 1.0.0-borrador |
+| Versión | 1.1.0-u2 |
+| Fecha | 2026-11-05 |
+| Estado documental | **📝 PREPARADA PARA REVISIÓN HUMANA** |
+| Aprobación humana | PENDIENTE |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Spec | `spec.md` 1.1.0-u2 |
+| Tasks | `task.md` 1.1.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
+| Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
 
-Plan de ejecución futura. No se instala nada, no se crean workflows y no se ejecutan pruebas en esta entrega.
+Plan preparado para revisión. No crea workflows ni cambia la configuración de GitHub hasta la autorización «EJECUTA».
 
 ## 1. Enfoque
 
-NV-02 se ejecuta después de que NV-01 produzca fundamentos verificables y después de que NV-03 produzca una imagen autorizada para las tareas de contenedor. La cadena se divide en seis fases para evitar que un gate dependa de un artefacto inexistente.
+La CI se construye en un solo workflow, `ci.yml`, por capas: primero build y pruebas, después los escáneres de código y dependencias, luego contenedor e infraestructura, la mutación como control programado y al final el quality gate y la protección de rama. Cada fase deja un job verificable en GitHub Actions.
 
 Principios:
 
-1. Primero se mide, después se fija el umbral.
-2. Un control no ejecutado no es PASS.
-3. La evidencia debe ser reproducible: comando, versión, entorno, datos y reporte.
-4. Las herramientas deben ser gratuitas o locales; si no, BLOCKED.
-5. DAST y fuzzing solo en entornos aislados y autorizados.
-6. La seguridad de contenedor no se simula sin imagen real.
-7. Los repositorios de referencia aportan metodología, no código ni umbrales.
+1. Se mide antes de fijar un umbral (cobertura y mutación).
+2. Un control que no se ejecutó no es PASS.
+3. La CI no usa secretos ni escribe en ningún sistema.
+4. Cada herramienta es gratuita; si no, BLOCKED.
+5. Los hallazgos se corrigen o se excepcionan con registro; nunca se ocultan.
 
 ## 2. Fases
 
 | Fase | Nombre | Requisitos | Tasks | Salida |
 | --- | --- | --- | --- | --- |
-| F1 | Línea base de pruebas | R01, R02, R03 | T01, T02, T03, T04, T05 | Suites unitarias, integración y seguridad ejecutables |
-| F2 | Análisis estático y suministro | R04, R05, R06 | T06, T07, T08, T09 | SAST/SCA/SBOM con baseline |
-| F3 | Pruebas avanzadas | R07, R08, R09 | T10, T11, T12 | Mutación, contrato y performance medidos |
-| F4 | Seguridad dinámica | R10, R11 | T13, T14 | DAST y fuzzing en entorno aislado |
-| F5 | Contenedor y firma | R12, R13 | T15, T16, T17 | Imagen escaneada, firmada y verificada |
-| F6 | Gates, CI y evidencia | R14, R15, R16 | T18, T19, T20, T21, T22, T23, T24 | Pipeline y gates trazables |
+| F1 | Workflow base, build y pruebas | R01, R02, R03 | T01, T02, T03, T13 | `ci.yml` con `build-test` y cobertura; workflows duplicados retirados |
+| F2 | Código, dependencias y secretos | R04, R05, R06, R07 | T04, T05, T06, T07, T08 | `sast-semgrep`, `sca-sbom` y `secrets-gitleaks` |
+| F3 | Contenedor e infraestructura | R08, R09 | T09, T10 | `container-security` e `iac-terraform` |
+| F4 | Mutación | R10, R13 | T11 | `mutation-stryker` programado y manual, con línea base |
+| F5 | Gate, protección y evidencia | R11, R12, R13 | T12, T14, T15 | `quality-gate`, checks requeridos documentados y `evidence.md` |
 
 ## 3. Detalle de fases
 
-### F1 — Línea base de pruebas
+### F1 — Workflow base, build y pruebas
 
-**Requisitos:** NV-02-R01, NV-02-R02, NV-02-R03.
+**Requisitos:** NV-02-R01, NV-02-R02, NV-02-R03. **Tasks:** T01, T02, T03, T13.
 
-**Tasks:** T01, T02, T03, T04, T05.
+**Entregables:**
 
-**Entregables futuros:**
+- `.github/workflows/ci.yml` con disparadores, permisos mínimos, `concurrency` y `timeout-minutes`.
+- Job `build-test`: SDK desde `global.json`, restore, build Release con advertencias como error y las tres suites con TRX.
+- Cobertura con el recolector existente (`coverlet.collector`), resumen por proyecto en el run y artefacto.
+- Retiro de `u2-linux-validation.yml` y `u2-container-validation.yml`.
 
-- Inventario de suites y riesgos cubiertos.
-- Pruebas unitarias de Domain/Application sin infraestructura.
-- Harness de integración con `WebApplicationFactory`.
-- Suite de seguridad con casos negativos y datos de prueba.
-- Reporte base de ejecución y limitaciones.
+**Criterios de salida:** el workflow corre en un pull request de prueba; una prueba fallida rompe `build-test`; la cobertura aparece en el resumen.
 
-**Criterios de salida:**
+### F2 — Código, dependencias y secretos
 
-1. Las suites obligatorias ejecutan y fallan cuando deben fallar.
-2. Los datos de prueba se aíslan y limpian.
-3. No se usan credenciales ni servicios productivos.
-4. Los placeholders se identifican y no se reportan como cobertura.
+**Requisitos:** NV-02-R04, NV-02-R05, NV-02-R06, NV-02-R07. **Tasks:** T04, T05, T06, T07, T08.
 
-**Evidencia:** reporte de cada suite, versión de xUnit, comando y entorno.
+**Entregables:**
 
-### F2 — Análisis estático y suministro
+- Job `sast-semgrep` con rulesets públicos y reglas propias en `.semgrep/`; SARIF como artefacto.
+- Job `sca-sbom` con auditoría de dependencias vulnerables y SBOM CycloneDX.
+- Job `secrets-gitleaks` sobre todo el historial, con valores redactados.
 
-**Requisitos:** NV-02-R04, NV-02-R05, NV-02-R06.
+**Criterios de salida:** cada job falla ante un caso de prueba controlado (regla, dependencia o secreto ficticio) y pasa sobre el código actual o con excepciones registradas.
 
-**Tasks:** T06, T07, T08, T09.
+### F3 — Contenedor e infraestructura
 
-**Entregables futuros:**
+**Requisitos:** NV-02-R08, NV-02-R09. **Tasks:** T09, T10.
 
-- Configuración de Semgrep y baseline de hallazgos.
-- SonarAnalyzer local y, solo si cumple $0, SonarCloud.
-- Auditoría de paquetes NuGet y política de versiones.
-- SBOM CycloneDX trazable a la entrega o imagen.
-- Registro de supresiones y excepciones.
+**Entregables:**
 
-**Criterios de salida:**
+- Job `container-security`: build de la imagen, Trivy de imagen y de configuración (Dockerfile y Terraform) y Dockle.
+- Job `iac-terraform`: `fmt -check`, `init -backend=false` y `validate`.
 
-1. Cada hallazgo tiene severidad, archivo y estado.
-2. Las supresiones tienen justificación, responsable y vencimiento.
-3. El SBOM se genera y se conserva.
-4. Un fallo del scanner no se interpreta como ausencia de hallazgos.
+**Criterios de salida:** la imagen se ejecuta como no root; no quedan Critical/High corregibles sin excepción; Terraform válido sin credenciales.
 
-**Evidencia:** reportes SARIF/JSON, SBOM, versiones de reglas y configuración.
+### F4 — Mutación
 
-### F3 — Pruebas avanzadas
+**Requisitos:** NV-02-R10, NV-02-R13. **Tasks:** T11.
 
-**Requisitos:** NV-02-R07, NV-02-R08, NV-02-R09.
+**Entregables:** job `mutation-stryker` semanal y manual sobre Domain y Application; reporte y línea base registrada.
 
-**Tasks:** T10, T11, T12.
+**Criterios de salida:** el score medido queda en `evidence.md`; el umbral se propone con esa evidencia.
 
-**Entregables futuros:**
+### F5 — Gate, protección y evidencia
 
-- Baseline de mutación con Stryker.NET y alcance acotado.
-- Pruebas de contrato PactNet o alcance equivalente documentado.
-- Escenarios NBomber con SLO, datos y entorno.
-- Informe de limitaciones y resultados no extrapolables.
+**Requisitos:** NV-02-R11, NV-02-R12, NV-02-R13. **Tasks:** T12, T14, T15.
 
-**Criterios de salida:**
+**Entregables:**
 
-1. El score de mutación se mide antes de proponer un gate.
-2. El contrato verificable tiene consumidor/proveedor identificado.
-3. Performance declara concurrencia, duración y límites.
-4. Los resultados no se presentan como producción.
+- Job `quality-gate` que agrega los jobs obligatorios y publica el resumen de hardening.
+- Guía de configuración del ruleset de `main` con los checks requeridos y estado de M-BE-050.
+- `evidence.md` con run, commit, resultados, hallazgos, excepciones y consumo de minutos.
 
-**Evidencia:** reportes de Stryker, Pact y NBomber; configuración y datos.
+**Criterios de salida:** el pull request muestra todos los checks; la revisión emite PASS, PASS WITH WARNINGS o BLOCKED.
 
-### F4 — Seguridad dinámica
-
-**Requisitos:** NV-02-R10, NV-02-R11.
-
-**Tasks:** T13, T14.
-
-**Entregables futuros:**
-
-- Plan de DAST con OWASP ZAP y alcance autorizado.
-- Plan de fuzzing con RESTler sobre OpenAPI.
-- Entorno aislado, datos de prueba y límites de tasa.
-- Triage de hallazgos y criterio de parada.
-
-**Criterios de salida:**
-
-1. El entorno no es producción ni un sistema de terceros.
-2. El alcance y las credenciales de prueba están aprobados.
-3. Los hallazgos se reproducen y clasifican.
-4. El fuzzing no se confunde con una prueba funcional completa.
-
-**Evidencia:** reportes ZAP/RESTler, alcance, entorno y triage.
-
-### F5 — Contenedor y firma
-
-**Requisitos:** NV-02-R12, NV-02-R13.
-
-**Tasks:** T15, T16, T17.
-
-**Entregables futuros:**
-
-- Escaneo de imagen con Trivy.
-- Lint de contenedor con Dockle.
-- Firma y verificación con Cosign.
-- Registro de la imagen, digest y SBOM asociado.
-
-**Criterios de salida:**
-
-1. Existe una imagen autorizada por NV-03.
-2. No hay secretos embebidos ni usuario root innecesario.
-3. Los hallazgos críticos/altos corregibles bloquean.
-4. La firma se verifica antes de cualquier despliegue.
-
-**Evidencia:** reportes Trivy/Dockle, digest, firma y verificación.
-
-### F6 — Gates, CI y evidencia
-
-**Requisitos:** NV-02-R14, NV-02-R15, NV-02-R16.
-
-**Tasks:** T18, T19, T20, T21, T22, T23, T24.
-
-**Entregables futuros:**
-
-- Catálogo de gates y criterios de bloqueo.
-- Workflow de CI con permisos mínimos y acciones fijadas.
-- Pipeline de seguridad con artefactos y reportes.
-- Registro de hallazgos y excepciones.
-- Paquete de evidencia y revisión final.
-
-**Criterios de salida:**
-
-1. Cada gate tiene evidencia y efecto bloqueante.
-2. Un control omitido no se reporta como PASS.
-3. Las excepciones tienen responsable y vencimiento.
-4. La evidencia se conserva y se puede reproducir.
-5. La revisión final emite PASS, PASS WITH WARNINGS o BLOCKED.
-
-**Evidencia:** workflow revisado, reportes consolidados, registro de excepciones y acta.
-
-## 4. Política de umbrales y gates
-
-No hay umbrales numéricos aprobados. Se medirán primero y se propondrán después con evidencia. Mientras tanto, rigen reglas cualitativas:
-
-| Gate | Regla de bloqueo | Excepción |
-| --- | --- | --- |
-| Build y suites obligatorias | Fallo o prueba requerida omitida | No admite excepción silenciosa |
-| SAST | Hallazgo crítico o alto nuevo sin triage | Excepción aprobada con vencimiento |
-| SCA | Vulnerabilidad crítica/alta explotable sin tratamiento | Excepción aprobada |
-| SBOM | Ausente o no trazable | Bloquea la entrega |
-| Mutación | Baseline no medido o score sin evidencia | No se aprueba gate |
-| Contrato | Verificación de proveedor fallida | Bloquea si el consumidor es obligatorio |
-| Performance | SLO no aprobado o no medido | No se declara cumplimiento |
-| DAST/fuzzing | Crítico/alto sin triage | Excepción aprobada |
-| Contenedor | Crítico/alto corregible o secreto embebido | Bloquea |
-| Firma | Imagen sin firma o verificación fallida | No se despliega |
-| CI | Permisos excesivos, acción no fijada o secreto expuesto | Bloquea |
-
-Los umbrales cuantitativos (cobertura, mutación, latencia, error rate) se calibrarán con datos del entorno autorizado y se registrarán en una revisión posterior.
-
-## 5. Secuencia y dependencias
+## 4. Secuencia y dependencias
 
 ```text
-NV-01 (fundamentos)
+F1 Workflow/build/pruebas
   ↓
-F1 pruebas base
+F2 Código/dependencias/secretos
   ↓
-F2 SAST/SCA/SBOM
+F3 Contenedor/IaC
   ↓
-F3 mutación/contrato/performance
+F4 Mutación
   ↓
-F4 DAST/fuzzing
-  ↓
-NV-03 (imagen autorizada)
-  ↓
-F5 contenedor/firma
-  ↓
-F6 gates/CI/evidencia
+F5 Gate/protección/evidencia
 ```
 
-Dependencias internas:
-
 - T02 depende de T01.
-- T04 depende de T03.
-- T05 depende de T03.
-- T06 y T07 dependen de T01.
-- T08 y T09 dependen de T01.
-- T10 depende de T01 y T02.
-- T11 depende de T03 y T04.
-- T12 depende de T04.
-- T13 y T14 dependen de T04.
-- T15, T16 y T17 dependen de la imagen autorizada por NV-03.
-- T18 depende de T06 a T14.
-- T19 depende de T18.
-- T20 depende de T01 a T12.
-- T21 depende de T06 a T17.
-- T22 depende de T20 y T21.
-- T23 depende de T20 a T22.
-- T24 depende de T18 a T23.
+- T03 depende de T02.
+- T04 depende de T01.
+- T05 depende de T04.
+- T06 depende de T01.
+- T07 depende de T06.
+- T08 depende de T01.
+- T09 depende de T01.
+- T10 depende de T01.
+- T11 depende de T02.
+- T12 depende de T02, T04, T06, T07, T08, T09 y T10.
+- T13 depende de T02 y T09.
+- T14 depende de T12 y de la decisión M-BE-050.
+- T15 depende de T12 y T14.
 
-## 6. Evidencia y retención
+## 5. Estrategia de verificación
 
-Cada ejecución futura debe conservar:
-
-1. Identificador de la entrega y versión de la configuración.
-2. Comando reproducible y versión de la herramienta.
-3. Entorno, sistema operativo y datos utilizados.
-4. Reporte original sin edición.
-5. Resumen de hallazgos con severidad y estado.
-6. Excepciones con aprobador, motivo y vencimiento.
-7. Enlaces o rutas a artefactos, no secretos.
-
-La retención debe cumplir COST-001. Un artefacto que genera cobro se elimina o se sustituye por una alternativa gratuita; si no es posible, se reporta BLOCKED.
-
-## 7. Seguridad
-
-- Los workflows no reciben secretos productivos.
-- Las acciones se fijan por versión o digest.
-- Los permisos se limitan a lectura salvo necesidad explícita.
-- Los reportes se revisan antes de publicarse.
-- DAST/fuzzing se ejecutan solo en un entorno autorizado.
-- Las imágenes se escanean antes de firmar.
-- Los hallazgos no se cierran sin corrección o excepción.
-- No se copian reglas ni workflows de referencia.
-
-## 8. Costo
-
-| Concepto | Costo esperado | Evidencia |
+| Control | Verificación | Evidencia |
 | --- | --- | --- |
-| Suites y herramientas open source | $0 | Licencia y versión |
-| SonarCloud | $0 si el plan aplica | Captura de elegibilidad |
-| GitHub Actions | $0 dentro de cuota o local | Consumo y límite |
-| Registry de imágenes | $0 si el plan aplica | Cuota y retención |
-| Almacenamiento de reportes | $0 | Límite y retención |
-| DAST/fuzzing | $0 local | Entorno propio |
+| Build y pruebas | Run en pull request y prueba fallida controlada en local | Run y TRX |
+| SAST | Regla propia que detecta un caso de prueba | SARIF |
+| SCA | Comando local equivalente y reporte | Reporte |
+| Secretos | Escaneo del historial completo | Reporte redactado |
+| Contenedor e IaC | Reportes de Trivy y Dockle; salida de Terraform | Reportes |
+| Mutación | Ejecución manual de Stryker.NET | Reporte |
+| Gate | Run completo con todos los checks | Resumen del run |
 
-Si un componente exige tarjeta, crédito temporal o cobro por uso, se detiene y se eleva a revisión. No se asume gratuidad.
+## 6. Seguridad
 
-## 9. Puertas de revisión
+- `permissions: contents: read`; sin secretos ni tokens con escritura.
+- Acciones e imágenes fijadas por versión (SHA cuando sea viable).
+- Reportes revisados antes de compartirse.
+- Supresiones con justificación, responsable y vencimiento.
+
+## 7. Costo
+
+| Concepto | Costo esperado | Evidencia requerida |
+| --- | --- | --- |
+| Minutos de Actions | $0 dentro de 2,000 min/mes (privado) o sin límite (público) | Minutos por run y consumo mensual |
+| Herramientas | $0 (open source) | Versión y licencia |
+| SonarCloud / SARIF en code scanning | $0 solo si el repositorio es público | Decisión M-BE-050 |
+
+## 8. Puertas
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0 | Antes de empezar | Aprobación humana de los tres documentos | BLOCKED |
-| G1 | Fin de F1 | Suites base ejecutables y evidencia | No avanzar |
-| G2 | Fin de F2 | SAST/SCA/SBOM con baseline | No avanzar |
-| G3 | Fin de F3 | Mutación/contrato/performance medidos | No avanzar |
-| G4 | Fin de F4 | DAST/fuzzing en alcance autorizado | No avanzar |
-| G5 | Fin de F5 | Imagen escaneada y firmada | No avanzar |
-| G6 | Fin de F6 | Gates/CI/evidencia revisados | NV-02 no se cierra |
+| G0-Doc | Antes de ejecutar | Aprobación humana de 1.1.0-u2 | BLOCKED |
+| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas | BLOCKED |
+| G1 | Fin F1 | `build-test` corre en pull request | No avanzar |
+| G2 | Fin F2 | Escáneres operativos con hallazgos tratados | No avanzar |
+| G3 | Fin F3 | Contenedor e IaC verificados | No avanzar |
+| G4 | Fin F4 | Línea base de mutación registrada | No avanzar |
+| G5 | Fin F5 | Checks visibles, evidencia y revisión | No cerrar |
 
-## 10. Trazabilidad
+## 9. Trazabilidad
 
 | Requisito | Fase | Tasks |
 | --- | --- | --- |
-| R01 | F1 | T01, T02 |
-| R02 | F1 | T03, T04 |
-| R03 | F1 | T05 |
-| R04 | F2 | T06, T07 |
-| R05 | F2 | T08 |
-| R06 | F2 | T09 |
-| R07 | F3 | T10 |
-| R08 | F3 | T11 |
-| R09 | F3 | T12 |
-| R10 | F4 | T13 |
-| R11 | F4 | T14 |
-| R12 | F5 | T15, T16 |
-| R13 | F5 | T17 |
-| R14 | F6 | T18, T22, T24 |
-| R15 | F6 | T20, T21, T22 |
-| R16 | F6 | T19, T23, T24 |
+| R01 | F1 | T01, T13 |
+| R02 | F1 | T02 |
+| R03 | F1 | T03 |
+| R04 | F2 | T04, T05 |
+| R05 | F2 | T06 |
+| R06 | F2 | T07 |
+| R07 | F2 | T08 |
+| R08 | F3 | T09 |
+| R09 | F3 | T09, T10 |
+| R10 | F4 | T11 |
+| R11 | F5 | T12, T14 |
+| R12 | F5 | T15 |
+| R13 | F5 | T11, T15 |
 
-## 11. No ejecución
+## 10. No ejecución
 
-Este plan no autoriza instalar herramientas, crear workflows, modificar proyectos, ejecutar scanners, escanear imágenes, firmar artefactos ni desplegar. Estado: **⛔ NO EJECUTAR**. Siguiente paso: revisión humana de `spec.md`, `plan.md` y `task.md`.
+Este plan no autoriza crear workflows, instalar herramientas, modificar la configuración de GitHub ni publicar o desplegar. Estado de ejecución: **⛔ NO EJECUTAR HASTA «EJECUTA»**.

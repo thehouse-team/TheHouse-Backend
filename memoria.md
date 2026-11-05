@@ -421,3 +421,23 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** al implementar M-BE-046 las pruebas mostraron que esos errores no enviaban `no-store`, contrario a NV-07-R08 y NV-08-R08; también se observó así en Azure el 2026-11-04.
 - **Impacto:** ningún error de estos endpoints es cacheable por clientes o intermediarios. Configurar el `max-age` fuera de rango impide el arranque.
+
+## M-BE-049 — NV-02 como CI y NV-09 como CD
+
+- **ID:** M-BE-049
+- **Decisión:** reemitir NV-02 como "CI y DevSecOps" versión `1.1.0-u2` (workflow `ci.yml` en cada pull request y push a `main` con build, pruebas, cobertura, Semgrep, SCA, SBOM, Gitleaks, Trivy, Dockle, Terraform, mutación programada y quality gate) y especificar la entrega continua en una spec nueva NV-09 (publicación, firma, despliegue manual con aprobación, smoke tests, DAST, fuzzing y performance). El roadmap funcional de M-BE-023 se recorre a partir de NV-10 cuando se reemita.
+- **Estado:** PROPUESTO (pendiente de aprobación humana de NV-02 1.1.0-u2).
+- **Fecha:** 2026-11-05.
+- **Aprobador:** pendiente.
+- **Justificación:** en la revisión académica del 2026-11-05 el profesor observó que no hay CI/CD visible en los pull requests: los workflows existentes solo corren en `feature/u2-entrega` o de forma manual. Separar CI y CD sigue la estructura pedida: base → infraestructura → endpoints → CI → CD.
+- **Impacto:** `u2-linux-validation.yml` y `u2-container-validation.yml` se retirarán al implementar `ci.yml`; `u2-ghcr-publish.yml` pasa a NV-09. La CI no usa secretos ni despliega.
+
+## M-BE-050 — Ruleset de main no aplicado por plan y visibilidad
+
+- **ID:** M-BE-050
+- **Decisión:** registrar que el ruleset "Main Proteccion" de `main` no se aplica: la organización `thehouse-team` está en el plan Free y el repositorio es privado (respuesta de la API de GitHub del 2026-11-05: "Upgrade to GitHub Pro or make this repository public to enable this feature"). Recomendación: hacer público el repositorio después de que Gitleaks pase sobre todo el historial; alternativa: GitHub Pro/Team con beneficio educativo.
+- **Estado:** PENDIENTE (decisión humana del equipo).
+- **Fecha:** 2026-11-05.
+- **Aprobador:** pendiente.
+- **Justificación:** sin aplicación del ruleset, los checks requeridos y la aprobación obligatoria no bloquean el merge. Un repositorio público además da minutos ilimitados de Actions y habilita gratis SARIF en code scanning y SonarCloud (COST-001).
+- **Impacto:** hasta decidir, la revisión humana debe comprobar los checks de la CI antes de aprobar un pull request. Antes de publicar el repositorio se deben rotar o descartar los secretos que Gitleaks encuentre en el historial.
