@@ -8,11 +8,11 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA») |
-| Estado de ejecución | **🟡 CI EN VERDE EN EL PR #3 (run `42122674335`); ABIERTAS T14 Y T15** |
+| Estado de ejecución | **✅ COMPLETADA — PASS WITH WARNINGS (2026-11-05)** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks totales | 15 |
-| Tasks completadas | 13 |
+| Tasks completadas | 15 |
 
 ## Reglas de esta lista
 
@@ -49,8 +49,8 @@
 ## F5 — Gate, protección y evidencia
 
 - [x] **T12 · Job `quality-gate` y resumen de hardening** — Requisito: NV-02-R11 · Fase: F5 · Aceptación: depende de los jobs obligatorios, falla si alguno no terminó en éxito y publica una tabla de resultados en el resumen del run. · Evidencia: run completo. · Depende de: T02, T04, T06, T07, T08, T09, T10.
-- [ ] **T14 · Protección de rama con checks requeridos** — Requisito: NV-02-R11 · Fase: F5 · Aceptación: guía paso a paso para agregar `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks`, `container-security`, `iac-terraform` y `quality-gate` al ruleset de `main`; verificación con la API de GitHub de que el ruleset se aplica, o registro de que sigue sin aplicarse por M-BE-050. · Evidencia: guía y respuesta de la API. · Depende de: T12 y decisión M-BE-050.
-- [ ] **T15 · Evidencia, costo y revisión final** — Requisitos: NV-02-R12, NV-02-R13 · Fase: F5 · Aceptación: `evidence.md` con run, commit, resultados por job, hallazgos, excepciones y minutos consumidos; revisión de seguridad y coherencia con resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md` y acta. · Depende de: T12, T14.
+- [x] **T14 · Protección de rama con checks requeridos** — Requisito: NV-02-R11 · Fase: F5 · Aceptación: guía paso a paso para agregar `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks`, `container-security`, `iac-terraform` y `quality-gate` al ruleset de `main`; verificación con la API de GitHub de que el ruleset se aplica, o registro de que sigue sin aplicarse por M-BE-050. · Evidencia: guía y respuesta de la API. · Depende de: T12 y decisión M-BE-050.
+- [x] **T15 · Evidencia, costo y revisión final** — Requisitos: NV-02-R12, NV-02-R13 · Fase: F5 · Aceptación: `evidence.md` con run, commit, resultados por job, hallazgos, excepciones y minutos consumidos; revisión de seguridad y coherencia con resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md` y acta. · Depende de: T12, T14.
 
 ## Matriz task → requisito
 
@@ -69,8 +69,8 @@
 | T11 | R10, R13 | F4 | COMPLETADA |
 | T12 | R11 | F5 | COMPLETADA |
 | T13 | R01 | F1 | COMPLETADA |
-| T14 | R11 | F5 | ABIERTA |
-| T15 | R12, R13 | F5 | ABIERTA |
+| T14 | R11 | F5 | COMPLETADA |
+| T15 | R12, R13 | F5 | COMPLETADA |
 
 ## Cobertura requisito → task
 
@@ -96,11 +96,11 @@
 | --- | --- |
 | Requisitos | 13 |
 | Tasks | 15 |
-| Tasks abiertas | 2 |
-| Tasks completadas | 13 |
+| Tasks abiertas | 0 |
+| Tasks completadas | 15 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CI EN VERDE; ABIERTAS T14 Y T15** |
+| Estado de ejecución | **✅ COMPLETADA — PASS WITH WARNINGS** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

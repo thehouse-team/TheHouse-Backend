@@ -8,9 +8,9 @@
 | Fecha | 2026-11-05 |
 | Aprobación | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» de NV-02 1.1.0-u2) |
 | Rama | `fix/u2-review` |
-| Resultado | **PASS WITH WARNINGS**: CI en verde en el PR #3; pendientes T14 (ruleset) y T15 (cierre) |
+| Resultado | **PASS WITH WARNINGS**: CI en verde, ruleset de `main` activo y 15/15 tasks completas; advertencias en la §10 |
 
-Las tasks T01–T13 se cierran con la evidencia de los runs de GitHub Actions de las §7 y §8. T14 y T15 siguen abiertas.
+Las 15 tasks se cierran con la evidencia de las §7 a §10.
 
 ## 1. Archivos creados o modificados
 
@@ -82,10 +82,7 @@ Después del primer run de `CI` en el pull request:
 
 ## 6. Pendiente para cerrar las tasks
 
-- Primer run de `CI` en el pull request de `fix/u2-review`: resultados por job, minutos consumidos y hallazgos (corregir o registrar excepciones).
-- Ejecución manual de `mutation-stryker` (`run_mutation = true`) para la línea base (T11).
-- Ruleset de `main` creado y verificado (T14).
-- Revisión final de seguridad y coherencia (T15).
+Nada: los cuatro pendientes originales (primer run, mutación, ruleset y revisión final) se cerraron en las §7 a §10.
 
 ## 7. Runs en GitHub Actions — PR #3 (`fix/u2-review` → `main`)
 
@@ -138,3 +135,39 @@ Umbral propuesto (requiere aprobación de Victor antes de cambiar `ci.yml`):
 | `TheHouse.Domain` | 0 (informativo) | — | — | Sin lógica que mutar; se reevalúa cuando el dominio tenga reglas de negocio |
 
 Hasta que se apruebe, el job sigue con `--break-at 0`, así que es informativo y no bloquea. Costo: 1 min 40 s por run manual o semanal (repositorio público, $0).
+
+## 9. Ruleset de `main` (T14) — verificado con la API de GitHub
+
+Creado por Victor en la interfaz de GitHub el 2026-11-05. Consultas: `gh api repos/thehouse-team/TheHouse-Backend/rulesets/26657131` y `gh api repos/thehouse-team/TheHouse-Backend/rules/branches/main`.
+
+| Campo | Valor verificado |
+| --- | --- |
+| Nombre / ID | `Main Proteccion` / `26657131` |
+| Enforcement | `active` |
+| Rama objetivo | `~DEFAULT_BRANCH` (`main`) |
+| Bypass | ninguno (`bypass_actors: []`): nadie, ni administradores, puede saltarse las reglas |
+| `deletion` | ✅ bloquea borrar `main` |
+| `non_fast_forward` | ✅ bloquea force push |
+| `pull_request` | ✅ 1 aprobación requerida; métodos `merge`, `squash` y `rebase` |
+| `required_status_checks` | ✅ `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks`, `container-security`, `iac-terraform` y `quality-gate`, todos de GitHub Actions (`integration_id` 15368); rama al día requerida (`strict: true`) |
+
+`mutation-stryker` no es check requerido a propósito: en los pull requests queda omitido y bloquearía el merge para siempre.
+
+Prueba de que se aplica: con los 7 checks en verde (run `42123513805`, commit `66d2f5b`), el PR #3 queda `mergeStateStatus: BLOCKED` y `reviewDecision: REVIEW_REQUIRED` hasta que otro integrante lo apruebe.
+
+## 10. Revisión final de seguridad y coherencia (T15) — PASS WITH WARNINGS
+
+| Aspecto | Resultado |
+| --- | --- |
+| Coherencia spec → plan → task → evidencia | 13 requisitos, 15 tasks, sin requisitos sin task ni tasks sin requisito (chequeo de trazabilidad) |
+| Constitution / AGENTS | Spec aprobada antes de ejecutar («EJECUTA»); sin `terraform apply`; sin secretos en el workflow; cambios de configuración de GitHub hechos por humanos |
+| Superficie del workflow | `contents: read`; acciones fijadas por SHA; imágenes por versión; `pull_request` (no `pull_request_target`), así que los forks no reciben secretos ni permisos de escritura |
+| Hallazgos | 0 en Semgrep, Gitleaks, Trivy imagen, Trivy config y SCA; la CVE HIGH de `apt` se corrigió (§7), sin excepciones registradas |
+| Costo (COST-001) | $0: repositorio público; ~1.2 min por PR y 1 min 40 s por mutación |
+
+Advertencias (no bloquean el cierre):
+
+1. **Umbral de mutación sin aprobar**: `mutation-stryker` sigue con `--break-at 0`; la propuesta está en la §8.
+2. **Aprobaciones viejas**: el ruleset tiene `dismiss_stale_reviews_on_push: false`, así que un push después de la aprobación no la invalida. Recomendación: activar *Dismiss stale pull request approvals when new commits are pushed* en `Main Proteccion`.
+3. **Dockle INFO**: CIS-DI-0005 (firma de imágenes) se resuelve en NV-09 con Cosign; CIS-DI-0008 corresponde a binarios setuid de la imagen base.
+4. **SARIF fuera de code scanning**: los reportes quedan como artefactos; con el repositorio público se pueden subir gratis a la pestaña Security (mejora futura, requiere `security-events: write` en ese job).
