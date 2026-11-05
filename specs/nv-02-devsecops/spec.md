@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA») |
-| Estado de ejecución | **🟡 IMPLEMENTADA EN `fix/u2-review`; VERIFICACIÓN EN GITHUB ACTIONS PENDIENTE** |
+| Estado de ejecución | **🟡 CI EN VERDE EN EL PR #3 (run `42122674335`); ABIERTAS T11, T14 Y T15** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
@@ -92,7 +92,7 @@ Reglas comunes:
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Visibilidad del repositorio | Hacer público el repositorio después de que `secrets-gitleaks` pase sobre todo el historial: aplica el ruleset de `main`, da minutos ilimitados de Actions y habilita gratis SARIF en code scanning y SonarCloud. Alternativa: GitHub Pro/Team (no cumple COST-001 salvo beneficio educativo) | PENDIENTE (M-BE-050) |
+| Visibilidad del repositorio | Hacer público el repositorio después de que `secrets-gitleaks` pase sobre todo el historial: aplica el ruleset de `main`, da minutos ilimitados de Actions y habilita gratis SARIF en code scanning y SonarCloud. Alternativa: GitHub Pro/Team (no cumple COST-001 salvo beneficio educativo) | APLICADA: repositorio público (M-BE-050); ruleset pendiente (T14) |
 | Checks requeridos | `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks`, `container-security`, `iac-terraform` y `quality-gate`, con "Require branches to be up to date" | PROPUESTO |
 | Cobertura | Informativa, no gate único. Línea base local del 2026-11-05: 68.2 % de líneas y 64.8 % de ramas (Domain 97.3 %, Application 97.6 %, Infrastructure 27.6 %) | PROPUESTO |
 | Mutación | Medir la línea base primero; fijar después el umbral (referencia del equipo: 60 %) con evidencia | PROPUESTO |
@@ -181,7 +181,7 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 IMPLEMENTADA; VERIFICACIÓN EN GITHUB ACTIONS PENDIENTE** |
+| Estado de ejecución | **🟡 CI EN VERDE; ABIERTAS T11, T14 Y T15** |
 
 ## 14. Aprobación pendiente
 
