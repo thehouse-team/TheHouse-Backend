@@ -391,3 +391,23 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** evitar mezclas CRLF/LF entre Windows y los runners Linux de CI.
 - **Impacto:** el índice ya estaba en LF; no hubo renormalización de archivos existentes.
+
+## M-BE-046 — Caché HTTP condicional en propiedades y universidades
+
+- **ID:** M-BE-046
+- **Decisión:** NV-07 y NV-08 pasan a 1.1.0-u2 con el requisito R08: los GET públicos de listado y detalle devuelven `ETag` débil por contenido y `Cache-Control: public, max-age=60`, responden 304 a un `If-None-Match` coincidente y mantienen `no-store` sin `ETag` en errores. Tasks nuevas: NV-07 T11–T12 y NV-08 T12–T13.
+- **Estado:** APROBADO (documental). Ejecución: PENDIENTE de la autorización humana «EJECUTA».
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** cubrir el requisito académico 9 (caché en frontend): el móvil revalida con `If-None-Match` y evita descargar de nuevo datos públicos sin cambios.
+- **Impacto:** no cambia el contrato JSON ni aplica a respuestas autenticadas. El valor `max-age=60` es propuesto y configurable entre 0 y 300 s.
+
+## M-BE-047 — Observabilidad persistente a costo $0
+
+- **ID:** M-BE-047
+- **Decisión:** NV-03 pasa a 1.2.0-u2 con el requisito R15: Log Analytics (`PerGB2018`, `daily_quota_gb = 0.1`, retención de 30 días) como destino de logs del entorno de Container Apps (opción A); si el plan propone recrear el entorno o la app, se usa OpenTelemetry hacia Application Insights sobre el mismo workspace (opción B). Tasks nuevas: T24 y T25.
+- **Estado:** APROBADO (documental). Ejecución: PENDIENTE de la autorización humana «EJECUTA» y, para el apply, de `OK PARA APPLY`.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** el requisito académico pide un servicio en la nube para logs de eventos y errores; M-BE-037 dejó los logs solo en streaming. La API de precios de Azure (`eastus2`, 2026-11-05) muestra la ingestión de 0–5 GB/mes a 0.00 USD; el tope diario limita el uso a ~3.1 GB/mes.
+- **Impacto:** sustituye a M-BE-037 una vez ejecutado T24. Antes del apply debe verificarse en la documentación vigente que el tramo gratuito aplica a la cuenta y que 30 días de retención están incluidos; si no, BLOCKED. Al llegar al tope diario se pierden los logs restantes de ese día (NV-03-RK11).

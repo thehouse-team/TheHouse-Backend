@@ -4,13 +4,13 @@
 | --- | --- |
 | ID | NV-03 |
 | Documento | `plan.md` |
-| Versión | 1.1.0-u2 |
-| Fecha | 2026-11-02 |
+| Versión | 1.2.0-u2 |
+| Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
-| Spec | `spec.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Spec | `spec.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
 
@@ -45,7 +45,7 @@ T14 — handoff de imagen a NV-02; NV-02 sigue ⛔ NO EJECUTAR.
 | F1 | Auditoría stateless | R01 | T01, T02 | Inventario y diseño sin estado local |
 | F2 | Estado compartido y datos | R01, R04, R05 | T03, T04, T05, T06, T07 | Redis y MongoDB con fallos definidos |
 | F3 | Réplicas, balanceo y TLS | R02, R03, R06 | T08, T09, T10 | Dos réplicas, LB y HTTPS |
-| F4 | Observabilidad, imagen y GHCR | R07, R08, R14 | T11, T12, T13, T22 | Telemetría, imagen y trazabilidad |
+| F4 | Observabilidad, imagen y GHCR | R07, R08, R14, R15 | T11, T12, T13, T22, T24, T25 | Telemetría, logs persistentes, imagen y trazabilidad |
 | F5 | Terraform y costo Azure | R09, R10 | T15, T16, T17 | IaC y gate de costo/apply |
 | F6 | Creación, verificación, apagado y destrucción | R01–R07, R11–R13 | T18, T19, T20, T21, T23 | Evidencia, costo y limpieza |
 
@@ -122,9 +122,9 @@ T14 — handoff de imagen a NV-02; NV-02 sigue ⛔ NO EJECUTAR.
 
 ### F4 — Observabilidad, imagen y GHCR
 
-**Requisitos:** NV-03-R07, NV-03-R08, NV-03-R14.
+**Requisitos:** NV-03-R07, NV-03-R08, NV-03-R14, NV-03-R15.
 
-**Tasks:** T11, T12, T13, T22.
+**Tasks:** T11, T12, T13, T22, T24, T25.
 
 **Entregables U2:**
 
@@ -133,6 +133,8 @@ T14 — handoff de imagen a NV-02; NV-02 sigue ⛔ NO EJECUTAR.
 - `Dockerfile` multi-stage, no root, sin secretos y con healthcheck.
 - Publicación de imagen en GHCR con tag y commit trazables.
 - `VERSIONING.md` sin secretos.
+- Log Analytics con `daily_quota_gb = 0.1` y 30 días de retención, conectado al entorno de Container Apps (T24, 1.2.0-u2).
+- Consulta de errores documentada y evidencia de uso y costo de ingestión (T25).
 
 **Criterios de salida:**
 
@@ -141,6 +143,7 @@ T14 — handoff de imagen a NV-02; NV-02 sigue ⛔ NO EJECUTAR.
 3. La telemetría no genera costo no aprobado.
 4. La imagen cumple las restricciones y se publica en GHCR.
 5. `VERSIONING.md` coincide con la imagen y el commit.
+6. Los logs de eventos y errores persisten en Azure, sin PII ni secretos, y el plan no recrea el entorno ni la app.
 
 **Evidencia:** configuración OTel, Dockerfile, digest, tag, `VERSIONING.md` y reporte de publicación.
 
@@ -228,6 +231,8 @@ Dependencias internas:
 - T21 depende de T20.
 - T22 depende de T13.
 - T23 depende de T18 y T19.
+- T24 depende de T15 y T16.
+- T25 depende de T24.
 
 T14 (handoff a NV-02) no es U2 y no se ejecuta.
 
@@ -285,7 +290,7 @@ No se asume que `destroy` elimina recursos externos, imágenes o servicios de te
 | GHCR | $0 | BLOCKED |
 | Redis | $0 | BLOCKED |
 | MongoDB | $0 | BLOCKED |
-| Observabilidad | $0 | BLOCKED |
+| Observabilidad | $0: Log Analytics 0–5 GB/mes a 0.00 USD y tope de 0.1 GB/día (spec §7.1) | BLOCKED |
 | Egress | $0 | BLOCKED |
 | Terraform/estado | $0 | BLOCKED |
 
@@ -309,7 +314,7 @@ Un free tier, un crédito o una alerta de presupuesto no prueban costo cero. Si 
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0-Doc | Antes de Fase B | Aprobación documental 1.1.0-u2 | BLOCKED |
+| G0-Doc | Antes de Fase B | Aprobación documental 1.1.0-u2; 1.2.0-u2 para T24 y T25 | BLOCKED |
 | G0-Ejec | Inicio de Fase B | Autorización con SPEC, PLAN, TASK y ESTADO | BLOCKED |
 | G1 | Fin de F1 | Estado local inventariado y resuelto | No avanzar |
 | G2 | Fin de F2 | Redis/MongoDB con fallos y costo $0 | No avanzar |
@@ -336,6 +341,7 @@ Un free tier, un crédito o una alerta de presupuesto no prueban costo cero. Si 
 | R12 | F6 | T20, T23 |
 | R13 | F6 | T12, T17, T20, T21, T23 |
 | R14 | F4 | T22 |
+| R15 | F4 | T24, T25 |
 
 ## 12. No ejecución
 
