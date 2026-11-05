@@ -15,20 +15,18 @@ public static class LoginProblems
         ProblemDetails problem,
         int status)
     {
-        problem.Title = status switch
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
         {
-            400 => "Validation failed",
-            401 => "Invalid credentials",
-            413 => "Payload too large",
-            415 => "Unsupported media type",
-            429 => "Too many requests",
-            503 => "Service unavailable",
-            504 => "Gateway timeout",
-            _ => "Internal server error"
+            400 => "La solicitud de inicio de sesión no es válida.",
+            401 => "Las credenciales proporcionadas no son válidas.",
+            413 => "La solicitud de inicio de sesión supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de solicitudes de inicio de sesión.",
+            503 => "El inicio de sesión no está disponible temporalmente.",
+            504 => "El inicio de sesión no respondió a tiempo.",
+            _ => "No fue posible completar el inicio de sesión."
         };
-
-        problem.Detail =
-            "The login request could not be completed.";
 
         problem.Instance = LoginEndpoint.Path;
     }

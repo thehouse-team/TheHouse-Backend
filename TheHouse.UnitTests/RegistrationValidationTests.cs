@@ -36,7 +36,7 @@ public sealed class RegistrationValidationTests
     [InlineData("a@example-.com")]
     [InlineData("a<@example.com")]
     [InlineData("a@exam_ple.com")]
-    [InlineData("Ã¡@example.com")]
+    [InlineData("á@example.com")]
     public void Invalid_email_is_rejected(string? email) =>
         Assert.False(EmailNormalizer.IsValid(EmailNormalizer.Normalize(email)));
 

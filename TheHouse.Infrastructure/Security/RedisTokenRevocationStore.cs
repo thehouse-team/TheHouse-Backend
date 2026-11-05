@@ -5,10 +5,10 @@ using TheHouse.Infrastructure.Observability;
 
 namespace TheHouse.Infrastructure.Security;
 
-// NV-06: revocaciÃƒÂ³n en Redis compartido. `SET NX` con expiraciÃƒÂ³n
-// es una operaciÃƒÂ³n atÃƒÂ³mica; la consulta usa `EXISTS`. Fallo cerrado:
+// NV-06: revocación en Redis compartido. `SET NX` con expiración
+// es una operación atómica; la consulta usa `EXISTS`. Fallo cerrado:
 // cualquier error de Redis produce DependencyUnavailableException,
-// nunca un ÃƒÂ©xito silencioso ni un fallback local.
+// nunca un éxito silencioso ni un fallback local.
 public sealed class RedisTokenRevocationStore(
     ConfigurationOptions? configuration) :
     ITokenRevocationStore,

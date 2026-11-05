@@ -30,7 +30,7 @@ Definir el contrato verificable de `GET /api/v1/properties` y `GET /api/v1/prope
 1. NV-01 U2 provee Problem Details, validación, paginación y configuración.
 2. NV-03 U2 aprobada documentalmente para la verificación desplegada; las pruebas locales pueden usar MongoDB y Redis aislados.
 3. Existe autorización de Fase B.
-4. Existe una colección `properties` con datos de prueba o seed controlado; no se crea contenido masivo.
+4. Existe una colección `properties` con datos de prueba o seed controlado. El seed idempotente de seis propiedades de demostración se activa solo por configuración (`PropertySeed__Enabled=true` y `--seed-properties`), requiere el seed de universidades NV-08 y se rechaza en `Production`; no crea contenido masivo.
 
 ## 4. Alcance
 
@@ -40,11 +40,12 @@ Definir el contrato verificable de `GET /api/v1/properties` y `GET /api/v1/prope
 4. Proyección de campos públicos.
 5. Índice MongoDB para el orden del listado.
 6. Problem Details.
-7. Pruebas unitarias, de integración y de seguridad.
+7. Seed idempotente de seis propiedades de demostración vinculadas a las universidades del seed NV-08.
+8. Pruebas unitarias, de integración y de seguridad.
 
 ## 5. Fuera de alcance
 
-- Crear, actualizar o borrar propiedades.
+- Crear, actualizar o borrar propiedades mediante la API; el seed de inicialización es la única escritura y no forma parte del contrato HTTP.
 - Favoritos, visitas, chat, Smart Match, reviews o notificaciones.
 - Filtros por universidad, precio, ubicación o texto; no estaban aprobados para U2.
 - Exponer dirección exacta, coordenadas, propietario, contacto o campos internos.
@@ -173,11 +174,11 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | Caso | Status | `title` |
 | --- | --- | --- |
-| Validación | 400 | `Validation failed` |
-| No encontrado | 404 | `Not found` |
-| Rate limit | 429 | `Too many requests` |
-| MongoDB no disponible | 503 | `Service unavailable` |
-| Interno | 500 | `Internal server error` |
+| Validación | 400 | `Validación fallida` |
+| No encontrado | 404 | `Recurso no encontrado` |
+| Rate limit | 429 | `Demasiadas solicitudes` |
+| MongoDB no disponible | 503 | `Servicio no disponible` |
+| Interno | 500 | `Error interno del servidor` |
 
 ## 10. Requisitos verificables
 

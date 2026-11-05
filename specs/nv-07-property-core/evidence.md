@@ -107,11 +107,11 @@ Se validó:
 
 Se validaron:
 
-- `400 Validation failed`;
-- `404 Not found`;
-- `429 Too many requests`;
-- `503 Service unavailable`;
-- `500 Internal server error`.
+- `400 Validación fallida`;
+- `404 Recurso no encontrado`;
+- `429 Demasiadas solicitudes`;
+- `503 Servicio no disponible`;
+- `500 Error interno del servidor`.
 
 Los errores usan:
 
@@ -297,3 +297,18 @@ NV-07 cumple el alcance funcional y de seguridad aprobado para U2.
 Las advertencias restantes pertenecen a la validación desplegada de NV-03.
 
 **NV-07 queda EJECUTADA, VALIDADA Y CERRADA PARA U2.**
+
+## Addendum — Correcciones de revisión U2 (2026-11-05)
+
+Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `fix/u2-review`. Este addendum documenta la corrección del punto 4 de NV-07: el seed controlado de propiedades.
+
+- Problem Details de propiedades: títulos en español y consistentes (`Validación fallida`, `Recurso no encontrado`, `Demasiadas solicitudes`, `Servicio no disponible`). El contrato omite `detail` e `instance` en estos endpoints.
+- Seed de propiedades: seis registros de demostración con ObjectIds fijos `000000000000000000000001` a `000000000000000000000006`; `upsert` idempotente por `_id`; `createdAt` reproducible `2026-11-02T00:00:00Z` conservado con `SetOnInsert`; no elimina propiedades ajenas al seed.
+- Vinculación: cada propiedad referencia una universidad del seed NV-08 por `code` (`UTTT`, `UAEH`, `ITSOEH`). Si falta la universidad requerida, el seed falla de forma cerrada y no escribe propiedades parciales.
+- Activación: solo mediante `--seed-properties` con `PropertySeed__Enabled=true`; el seed de universidades debe ejecutarse primero. Rechazo explícito en `Production` y por defecto deshabilitado en `appsettings.json`.
+- Pruebas: `PropertySeedTests` cubre creación de seis propiedades vinculadas, idempotencia, preservación de `createdAt`, conservación de registros ajenos, requisito del seed de universidades, deshabilitado por defecto y fallo cerrado del store.
+- Seed real: **NO EJECUTADO** contra MongoDB ni Azure. La idempotencia se verificó con `PropertyTestStore` aislado con la misma semántica de `upsert` por `_id`.
+- Verificación ejecutada: `dotnet build --verbosity quiet` con 0 errores y 0 advertencias; `dotnet test --verbosity quiet` con 130 pruebas unitarias, 39 de seguridad y 227 de integración: 396 aprobadas y 0 fallidas.
+- Nota de entorno: `TheHouse/appsettings.Development.json` es un archivo local ignorado por Git, no forma parte del repositorio y habilita JWT sin `JWT_SIGNING_KEY`; para ejecutar la suite se excluyó temporalmente y se restauró byte a byte sin incorporarlo al commit. Esta limitación se declara para no atribuir a la suite una ejecución que dependa de configuración no versionada.
+- Seguridad: revisión de OWASP API Security Top 10, secretos, autenticación, autorización, validación de entrada, exposición de datos, errores, logging, rate limiting y mass assignment. Sin hallazgos Critical/High ni secretos confirmados en el alcance revisado. Resultado: PASS WITH WARNINGS. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación ni performance.
+- SDD: la revisión no crea tasks, no reabre el cierre U2 y no autoriza implementación adicional. Resultado: PASS WITH WARNINGS.

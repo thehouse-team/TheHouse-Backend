@@ -15,10 +15,10 @@ public static class ApiConventions
         {
             options.AddDocumentTransformer((document, _, _) =>
             {
-                document.Info.Title = "TheHouse U2 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Foundation, Registration, Login, Logout, Properties y Universities";
+                document.Info.Title = "TheHouse U2 — Foundation, Registration, Login, Logout, Properties y Universities";
                 document.Info.Version = Version;
                 document.Info.Description = "Foundation, Registration, Login, Logout, Properties y Universities U2 bajo /api/v1; health es operacional y no versionado. " +
-                    "JWT de acceso revocable vÃƒÂ­a Logout. Errores RFC 9457 con traceId.";
+                    "JWT de acceso revocable vía Logout. Errores RFC 9457 con traceId.";
                 return Task.CompletedTask;
             });
             options.AddSchemaTransformer((schema, context, _) =>

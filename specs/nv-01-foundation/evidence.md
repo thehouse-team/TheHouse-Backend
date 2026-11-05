@@ -236,3 +236,16 @@ Se revisaron por lectura entradas externas, errores/logging, configuración, sec
 **NV-01 Foundation 1.1.0-u2: ✅ EJECUTADA, VALIDADA Y CERRADA PARA U2**
 
 Tasks U2 pendientes: **ninguna**. T13: **NO EJECUTADA, [ ] abierta, fuera de U2**. NV-02 continúa **⛔ NO EJECUTAR**. Terraform no autorizado. Detenerse; no avanzar a NV-04 ni ejecutar otra spec.
+
+## Addendum — Correcciones de revisión U2 (2026-11-05)
+
+Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `fix/u2-review`, limitadas a los hallazgos de la revisión U2. Este addendum no reabre el cierre de NV-01 ni autoriza nuevas tasks.
+
+- Codificación: se repararon secuencias de doble codificación (mojibake) en documentos y pruebas, y reemplazos literales `Validaci?n`; los archivos de texto quedaron en UTF-8 válido y sin BOM. Se agregó `.editorconfig` con `charset = utf-8` y finales de línea LF.
+- SDK: `global.json` usa `rollForward: latestFeature` y acepta SDK 10.0.x desde 10.0.114 en adelante, sin fijar una revisión inexistente.
+- Problem Details: títulos y mensajes unificados en español; `ProblemResponses.TitleFor(int)` es la fuente única de títulos para 400, 401, 403, 404, 405, 408, 409, 413, 415, 429, 500, 503 y 504.
+- Se retiró el BOM de `.github/workflows/u2-linux-validation.yml`, `TheHouse/Properties/launchSettings.json`, `TheHouse.UnitTests/TheHouse.UnitTests.csproj` y `TheHouse.UnitTests/UnitTest1.cs`.
+- Verificación ejecutada: `dotnet build --verbosity quiet` con 0 errores y 0 advertencias; `dotnet test --verbosity quiet` con 130 pruebas unitarias, 39 de seguridad y 227 de integración: 396 aprobadas y 0 fallidas.
+- Nota de entorno: `TheHouse/appsettings.Development.json` es un archivo local ignorado por Git, no forma parte del repositorio y habilita JWT sin `JWT_SIGNING_KEY`; para ejecutar la suite se excluyó temporalmente y se restauró byte a byte sin incorporarlo al commit. Esta limitación se declara para no atribuir a la suite una ejecución que dependa de configuración no versionada.
+- Seguridad: revisión de OWASP API Security Top 10, secretos, autenticación, autorización, validación de entrada, exposición de datos, errores, logging, rate limiting y mass assignment. Sin hallazgos Critical/High ni secretos confirmados en el alcance revisado. Resultado: PASS WITH WARNINGS. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación ni performance.
+- SDD: la revisión no crea tasks, no reabre el cierre U2 y no autoriza implementación adicional. Resultado: PASS WITH WARNINGS.

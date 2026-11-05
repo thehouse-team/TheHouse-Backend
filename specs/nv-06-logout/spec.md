@@ -125,10 +125,10 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | Caso | Status | `title` |
 | --- | --- | --- |
-| Token ausente/inválido/revocado | 401 | `Unauthorized` |
-| Rate limit | 429 | `Too many requests` |
-| Redis no disponible | 503 | `Service unavailable` |
-| Error interno | 500 | `Internal server error` |
+| Token ausente/inválido/revocado | 401 | `No autorizado` |
+| Rate limit | 429 | `Demasiadas solicitudes` |
+| Redis no disponible | 503 | `Servicio no disponible` |
+| Error interno | 500 | `Error interno del servidor` |
 
 ## 10. Requisitos verificables
 

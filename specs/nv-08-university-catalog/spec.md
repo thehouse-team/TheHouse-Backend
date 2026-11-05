@@ -145,6 +145,23 @@ Son nombres institucionales públicos del contexto mexicano de TheHouse. El equi
 - Único `{ code: 1 }`.
 - Orden `{ name: 1, _id: 1 }`.
 
+### 7.4 Activación controlada
+
+El seed está deshabilitado por defecto en `appsettings.json` y solo se activa por configuración:
+
+- `--seed-universities` requiere `UniversitySeed__Enabled=true`.
+- `--seed-properties` requiere `PropertySeed__Enabled=true`.
+- Ambos comandos se rechazan cuando `ASPNETCORE_ENVIRONMENT=Production`.
+- El seed de propiedades requiere que el seed de universidades se haya ejecutado primero.
+
+Comando documentado para una ejecución autorizada, sin credenciales embebidas:
+
+```text
+az containerapp exec -n ca-thehouse-u2 -g rg-thehouse-u2 --container thehouse-backend --command "/bin/sh -c 'ASPNETCORE_ENVIRONMENT=Staging MongoDB__Enabled=true UniversitySeed__Enabled=true PropertySeed__Enabled=true dotnet TheHouse.dll --seed-universities --seed-properties'"
+```
+
+Requiere que el contenedor ya tenga `MongoDB__ConnectionString` como secreto de Azure Container Apps. La ejecución real debe coordinarse con NV-03, no debe ejecutarse contra una base con datos productivos y sus conteos antes/después quedan como evidencia pendiente; no se realiza en esta revisión.
+
 ## 8. Seguridad
 
 - Lecturas públicas; no hay BOLA.
@@ -162,11 +179,11 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | Caso | Status | `title` |
 | --- | --- | --- |
-| Validación | 400 | `Validation failed` |
-| No encontrado | 404 | `Not found` |
-| Rate limit | 429 | `Too many requests` |
-| MongoDB no disponible | 503 | `Service unavailable` |
-| Interno | 500 | `Internal server error` |
+| Validación | 400 | `Validación fallida` |
+| No encontrado | 404 | `Recurso no encontrado` |
+| Rate limit | 429 | `Demasiadas solicitudes` |
+| MongoDB no disponible | 503 | `Servicio no disponible` |
+| Interno | 500 | `Error interno del servidor` |
 
 ## 10. Requisitos verificables
 

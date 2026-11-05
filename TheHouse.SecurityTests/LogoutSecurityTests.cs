@@ -5,21 +5,21 @@ using TheHouse.Application.UseCases;
 
 namespace TheHouse.SecurityTests;
 
-// NV-06 T09 (seguridad estÃ¡tica): blindaje de la clave de revocaciÃ³n
-// y semÃ¡ntica de `jti` canÃ³nico. Los hallazgos HTTP (no-store,
-// rate limit, logs sin secretos) se evidencian en integraciÃ³n.
+// NV-06 T09 (seguridad estática): blindaje de la clave de revocación
+// y semántica de `jti` canónico. Los hallazgos HTTP (no-store,
+// rate limit, logs sin secretos) se evidencian en integración.
 public sealed class LogoutSecurityTests
 {
     [Fact]
     public void Canonical_jti_rejects_non_hex_identities()
     {
-        // Compacta: evita claves manipuladas por `jti` no canÃ³nicos.
+        // Compacta: evita claves manipuladas por `jti` no canónicos.
         Assert.False(RevocationKeys.IsCanonicalJti(null));
         Assert.False(RevocationKeys.IsCanonicalJti(""));
         Assert.False(RevocationKeys.IsCanonicalJti("abc"));
         Assert.False(RevocationKeys.IsCanonicalJti(
             "0123456789abcdef0123456789abcde:"));
-        // MayÃºsculas no son canÃ³nicas frente a la emisiÃ³n NV-05.
+        // Mayúsculas no son canónicas frente a la emisión NV-05.
         Assert.False(RevocationKeys.IsCanonicalJti(
             "0123456789ABCDEF0123456789ABCDEF"));
         Assert.False(RevocationKeys.IsCanonicalJti(

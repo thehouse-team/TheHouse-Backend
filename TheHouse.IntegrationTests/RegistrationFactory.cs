@@ -45,7 +45,7 @@ public sealed class RegistrationFactory(RegistrationTestStore? store = null, Reg
     }
 }
 
-// Dobles aislados solo en pruebas HTTP; NO demuestran Ã­ndices Mongo o atomicidad Redis.
+// Dobles aislados solo en pruebas HTTP; NO demuestran índices Mongo o atomicidad Redis.
 public sealed class RegistrationTestStore : IUserRepository
 {
     public ConcurrentDictionary<string, User> Users { get; } = new(StringComparer.Ordinal);

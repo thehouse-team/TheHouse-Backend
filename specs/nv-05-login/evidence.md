@@ -46,7 +46,7 @@ Se implementó y validó:
 - verificación PBKDF2-HMAC-SHA256;
 - comparación criptográfica en tiempo constante;
 - ejecución de PBKDF2 dummy cuando el usuario no existe;
-- respuesta genérica `401 Invalid credentials`;
+- respuesta genérica `401 No autorizado`;
 - mismo contrato público para usuario inexistente y contraseña incorrecta;
 - ausencia de contraseña, hash y access token en logs controlados.
 
@@ -322,3 +322,16 @@ NV-05 cumple el alcance funcional y de seguridad requerido para Login U2 y cuent
 Las advertencias registradas no bloquean el cierre de NV-05 porque corresponden a evidencia de infraestructura posterior o a una validación adicional declarada explícitamente.
 
 **NV-05 queda EJECUTADA, VALIDADA Y CERRADA PARA U2.**
+
+## Addendum — Correcciones de revisión U2 (2026-11-05)
+
+Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `fix/u2-review`. No se modifican requisitos, alcance ni tasks de NV-05.
+
+- Problem Details de login: títulos en español y consistentes (`Validación fallida`, `No autorizado`, `Acceso denegado`, `Demasiadas solicitudes`, `Servicio no disponible`), conservando `detail` e `instance` en español.
+- Pruebas actualizadas: `LoginHttpTests` verifica los títulos y mensajes en español.
+- No se registran correos, contraseñas, tokens ni claims en logs o respuestas de error; el rate limit de login se mantiene.
+- Codificación reparada en pruebas y documentos; sin BOM. `.editorconfig` fija UTF-8.
+- Verificación ejecutada: `dotnet build --verbosity quiet` con 0 errores y 0 advertencias; `dotnet test --verbosity quiet` con 130 pruebas unitarias, 39 de seguridad y 227 de integración: 396 aprobadas y 0 fallidas.
+- Nota de entorno: `TheHouse/appsettings.Development.json` es un archivo local ignorado por Git, no forma parte del repositorio y habilita JWT sin `JWT_SIGNING_KEY`; para ejecutar la suite se excluyó temporalmente y se restauró byte a byte sin incorporarlo al commit. Esta limitación se declara para no atribuir a la suite una ejecución que dependa de configuración no versionada.
+- Seguridad: revisión de OWASP API Security Top 10, secretos, autenticación, autorización, validación de entrada, exposición de datos, errores, logging, rate limiting y mass assignment. Sin hallazgos Critical/High ni secretos confirmados en el alcance revisado. Resultado: PASS WITH WARNINGS. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación ni performance.
+- SDD: la revisión no crea tasks, no reabre el cierre U2 y no autoriza implementación adicional. Resultado: PASS WITH WARNINGS.

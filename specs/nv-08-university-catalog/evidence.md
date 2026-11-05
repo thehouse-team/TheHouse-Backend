@@ -157,11 +157,11 @@ Se validó:
 
 Se validaron títulos:
 
-- `400 Validation failed`;
-- `404 Not found`;
-- `429 Too many requests`;
-- `503 Service unavailable`;
-- `500 Internal server error`.
+- `400 Validación fallida`;
+- `404 Recurso no encontrado`;
+- `429 Demasiadas solicitudes`;
+- `503 Servicio no disponible`;
+- `500 Error interno del servidor`.
 
 Los errores usan:
 
@@ -380,3 +380,19 @@ NV-08 cumple el alcance funcional, de seguridad y testing requerido para U2.
 Las brechas restantes pertenecen a la verificación desplegada de NV-03.
 
 **NV-08 queda EJECUTADA, VALIDADA Y CERRADA PARA U2.**
+
+## Addendum — Correcciones de revisión U2 (2026-11-05)
+
+Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `fix/u2-review`. Este addendum documenta la activación controlada del seed solicitada en la revisión; el seed real sigue **NO EJECUTADO**.
+
+- Problem Details de universidades: títulos en español y consistentes (`Validación fallida`, `Recurso no encontrado`, `Demasiadas solicitudes`, `Servicio no disponible`). El contrato omite `detail` e `instance` en estos endpoints.
+- Activación: `--seed-universities` requiere `UniversitySeed__Enabled=true`; `--seed-properties` requiere `PropertySeed__Enabled=true`. Ambos comandos se rechazan cuando `ASPNETCORE_ENVIRONMENT=Production`. El seed de propiedades exige que el de universidades se haya ejecutado primero y resuelve la relación por `code`.
+- MongoDB: la ejecución real requiere `MongoDB__Enabled=true` y que el contenedor ya tenga `MongoDB__ConnectionString` provisto como secreto de Azure Container Apps; el comando no incluye ni imprime credenciales. Sin conexión, el seed falla de forma cerrada.
+- Comando exacto preparado para una ejecución autorizada (no ejecutado en esta revisión):
+  `az containerapp exec -n ca-thehouse-u2 -g rg-thehouse-u2 --container thehouse-backend --command "/bin/sh -c 'ASPNETCORE_ENVIRONMENT=Staging MongoDB__Enabled=true UniversitySeed__Enabled=true PropertySeed__Enabled=true dotnet TheHouse.dll --seed-universities --seed-properties'"`
+- El comando sobrescribe el entorno solo para el proceso de seed y debe ejecutarse únicamente con autorización humana explícita en el entorno autorizado; no se ejecutó contra Azure ni MongoDB real. Los conteos antes/después quedan pendientes para NV-03.
+- Pruebas: `PropertySeedTests` verifica la dependencia del seed de universidades y la idempotencia del seed de propiedades; las pruebas de universidades conservan la cobertura de idempotencia por `code`.
+- Verificación ejecutada: `dotnet build --verbosity quiet` con 0 errores y 0 advertencias; `dotnet test --verbosity quiet` con 130 pruebas unitarias, 39 de seguridad y 227 de integración: 396 aprobadas y 0 fallidas.
+- Nota de entorno: `TheHouse/appsettings.Development.json` es un archivo local ignorado por Git, no forma parte del repositorio y habilita JWT sin `JWT_SIGNING_KEY`; para ejecutar la suite se excluyó temporalmente y se restauró byte a byte sin incorporarlo al commit. Esta limitación se declara para no atribuir a la suite una ejecución que dependa de configuración no versionada.
+- Seguridad: revisión de OWASP API Security Top 10, secretos, autenticación, autorización, validación de entrada, exposición de datos, errores, logging, rate limiting y mass assignment. Sin hallazgos Critical/High ni secretos confirmados en el alcance revisado. Resultado: PASS WITH WARNINGS. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación ni performance.
+- SDD: la revisión no crea tasks, no reabre el cierre U2 y no autoriza implementación adicional. Resultado: PASS WITH WARNINGS.

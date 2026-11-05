@@ -25,4 +25,12 @@ public sealed class UnavailablePropertyRepository :
         cancellationToken.ThrowIfCancellationRequested();
         throw new DependencyUnavailableException();
     }
+
+    public Task UpsertSeedAsync(
+        IReadOnlyCollection<Property> properties,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        throw new DependencyUnavailableException();
+    }
 }

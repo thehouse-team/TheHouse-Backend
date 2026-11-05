@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TheHouse.Http;
 
-// NV-06: títulos y detalle de logout definidos por la spec 9:
-// Unauthorized / Too many requests / Service unavailable /
-// Internal server error, sin detalles internos.
+// NV-06: títulos de logout en español: No autorizado /
+// Demasiadas solicitudes / Servicio no disponible / Error interno
+// del servidor, sin detalles internos.
 public static class LogoutProblems
 {
     public static bool IsLogout(HttpContext context) =>
@@ -18,15 +18,7 @@ public static class LogoutProblems
         ProblemDetails problem,
         int status)
     {
-        problem.Title = status switch
-        {
-            400 => "Validation failed",
-            401 => "Unauthorized",
-            429 => "Too many requests",
-            503 => "Service unavailable",
-            500 => "Internal server error",
-            _ => "Internal server error"
-        };
+        problem.Title = ProblemResponses.TitleFor(status);
 
         // Sin `detail` ni `instance`: el contrato compartido exige
         // respuestas sanitizadas y sin rutas internas.

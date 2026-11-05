@@ -1,4 +1,4 @@
-﻿name: U2 Linux Validation
+name: U2 Linux Validation
 
 on:
   workflow_dispatch:
