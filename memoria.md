@@ -251,3 +251,103 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** superar el bloqueo del preflight U2 sin implementar, manteniendo la separación entre documentación aprobada y ejecución autorizada.
 - **Impacto:** la documentación queda aprobada para U2, pero la implementación sigue **BLOCKED** hasta la autorización de Fase B. `terraform apply` y `terraform destroy` requieren confirmación humana separada. M-BE-028 sigue vigente y M-BE-011 continúa pendiente para la selección general de proveedor. La referencia de M-BE-028 a NV-03-R10/T16 se interpreta conforme a esta versión: R10/T16 documentan evidencia de costo Azure U2, no una matriz comparativa general.
+
+## M-BE-032 — Hash de contraseñas con PBKDF2 210000 iteraciones
+
+- **ID:** M-BE-032
+- **Decisión:** usar PBKDF2-HMAC-SHA256 con 210000 iteraciones, sal aleatoria de 16 bytes y subclave de 32 bytes, con formato versionado `pbkdf2-sha256$210000$...`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** aumentar el costo de la fuerza bruta sin almacenar contraseñas en claro; la implementación y las pruebas de seguridad ya verifican el parámetro.
+- **Impacto:** cualquier reducción de iteraciones o cambio de algoritmo requiere nueva decisión y migración controlada. No se almacenan credenciales ni sales en repositorios, logs o evidencia.
+
+## M-BE-033 — Rate limit distribuido en Redis con script Lua
+
+- **ID:** M-BE-033
+- **Decisión:** aplicar los límites de intentos con un contador atómico en Redis mediante script Lua (`INCR`, `PEXPIRE`, `PTTL`), compartido entre réplicas.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** evitar ventanas de carrera y límites inconsistentes cuando hay más de una réplica; no usar memoria local como respaldo de seguridad.
+- **Impacto:** si Redis no está disponible, la operación se degrada de forma controlada y no abre controles; la disponibilidad del rate limit depende de Redis. Los cambios de claves, TTL o umbrales requieren nueva decisión y pruebas.
+
+## M-BE-034 — Redis en Upstash gratuito en lugar de Redis Cloud
+
+- **ID:** M-BE-034
+- **Decisión:** usar Redis en Upstash con su plan gratuito para el estado compartido de U2, en lugar de Redis Cloud.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** cubrir revocación y límites distribuidos dentro de COST-001 sin introducir un recurso facturable.
+- **Impacto:** la conexión TLS y las credenciales se administran como secreto fuera de Terraform y fuera del repositorio. El límite de conexiones, la latencia y la disponibilidad del plan gratuito deben revisarse antes de ampliar carga; el proveedor no se aprovisiona mediante Terraform.
+
+## M-BE-035 — MongoDB Atlas M0
+
+- **ID:** M-BE-035
+- **Decisión:** usar MongoDB Atlas M0 gratuito para la persistencia de U2, con TLS y credenciales administradas fuera de Terraform.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** disponer de persistencia administrada sin crear un recurso MongoDB facturable en Azure.
+- **Impacto:** Atlas M0 no se aprovisiona con Terraform y su endpoint es público con autenticación TLS; la aceptación literal de T07 sobre no exponer la base a Internet queda **REQUIERE DECISIÓN HUMANA** y T07 permanece abierta. No se deben imprimir cadenas de conexión ni credenciales.
+
+## M-BE-036 — Imagen GHCR desplegada por digest
+
+- **ID:** M-BE-036
+- **Decisión:** publicar la imagen en `ghcr.io/thehouse-team/thehouse-backend` y desplegarla por digest OCI inmutable `@sha256:...`; prohibir `latest` y etiquetas mutables.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** garantizar que cada revisión ejecute exactamente el artefacto publicado y trazable a un commit.
+- **Impacto:** la imagen actualmente desplegada es `@sha256:15f196af9c32fc843cf1723b4615f896668b0368b292e1246807ab0d03194775`, asociada al commit `c6518862788407fe678c1a524ad4d4b764dc6a71`; el HEAD posterior no está desplegado. Terraform valida el digest y no se permiten credenciales GHCR en Git, tfvars o state.
+
+## M-BE-037 — Logs solo en streaming, sin Log Analytics
+
+- **ID:** M-BE-037
+- **Decisión:** mantener los logs de Container Apps en Streaming Only, sin aprovisionar Log Analytics Workspace ni Application Insights para U2.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** preservar COST-001 y evitar un recurso de observabilidad facturable.
+- **Impacto:** no hay retención centralizada de trazas, métricas o logs; la evidencia operativa debe capturarse durante la ventana de verificación. Las tasks T11 y T12 permanecen abiertas porque no se demuestra correlación entre réplicas ni costo/retensión de telemetría.
+
+## M-BE-038 — Secretos y variables administrados fuera de Terraform
+
+- **ID:** M-BE-038
+- **Decisión:** administrar secretos y variables de ejecución de Container Apps fuera de Terraform; el template de IaC solo crea el bootstrap y declara `ignore_changes` para secretos y variables de entorno.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** impedir que cadenas de conexión, claves JWT, credenciales de Redis o MongoDB entren en `.tf`, `terraform.tfvars` o `terraform.tfstate`.
+- **Impacto:** el estado real puede divergir del bootstrap y debe revisarse con `terraform plan`; no se deben revertir variables validadas en Azure. La ausencia de secretos en el repositorio no autoriza a imprimirlos en evidencia o reportes.
+
+## M-BE-039 — Réplicas 0–2 en operación y 2–2 solo en evaluación
+
+- **ID:** M-BE-039
+- **Decisión:** operar NV-03 con mínimo 0 y máximo 2 réplicas (scale-to-zero); usar exactamente 2–2 réplicas únicamente durante una ventana controlada de evaluación.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** reducir consumo fuera de la ventana de evaluación sin perder la capacidad de escalar; la regla HTTP `http-scaler` con `concurrent_requests=10` controla la escala.
+- **Impacto:** el despliegue actual está en 0–2 y puede tener cero o una réplica; no satisface por sí solo la aceptación de dos réplicas de T08, T18 o T19. La ventana 2–2 debe activarse y evidenciarse de forma explícita. Esta decisión actualiza el estado de NV-03 frente a M-BE-026: T13, T15 y T23 quedan con evidencia; el resto sigue abierto.
+
+## M-BE-040 — Responsable del backend
+
+- **ID:** M-BE-040
+- **Decisión:** designar a Victor Manuel Jose Jose como responsable del backend desde 2026-11-05.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** centralizar la responsabilidad sobre decisiones técnicas, autorizaciones, evidencia, seguridad y costo del backend.
+- **Impacto:** el responsable debe aprobar cambios materiales y revisiones de evidencia; la designación no autoriza por sí sola implementación, `terraform apply`, `terraform destroy` ni gasto.
+
+## M-BE-041 — Adopción de la regla HTTP http-scaler
+
+- **ID:** M-BE-041
+- **Decisión:** adoptar en el template Terraform la regla existente `http-scaler` de Azure Container Apps, con `concurrent_requests=10`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** eliminar el drift entre Azure y Terraform sin cambiar el comportamiento operativo ya validado.
+- **Impacto:** la regla queda declarada en `infra/terraform/main.tf`; `terraform plan` no propone cambios en recursos y solo actualiza salidas de estado. No se ejecutó `terraform apply`; cualquier cambio futuro de umbral debe registrarse y reflejarse en IaC.

@@ -1,5 +1,5 @@
 ---
-name: Redis Distributed Cache
+name: redis-distributed-cache
 description: Revisa claves, TTL, cache-aside, invalidación, stampede, estado compartido, fallos y conexiones Redis.
 ---
 

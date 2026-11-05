@@ -1,5 +1,5 @@
 ---
-name: SDD Compliance
+name: sdd-compliance
 description: Verifica jerarquía normativa, autorización humana, trazabilidad requisito-fase-task y alcance antes de cualquier implementación.
 ---
 

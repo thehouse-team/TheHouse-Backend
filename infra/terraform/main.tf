@@ -51,6 +51,13 @@ resource "azurerm_container_app" "this" {
     min_replicas = var.min_replicas
     max_replicas = var.max_replicas
 
+    # Regla creada originalmente fuera de Terraform y adoptada en el
+    # template para evitar drift. Escala por solicitudes concurrentes.
+    http_scale_rule {
+      name                = "http-scaler"
+      concurrent_requests = "10"
+    }
+
     container {
       name   = "thehouse-backend"
       image  = var.image

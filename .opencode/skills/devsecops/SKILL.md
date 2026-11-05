@@ -1,5 +1,5 @@
 ---
-name: DevSecOps
+name: devsecops
 description: Revisa SAST, SCA, SBOM, DAST, fuzzing, seguridad de contenedores, firma, secretos, CI/CD y quality gates.
 ---
 
