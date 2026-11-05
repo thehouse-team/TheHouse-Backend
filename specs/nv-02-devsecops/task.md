@@ -6,9 +6,9 @@
 | Documento | `task.md` |
 | Versión | 1.1.0-u2 |
 | Fecha | 2026-11-05 |
-| Estado documental | **📝 PREPARADA PARA REVISIÓN HUMANA** |
-| Aprobación humana | PENDIENTE |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA») |
+| Estado de ejecución | **🟡 IMPLEMENTADA EN `fix/u2-review`; VERIFICACIÓN EN GITHUB ACTIONS PENDIENTE** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks totales | 15 |
@@ -100,7 +100,7 @@
 | Tasks completadas | 0 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **📝 PREPARADA PARA REVISIÓN HUMANA** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 IMPLEMENTADA; VERIFICACIÓN EN GITHUB ACTIONS PENDIENTE** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

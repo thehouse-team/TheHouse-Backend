@@ -1,0 +1,357 @@
+# NV-02 1.1.0-u2 — Integración continua (M-BE-049).
+# Corre en cada pull request y push a main. No usa secretos, no publica
+# imágenes ni despliega: eso es NV-09 (CD).
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      run_mutation:
+        description: "Ejecutar también la mutación con Stryker.NET"
+        type: boolean
+        default: false
+  schedule:
+    # Lunes 08:30 UTC = 02:30 en Ciudad de México (UTC-6): solo mutación.
+    - cron: "30 8 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+  DOTNET_VERSION: "10.0.x"
+  SEMGREP_IMAGE: "semgrep/semgrep:1.184.0"
+  GITLEAKS_IMAGE: "zricethezav/gitleaks:v8.30.1"
+  TRIVY_IMAGE: "aquasec/trivy:0.76.2"
+  DOCKLE_IMAGE: "goodwithtech/dockle:v0.4.15"
+  CYCLONEDX_VERSION: "6.3.1"
+  STRYKER_VERSION: "5.0.0"
+  TERRAFORM_VERSION: "1.17.1"
+  CI_IMAGE: "thehouse-backend:ci"
+
+jobs:
+  build-test:
+    name: build-test
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore TheHouse.slnx
+
+      - name: Build (Release, advertencias como error)
+        run: dotnet build TheHouse.slnx --configuration Release --no-restore -warnaserror
+
+      - name: Test con cobertura
+        run: >
+          dotnet test TheHouse.slnx
+          --configuration Release
+          --no-build
+          --logger trx
+          --results-directory TestResults
+          --collect:"XPlat Code Coverage"
+
+      - name: Resumen de cobertura (informativo)
+        if: always()
+        run: python3 .github/scripts/coverage_summary.py TestResults >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Artefacto de pruebas y cobertura
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results
+          path: TestResults/
+          retention-days: 14
+          if-no-files-found: warn
+
+  sast-semgrep:
+    name: sast-semgrep
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Pruebas de las reglas propias
+        run: >
+          docker run --rm -v "$PWD:/src" -w /src -e HOME=/tmp --user "$(id -u):$(id -g)"
+          "$SEMGREP_IMAGE" semgrep --test --metrics=off .semgrep/
+
+      - name: Semgrep (reporte SARIF de todas las severidades)
+        run: >
+          docker run --rm -v "$PWD:/src" -w /src -e HOME=/tmp --user "$(id -u):$(id -g)"
+          "$SEMGREP_IMAGE" semgrep scan --metrics=off
+          --config p/csharp --config p/secrets --config p/dockerfile --config p/terraform
+          --config .semgrep/thehouse.yml
+          --exclude .semgrep
+          --sarif --output semgrep.sarif
+
+      - name: Semgrep (falla con severidad ERROR)
+        run: >
+          docker run --rm -v "$PWD:/src" -w /src -e HOME=/tmp --user "$(id -u):$(id -g)"
+          "$SEMGREP_IMAGE" semgrep scan --metrics=off
+          --config p/csharp --config p/secrets --config p/dockerfile --config p/terraform
+          --config .semgrep/thehouse.yml
+          --exclude .semgrep
+          --severity ERROR --error
+
+      - name: Artefacto SARIF
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: semgrep-sarif
+          path: semgrep.sarif
+          retention-days: 14
+          if-no-files-found: warn
+
+  sca-sbom:
+    name: sca-sbom
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore TheHouse.slnx
+
+      - name: Dependencias vulnerables (directas y transitivas)
+        run: |
+          dotnet list TheHouse.slnx package --vulnerable --include-transitive --format json --output-version 1 > vulnerable.json
+          python3 .github/scripts/sca_gate.py vulnerable.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: SBOM CycloneDX
+        run: |
+          dotnet tool install --global CycloneDX --version "$CYCLONEDX_VERSION"
+          dotnet CycloneDX TheHouse/TheHouse.csproj --exclude-test-projects \
+            --output sbom --output-format Json \
+            --set-name thehouse-backend --set-version "${GITHUB_SHA}"
+
+      - name: Artefactos de SCA y SBOM
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sca-sbom
+          path: |
+            vulnerable.json
+            sbom/
+          retention-days: 14
+          if-no-files-found: warn
+
+  secrets-gitleaks:
+    name: secrets-gitleaks
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (historial completo)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Gitleaks sobre todo el historial
+        run: >
+          docker run --rm -v "$PWD:/repo" --user "$(id -u):$(id -g)"
+          "$GITLEAKS_IMAGE" git /repo
+          --redact --no-banner --exit-code 1
+          --report-format sarif --report-path /repo/gitleaks.sarif
+
+      - name: Artefacto Gitleaks (valores redactados)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gitleaks-report
+          path: gitleaks.sarif
+          retention-days: 14
+          if-no-files-found: warn
+
+  container-security:
+    name: container-security
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build de la imagen
+        run: docker build --file Dockerfile --tag "$CI_IMAGE" .
+
+      - name: La imagen corre como usuario no root
+        run: |
+          USER_NAME="$(docker image inspect "$CI_IMAGE" --format '{{.Config.User}}')"
+          echo "Usuario configurado: ${USER_NAME}"
+          test -n "${USER_NAME}" && test "${USER_NAME}" != "root" && test "${USER_NAME}" != "0"
+
+      - name: Trivy — vulnerabilidades de la imagen (Critical/High corregibles)
+        run: |
+          set +e
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/out"             "$TRIVY_IMAGE" image --no-progress --ignore-unfixed             --severity CRITICAL,HIGH --exit-code 1             --format table --output /out/trivy-image.txt             "$CI_IMAGE"
+          code=$?
+          cat trivy-image.txt
+          exit $code
+
+      - name: Trivy — configuración de Dockerfile y Terraform
+        if: always()
+        run: |
+          set +e
+          docker run --rm -v "$PWD:/src"             "$TRIVY_IMAGE" config --severity CRITICAL,HIGH --exit-code 1             --format table --output /src/trivy-config.txt             /src
+          code=$?
+          cat trivy-config.txt
+          exit $code
+
+      - name: Dockle — buenas prácticas de imagen (FATAL bloquea)
+        if: always()
+        run: |
+          set +e
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/out"             "$DOCKLE_IMAGE" --exit-code 1 --exit-level fatal             --format json --output /out/dockle.json             "$CI_IMAGE"
+          code=$?
+          cat dockle.json
+          exit $code
+
+      - name: Artefactos de contenedor
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: container-security
+          path: |
+            trivy-image.txt
+            trivy-config.txt
+            dockle.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  iac-terraform:
+    name: iac-terraform
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Formato
+        run: terraform fmt -check -recursive
+
+      - name: Init sin backend ni credenciales
+        run: terraform init -backend=false -input=false
+
+      - name: Validate
+        run: terraform validate
+
+  mutation-stryker:
+    name: mutation-stryker
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.run_mutation)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: TheHouse.UnitTests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Instalar Stryker.NET
+        run: dotnet tool install --global dotnet-stryker --version "$STRYKER_VERSION"
+
+      # Línea base: --break-at 0 no bloquea; el umbral se fija con esta evidencia (NV-02-R10).
+      - name: Mutación de Application
+        run: dotnet stryker --project TheHouse.Application.csproj --reporter html --reporter json --reporter progress --break-at 0
+
+      - name: Mutación de Domain
+        run: dotnet stryker --project TheHouse.Domain.csproj --reporter html --reporter json --reporter progress --break-at 0
+
+      - name: Artefacto de mutación
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mutation-report
+          path: TheHouse.UnitTests/StrykerOutput/
+          retention-days: 14
+          if-no-files-found: warn
+
+  quality-gate:
+    name: quality-gate
+    if: always() && github.event_name != 'schedule'
+    needs:
+      - build-test
+      - sast-semgrep
+      - sca-sbom
+      - secrets-gitleaks
+      - container-security
+      - iac-terraform
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Resumen de hardening
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          needs = json.loads(os.environ["NEEDS"])
+          rows = [(job, data.get("result", "unknown")) for job, data in needs.items()]
+          icons = {"success": "✅", "failure": "❌", "cancelled": "⚪", "skipped": "⏭️"}
+          lines = ["## Quality gate (NV-02)", "", "| Control | Resultado |", "| --- | --- |"]
+          lines += [f"| `{job}` | {icons.get(result, '❔')} {result} |" for job, result in rows]
+          failed = [job for job, result in rows if result != "success"]
+          lines += ["", "**Resultado:** " + ("PASS" if not failed else "BLOCKED — " + ", ".join(failed))]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write("\n".join(lines) + "\n")
+          print("\n".join(lines))
+          sys.exit(1 if failed else 0)
+          PY

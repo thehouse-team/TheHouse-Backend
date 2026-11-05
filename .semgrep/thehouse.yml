@@ -1,0 +1,106 @@
+# Reglas Semgrep propias de TheHouse Backend (NV-02-R04, T05).
+# Pruebas de regla en thehouse.cs: `semgrep --test .semgrep/`.
+# ERROR bloquea el job sast-semgrep; WARNING solo se reporta.
+rules:
+  - id: thehouse-log-sensitive-data
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      No registres contraseñas, tokens, llaves ni cadenas de conexión en logs
+      (AGENTS.md: secretos y exposición de datos).
+    patterns:
+      - pattern: $LOGGER.$METHOD(..., $ARG, ...)
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: ^Log(Trace|Debug|Information|Warning|Error|Critical)$
+      - metavariable-regex:
+          metavariable: $ARG
+          regex: (?i)(^|\.)(password|passwd|pwd|secret|clientsecret|token|accesstoken|refreshtoken|jwt|connectionstring|signingkey|apikey)$
+    paths:
+      exclude:
+        - "**/*Tests/**"
+
+  - id: thehouse-hardcoded-mongodb-credentials
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      Cadena de conexión de MongoDB con usuario y contraseña en el código.
+      Usa configuración o secretos de Azure Container Apps.
+    pattern-regex: mongodb(\+srv)?://[^:/\s"]+:[^@\s"]+@
+    paths:
+      exclude:
+        - "**/*Tests/**"
+
+  - id: thehouse-hardcoded-signing-key
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      Llave de firma JWT escrita en el código. Debe venir de configuración
+      protegida (Jwt__SigningKey como secreto).
+    pattern-regex: (?i)signingkey\s*=\s*"[^"]{8,}"
+    paths:
+      exclude:
+        - "**/*Tests/**"
+
+  - id: thehouse-tls-validation-disabled
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      No desactives la validación de certificados TLS (constitución §10).
+    pattern-either:
+      - pattern: HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+      - pattern-regex: ServerCertificateCustomValidationCallback\s*=\s*\([^)]*\)\s*=>\s*true
+
+  - id: thehouse-weak-hash
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      MD5 y SHA-1 no son aceptables para seguridad. Usa SHA-256 o superior,
+      o PBKDF2 para contraseñas (M-BE-032).
+    pattern-either:
+      - pattern: MD5.Create(...)
+      - pattern: MD5.HashData(...)
+      - pattern: SHA1.Create(...)
+      - pattern: SHA1.HashData(...)
+
+  - id: thehouse-insecure-random
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      System.Random no es criptográficamente seguro. Para tokens, códigos o
+      identificadores usa RandomNumberGenerator.
+    pattern: new Random(...)
+    paths:
+      exclude:
+        - "**/*Tests/**"
+
+  - id: thehouse-jwt-validation-disabled
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      La validación de JWT debe comprobar firma, emisor, audiencia y
+      expiración (constitución §19).
+    pattern-regex: \b(ValidateLifetime|ValidateIssuer|ValidateAudience|ValidateIssuerSigningKey|RequireSignedTokens|RequireExpirationTime)\s*=\s*false\b
+    paths:
+      exclude:
+        - "**/*Tests/**"
+
+  - id: thehouse-exception-details-to-client
+    languages: [csharp]
+    severity: ERROR
+    message: >-
+      No devuelvas mensajes ni trazas de excepciones al cliente; usa Problem
+      Details sin detalles internos (NV-01).
+    pattern-either:
+      - pattern-regex: detail:\s*\w+\.(Message|StackTrace)\b
+      - pattern-regex: WriteAsync\(\s*\w+\.(Message|StackTrace|ToString\(\))
+
+  - id: thehouse-bson-parse-input
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      BsonDocument.Parse con datos variables puede permitir inyección NoSQL.
+      Construye los filtros con Builders<T>.Filter.
+    patterns:
+      - pattern: BsonDocument.Parse($X)
+      - pattern-not: BsonDocument.Parse("...")
