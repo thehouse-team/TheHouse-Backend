@@ -164,5 +164,20 @@ Ejecutado el 2026-11-05 en la rama `fix/u2-review` con la autorización humana �
 - `variables.tf` valida el tope (mayor que 0 y máximo 0.16 GB/día = 5 GB / 31 días) y fija la retención en 30 días; `outputs.tf` expone el nombre del workspace.
 - `terraform fmt -check -recursive` → exit 0; `terraform validate` → `Success! The configuration is valid.`
 - `terraform plan` (guardado fuera del repositorio): **1 a crear** (workspace), **1 a cambiar en sitio** (entorno: `logs_destination` y `log_analytics_workspace_id`), **0 a destruir**. No reemplaza el entorno ni la app: la opción A es viable y no se necesita la opción B.
-- **`terraform apply` NO ejecutado:** espera el `OK PARA APPLY` humano. T24 queda abierta hasta aplicar y verificar; T25 depende de T24.
+- `terraform apply` ejecutado tras el `OK PARA APPLY` humano de Victor Manuel Jose Jose (2026-11-05), con el plan revisado.
 - Tras el apply, el estado de Terraform contendrá las claves compartidas del workspace (atributos sensibles): `terraform.tfstate` debe seguir fuera de Git y no compartirse por chat.
+
+### Resultado del apply (T24 completada)
+
+- `Apply complete! Resources: 1 added, 1 changed, 0 destroyed.` El entorno se modificó en sitio en 2 min 9 s; el state previo se respaldó fuera del repositorio.
+- Verificación en Azure: workspace `log-thehouse-u2` con `PerGB2018`, retención 30 días, `dailyQuotaGb` 0.1 y `Succeeded`; entorno `cae-thehouse-u2` con destino `log-analytics`; app `ca-thehouse-u2` en la misma revisión (`ca-thehouse-u2--0000008`), misma URL, réplicas 0–2; `/health/live` y `/health/ready` → 200.
+- `terraform plan` posterior: `No changes. Your infrastructure matches the configuration.`
+- Precio verificado en la página oficial de Azure Monitor (2026-11-05): 5 GB/mes gratuitos por cuenta de facturación en Analytics Logs y 31 días de retención incluidos.
+
+### T25 — en curso (ABIERTA)
+
+- Logs de **sistema** recibidos en `ContainerAppSystemLogs_CL` unos 5 minutos después del apply (7 registros: `ContainerCreated`, `ContainerStarted`, `RevisionUpdate`, `ContainerAppReady`, `ProbeFailed` de arranque). No contienen PII, tokens ni cadenas de conexión.
+- Logs de **consola** (`ContainerAppConsoleLogs_CL`): sin registros tras 15 minutos de espera con tráfico de prueba. Hipótesis: la réplica activa no tomó el nuevo destino de logs; requiere reiniciar la revisión, lo que necesita autorización humana.
+- Consulta usada (API de Log Analytics vía `az rest`, sin extensiones):
+  `union isfuzzy=true ContainerAppConsoleLogs_CL, ContainerAppSystemLogs_CL | where TimeGenerated > ago(60m) | summarize registros=count() by Type`
+- Pendiente para cerrar T25: logs de consola con registros reales del backend, revisión de PII/secretos en ellos y registro del uso de ingestión y del costo en Cost Management.

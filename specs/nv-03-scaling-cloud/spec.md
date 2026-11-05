@@ -132,7 +132,7 @@ Evidencia de precio (Azure Retail Prices API, `prices.azure.com`, región `eastu
 | Analytics Logs Data Ingestion | más de 5 GB/mes | 2.76 USD/GB |
 | Analytics Logs Data Retention | más allá del periodo incluido | 0.12 USD/GB/mes |
 
-Cálculo: tope de 0.1 GB/día × 31 días = 3.1 GB/mes, por debajo del tramo de 5 GB a 0.00 USD. **PENDIENTE DE VERIFICAR** en la documentación vigente de Azure Monitor, antes del apply, que el tramo gratuito de 5 GB aplica a esta cuenta de facturación y que 30 días de retención están dentro del periodo incluido; si no se confirma, el resultado es **BLOCKED**.
+Cálculo: tope de 0.1 GB/día × 31 días = 3.1 GB/mes, por debajo del tramo de 5 GB a 0.00 USD. **Verificado el 2026-11-05** en la página oficial de precios de Azure Monitor: los primeros 5 GB/mes por cuenta de facturación son gratuitos en Analytics Logs (pago por uso) y se incluyen 31 días de retención sin costo, por lo que 30 días quedan dentro del periodo incluido.
 
 Al alcanzar el tope diario, Azure deja de ingerir logs hasta el día siguiente; se acepta la pérdida de los logs restantes de ese día (NV-03-RK11).
 
