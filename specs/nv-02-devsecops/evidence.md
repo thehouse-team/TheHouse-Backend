@@ -8,9 +8,9 @@
 | Fecha | 2026-11-05 |
 | Aprobación | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» de NV-02 1.1.0-u2) |
 | Rama | `fix/u2-review` |
-| Resultado | **PASS WITH WARNINGS (local)**: implementación lista; falta el primer run en GitHub Actions |
+| Resultado | **PASS WITH WARNINGS**: CI en verde en el PR #3; pendientes T11 (mutación), T14 (ruleset) y T15 (cierre) |
 
-Ninguna task se marca como completada todavía: su aceptación exige evidencia de un run real en GitHub Actions. Esta evidencia registra la implementación y la validación local.
+Las tasks T01–T10, T12 y T13 se cierran con la evidencia de los runs de GitHub Actions de la §7. T11, T14 y T15 siguen abiertas.
 
 ## 1. Archivos creados o modificados
 
@@ -86,3 +86,31 @@ Después del primer run de `CI` en el pull request:
 - Ejecución manual de `mutation-stryker` (`run_mutation = true`) para la línea base (T11).
 - Ruleset de `main` creado y verificado (T14).
 - Revisión final de seguridad y coherencia (T15).
+
+## 7. Runs en GitHub Actions — PR #3 (`fix/u2-review` → `main`)
+
+### Run 1 — `42122260637` (commit `c784603`)
+
+- `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks` e `iac-terraform`: éxito.
+- `container-security`: **falla**. Trivy reportó `Total: 2 (HIGH: 2)`: CVE-2026-109518 en `apt` 2.8.3 de `mcr.microsoft.com/dotnet/aspnet:10.0.14-noble`, corregida en `2.8.4ubuntu0.1`.
+- `quality-gate`: falla (BLOCKED) por `container-security`, como corresponde.
+- Corrección: commit `6bd3e92`, el `Dockerfile` ejecuta `apt-get upgrade` en la etapa de runtime para aplicar los parches del sistema operativo. No se registraron excepciones.
+
+### Run 2 — `42122674335` (commit `6bd3e92`) — ✅ todos los checks en verde
+
+URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42122674335
+
+| Job | Resultado | Duración | Hallazgos |
+| --- | --- | --- | --- |
+| `build-test` | ✅ success | 0.8 min | 429 pruebas aprobadas; cobertura publicada en el resumen |
+| `sast-semgrep` | ✅ success | 0.5 min | Pruebas de las 9 reglas propias en verde; 0 hallazgos en todas las severidades |
+| `sca-sbom` | ✅ success | 0.4 min | 0 dependencias vulnerables; SBOM CycloneDX generado |
+| `secrets-gitleaks` | ✅ success | 0.1 min | 0 secretos en todo el historial |
+| `container-security` | ✅ success | 0.9 min | Trivy imagen: 0 vulnerabilidades (Ubuntu 24.04, `TheHouse.deps.json` y runtime .NET 10.0.14). Trivy config: 0 misconfiguraciones en `Dockerfile` e `infra/terraform`. Dockle: 0 FATAL, 0 WARN, 2 INFO (CIS-DI-0005 content trust, CIS-DI-0008 setuid/setgid), 14 PASS. Usuario no root verificado |
+| `iac-terraform` | ✅ success | 0.1 min | `fmt`, `init -backend=false` y `validate` correctos |
+| `quality-gate` | ✅ success | 0 min | PASS |
+| `mutation-stryker` | ⏭️ skipped | — | Solo semanal o manual, por diseño |
+
+- Artefactos (14 días): `test-results` (259 KB), `semgrep-sarif` (23 KB), `sca-sbom` (5 KB), `gitleaks-report` (6 KB) y `container-security` (1 KB).
+- Costo (NV-02-R13): el repositorio es público, por lo que los minutos de GitHub Actions no tienen costo. El run completo tarda ~1.2 minutos de reloj.
+- Los dos avisos INFO de Dockle no bloquean: content trust aplica a la firma de imágenes (NV-09, Cosign) y los binarios setuid/setgid son los de la imagen base de Ubuntu.
