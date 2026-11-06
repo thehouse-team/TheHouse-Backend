@@ -441,3 +441,34 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** sin aplicación del ruleset, los checks requeridos y la aprobación obligatoria no bloquean el merge. Un repositorio público además da minutos ilimitados de Actions y habilita gratis SARIF en code scanning y SonarCloud (COST-001).
 - **Impacto:** antes de hacerlo público se buscó localmente en todo el historial patrones de secretos, sin hallazgos (Gitleaks lo confirmará en CI). Con el repositorio público, `main` todavía no tiene ruleset: las capturas del profesor eran la referencia a replicar. Se crea después del primer run de CI con los checks requeridos (NV-02 T14). **Actualización 2026-11-05:** ruleset `Main Proteccion` (ID 26657131) creado por Victor y activo, sin bypass, con 1 aprobación y los 7 checks de `CI` requeridos; verificado con la API (NV-02 `evidence.md` §9).
+
+## M-BE-051 — Aprobación de NV-09 (CD) y sus decisiones
+
+- **ID:** M-BE-051
+- **Decisión:** aprobar NV-09 1.0.0-u2 y autorizar T01–T14 con las decisiones de su §7: el CD es dueño de la imagen (`ignore_changes` sobre `template[0].container[0].image`); identidad administrada `id-thehouse-u2-deploy` con credencial federada solo para el Environment `production`; rol de mínimo privilegio con alcance al recurso; Environment `production` con Victor e Isai como revisores, sin autoaprobación y solo desde `main`; firma Cosign keyless; smoke en producción sin escrituras persistentes; DAST activo solo en el entorno efímero y pasivo en producción; seed en producción como operación humana; `VERSIONING.md` actualizado por pull request.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose («EJECUTA NV-09 1.0.0-u2, tasks T01–T14»).
+- **Justificación:** observación del profesor (sin CD) y despliegue manual desde la computadora del responsable; se busca una entrega trazable, firmada y aprobada, a costo $0 y sin secretos de larga duración.
+- **Impacto:** `terraform apply` de T01/T02 sigue requiriendo «OK PARA APPLY». T15–T19 (RESTler, performance, primer despliegue, seed y cierre) no están autorizadas. NBomber queda PENDIENTE DE VERIFICAR por licencia.
+
+## M-BE-052 — Rol personalizado para el CD en lugar del rol integrado
+
+- **ID:** M-BE-052
+- **Decisión:** usar el rol personalizado `TheHouse CD Deployer (rg-thehouse-u2)` (lectura y escritura de la Container App, lectura de revisiones y réplicas, `managedEnvironments/join/action` y lectura de operaciones) asignado a `ca-thehouse-u2` y a `cae-thehouse-u2`, en lugar del rol integrado `Container Apps Contributor`.
+- **Estado:** APROBADO (aplicación de la §7 de NV-09: "rol integrado si cubre la actualización, o personalizado").
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose (vía M-BE-051).
+- **Justificación:** el rol integrado incluye `Microsoft.App/containerApps/*/delete` y `*/action`, que abarca `listSecrets`: la identidad del CD podría borrar la app o leer las cadenas de conexión y la llave JWT.
+- **Impacto:** si `az containerapp update` requiere una acción adicional, el primer despliegue fallará sin cambiar la app y la acción se agregará con registro, nunca `listSecrets` ni `delete` sin una decisión nueva.
+
+## M-BE-053 — MongoDB 7.0 en el entorno efímero del CD
+
+- **ID:** M-BE-053
+- **Decisión:** usar `mongo:7.0.45` como servicio del entorno efímero de NV-09 (smoke completo y ZAP).
+- **Estado:** APROBADO (ajuste técnico dentro de T09).
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose (vía M-BE-051).
+- **Justificación:** MongoDB 8.0+ no arranca en los runners de GitHub con kernel Linux ≥ 6.19 (tcmalloc/rseq; SERVER-121912 cerrado, SERVER-125742 abierto). Verificado en el run 42170097726.
+- **Impacto:** producción sigue en Atlas 8.0. Las consultas de la API son compatibles con 7.0; se vuelve a 8.x cuando MongoDB publique la corrección.
+

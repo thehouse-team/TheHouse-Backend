@@ -46,23 +46,37 @@ Published images must contain at least:
 
 The source label links the package to the GitHub repository.
 
-## 5. Publication gate
+## 5. Publication and deployment gate (NV-09)
 
-U2 image publication is manual.
+Images are published and deployed only by:
+
+.github/workflows/cd.yml
 
 The workflow:
 
-.github/workflows/u2-ghcr-publish.yml
+- runs after the `CI` workflow succeeds on a push to `main`, or manually from `main`
+- builds the exact commit validated by CI and pushes `sha-<commit>`
+- rescans the published digest with Trivy (Critical/High with a fix block)
+- signs the digest with Cosign keyless and attests a CycloneDX SBOM
+- verifies the image in an ephemeral environment (smoke tests and OWASP ZAP)
+- deploys to Azure Container Apps by digest only after approval in the `production` Environment
+- verifies the signature again before deploying and rolls back automatically if the production smoke tests fail
 
-requires:
+Credentials:
 
-- branch `main` or `feature/u2-entrega`
-- explicit workflow_dispatch
-- explicit `PUBLISH` confirmation
-- `packages: write`
-- GitHub-provided `GITHUB_TOKEN`
+- GHCR: GitHub-provided `GITHUB_TOKEN` (`packages: write` only in the publish job)
+- Azure: OIDC federated credential bound to the `production` Environment (no client secret)
+- Cosign: keyless (Sigstore), signature identity `https://github.com/thehouse-team/TheHouse-Backend/.github/workflows/cd.yml@refs/heads/main`
 
-No personal access token is stored in the repository.
+No personal access token or long-lived secret is stored in the repository.
+
+The previous manual workflow `u2-ghcr-publish.yml` was retired by NV-09 T08.
+
+Verify an image before using it:
+
+```bash
+cosign verify ghcr.io/thehouse-team/thehouse-backend@sha256:<digest>   --certificate-identity https://github.com/thehouse-team/TheHouse-Backend/.github/workflows/cd.yml@refs/heads/main   --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
 
 ## 6. Mutability policy
 
@@ -89,11 +103,9 @@ This allows telemetry to be associated with the exact deployed build.
 
 ## 8. Package visibility
 
-The publication workflow does not change package visibility.
+The GHCR package is public (verified 2026-11-05 with an anonymous pull token), consistent with the public repository (M-BE-050). Azure Container Apps pulls it without registry credentials.
 
-The first publication must be reviewed before any visibility change.
-
-Do not make the GHCR package public merely to simplify deployment without an explicit architecture/security decision.
+Public visibility does not relax the digest, signature or approval rules above.
 
 ## 9. U2 evidence
 
@@ -102,12 +114,16 @@ For every image accepted for U2 evidence, record:
 - repository
 - branch
 - commit SHA
-- publication workflow run ID
+- CD workflow run ID and approver(s)
 - image tag
 - image digest
 - publication timestamp
 - visibility
+- signature identity
 - deployment revision, when applicable
+- previous image (rollback target)
+
+The `cd-summary` job writes this record to the run summary and to the `deployment-record.json` artifact. Records are added to section 11 through a pull request, because the `main` ruleset does not allow direct pushes.
 
 ## 10. Terraform rule
 
@@ -116,3 +132,9 @@ Terraform must not depend on `latest`.
 The final Container Apps revision must consume an immutable image identity, preferably the OCI digest.
 
 No GHCR credentials may be committed to Git or embedded in the Docker image.
+
+## 11. Deployment log
+
+| Date | Commit | Digest | CD run | Approver(s) | Revision | Result |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-05 (before NV-09) | `c6518862788407fe678c1a524ad4d4b764dc6a71` | `sha256:15f196af9c32fc843cf1723b4615f896668b0368b292e1246807ab0d03194775` | manual (`u2-ghcr-publish.yml`) | — | — | Running in Azure (M-BE-036) |
