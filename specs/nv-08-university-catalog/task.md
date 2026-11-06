@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **✅ EJECUTADA Y VALIDADA EN LOCAL (1.1.0-u2); VERIFICACIÓN EN AZURE PENDIENTE DE DESPLIEGUE** |
+| Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks totales | 13 |
@@ -91,7 +91,7 @@
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **✅ EJECUTADA Y VALIDADA EN LOCAL (1.1.0-u2); VERIFICACIÓN EN AZURE PENDIENTE DE DESPLIEGUE** |
+| Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
 ## Cierre U2 NV-08
 
 | Campo | Resultado |

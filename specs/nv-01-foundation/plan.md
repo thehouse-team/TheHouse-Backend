@@ -8,7 +8,7 @@
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
 | Spec | `spec.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -250,7 +250,7 @@ Los umbrales numéricos se fijan en las specs funcionales y en NV-03. Una suite 
 - Revisar que OpenAPI no exponga información sensible.
 - Revisar que el rate limiting no pueda eludirse trivialmente por IP falsificada.
 - Revisar que la compresión no introduzca riesgos en respuestas autenticadas.
-- No ejecutar scanners de NV-02; NV-02 sigue **⛔ NO EJECUTAR**.
+- Los scanners pertenecen a NV-02 (CI, completada el 2026-11-05); este plan no los ejecuta.
 
 ## 8. Costo
 
@@ -305,4 +305,4 @@ Este plan no autoriza:
 - Iniciar NV-02, NV-03, NV-04, NV-05, NV-06, NV-07 o NV-08.
 - Seleccionar o provisionar servicios cloud.
 
-Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B**.
+Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida).

@@ -134,6 +134,6 @@ El usuario confirmó `024d5f7`, workflow `U2 Linux Validation`, GitHub Actions /
 
 Se verificó la aceptación de T01–T12 y T14–T18 contra R01–R12, fases y evidencia; se cierran esas 17 tasks. SDD y seguridad: **PASS WITH WARNINGS**, sin hallazgos bloqueantes dentro de Foundation (detalle, responsables y acciones en `evidence.md`). Configuración inválida y compression negotiation: resueltas. Forwarded headers: configuración segura; solo la validación del ingress real de Azure queda en NV-03, fuera del cierre NV-01.
 
-T13 permanece **[ ] ABIERTA, NO EJECUTADA**, fuera de U2. NV-02 permanece **⛔ NO EJECUTAR**. Sin cambios de código, `.csproj`, workflow o `global.json`; sin nuevas ejecuciones, commit/push ni operaciones sobre stashes. No se avanza a NV-04.
+T13 permanece **[ ] ABIERTA, NO EJECUTADA**, fuera de U2. NV-02 (CI) quedó completada el 2026-11-05 (M-BE-049). Sin cambios de código, `.csproj`, workflow o `global.json`; sin nuevas ejecuciones, commit/push ni operaciones sobre stashes. No se avanza a NV-04.
 
 **NV-01 Foundation 1.1.0-u2: ✅ EJECUTADA, VALIDADA Y CERRADA PARA U2**

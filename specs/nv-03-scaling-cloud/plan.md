@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 4 de 25 tasks (T13, T15, T23, T24); ver `evidence.md`** |
 | Spec | `spec.md` 1.2.0-u2 |
 | Tasks | `task.md` 1.2.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -35,7 +35,7 @@ T22, T23
 Task no U2:
 
 ```text
-T14 — handoff de imagen a NV-02; NV-02 sigue ⛔ NO EJECUTAR.
+T14 — handoff de imagen (digest y SBOM); lo cubre NV-09 (CD) desde el 2026-11-06.
 ```
 
 ## 3. Fases
@@ -333,13 +333,13 @@ Un free tier, un crédito o una alerta de presupuesto no prueban costo cero. Si 
 | R04 | F2 | T03, T04, T05, T18, T19 |
 | R05 | F2 | T06, T07, T18, T19 |
 | R06 | F3 | T10, T18, T19 |
-| R07 | F4 | T11, T12, T19 |
+| R07 | F4 | T11, T12, T19, T24 |
 | R08 | F4 | T13, T14, T22 |
 | R09 | F5 | T15, T18, T20 |
 | R10 | F5 | T16, T17 |
 | R11 | F6 | T18 |
 | R12 | F6 | T20, T23 |
-| R13 | F6 | T12, T17, T20, T21, T23 |
+| R13 | F6 | T12, T17, T20, T21, T23, T24, T25 |
 | R14 | F4 | T22 |
 | R15 | F4 | T24, T25 |
 
@@ -354,4 +354,4 @@ Este plan no autoriza:
 - Ejecutar NV-02 o declarar sus controles.
 - Afirmar costo $0 sin evidencia.
 
-Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B**.
+Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **🟡 EJECUCIÓN PARCIAL — 4 de 25 tasks**; ver `evidence.md`.

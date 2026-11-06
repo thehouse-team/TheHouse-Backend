@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -189,9 +189,9 @@ University Catalog no requiere servicios pagos. MongoDB/Redis deben caber en COS
 | R04 | F2 | T04, T08, T09, T10 |
 | R05 | F2 | T03, T05, T06, T09 |
 | R06 | F3 | T05, T06, T07, T09 |
-| R07 | F4 | T10, T11 |
+| R07 | F4 | T10, T11, T13 |
 | R08 | F3 | T12, T13 |
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, build, tests, Docker, Terraform ni despliegue. Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B**.
+Este plan no autoriza código, paquetes, build, tests, Docker, Terraform ni despliegue. Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)**.

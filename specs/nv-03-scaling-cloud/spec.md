@@ -8,8 +8,9 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 4 de 25 tasks (T13, T15, T23, T24); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
+| Requerimientos de origen | RNF-05, RNF-06, RNF-08 (transversales) (`Requerimientos_TheHouse_v2`) |
 | Plan | `plan.md` 1.2.0-u2 |
 | Tasks | `task.md` 1.2.0-u2 |
 | Precondición | NV-01 U2 y specs funcionales U2 aprobadas documentalmente; M-BE-028; COST-001 |
@@ -39,7 +40,7 @@ Definir los requisitos verificables para contenerizar, publicar, aprovisionar, d
 5. Existe evidencia de costo compatible con COST-001 antes de `terraform apply`; si no, BLOCKED.
 6. Existe autorización humana de Fase B para Docker, GHCR, Terraform y Azure.
 7. Existe una suscripción Azure, región autorizada y credenciales temporales suministradas por el humano.
-8. NV-02 permanece **⛔ NO EJECUTAR**; sus scanners y quality gates no forman parte de U2.
+8. Los scanners y quality gates viven en NV-02 (CI, completada el 2026-11-05) y la publicación en NV-09 (CD); no forman parte de esta spec.
 
 ## 4. Alcance U2
 
@@ -78,13 +79,13 @@ Definir los requisitos verificables para contenerizar, publicar, aprovisionar, d
 | NV-03-R04 | Redis distribuido | Redis tiene topología, namespace, TTL, autenticación/TLS cuando aplique, timeouts y comportamiento ante fallo; no es fuente de verdad ni fallback local de seguridad. | F2 | T03, T04, T05, T18, T19 |
 | NV-03-R05 | Conectividad MongoDB | La conexión usa pooling, timeouts, cancelación, TLS, credenciales protegidas e índices justificados; el fallo se refleja en readiness sin filtrar secretos. | F2 | T06, T07, T18, T19 |
 | NV-03-R06 | HTTPS/TLS | Todo acceso público usa HTTPS con certificado válido; HSTS, terminación, renovación y confianza en cabeceras de proxy están definidos y probados; no se desactiva la validación. | F3 | T10, T18, T19 |
-| NV-03-R07 | Observabilidad U2 | Trazas, métricas y logs comparten correlación; se controlan cardinalidad, PII y retención; el exportador y la retención caben en COST-001. | F4 | T11, T12, T19 |
+| NV-03-R07 | Observabilidad U2 | Trazas, métricas y logs comparten correlación; se controlan cardinalidad, PII y retención; el exportador y la retención caben en COST-001. | F4 | T11, T12, T19, T24 |
 | NV-03-R08 | Imagen Docker y GHCR | La imagen es multi-stage, mínima, no root, sin secretos, con base fijada, healthcheck y tag inmutable; se publica en GHCR con trazabilidad a commit. | F4 | T13, T14, T22 |
 | NV-03-R09 | Terraform | La infraestructura se describe declarativamente con módulos, variables, versiones fijadas, estado protegido, etiquetado y plan/apply/destroy; no contiene secretos. | F5 | T15, T18, T20 |
 | NV-03-R10 | Azure U2 y evidencia de costo | Azure Container Apps se usa conforme a M-BE-028; existe evidencia vigente de región, SKU, free allowance, cuotas, tarjeta, riesgo y costo esperado; si no se demuestra $0, BLOCKED. | F5 | T16, T17 |
 | NV-03-R11 | Creación de infraestructura | La creación sigue un plan aprobado, incluye dos réplicas, HTTPS, Redis, MongoDB y observabilidad, y produce inventario y evidencia de costo inicial. | F6 | T18 |
 | NV-03-R12 | Destrucción y apagado | Existe inventario, scale-to-zero cuando aplique, plan de destrucción, verificación de recursos residuales y evidencia de costo posterior. | F6 | T20, T23 |
-| NV-03-R13 | Arquitectura de costo $0 | El costo total del ciclo de vida es $0, incluidos compute, dos réplicas, TLS, logs, Redis, MongoDB, registry y egress; si no se demuestra, BLOCKED. | F6 | T12, T17, T20, T21, T23 |
+| NV-03-R13 | Arquitectura de costo $0 | El costo total del ciclo de vida es $0, incluidos compute, dos réplicas, TLS, logs, Redis, MongoDB, registry y egress; si no se demuestra, BLOCKED. | F6 | T12, T17, T20, T21, T23, T24, T25 |
 | NV-03-R14 | Versionamiento del despliegue | `VERSIONING.md` registra versión, fecha, imagen, tag, commit, entorno, URL y estado, sin secretos; la información coincide con GHCR y Azure. | F4 | T22 |
 | NV-03-R15 | Observabilidad persistente en la nube | Los logs de consola y de sistema de Container Apps (eventos y errores) se conservan en un servicio de Azure con ingestión limitada (`daily_quota_gb` de 0.1) y retención de 30 días; existe una consulta de errores documentada; sin PII ni secretos; costo $0 con evidencia de precio vigente; si Terraform propone reemplazar el entorno o la app, BLOCKED y se usa la alternativa documentada. | F4 | T24, T25 |
 
@@ -220,9 +221,9 @@ Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran late
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 3 |
+| Tasks completadas | 4 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 4 de 25 tasks (T13, T15, T23, T24); ver `evidence.md`** |
 
 ## 14. Aprobación documental y ejecución
 
