@@ -14,6 +14,7 @@
 | No funcionales | RNF-01, RNF-03, RNF-19 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Moderation |
 | Precondición | NV-12 y NV-13 |
 | Relación | Aprueba edificios de NV-12, lee documentos de NV-13, oculta contenido de NV-14/NV-16/NV-19 y suspende cuentas (NV-10) |
 
@@ -30,7 +31,7 @@ Definir roles administrativos, el flujo de revisión de edificios, los reportes 
 ## 3. Precondiciones
 
 1. NV-12 y NV-13.
-2. Decisión sobre la asignación de roles (§12).
+2. Decisión sobre la asignación de roles (§13).
 3. Autorización «EJECUTA».
 
 ## 4. Alcance
@@ -65,22 +66,35 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - `targetType` = `room`, `building`, `user`, `message` o `review`; `reason` de catálogo (`fake`, `fraud`, `inappropriate`, `spam`, `other`); `details` ≤ 500.
 - Las decisiones de revisión y moderación exigen `reason`.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
 
-- `users.roles[]` (`reviewer`, `admin`) incluido como claim en el JWT.
+Módulo **Moderation** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `verification_reviews`, `reports`, `audit_events` |
+| Usa (puertos de otros módulos) | Listings `IListingOwnership` (NV-12); Media `IDocumentAccess` (NV-13); Identity `IRoleQuery` (NV-10) |
+| Publica (eventos de dominio) | `BuildingReviewDecided`, `UserSuspended`, `ContentHidden` |
+| Consume (eventos de dominio) | `BuildingPublicationRequested (NV-12)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
+
+- Roles `reviewer` y `admin`: datos de Identity (NV-10, `users.roles[]`) emitidos como claim del JWT; Moderation los consulta con `IRoleQuery` y no los modifica.
 - `verification_reviews`: `buildingId`, `reviewerId`, `decision`, `reason`, `createdAt`.
 - `reports`: `reporterId`, `targetType`, `targetId`, `reason`, `details`, `status` (`open`, `resolved`, `dismissed`), `resolution`.
 - `audit_events`: `actorId`, `action`, `target`, `reason`, `createdAt`; solo inserción.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Aprobar un edificio lo pasa a Verificado y sus cuartos Listos a Libres; pedir corrección lo regresa a Borrador con motivo; rechazar lo deja Rechazado.
 2. Un revisor no puede revisar sus propios edificios.
-3. Suspender una cuenta revoca todas sus sesiones (NV-10) y oculta sus publicaciones.
+3. Suspender una cuenta publica `UserSuspended`: Identity revoca todas sus sesiones y Listings, Search y Messaging ocultan o bloquean su contenido.
 4. Un usuario solo reporta una vez el mismo objetivo mientras el reporte esté abierto.
 5. Toda acción administrativa y toda lectura de documentos queda en `audit_events`.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -98,7 +112,7 @@ Específicas de esta spec:
 - Enlaces a documentos de 5 minutos, de un solo uso y auditados (RNF-19).
 - `audit_events` no admite actualización ni borrado por la aplicación.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -113,7 +127,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -125,7 +139,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-21-R06 | Bitácora inmutable | `audit_events` solo de inserción; prueba que no existe ruta para modificarla. | F3 | T06 |
 | NV-21-R07 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T07, T08, T09 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -134,15 +148,15 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Asignación de roles | Comando CLI `--grant-role` similar al seed, con registro en `audit_events` | PENDIENTE |
 | Retención de reportes | 1 año | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | — |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -150,13 +164,13 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-21-RK02 | Revisión sesgada o autoaprobación | Fraude | Regla de no revisar lo propio y auditoría |
 | NV-21-RK03 | Reportes abusivos | Moderación saturada | Rate limit y un reporte abierto por objetivo |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-12 (estados), NV-13 (documentos), NV-10 (revocación).
 - NV-14, NV-16 y NV-19 (contenido ocultable).
 - NV-20 (notificar decisiones).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -169,6 +183,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

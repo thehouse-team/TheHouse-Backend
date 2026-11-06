@@ -14,6 +14,7 @@
 | No funcionales | RNF-11, RNF-12, RNF-13, RNF-14 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | SmartMatch |
 | Precondición | NV-11 y NV-14 |
 | Relación | NV-24 explica los resultados; NV-25 mide su uso |
 
@@ -30,7 +31,7 @@ Definir el cálculo de compatibilidad explicable y versionado, su exposición po
 ## 3. Precondiciones
 
 1. NV-11 (preferencias) y NV-14 (cuartos publicables).
-2. Decisión del enfoque de modelo (§12).
+2. Decisión del enfoque de modelo (§13).
 3. Autorización «EJECUTA».
 
 ## 4. Alcance
@@ -64,14 +65,27 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - Cada puntaje: `roomId`, `score` (entero 0–100), `factors { budget, distance, services, modality, propertyType, extras }` (0–100 cada uno), `modelVersion`.
 - Los invitados envían el mismo objeto de preferencias de NV-11; no se persiste.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **SmartMatch** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `smart_match_feedback`, `smart_match_dismissals`, `smart_match_models (metadatos)` |
+| Usa (puertos de otros módulos) | Profile `IPreferencesQuery` (NV-11); Search `IRoomCatalogQuery` (NV-14) |
+| Publica (eventos de dominio) | `RecommendationShown`, `RecommendationClicked`, `FeedbackRecorded` |
+| Consume (eventos de dominio) | `PreferencesChanged (NV-11)`, `UserDeleted (NV-10)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - Modelo base: suma ponderada de factores normalizados con pesos versionados en configuración (explicable por diseño).
-- Modelo entrenado (fase 2): ML.NET con los mismos factores como variables, entrenado fuera de línea con retroalimentación; artefacto versionado e inmutable.
+- Modelo entrenado (fase 2): ML.NET como adaptador de Infrastructure detrás del puerto `ICompatibilityModel` (Domain no conoce ML.NET); el entrenamiento ocurre fuera de línea en una herramienta separada que no se despliega, y produce un artefacto versionado e inmutable que el API solo carga.
 - `smart_match_feedback`: `userId`, `roomId`, `useful`, `modelVersion`, `createdAt`.
 - `smart_match_dismissals`: `userId`, `roomId`, `createdAt`; índice único.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. El puntaje es determinista para las mismas preferencias, cuarto y `modelVersion` (RNF-13).
 2. Cada factor y el total se acotan a 0–100.
@@ -79,7 +93,7 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 4. Cambiar las preferencias (`version` de NV-11) invalida cualquier caché de puntajes.
 5. Un modelo entrenado solo reemplaza al base si mejora la métrica acordada (por ejemplo, NDCG@10) en un conjunto de validación, con evidencia.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -97,7 +111,7 @@ Específicas de esta spec:
 - Máximo 50 cuartos por cálculo para acotar el costo de CPU.
 - El modelo y sus pesos no se exponen; solo el desglose por factor.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -110,7 +124,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -123,7 +137,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-23-R07 | Minimización y límites | Prueba que el cálculo no lee campos personales; límites de tamaño y rate limit verificados. | F3 | T07 |
 | NV-23-R08 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T08, T09, T10 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -133,16 +147,16 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Pesos iniciales | Presupuesto 30, distancia 25, servicios 20, modalidad 10, tipo 10, extras 5 | PROPUESTO |
 | Métrica de promoción | NDCG@10 sobre retroalimentación etiquetada | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | ML.NET y cálculo en el mismo contenedor | $0 | Sin servicios de ML administrados |
 | Entrenamiento fuera de línea | $0 | En el runner de GitHub Actions o local |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -151,12 +165,12 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-23-RK03 | Costo de CPU | Latencia | Límite de 50 cuartos y caché por versión de preferencias |
 | NV-23-RK04 | Usuarios lo toman como garantía | Expectativas falsas | Mensaje de apoyo (RES-06) en el cliente |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-11 (preferencias) y NV-14 (cuartos).
 - NV-24 (explicaciones) y NV-25 (métricas).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -169,6 +183,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

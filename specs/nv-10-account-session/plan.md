@@ -114,6 +114,7 @@ F4 Pruebas y evidencia
 - `DELETE /users/me` exige la contraseña actual (reautenticación) para evitar borrados con un token robado.
 - Respuestas idénticas y con tiempo similar para correos existentes e inexistentes (OWASP API2).
 - Los enlaces de correo usan un esquema de la app (deep link) y no incluyen el correo del usuario.
+- Transporte del refresh token en el cuerpo JSON, nunca en cookies (sin riesgo CSRF); la app lo guarda en almacenamiento cifrado del sistema (Android Keystore). Decisión de transporte exigida por constitution §20.
 - Revisión de seguridad (OWASP API Top 10) al cierre de cada fase.
 
 ## 7. Costo
@@ -128,7 +129,7 @@ F4 Pruebas y evidencia
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
 | G0-Doc | Antes de ejecutar | Aprobación documental de 1.0.0-borrador | BLOCKED |
-| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §12 de la spec resueltas o aceptadas | BLOCKED |
+| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | BLOCKED |
 | G1 | Fin F1 | Tasks de F1 cerradas con evidencia | No avanzar |
 | G2 | Fin F2 | Tasks de F2 cerradas con evidencia | No avanzar |
 | G3 | Fin F3 | Tasks de F3 cerradas con evidencia | No avanzar |

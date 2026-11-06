@@ -14,6 +14,7 @@
 | No funcionales | RNF-11, RNF-12, RNF-15, RNF-16 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | SmartMatchExplanations |
 | Precondición | NV-23 |
 | Relación | Explica los puntajes de NV-23; si no está disponible, NV-23 sigue funcionando (RNF-16) |
 
@@ -30,7 +31,7 @@ Definir explicaciones fundamentadas en datos, con validación de alucinaciones, 
 ## 3. Precondiciones
 
 1. NV-23 (puntaje y factores).
-2. Decisión de proveedor de IA (§12).
+2. Decisión de proveedor de IA (§13).
 3. Autorización «EJECUTA».
 
 ## 4. Alcance
@@ -57,19 +58,33 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 - Respuesta: `summary`, `pros[]`, `cons[]`, `score`, `generatedBy` (`llm` o `template`), `modelVersion`, `promptVersion`.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **SmartMatchExplanations** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `smart_match_explanations (caché)` |
+| Usa (puertos de otros módulos) | SmartMatch `IScoreQuery` (NV-23); Search `IRoomCatalogQuery` (NV-14) |
+| Publica (eventos de dominio) | — |
+| Consume (eventos de dominio) | `PreferencesChanged (NV-11)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - Hechos de entrada: precio, presupuesto, distancia, minutos a pie, servicios del cuarto y del usuario, modalidad, tipo y factores de NV-23; nunca la descripción libre del propietario ni datos personales.
 - `smart_match_explanations` (caché): clave `{ roomId, preferencesVersion, modelVersion, promptVersion }`, TTL de 24 h.
+- Adaptadores de Infrastructure detrás del puerto `IExplanationGenerator`: `TemplateExplanationGenerator` (siempre disponible) y `LlmExplanationGenerator` (cliente HTTP del proveedor aprobado, con timeout de 3 s y circuit breaker).
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. La explicación solo menciona hechos de la entrada; el validador rechaza cualquier número, servicio o condición que no esté en ella y usa la plantilla.
 2. Si el proveedor tarda más de 3 s o falla, se responde con la plantilla (RNF-16).
 3. Lenguaje sencillo, sin porcentajes técnicos por factor (RF-63); máximo 600 caracteres.
 4. El prompt está versionado (`promptVersion`) y se prueba con casos fijos.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -87,7 +102,7 @@ Específicas de esta spec:
 - Rate limit 20/min por usuario y 10/min por IP de invitado; caché para no repetir llamadas.
 - La salida se trata como texto no confiable: sin HTML ni enlaces.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -100,7 +115,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -111,25 +126,25 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-24-R05 | Protección contra inyección | Pruebas con descripciones maliciosas que no llegan al prompt ni alteran la salida. | F3 | T05 |
 | NV-24-R06 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T06, T07, T08 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Proveedor de IA generativa | Plantillas deterministas como base ($0); un modelo de lenguaje solo con plan gratuito, términos de no retención de datos y aprobación | PENDIENTE |
+| Proveedor de IA generativa | Plantillas deterministas como base ($0). Opción de modelo de lenguaje: API de Gemini de Google (proveedor permitido por constitution §30) en su plan gratuito, solo con evidencia de COST-001 y revisión de sus términos de uso de datos; Azure OpenAI y otros servicios de pago quedan BLOCKED | PENDIENTE |
 | Idioma | Español neutro de México | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | Plantillas deterministas | $0 | Siempre disponibles |
 | Proveedor de modelo de lenguaje | $0 solo con plan gratuito | PENDIENTE DE VERIFICAR; si no, solo plantillas (BLOCKED la parte `llm`) |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -138,12 +153,12 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-24-RK03 | Costo del proveedor | Incumplir COST-001 | Plantillas por defecto y caché |
 | NV-24-RK04 | Fuga de datos al proveedor | Privacidad | Solo hechos no personales |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-23 (puntajes y factores).
 - NV-11 (versión de preferencias).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -156,6 +171,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

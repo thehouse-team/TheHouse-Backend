@@ -14,6 +14,7 @@
 | No funcionales | RNF-02, RNF-19 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Media |
 | Precondición | NV-12 |
 | Relación | NV-12 exige documentos para publicar; NV-21 los revisa; NV-14 muestra las fotos |
 
@@ -30,7 +31,7 @@ Definir la carga, validación, almacenamiento y entrega segura de fotos y docume
 ## 3. Precondiciones
 
 1. NV-12 (edificios y cuartos).
-2. Decisión de almacenamiento y de cifrado resuelta (§12).
+2. Decisión de almacenamiento y de cifrado resuelta (§13).
 3. Autorización «EJECUTA».
 
 ## 4. Alcance
@@ -64,12 +65,25 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - Documentos: PDF, JPEG o PNG, máximo 10 MB; `kind` = `ine` o `property_proof` (predial, escritura o contrato).
 - Los documentos nunca tienen URL pública; los revisores los obtienen por NV-21 con un enlace que vence en 5 minutos.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Media** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `media`, `verification_documents` |
+| Usa (puertos de otros módulos) | Listings `IListingOwnership` (NV-12) |
+| Publica (eventos de dominio) | `VerificationDocumentsCompleted`, `PhotosChanged` |
+| Consume (eventos de dominio) | `BuildingReviewDecided (NV-21) para iniciar la retención`, `RoomStatusChanged (NV-12) para borrar fotos de cuartos eliminados` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `media`: `ownerId`, `buildingId`, `roomId`, `storageKey`, `thumbKey`, `contentType`, `bytes`, `sha256`, `createdAt`.
 - `verification_documents`: `ownerId`, `buildingId`, `kind`, `storageKey`, `encryptedDataKey`, `sha256`, `uploadedAt`, `retentionUntil`.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Máximo 1 foto de edificio y 4 por cuarto (409 al exceder).
 2. El tipo se valida por firma de bytes, no por extensión ni `Content-Type`.
@@ -77,7 +91,7 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 4. Los documentos se cifran con AES-256-GCM antes de salir del proceso; la llave de datos se cifra con una llave maestra fuera de la base.
 5. Los documentos se borran 90 días después de la decisión de revisión (propuesta de retención).
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -96,7 +110,7 @@ Específicas de esta spec:
 - Nombres de archivo del cliente ignorados; claves de almacenamiento aleatorias.
 - Fotos de edificios no verificados no se sirven públicamente.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -112,7 +126,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -124,26 +138,26 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-13-R06 | Retención y borrado | Borrar una foto o un cuarto elimina sus archivos; documentos con `retentionUntil` y tarea de limpieza. | F3 | T06 |
 | NV-13-R07 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T07, T08, T09 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Almacenamiento de archivos | Opciones: MongoDB GridFS (dentro de 512 MB de M0), Azure Blob (no es $0 permanente) o un servicio de imágenes con plan gratuito. Recomendación: GridFS para documentos y servicio gratuito o GridFS para fotos | PENDIENTE |
+| Almacenamiento de archivos | Recomendado: MongoDB GridFS (persistencia ya aprobada, dentro de los 512 MB de M0) con fotos comprimidas. Azure Blob es un proveedor permitido pero no es $0 permanente; un servicio de imágenes externo requiere excepción a constitution §30 | PENDIENTE |
 | Llave maestra de cifrado | Secreto de Container Apps (M-BE-038) en lugar de Key Vault para mantener $0 | PENDIENTE |
 | Retención de documentos | 90 días después de la decisión | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | Almacenamiento de fotos y documentos | $0 solo con la opción elegida dentro de su plan gratuito | PENDIENTE DE VERIFICAR |
 | Ancho de banda de imágenes | $0 dentro de la concesión de Container Apps | Miniaturas y caché HTTP para reducirlo |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -152,13 +166,13 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-13-RK03 | Llenado del almacenamiento gratuito | Servicio interrumpido | Límites por cuarto, compresión y monitoreo |
 | NV-13-RK04 | Archivos maliciosos | Explotación del procesador de imágenes | Validación por contenido y librería actualizada |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-12 (dueño de edificios y cuartos).
 - NV-21 (lectura de documentos por revisores).
 - NV-14 (fotos en resultados).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -171,6 +185,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

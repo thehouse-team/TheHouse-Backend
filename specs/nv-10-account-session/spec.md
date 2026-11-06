@@ -14,6 +14,7 @@
 | No funcionales | RNF-01, RNF-02, RNF-09, RNF-10 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Identity |
 | Precondición | NV-04, NV-05 y NV-06 cerradas; NV-09 (CD) operativa |
 | Relación | Extiende NV-04/NV-05/NV-06 con cambios aditivos; NV-11 usa `/users/me` |
 
@@ -30,7 +31,7 @@ Definir el ciclo de vida completo de la sesión y de la cuenta: refresh token co
 ## 3. Precondiciones
 
 1. NV-04, NV-05 y NV-06 cerradas y desplegadas.
-2. Decisión de proveedor de correo resuelta (§12) para RF-04 y RF-36.
+2. Decisión de proveedor de correo resuelta (§13) para RF-04 y RF-36.
 3. Autorización «EJECUTA».
 
 ## 4. Alcance
@@ -70,14 +71,27 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - `DELETE /users/me` recibe `{ "password": "..." }`; 409 si la cuenta tiene una renta activa como estudiante o arrendador (NV-18).
 - `POST /auth/password/reset` recibe `{ token, newPassword }` y aplica `PasswordPolicy` de NV-04.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Identity** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `users`, `refresh_tokens`, `one_time_tokens` |
+| Usa (puertos de otros módulos) | Rentals `IActiveRentalQuery` (NV-18) para bloquear la eliminación con renta activa |
+| Publica (eventos de dominio) | `UserDeleted`, `PasswordChanged` |
+| Consume (eventos de dominio) | `UserSuspended (NV-21)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `refresh_tokens`: `tokenHash` (SHA-256), `userId`, `familyId`, `createdAt`, `expiresAt`, `rotatedAt`, `revokedAt`, `userAgentHash`. Índice único en `tokenHash`, índice por `familyId` e índice TTL en `expiresAt`.
 - `one_time_tokens`: `tokenHash`, `userId`, `purpose` (`password_reset`, `email_verification`), `expiresAt`, `usedAt`. Índice TTL.
 - `users` (NV-04) agrega `name`, `acceptedTermsVersion`, `acceptedTermsAt`, `emailVerifiedAt`, `deletedAt`, `status` (`active`, `suspended`, `deleted`).
 - La insignia de estudiante se calcula: correo verificado y dominio presente en `universities.emailDomains` (extensión aditiva de NV-08).
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Refresh token opaco de 256 bits, válido 30 días, de un solo uso: cada uso emite uno nuevo de la misma familia y marca el anterior como rotado.
 2. Si se presenta un refresh token ya rotado, se revoca toda la familia (detección de reuso) y se responde 401.
@@ -85,9 +99,10 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 4. El token de recuperación vale 30 minutos y el de verificación 24 horas; ambos de un solo uso y guardados solo como hash.
 5. `password/forgot` responde 202 aunque el correo no exista (sin enumeración de cuentas).
 6. Cambiar la contraseña revoca todas las familias de refresh token y los access tokens vigentes del usuario.
-7. Eliminar la cuenta: borrado lógico, anonimización de correo y nombre, revocación de sesiones y borrado de favoritos, preferencias y publicaciones de compañero; las reseñas se conservan como "Usuario eliminado".
+7. Eliminar la cuenta: borrado lógico, anonimización de correo y nombre y revocación de sesiones en Identity; se publica `UserDeleted` y cada módulo borra o anonimiza sus propios datos (favoritos, preferencias, publicaciones de compañero); las reseñas se conservan como "Usuario eliminado".
+8. La rotación es atómica (actualización condicional sobre el token no rotado): dos solicitudes simultáneas con el mismo refresh token producen una sola emisión y la otra se trata como reuso (constitution §20).
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -105,8 +120,9 @@ Específicas de esta spec:
 - `DELETE /users/me` exige la contraseña actual (reautenticación) para evitar borrados con un token robado.
 - Respuestas idénticas y con tiempo similar para correos existentes e inexistentes (OWASP API2).
 - Los enlaces de correo usan un esquema de la app (deep link) y no incluyen el correo del usuario.
+- Transporte del refresh token en el cuerpo JSON, nunca en cookies (sin riesgo CSRF); la app lo guarda en almacenamiento cifrado del sistema (Android Keystore). Decisión de transporte exigida por constitution §20.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -122,7 +138,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -136,27 +152,27 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-10-R08 | Límites y anti-enumeración | Rate limits de la §9 con 429 y `Retry-After`; respuestas indistinguibles para cuentas existentes e inexistentes. | F3 | T08 |
 | NV-10-R09 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T09, T10, T11 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Proveedor de correo | Servicio con plan gratuito permanente y API (por ejemplo, Brevo o Resend free tier); credenciales fuera de Terraform (M-BE-038) | PENDIENTE |
+| Proveedor de correo | Los servicios de correo de los proveedores permitidos (Azure Communication Services, Amazon SES) cobran por mensaje; un proveedor externo con plan gratuito requiere una excepción a constitution §30 registrada en `memoria.md`. Sin una opción $0 aprobada, RF-04 y RF-36 quedan BLOCKED | PENDIENTE |
 | Duración del refresh token | 30 días con rotación | PROPUESTO |
 | Google Sign-In (RF-02) | Spec propia posterior (OAuth/OIDC) | PROPUESTO |
-| Verificación por SMS (RF-70) | Fuera de alcance por costo | BLOCKED (COST-001) |
+| Verificación por SMS (RF-70) | Fuera de alcance por costo (COST-001) | DESCARTADO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 y Redis Upstash | $0 | Dentro de los límites del plan gratuito |
 | Correo transaccional | $0 solo en plan gratuito permanente | PENDIENTE DE VERIFICAR; si no, RF-04 y RF-36 quedan BLOCKED |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -165,14 +181,14 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-10-RK03 | Correo no entregado | Usuario sin acceso | Reintento acotado y mensaje claro en la app |
 | NV-10-RK04 | Borrado incompleto | Datos personales residuales | Lista explícita de colecciones afectadas y prueba de integración |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-04, NV-05 y NV-06 (contratos que se extienden).
 - NV-08 (`emailDomains` de universidades) para la insignia.
 - NV-18 para la regla de renta activa al eliminar la cuenta.
 - NV-21 usa la revocación de sesiones al suspender cuentas.
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -185,6 +201,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

@@ -94,7 +94,7 @@ F4 Pruebas y evidencia
 
 - Solo el dueño lee y marca sus notificaciones (BOLA).
 - Sin datos sensibles en el cuerpo (RNF-02).
-- El contador usa `ETag` para que el sondeo del cliente sea barato.
+- El contador usa `ETag` con `Cache-Control: private, no-cache` para que el sondeo del cliente sea barato sin que ninguna caché compartida lo almacene (constitution §23).
 - Revisión de seguridad (OWASP API Top 10) al cierre de cada fase.
 
 ## 7. Costo
@@ -109,7 +109,7 @@ F4 Pruebas y evidencia
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
 | G0-Doc | Antes de ejecutar | Aprobación documental de 1.0.0-borrador | BLOCKED |
-| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §12 de la spec resueltas o aceptadas | BLOCKED |
+| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | BLOCKED |
 | G1 | Fin F1 | Tasks de F1 cerradas con evidencia | No avanzar |
 | G2 | Fin F2 | Tasks de F2 cerradas con evidencia | No avanzar |
 | G3 | Fin F4 | Tasks de F4 cerradas con evidencia | No cerrar |

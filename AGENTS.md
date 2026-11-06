@@ -1,5 +1,15 @@
 # TheHouse Backend — Instrucciones para agentes
 
+| Campo | Valor |
+| --- | --- |
+| Versión | 1.1.0 |
+| Fecha | 2026-11-06 |
+| Estado | **✅ APROBADO — VIGENTE** (sustituye a la versión anterior) |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-06 («Apruebo 1.1.0») |
+| Decisión | M-BE-057 |
+
+**Cambios 1.1.0:** sustituye el estado de la "entrega documental" inicial por el estado vigente, incorpora el protocolo de autorizaciones en uso («EJECUTA», «OK PARA APPLY», aprobación de despliegues y seeds), el flujo de Git con pull requests y las reglas de uso eficiente de recursos. Las reglas de seguridad, verificación iterativa y separación SDD/ejecución se conservan sin cambios de fondo.
+
 ## Autoridad y lectura obligatoria
 
 Leer desde la raíz, en este orden:
@@ -7,33 +17,51 @@ Leer desde la raíz, en este orden:
 1. `constitution.md` — máxima autoridad del Backend.
 2. `AGENTS.md` — reglas operativas.
 3. `memoria.md` — decisiones, no un diario.
-4. `spec.md` de la spec activa.
-5. `plan.md` activo.
-6. `task.md` activo.
+4. `specs/README.md` — mapa de specs, estados y cobertura de requerimientos.
+5. `spec.md` de la spec activa.
+6. `plan.md` activo.
+7. `task.md` activo.
 
 Las instrucciones humanas y políticas del entorno siguen siendo vinculantes. Un documento inferior, un perfil de agente, una skill o una referencia externa no pueden contradecir una norma superior ni ampliar el alcance. Ante contradicción: reportar y **BLOCKED**.
 
-## Estado de esta entrega
+## Estado vigente
 
-Autorizado: preparar y verificar únicamente documentación SDD en los tres Markdown de raíz, `.opencode/agents/`, `.opencode/skills/` y las tres carpetas de specs solicitadas. No hay spec de implementación activa ni tasks autorizadas. NV-01 es candidata a primera revisión, no ejecución autorizada.
+El estado de cada spec está en su `task.md` y en `specs/README.md`; este archivo no lo repite para no desfasarse. Resumen al 2026-11-06:
+
+- NV-01, NV-04 a NV-08: ejecutadas y desplegadas; NV-02 (CI) completada; NV-09 (CD) operativa; NV-03 con ejecución parcial.
+- NV-10 a NV-25: borradores pendientes de aprobación documental, sin autorización de ejecución.
 
 Antes de cualquier implementación declarar explícitamente:
 
-| Campo | Estado actual |
+| Campo | Requisito |
 | --- | --- |
-| SPEC ACTIVA | NINGUNA AUTORIZADA |
-| PLAN ACTIVO | NINGUNO AUTORIZADO |
-| TASK ACTIVO | NINGUNO AUTORIZADO |
-| ESTADO AUTORIZADO | BLOCKED para implementación; solo preparación documental permitida |
+| SPEC ACTIVA | ID y ruta exactos |
+| PLAN ACTIVO | ID, versión y ruta |
+| TASK ACTIVA | IDs habilitados por «EJECUTA» |
+| ESTADO AUTORIZADO | APROBADO explícito, con aprobador y fecha |
+
+Si cualquiera falta: **BLOCKED**.
 
 ## Protocolo de autorización
 
 1. Identificar IDs y rutas exactas de spec, plan y task; comprobar versiones y traza requisito → fase → task.
-2. Comprobar aprobación humana explícita de **los tres** documentos, con aprobador, fecha, versión, IDs autorizados, rutas permitidas y restricciones.
-3. Verificar precondiciones, dependencias entre specs, riesgos, pruebas y COST-001. Aprobar NV-01 no aprueba NV-02 ni NV-03.
-4. Si persiste `⛔ NO EJECUTAR`, falta aprobación, se requiere escribir en rutas protegidas sin levantamiento explícito o el costo es incierto: **BLOCKED**. No cambiar estos estados por iniciativa propia.
+2. Comprobar la aprobación humana explícita de **los tres** documentos y la autorización «EJECUTA» con aprobador, fecha, versión, tasks, rutas permitidas y restricciones.
+3. Verificar precondiciones, dependencias entre specs, decisiones PENDIENTE que bloqueen tasks, riesgos, pruebas y COST-001. Aprobar una spec no aprueba otra.
+4. Si persiste `⛔ NO EJECUTAR`, falta aprobación, se requiere escribir en rutas protegidas no incluidas en la autorización o el costo es incierto: **BLOCKED**. No cambiar estos estados por iniciativa propia.
 5. Solo una revisión humana puede registrar la autorización y retirar el bloqueo del alcance correspondiente. Un plan aprobado no habilita tareas fuera de él. Un cambio material requiere reaprobar.
-6. En el futuro, ejecutar únicamente la task habilitada y producir evidencia real. Marcar su finalización únicamente después de cumplir aceptación y revisión; en esta entrega todas permanecen abiertas.
+6. Ejecutar únicamente las tasks habilitadas y producir evidencia real. Marcar su finalización solo después de cumplir aceptación y revisión.
+
+Autorizaciones independientes (constitution §34):
+
+| Acción | Requiere |
+| --- | --- |
+| Implementar tasks | «EJECUTA» con spec, versión, tasks y rutas |
+| `terraform apply` | Plan mostrado al humano y «OK PARA APPLY»; un plan nuevo o distinto requiere otra confirmación |
+| `terraform destroy` | Autorización aparte con inventario |
+| Desplegar a producción | Aprobación humana en el Environment `production` (nunca la otorga un agente) |
+| Seed en Production | Autorización explícita para esa ejecución (M-BE-043) |
+| Cambios en cuentas o servicios externos (suscripción, registro de proveedores, GitHub, roles) | Permiso explícito para esa acción concreta |
+| Merge de un pull request | Aprobación de otra persona en GitHub; el agente no mezcla por iniciativa propia |
 
 ## Flujo de trabajo obligatorio
 
@@ -41,26 +69,11 @@ Esta sección refuerza la separación entre preparación SDD y ejecución, y la 
 
 ### Spec primero; implementación solo por autorización
 
-La preparación documental y la ejecución son fases separadas. El agente puede crear o modificar `spec.md`, `plan.md` y `task.md`; después de preparar o actualizar esos documentos debe **DETENERSE**.
+La preparación documental y la ejecución son fases separadas. El agente puede crear o modificar `spec.md`, `plan.md` y `task.md` cuando un humano lo solicita; después de prepararlos o actualizarlos debe **DETENERSE**.
 
 La creación o aprobación documental de una spec **no** constituye autorización para ejecutarla. Nunca interpretar `spec creada` como `implementación autorizada`.
 
-#### Autorización obligatoria
-
-Antes de implementar debe existir explícitamente:
-
-| Campo | Requisito |
-| --- | --- |
-| SPEC ACTIVA | ID y ruta exactos |
-| PLAN ACTIVO | ID, versión y ruta |
-| TASK ACTIVA | ID habilitado |
-| ESTADO AUTORIZADO | APROBADO explícito |
-
-Si cualquiera falta: **BLOCKED**. Solo se permite implementación cuando `ESTADO AUTORIZADO = APROBADO`, o equivalente explícito definido por el equipo. La tabla de estado se declara antes de cualquier implementación.
-
-#### Prohibición
-
-Está prohibido crear una spec y ejecutarla automáticamente en el mismo paso sin autorización humana intermedia. El flujo correcto es:
+Está prohibido crear una spec y ejecutarla en el mismo paso sin autorización humana intermedia. El flujo correcto es:
 
 ```text
 1. Crear/revisar spec.md
@@ -68,17 +81,26 @@ Está prohibido crear una spec y ejecutarla automáticamente en el mismo paso si
 3. Crear/revisar task.md
 4. Detenerse
 5. Revisión humana
-6. Autorización explícita
+6. Autorización explícita («EJECUTA»)
 7. Ejecutar únicamente las tasks autorizadas
+8. Registrar evidence.md y cerrar tasks con evidencia
 ```
 
 ### No crear checklist.md
 
-No agregar `checklist.md`: el estándar actual es `spec.md`, `plan.md` y `task.md`, y `task.md` funciona como checklist de ejecución. Si se requiere evidencia, usar `evidence.md` cuando la spec lo justifique. No inventar evidencia.
+No agregar `checklist.md`: el estándar es `spec.md`, `plan.md` y `task.md`, y `task.md` funciona como checklist de ejecución. La evidencia de lo ejecutado va en `evidence.md`. No inventar evidencia.
+
+### Coherencia documental
+
+- Los tres documentos de una spec muestran el mismo estado; el conteo de tasks completadas coincide con las casillas marcadas.
+- Trazabilidad bidireccional: cada requisito lista sus tasks y cada task cita su requisito.
+- Cada spec cita los RF/RNF de origen de `Requerimientos_TheHouse_v2`.
+- Al crear una spec o cambiar su estado, actualizar `specs/README.md`.
+- Las `evidence.md` son registros fechados: se agregan secciones, no se reescribe lo ya registrado.
 
 ### Verificación iterativa durante la implementación
 
-Después de cada incremento coherente de implementación y obligatoriamente antes de cerrar una task, revisar `constitution.md`, `AGENTS.md`, `memoria.md`, la spec activa, el plan activo, la task activa y el alcance autorizado.
+Después de cada incremento coherente de implementación y obligatoriamente antes de cerrar una task, revisar `constitution.md`, `AGENTS.md`, `memoria.md`, la spec activa, el plan activo, la task activa y el alcance autorizado. Si un documento inferior contradice a uno superior, corregir el inferior o reportar el conflicto.
 
 No es necesario auditar todo después de modificar una sola línea. La revisión se realiza después de un cambio coherente, unidad lógica, subtask o incremento verificable, y siempre antes del cierre de la task.
 
@@ -96,9 +118,9 @@ Toda entrada externa debe validarse según corresponda: body, route params, quer
 
 ### Secretos
 
-Nunca permitir passwords, JWT secrets, connection strings reales, API keys, tokens, private keys, certificados privados ni credenciales dentro de código, logs, commits, specs, evidence o reportes.
+Nunca permitir passwords, JWT secrets, connection strings reales, API keys, tokens, private keys, certificados privados ni credenciales dentro de código, logs, commits, specs, evidence o reportes. No leer ni mostrar `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
-Si se detecta un secreto confirmado: **BLOCK**, sin imprimir el valor completo en reportes.
+Si se detecta un secreto confirmado: **BLOCK**, sin imprimir el valor completo en reportes, y recomendar su rotación.
 
 ### Exposición de datos
 
@@ -141,21 +163,24 @@ Resultado de seguridad:
 PASS / PASS WITH WARNINGS / BLOCKED
 ```
 
-No inventar evidencia.
-
 ### Repetir validación
 
-Cuando se aplique una corrección: corregir → volver a verificar → registrar resultado, hasta obtener PASS o PASS WITH WARNINGS sin hallazgos bloqueantes.
+Cuando se aplique una corrección: corregir → volver a verificar → registrar resultado, hasta obtener PASS o PASS WITH WARNINGS sin hallazgos bloqueantes. Máximo dos ciclos de corrección por fase antes de reportar al humano.
+
+### Uso eficiente de recursos
+
+- Leer cada documento de gobierno una vez por sesión y después hacer lecturas puntuales.
+- Ediciones acotadas en lugar de reescribir archivos completos.
+- Build y pruebas una vez por fase (no después de cada línea); en tareas solo documentales, no ejecutar build, restore ni tests.
+- Reportes breves con evidencia verificable.
 
 ## Rutas protegidas y acciones prohibidas
 
-No modificar `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/` o `TheHouse.slnx`. Incluye `.csproj`, código fuente, `Program.cs`, `appsettings*.json`, `Controllers/`, `Properties/` y referencias.
+No modificar `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/` o `TheHouse.slnx` (incluye `.csproj`, código fuente, `Program.cs`, `appsettings*.json`, `Controllers/`, `Properties/` y referencias) salvo que «EJECUTA» incluya esas rutas.
 
-No recrear, mover ni renombrar proyectos; no agregar `src/` o `tests/`. No ejecutar `dotnet new`, `dotnet add`, `dotnet remove`, `dotnet sln add` o `dotnet sln remove`. No instalar paquetes ni crear código, entidades, controllers, endpoints o repositories. No implementar persistencia, Redis o autenticación. No generar Dockerfile, Terraform, workflows o recursos cloud. No ejecutar specs.
+Sin autorización que lo nombre: no recrear, mover ni renombrar proyectos; no agregar `src/` o `tests/`; no ejecutar `dotnet new`, `dotnet add`, `dotnet remove`, `dotnet sln add` o `dotnet sln remove`; no instalar paquetes; no cambiar workflows, Dockerfile, Terraform, configuración de GitHub ni recursos cloud; no ejecutar specs.
 
-No ejecutar build, restore o tests en esta preparación documental: pueden reescribir `bin/obj` y no son necesarios para validar Markdown. Se usa el estado técnico previo como precondición y se compara inventario/SHA-256 antes y después. No declarar pruebas nuevas o cobertura que no existan.
-
-No inicializar Git, hacer commit, push ni borrar cambios ajenos. Inspeccionar `UnitTest/` solo en lectura y reportar su contenido; no eliminarlo. Referencias externas solo mediante lectura, sin clone ni copia de código.
+Git: commit y push solo cuando un humano lo pide, en ramas de trabajo, nunca directo a `main`; sin force push ni reescritura de historial publicado; los cambios llegan a `main` por pull request con checks y aprobación (constitution §33). Inspeccionar `UnitTest/` solo en lectura; no eliminarlo. Referencias externas solo mediante lectura, sin clone ni copia de código.
 
 ## Agentes especializados
 
@@ -169,7 +194,7 @@ No inicializar Git, hacer commit, push ni borrar cambios ajenos. Inspeccionar `U
 | `cloud-devops-agent` | Contenedores, IaC, escalado, TLS y costo | `cloud-zero-cost` |
 | `database-cache-agent` | NoSQL, MongoDB y caché distribuida | `mongodb`, `redis-distributed-cache` |
 
-Los perfiles son subagentes de revisión en lectura, sin permisos de escritura, shell ni delegación. Su definición no ordena invocarlos automáticamente. Una futura habilitación necesita autorización humana y revisión independiente de permisos; una aprobación textual no evita las restricciones técnicas. No fijan modelo o proveedor de IA.
+Los perfiles de `.opencode/agents/` son subagentes de revisión en lectura, sin permisos de escritura, shell ni delegación. Su definición no ordena invocarlos automáticamente. Una futura habilitación necesita autorización humana y revisión independiente de permisos. No fijan modelo o proveedor de IA.
 
 ## Resultado de revisión
 
@@ -177,17 +202,19 @@ Los perfiles son subagentes de revisión en lectura, sin permisos de escritura, 
 - **PASS WITH WARNINGS**: cumple lo obligatorio, con advertencias no bloqueantes enumeradas, responsable y siguiente acción.
 - **BLOCKED**: falta requisito, traza, aprobación, evidencia, seguridad, precondición o garantía de costo. No sustituir este resultado por warnings.
 
-Cada informe identifica alcance, IDs evaluados, evidencia, pendientes y archivos afectados. Una revisión documental puede dar PASS y mantener todas las specs bloqueadas para ejecución.
+Cada informe identifica alcance, IDs evaluados, evidencia, pendientes y archivos afectados. Una revisión documental puede dar PASS y mantener specs bloqueadas para ejecución.
 
 ## Convenciones documentales
 
-Usar español, IDs estables, rutas relativas a raíz y estados explícitos. Mantener decisiones `M-BE-NNN` con Decisión, Estado, Justificación e Impacto; estados válidos: APROBADO, PROPUESTO, PENDIENTE, DESCARTADO. APROBADO como dirección arquitectónica no significa implementado ni autoriza una task.
+Usar español, IDs estables, rutas relativas a raíz y estados explícitos. Mantener decisiones `M-BE-NNN` con ID, Decisión, Estado, Fecha, Aprobador, Justificación e Impacto; estados válidos: APROBADO, PROPUESTO, PENDIENTE, DESCARTADO. APROBADO como dirección arquitectónica no significa implementado ni autoriza una task.
 
 - Toda decisión técnica nueva se registra en `memoria.md`.
-- Todos los archivos se guardan en UTF-8.
+- Todos los archivos se guardan en UTF-8 con finales de línea LF (M-BE-045).
+- Cada spec tiene requisitos verificables y todos mapean a fases y tasks.
+- No crear nuevas specs funcionales sin solicitud humana.
+- No completar checkboxes por haber escrito la planificación.
+- Los umbrales de calidad y los costos futuros son propuestas hasta revisión con evidencia.
 
-Cada spec tiene requisitos verificables y todos mapean a fases y tasks. No crear nuevas specs funcionales sin solicitud. No completar checkboxes por haber escrito la planificación. Los umbrales de calidad y los costos futuros son propuestas hasta revisión con evidencia.
+## Cierre de una tarea
 
-## Cierre de esta tarea documental
-
-Verificar existencia de los 27 archivos, frontmatter de agentes/skills, trazabilidad completa, todas las tasks abiertas y bloqueos de ejecución. Comparar las huellas de los siete proyectos y solución, informar el residual UnitTest y confirmar ausencia de operaciones Git de escritura. Entregar el reporte solicitado y detenerse, sin comenzar NV-01.
+Al terminar cualquier tarea: verificar trazabilidad y estados de las specs afectadas, actualizar `specs/README.md` y `memoria.md` cuando corresponda, confirmar que no se expusieron secretos, entregar el reporte de hallazgos y detenerse. No continuar con la siguiente spec sin solicitud humana.
