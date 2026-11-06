@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using TheHouse.Application.Abstractions.Security;
+using TheHouse.Application.Common;
 using TheHouse.Domain.Entities;
 using TheHouse.Infrastructure.Configuration;
 
@@ -20,8 +21,15 @@ public sealed class JwtTokenService(
             throw new InvalidOperationException(
                 "JWT signing key is not configured.")));
 
-    public AccessToken CreateAccessToken(User user)
+    public AccessToken CreateAccessToken(User user, string sessionId)
     {
+        if (!SessionTokens.IsCanonicalSessionId(sessionId))
+        {
+            throw new ArgumentException(
+                "Invalid session identifier.",
+                nameof(sessionId));
+        }
+
         var now = timeProvider.GetUtcNow();
         var expiresAt = now.AddSeconds(options.ExpirationSeconds);
 
@@ -34,6 +42,9 @@ public sealed class JwtTokenService(
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, jti),
+            // NV-10: identificador de sesión (aditivo; no es obligatorio
+            // al validar para aceptar tokens emitidos antes de NV-10).
+            new Claim(SessionTokens.SessionIdClaim, sessionId),
             new Claim(
                 JwtRegisteredClaimNames.Iat,
                 now.ToUnixTimeSeconds().ToString(

@@ -52,6 +52,8 @@ public sealed class OpenApiContractTests
                 path.Name == RegistrationEndpoint.Path ||
                 path.Name == LoginEndpoint.Path ||
                 path.Name == LogoutEndpoint.Path ||
+                path.Name == RefreshEndpoint.Path ||
+                path.Name == UsersMeEndpoint.Path ||
                 path.Name == PropertyEndpoint.ListPath ||
                 path.Name == PropertyEndpoint.DetailPath ||
                 path.Name == UniversityEndpoint.ListPath ||

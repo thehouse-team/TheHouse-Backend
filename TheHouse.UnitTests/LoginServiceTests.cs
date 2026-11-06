@@ -16,7 +16,7 @@ public sealed class LoginServiceTests
         var repository = new LoginRepository();
         var hasher = new LoginHasher();
         var jwt = new LoginJwt();
-        var service = new LoginService(repository, hasher, jwt);
+        var service = new LoginService(repository, hasher, Sessions(repository, jwt));
 
         await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
             service.LoginAsync(
@@ -46,7 +46,7 @@ public sealed class LoginServiceTests
         };
 
         var jwt = new LoginJwt();
-        var service = new LoginService(repository, hasher, jwt);
+        var service = new LoginService(repository, hasher, Sessions(repository, jwt));
 
         await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
             service.LoginAsync(
@@ -63,7 +63,7 @@ public sealed class LoginServiceTests
     }
 
     [Fact]
-    public async Task Valid_credentials_return_only_access_token_contract()
+    public async Task Valid_credentials_return_access_and_refresh_token_contract()
     {
         var repository = new LoginRepository
         {
@@ -76,7 +76,7 @@ public sealed class LoginServiceTests
         };
 
         var jwt = new LoginJwt();
-        var service = new LoginService(repository, hasher, jwt);
+        var service = new LoginService(repository, hasher, Sessions(repository, jwt));
 
         var response = await service.LoginAsync(
             new LoginRequest
@@ -89,6 +89,7 @@ public sealed class LoginServiceTests
         Assert.Equal("fixture-token", response.AccessToken);
         Assert.Equal("Bearer", response.TokenType);
         Assert.Equal(900, response.ExpiresIn);
+        Assert.True(SessionTokens.IsWellFormedRefreshToken(response.RefreshToken));
         Assert.Equal(1, jwt.CreateCalls);
     }
 
@@ -99,7 +100,7 @@ public sealed class LoginServiceTests
         var hasher = new LoginHasher();
         var jwt = new LoginJwt();
 
-        var service = new LoginService(repository, hasher, jwt);
+        var service = new LoginService(repository, hasher, Sessions(repository, jwt));
 
         await Assert.ThrowsAsync<RequestValidationException>(() =>
             service.LoginAsync(
@@ -126,6 +127,17 @@ public sealed class LoginServiceTests
             UpdatedAt = DateTimeOffset.UtcNow
         };
 
+    private static SessionService Sessions(
+        IUserRepository repository,
+        IJwtTokenService jwt) =>
+        new(
+            new InMemoryRefreshTokenStore(),
+            new InMemorySessionRevocationStore(),
+            repository,
+            jwt,
+            new RefreshTokenOptions(),
+            TimeProvider.System);
+
     private sealed class LoginRepository : IUserRepository
     {
         public User? User { get; init; }
@@ -139,6 +151,14 @@ public sealed class LoginServiceTests
             cancellationToken.ThrowIfCancellationRequested();
             RequestedEmail = normalizedEmail;
             return Task.FromResult(User);
+        }
+
+        public Task<User?> GetByIdAsync(
+            string id,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(User?.Id == id ? User : null);
         }
 
         public Task<User> CreateAsync(
@@ -177,7 +197,7 @@ public sealed class LoginServiceTests
     {
         public int CreateCalls { get; private set; }
 
-        public AccessToken CreateAccessToken(User user)
+        public AccessToken CreateAccessToken(User user, string sessionId)
         {
             CreateCalls++;
 

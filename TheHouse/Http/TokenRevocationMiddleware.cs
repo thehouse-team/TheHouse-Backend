@@ -47,7 +47,9 @@ public sealed class TokenRevocationMiddleware(
 
         try
         {
-            await logout.EnsureNotRevokedAsync(
+            // NV-10: el principal validado (incluye `sub` y `sid`) queda
+            // disponible para el endpoint protegido.
+            context.User = await logout.ValidateActiveAsync(
                 token,
                 context.RequestAborted);
         }

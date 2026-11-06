@@ -67,6 +67,19 @@ public sealed class RegistrationTestStore : IUserRepository
         return Task.FromResult<User?>(user);
     }
 
+    public Task<User?> GetByIdAsync(
+        string id,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+    
+        return Task.FromResult(Users.Values.FirstOrDefault(user => user.Id == id));
+    }
+
     public Task<User> CreateAsync(User user, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

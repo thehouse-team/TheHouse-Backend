@@ -50,8 +50,14 @@ public static class LogoutConfiguration
             }
         }
 
-        builder.Services.AddSingleton<ITokenRevocationStore>(
+        // NV-10: una sola instancia (una conexión Redis) atiende la
+        // revocación por `jti` y por sesión (`sid`).
+        builder.Services.AddSingleton(
             _ => new RedisTokenRevocationStore(realConfiguration));
+        builder.Services.AddSingleton<ITokenRevocationStore>(
+            provider => provider.GetRequiredService<RedisTokenRevocationStore>());
+        builder.Services.AddSingleton<ISessionRevocationStore>(
+            provider => provider.GetRequiredService<RedisTokenRevocationStore>());
     }
 
     private static OptionsValidationException Invalid(

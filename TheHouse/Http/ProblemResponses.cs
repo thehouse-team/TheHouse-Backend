@@ -46,6 +46,10 @@ public static class ProblemResponses
             LoginProblems.Normalize(problem, status);
         else if (LogoutProblems.IsLogout(context))
             LogoutProblems.Normalize(problem, status);
+        else if (SessionProblems.IsRefresh(context))
+            SessionProblems.NormalizeRefresh(problem, status);
+        else if (SessionProblems.IsMe(context))
+            SessionProblems.NormalizeMe(problem, status);
         else if (PropertyProblems.IsProperty(context))
             PropertyProblems.Normalize(problem, status);
         else if (UniversityProblems.IsUniversity(context))

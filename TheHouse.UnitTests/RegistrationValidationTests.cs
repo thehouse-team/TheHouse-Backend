@@ -142,6 +142,14 @@ public sealed class RegistrationValidationTests
             return Task.FromResult<User?>(Stored?.Email == normalizedEmail ? Stored : null);
         }
 
+        public Task<User?> GetByIdAsync(
+            string id,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult<User?>(Stored?.Id == id ? Stored : null);
+        }
+
         public Task<User> CreateAsync(
             User user,
             CancellationToken cancellationToken)

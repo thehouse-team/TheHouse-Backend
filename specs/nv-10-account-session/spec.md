@@ -1,57 +1,58 @@
-# NV-10 — Sesión y cuenta
+# NV-10 — Sesión: refresh token y cuenta propia
 
 | Campo | Valor |
 | --- | --- |
 | ID | NV-10 |
 | Documento | `spec.md` |
-| Versión | 1.0.0-borrador |
+| Versión | 1.1.0 |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-06 («Apruebo y EJECUTA»: NV-10 1.1.0, tasks T01–T11, rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/` y `specs/nv-10-account-session/`) |
+| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Requerimientos de origen | RF-01 (nombre y términos), RF-04, RF-36, RF-71; refresh y `/users/me` (requisito académico U2) (`Requerimientos_TheHouse_v2`) |
-| No funcionales | RNF-01, RNF-02, RNF-09, RNF-10 |
-| Plan | `plan.md` 1.0.0-borrador |
-| Tasks | `task.md` 1.0.0-borrador |
+| Requerimientos de origen | RF-02 (sesión persistente sin volver a iniciar sesión); requisito académico U2 (refresh y `/users/me`). RF-01, RF-04, RF-36 y RF-71 se cubrirán en la versión posterior de NV-10 (`Requerimientos_TheHouse_v2`) |
+| No funcionales | RNF-01, RNF-09 |
+| Plan | `plan.md` 1.1.0 |
+| Tasks | `task.md` 1.1.0 |
 | Módulo | Identity |
-| Precondición | NV-04, NV-05 y NV-06 cerradas; NV-09 (CD) operativa |
-| Relación | Extiende NV-04/NV-05/NV-06 con cambios aditivos; NV-11 usa `/users/me` |
+| Precondición | NV-04, NV-05 y NV-06 cerradas y desplegadas; NV-09 (CD) operativa |
+| Relación | Extiende NV-05 (login) y NV-06 (logout) con cambios aditivos; NV-04 (registro) sin cambios |
 
 Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
 
+**Cambio 1.1.0 (2026-11-06):** el alcance se reduce a lo que la app móvil necesita para U2: `POST /auth/refresh`, `refreshToken` en el login, revocación de la sesión en el logout y `GET /users/me` con los campos reales. Recuperación de contraseña, verificación de correo, insignia de estudiante, eliminación de cuenta y nuevos datos de registro pasan a una versión posterior de NV-10 (el borrador 1.0.0 queda en el historial de Git). Alcance revisado con el responsable de Mobile: la app ya ignora campos desconocidos (`ignoreUnknownKeys = true`), declara `refreshToken` como opcional y lo guarda cifrado (AES-GCM + Android Keystore).
+
 ## 1. Contexto
 
-El backend emite un access token JWT de 15 minutos (NV-05) y lo revoca en logout (NV-06), pero no tiene refresh token: la app móvil obliga a iniciar sesión cada 15 minutos. Tampoco existe un endpoint para consultar la cuenta propia, eliminarla, recuperar la contraseña o verificar el correo. RF-01 pide además guardar el nombre y la aceptación de términos y aviso de privacidad, que NV-04 no registra.
+El login (NV-05) devuelve solo `accessToken`, `tokenType` y `expiresIn`; el access token dura 15 minutos y `IJwtTokenService` solo crea y valida access tokens. El logout (NV-06) revoca el access token por `jti` en Redis con TTL hasta su expiración. No existe refresh token: cuando el access token vence, la app recibe 401, borra la sesión y obliga a iniciar sesión de nuevo. Tampoco existe una forma de consultar la cuenta propia: `User` solo tiene `Id`, `Email`, `PasswordHash`, `CreatedAt` y `UpdatedAt`, e `IUserRepository` no busca por id.
 
 ## 2. Objetivo
 
-Definir el ciclo de vida completo de la sesión y de la cuenta: refresh token con rotación y detección de reuso, consulta y eliminación de la cuenta propia, recuperación de contraseña, verificación de correo e insignia de estudiante.
+Agregar sesiones renovables con refresh tokens rotativos y revocables, integrarlas con el login y el logout sin romper sus contratos, y exponer `GET /users/me` con los campos reales del usuario autenticado.
 
 ## 3. Precondiciones
 
-1. NV-04, NV-05 y NV-06 cerradas y desplegadas.
-2. Decisión de proveedor de correo resuelta (§13) para RF-04 y RF-36.
-3. Autorización «EJECUTA».
+1. NV-04, NV-05 y NV-06 desplegadas en Azure.
+2. Redis (Upstash) y MongoDB Atlas operativos.
+3. Autorización «EJECUTA» que incluya las rutas protegidas necesarias (`TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/` y los tres proyectos de pruebas).
 
 ## 4. Alcance
 
-1. `POST /auth/refresh` con rotación de refresh token.
-2. Cambio aditivo de NV-05: el login devuelve también `refreshToken`.
-3. Cambio aditivo de NV-04: `name` y `acceptedTermsVersion` en el registro.
-4. `GET /users/me` y `DELETE /users/me`.
-5. Recuperación de contraseña por correo (RF-04).
-6. Verificación de correo (RF-36).
-7. Insignia de estudiante por dominio universitario verificado (RF-71).
-8. Revocación de todas las sesiones al cambiar la contraseña, al eliminar la cuenta y al suspenderla (NV-21).
+1. Refresh token opaco emitido en el login como campo adicional `refreshToken` (login sigue en 200).
+2. `POST /auth/refresh` con rotación en cada uso, detección de reuso y revocación de la sesión completa.
+3. Identificador de sesión `sid` como claim adicional del access token (los tokens sin `sid` siguen siendo válidos hasta su expiración).
+4. Logout revoca también la sesión del refresh token (sigue en 204).
+5. Rechazo inmediato de access tokens de una sesión revocada.
+6. `GET /users/me` con `id`, `email` y `createdAt`.
+7. Pruebas de regresión de register 201, login 200 y logout 204.
 
 ## 5. Fuera de alcance
 
-- Inicio de sesión con Google (RF-02 parcial): requiere su propia spec de OAuth/OIDC.
-- Verificación de teléfono por SMS (RF-70): el envío de SMS no tiene opción $0 (COST-001); BLOCKED.
-- Edición de perfil y preferencias: NV-11.
-- Modo arrendador: NV-12.
-- Autenticación multifactor.
+- Cambios en `POST /auth/register`: sigue recibiendo solo `email` y `password` y respondiendo 201.
+- Nombre, aceptación de términos, recuperación de contraseña (RF-04), verificación de correo (RF-36), insignia de estudiante (RF-71) y eliminación de cuenta: versión posterior de NV-10.
+- Campos de `/users/me` que el modelo no tiene (`name`, `emailVerified`, `studentBadge`, `landlordEnabled`).
+- Inicio de sesión con Google y verificación por SMS.
+- Cerrar todas las sesiones del usuario ("cerrar sesión en todos los dispositivos").
 
 ## 6. Contrato HTTP
 
@@ -59,17 +60,16 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 | Método | Ruta | Acceso | Descripción | Respuestas |
 | --- | --- | --- | --- | --- |
-| POST | `/api/v1/auth/refresh` | Público (refresh token) | Rota el refresh token y emite un access token nuevo | 200, 400, 401, 429 |
-| GET | `/api/v1/users/me` | Autenticado | Cuenta propia: id, email, name, emailVerified, studentBadge, landlordEnabled, createdAt | 200, 401 |
-| DELETE | `/api/v1/users/me` | Autenticado + contraseña | Elimina la cuenta con reautenticación | 204, 400, 401, 409, 429 |
-| POST | `/api/v1/auth/password/forgot` | Público | Envía enlace de recuperación; siempre 202 | 202, 400, 429 |
-| POST | `/api/v1/auth/password/reset` | Público (token) | Cambia la contraseña con token de un solo uso | 204, 400, 429 |
-| POST | `/api/v1/users/me/email/verification` | Autenticado | Envía el correo de verificación | 202, 401, 409, 429 |
-| POST | `/api/v1/auth/email/verify` | Público (token) | Marca el correo como verificado | 204, 400, 429 |
+| POST | `/api/v1/auth/login` | Público | Sin cambios en la entrada; la respuesta agrega `refreshToken` | 200, 400, 401, 429, 503 (sin cambios) |
+| POST | `/api/v1/auth/refresh` | Público (el refresh token es la credencial) | Rota el refresh token y emite un access token nuevo | 200, 400, 401, 429, 503 |
+| POST | `/api/v1/auth/logout` | Autenticado | Sin cambios en el contrato; además revoca la sesión `sid` | 204, 401, 429, 503 (sin cambios) |
+| GET | `/api/v1/users/me` | Autenticado | Cuenta propia: `id`, `email`, `createdAt` | 200, 401, 503 |
 
-- `POST /auth/refresh` recibe `{ "refreshToken": "..." }` y responde `{ accessToken, tokenType, expiresIn, refreshToken }`.
-- `DELETE /users/me` recibe `{ "password": "..." }`; 409 si la cuenta tiene una renta activa como estudiante o arrendador (NV-18).
-- `POST /auth/password/reset` recibe `{ token, newPassword }` y aplica `PasswordPolicy` de NV-04.
+- Login 200: `{ accessToken, tokenType, expiresIn, refreshToken }`; los tres primeros campos no cambian de nombre, tipo ni significado.
+- Refresh: entrada `{ "refreshToken": "..." }` (43 caracteres base64url); respuesta 200 con la misma forma que el login, incluido el `refreshToken` nuevo. El anterior deja de servir.
+- Cualquier falla del refresh (token desconocido, vencido, revocado o reusado) responde el mismo 401 sin distinguir la causa.
+- `/users/me` 200: `{ "id": "...", "email": "...", "createdAt": "2026-11-06T12:00:00Z" }` con `Cache-Control: no-store`; nuevos campos solo se agregan de forma aditiva cuando existan en el dominio.
+- Register: entrada `{ email, password }` y 201 sin ningún cambio.
 
 ## 7. Módulo, datos propios e integración
 
@@ -77,30 +77,31 @@ Módulo **Identity** del monolito modular (constitution §6): es propietario exc
 
 | Aspecto | Detalle |
 | --- | --- |
-| Colecciones propias | `users`, `refresh_tokens`, `one_time_tokens` |
-| Usa (puertos de otros módulos) | Rentals `IActiveRentalQuery` (NV-18) para bloquear la eliminación con renta activa |
-| Publica (eventos de dominio) | `UserDeleted`, `PasswordChanged` |
-| Consume (eventos de dominio) | `UserSuspended (NV-21)` |
+| Colecciones propias | `users`, `refresh_tokens` |
+| Usa (puertos de otros módulos) | — |
+| Publica (eventos de dominio) | — |
+| Consume (eventos de dominio) | — |
 
 Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
 
 ## 8. Modelo de datos
 
-- `refresh_tokens`: `tokenHash` (SHA-256), `userId`, `familyId`, `createdAt`, `expiresAt`, `rotatedAt`, `revokedAt`, `userAgentHash`. Índice único en `tokenHash`, índice por `familyId` e índice TTL en `expiresAt`.
-- `one_time_tokens`: `tokenHash`, `userId`, `purpose` (`password_reset`, `email_verification`), `expiresAt`, `usedAt`. Índice TTL.
-- `users` (NV-04) agrega `name`, `acceptedTermsVersion`, `acceptedTermsAt`, `emailVerifiedAt`, `deletedAt`, `status` (`active`, `suspended`, `deleted`).
-- La insignia de estudiante se calcula: correo verificado y dominio presente en `universities.emailDomains` (extensión aditiva de NV-08).
+- `refresh_tokens`: `tokenHash` (SHA-256, índice único), `sessionId` (= `sid`, índice), `userId`, `createdAt`, `expiresAt` (índice TTL), `sessionExpiresAt`, `rotatedAt`, `revokedAt`, `revokedReason` (`logout`, `reuse`).
+- Access token: claim adicional `sid` (aleatorio, 128 bits) con el identificador de la sesión; `sub`, `email`, `jti`, `iat` y `exp` no cambian.
+- Redis: clave `auth:revoked-sid:{sid}` con TTL igual a la vida del access token (15 min) para rechazar de inmediato los access tokens de una sesión revocada.
+- `IUserRepository` agrega la búsqueda por id; `User` no cambia.
 
 ## 9. Reglas de negocio
 
-1. Refresh token opaco de 256 bits, válido 30 días, de un solo uso: cada uso emite uno nuevo de la misma familia y marca el anterior como rotado.
-2. Si se presenta un refresh token ya rotado, se revoca toda la familia (detección de reuso) y se responde 401.
-3. Logout (NV-06) revoca también la familia del refresh token de esa sesión.
-4. El token de recuperación vale 30 minutos y el de verificación 24 horas; ambos de un solo uso y guardados solo como hash.
-5. `password/forgot` responde 202 aunque el correo no exista (sin enumeración de cuentas).
-6. Cambiar la contraseña revoca todas las familias de refresh token y los access tokens vigentes del usuario.
-7. Eliminar la cuenta: borrado lógico, anonimización de correo y nombre y revocación de sesiones en Identity; se publica `UserDeleted` y cada módulo borra o anonimiza sus propios datos (favoritos, preferencias, publicaciones de compañero); las reseñas se conservan como "Usuario eliminado".
-8. La rotación es atómica (actualización condicional sobre el token no rotado): dos solicitudes simultáneas con el mismo refresh token producen una sola emisión y la otra se trata como reuso (constitution §20).
+1. El refresh token son 32 bytes aleatorios de un generador criptográfico, codificados en base64url; solo se almacena su hash SHA-256.
+2. Cada refresh token vale 30 días desde su emisión y la sesión completa como máximo 90 días desde el login; vencido cualquiera de los dos, el refresh responde 401.
+3. La rotación es atómica: una actualización condicional marca el token como rotado solo si no estaba rotado ni revocado; de dos solicitudes simultáneas con el mismo token, solo una obtiene tokens nuevos (constitution §20).
+4. Presentar un refresh token ya rotado se trata como reuso: se revoca toda la sesión (todos sus refresh tokens y la clave `revoked-sid` en Redis) y se responde 401.
+5. El refresh valida que el usuario siga existiendo; si no, revoca la sesión y responde 401.
+6. El logout mantiene su comportamiento (revoca el `jti` del access token) y, si el token trae `sid`, revoca además la sesión; un access token antiguo sin `sid` funciona como hoy.
+7. El middleware de revocación rechaza con 401 cualquier access token cuyo `sid` esté revocado.
+8. Si el login no puede guardar el refresh token, responde 503 y no emite tokens (sin sesiones a medias).
+9. `/users/me` usa solo el `sub` del token; no recibe identificadores en la ruta ni en la consulta.
 
 ## 10. Seguridad
 
@@ -115,12 +116,11 @@ Comunes a todas las specs funcionales:
 
 Específicas de esta spec:
 
-- Refresh tokens y tokens de un solo uso solo se almacenan como hash; nunca aparecen en logs ni en Problem Details.
-- Rate limit: refresh 30/min por familia; forgot 3/hora por correo y 10/hora por IP; verify y reset 10/hora por IP.
-- `DELETE /users/me` exige la contraseña actual (reautenticación) para evitar borrados con un token robado.
-- Respuestas idénticas y con tiempo similar para correos existentes e inexistentes (OWASP API2).
-- Los enlaces de correo usan un esquema de la app (deep link) y no incluyen el correo del usuario.
-- Transporte del refresh token en el cuerpo JSON, nunca en cookies (sin riesgo CSRF); la app lo guarda en almacenamiento cifrado del sistema (Android Keystore). Decisión de transporte exigida por constitution §20.
+- El refresh token viaja solo en el cuerpo JSON por HTTPS, nunca en cookies ni en la URL (sin riesgo CSRF); la app lo guarda cifrado con Android Keystore y mantiene el access token solo en memoria.
+- Refresh tokens, `sid` revocados y hashes nunca aparecen en logs, Problem Details ni evidencia.
+- Rate limit de refresh: 30 solicitudes por 60 s por IP en Redis; si Redis no está disponible, el refresh y la validación de revocación fallan cerrados con 503.
+- La detección de reuso protege contra el robo de un refresh token: el primer uso del token robado o del legítimo invalida la sesión entera.
+- `/users/me` no permite consultar a otros usuarios (BOLA imposible por diseño) y no devuelve `PasswordHash` ni `UpdatedAt`.
 
 ## 11. Errores
 
@@ -130,10 +130,8 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | --- | --- | --- |
 | Validación | 400 | Validación fallida |
 | Sin autenticación o token revocado | 401 | No autorizado |
-| Reuso de refresh token o token expirado | 401 | No autorizado |
+| Refresh token desconocido, vencido, revocado o reusado | 401 | No autorizado |
 | Recurso inexistente o ajeno | 404 | Recurso no encontrado |
-| Cuenta con renta activa al eliminar | 409 | Conflicto |
-| Correo ya verificado | 409 | Conflicto |
 | Rate limit | 429 | Demasiadas solicitudes |
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
@@ -142,15 +140,15 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
-| NV-10-R01 | Refresh token con rotación | `POST /auth/refresh` emite access y refresh nuevos; el refresh anterior deja de servir; reuso de uno rotado revoca la familia y responde 401; expiración a 30 días. | F1 | T01 |
-| NV-10-R02 | Login y registro extendidos | Login devuelve `refreshToken` sin romper el contrato NV-05; registro acepta `name` (1–80) y `acceptedTermsVersion` obligatorio; clientes antiguos siguen funcionando. | F1 | T02 |
-| NV-10-R03 | Consulta de la cuenta propia | `GET /users/me` devuelve solo campos públicos de la cuenta del `sub`; nunca hash de contraseña ni tokens. | F1 | T03 |
-| NV-10-R04 | Eliminación de cuenta | `DELETE /users/me` con contraseña correcta anonimiza, revoca sesiones y limpia datos dependientes; 409 con renta activa; la cuenta eliminada no puede iniciar sesión. | F2 | T04 |
-| NV-10-R05 | Recuperación de contraseña | `forgot` siempre 202 y envía un enlace solo si la cuenta existe; `reset` con token válido cambia la contraseña, revoca sesiones y consume el token; token vencido o usado 400. | F2 | T05 |
-| NV-10-R06 | Verificación de correo e insignia | Token de 24 h de un solo uso; al verificar se fija `emailVerifiedAt`; `studentBadge` es true solo con correo verificado y dominio del catálogo. | F2 | T06 |
-| NV-10-R07 | Persistencia y expiración | Colecciones con índices únicos y TTL; sin datos personales en tokens; consultas con proyección explícita. | F2 | T07 |
-| NV-10-R08 | Límites y anti-enumeración | Rate limits de la §9 con 429 y `Retry-After`; respuestas indistinguibles para cuentas existentes e inexistentes. | F3 | T08 |
-| NV-10-R09 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T09, T10, T11 |
+| NV-10-R01 | Refresh token en el login | Login 200 devuelve `refreshToken` además de los campos actuales sin cambiar su forma; el access token incluye `sid`; en la base solo queda el hash; prueba de contrato que compara la respuesta con la de NV-05. | F1 | T01 |
+| NV-10-R02 | Renovación con rotación | `POST /auth/refresh` con token válido devuelve access y refresh nuevos y el anterior deja de servir; token desconocido, vencido o revocado 401 uniforme; cuerpo inválido 400; vencimiento de 30 días por token y 90 por sesión. | F1 | T02 |
+| NV-10-R03 | Cuenta propia | `GET /users/me` con Bearer válido devuelve exactamente `id`, `email` y `createdAt` del `sub`; sin token o con token revocado 401; `Cache-Control: no-store`. | F1 | T03 |
+| NV-10-R04 | Persistencia e índices | `refresh_tokens` con índice único en `tokenHash`, índice por `sessionId` e índice TTL; búsqueda de usuario por id con proyección explícita. | F2 | T04 |
+| NV-10-R05 | Detección de reuso y concurrencia | Reusar un token rotado revoca toda la sesión y responde 401; dos refresh simultáneos con el mismo token producen una sola emisión; pruebas de ambos casos. | F2 | T05 |
+| NV-10-R06 | Logout integrado | Logout sigue respondiendo 204 y revoca el `jti` como hoy; con `sid` revoca también la sesión y su refresh token deja de servir; un access token sin `sid` sigue funcionando hasta su expiración. | F2 | T06 |
+| NV-10-R07 | Rechazo inmediato de sesiones revocadas | Tras el logout o un reuso, cualquier access token de esa sesión recibe 401 en la siguiente solicitud, en cualquier réplica (estado en Redis). | F3 | T07 |
+| NV-10-R08 | Límites y no regresión | Rate limit de refresh con 429 y `Retry-After`; fallo de Redis 503; pruebas de regresión de register 201, login 200 y logout 204 con los contratos actuales. | F3 | T08 |
+| NV-10-R09 | Pruebas, seguridad y evidencia | Pruebas unitarias (generación, hash, vencimientos, rotación), de integración (login, refresh, logout, `/users/me`, register sin cambios) y de seguridad (reuso, concurrencia, sesión revocada en otra réplica, rate limit, Redis caído, ausencia de tokens en logs); después del despliegue por el CD, prueba HTTP real en Azure del flujo login → `/users/me` → refresh → logout; `evidence.md` con resultados y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T09, T10, T11 |
 
 ## 13. Decisiones pendientes
 
@@ -158,17 +156,16 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Proveedor de correo | Los servicios de correo de los proveedores permitidos (Azure Communication Services, Amazon SES) cobran por mensaje; un proveedor externo con plan gratuito requiere una excepción a constitution §30 registrada en `memoria.md`. Sin una opción $0 aprobada, RF-04 y RF-36 quedan BLOCKED | PENDIENTE |
-| Duración del refresh token | 30 días con rotación | PROPUESTO |
-| Google Sign-In (RF-02) | Spec propia posterior (OAuth/OIDC) | PROPUESTO |
-| Verificación por SMS (RF-70) | Fuera de alcance por costo (COST-001) | DESCARTADO |
+| Vigencia | 30 días por refresh token y 90 días como máximo por sesión | PROPUESTO |
+| Refresh simultáneos | Sin periodo de gracia: el segundo uso cuenta como reuso; la app debe serializar las renovaciones (una sola renovación en curso) | PROPUESTO |
+| Alcance diferido | Recuperación de contraseña, verificación de correo, insignia, eliminación de cuenta y datos de registro en una versión posterior de NV-10 | PROPUESTO |
 
 ## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
-| MongoDB Atlas M0 y Redis Upstash | $0 | Dentro de los límites del plan gratuito |
-| Correo transaccional | $0 solo en plan gratuito permanente | PENDIENTE DE VERIFICAR; si no, RF-04 y RF-36 quedan BLOCKED |
+| MongoDB Atlas M0 | $0 | Documentos pequeños con TTL |
+| Redis Upstash | $0 | Claves con TTL de 15 minutos; vigilar el límite de comandos del plan gratuito |
 
 Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
@@ -176,17 +173,18 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
-| NV-10-RK01 | Robo de refresh token | Sesión prolongada de un atacante | Rotación, detección de reuso y revocación de familia |
-| NV-10-RK02 | Enumeración de cuentas | Privacidad | Respuestas uniformes y rate limit |
-| NV-10-RK03 | Correo no entregado | Usuario sin acceso | Reintento acotado y mensaje claro en la app |
-| NV-10-RK04 | Borrado incompleto | Datos personales residuales | Lista explícita de colecciones afectadas y prueba de integración |
+| NV-10-RK01 | Robo del refresh token | Sesión prolongada de un atacante | Rotación, detección de reuso y almacenamiento cifrado en el dispositivo |
+| NV-10-RK02 | Falso reuso por reintentos de red | El usuario tiene que volver a iniciar sesión | Renovación serializada en la app; decisión documentada |
+| NV-10-RK03 | Romper la app actual | Login o registro fallan en Mobile | Cambios solo aditivos, confirmados con Mobile, y pruebas de regresión |
+| NV-10-RK04 | Redis no disponible | Refresh y validación de revocación con 503 | Fallo cerrado (constitution §14) y monitoreo |
+| NV-10-RK05 | Crecimiento de la colección | Límite de 512 MB de M0 | Índice TTL y tokens de 30 días |
 
 ## 16. Dependencias
 
-- NV-04, NV-05 y NV-06 (contratos que se extienden).
-- NV-08 (`emailDomains` de universidades) para la insignia.
-- NV-18 para la regla de renta activa al eliminar la cuenta.
-- NV-21 usa la revocación de sesiones al suspender cuentas.
+- NV-05 (login) y NV-06 (logout), que se extienden de forma aditiva.
+- NV-04 (registro), sin cambios.
+- NV-09 (CD) para desplegar y probar en Azure.
+- App móvil: conectará refresh y `/users/me` cuando se anuncie "NV-10 desplegada".
 
 ## 17. Trazabilidad y cobertura
 
@@ -197,10 +195,10 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Tasks completadas | 10 |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
 
-## 18. Aprobación pendiente
+## 18. Aprobación y ejecución
 
 Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

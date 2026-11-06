@@ -17,6 +17,9 @@ public static class RateLimitKeys
     public static string LogoutIp(string ipAddress) =>
         "thehouse:u2:logout:ip:v1:" + Hash(ipAddress);
 
+    public static string RefreshIp(string ipAddress) =>
+        "thehouse:u2:refresh:ip:v1:" + Hash(ipAddress);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

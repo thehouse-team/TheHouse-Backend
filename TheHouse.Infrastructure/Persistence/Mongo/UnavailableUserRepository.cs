@@ -14,6 +14,14 @@ public sealed class UnavailableUserRepository : IUserRepository
         throw new DependencyUnavailableException();
     }
 
+    public Task<User?> GetByIdAsync(
+        string id,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        throw new DependencyUnavailableException();
+    }
+
     public Task<User> CreateAsync(
         User user,
         CancellationToken cancellationToken)
