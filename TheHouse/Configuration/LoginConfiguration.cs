@@ -33,7 +33,7 @@ public static class LoginConfiguration
             ClockSkewSeconds =
                 configuredJwt.ClockSkewSeconds,
 
-            // El secreto de U2 solo se obtiene desde configuraciÃ³n
+            // El secreto de U2 solo se obtiene desde configuración
             // externa, principalmente JWT_SIGNING_KEY.
             SigningKey =
                 builder.Configuration["JWT_SIGNING_KEY"]
@@ -105,5 +105,5 @@ public static class LoginConfiguration
         new(
             Options.DefaultName,
             typeof(LoginConfiguration),
-            [$"ConfiguraciÃ³n invÃ¡lida en {section}; no se muestran valores."]);
+            [$"Configuración inválida en {section}; no se muestran valores."]);
 }

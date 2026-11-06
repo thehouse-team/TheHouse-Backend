@@ -1,5 +1,5 @@
 ---
-name: MongoDB
+name: mongodb
 description: Revisa modelado documental, índices, consultas, conexiones, consistencia y seguridad de MongoDB.
 ---
 

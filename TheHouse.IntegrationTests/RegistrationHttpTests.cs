@@ -51,7 +51,7 @@ public sealed class RegistrationHttpTests
         using var factory = new RegistrationFactory();
         using var client = factory.CreateHttpsClient();
         using var response = await client.PostAsync(Path, new StringContent(json, Encoding.UTF8, "application/json"));
-        await AssertProblem(response, 400, "Validation failed");
+        await AssertProblem(response, 400, "Validación fallida");
         Assert.Empty(factory.Store.Users);
     }
 
@@ -63,7 +63,7 @@ public sealed class RegistrationHttpTests
         using var created = await client.PostAsJsonAsync(Path, new { email = "test@example.com", password = "fixture-value-123" });
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         using var duplicate = await client.PostAsJsonAsync(Path, new { email = " TEST@EXAMPLE.COM ", password = "different-value-123" });
-        await AssertProblem(duplicate, 409, "Email already registered");
+        await AssertProblem(duplicate, 409, "Conflicto");
         Assert.Single(factory.Store.Users);
     }
 
@@ -79,7 +79,7 @@ public sealed class RegistrationHttpTests
         using var content = new StringContent("{}");
         content.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(contentType);
         using var response = await client.PostAsync(Path, content);
-        await AssertProblem(response, 415, "Unsupported media type");
+        await AssertProblem(response, 415, "Tipo de contenido no admitido");
     }
 
     [Theory]
@@ -97,7 +97,7 @@ public sealed class RegistrationHttpTests
             new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
         using var response = await client.PostAsync(Path, content);
-        await AssertProblem(response, 413, "Payload too large");
+        await AssertProblem(response, 413, "Solicitud demasiado grande");
         Assert.Empty(factory.Store.Users);
     }
 
@@ -111,7 +111,7 @@ public sealed class RegistrationHttpTests
         factory.Store.Unavailable = !redis;
         using var client = factory.CreateHttpsClient();
         using var response = await client.PostAsJsonAsync(Path, new { email = "test@example.com", password = "fixture-value-123" });
-        await AssertProblem(response, 503, "Service unavailable");
+        await AssertProblem(response, 503, "Servicio no disponible");
         Assert.Empty(factory.Store.Users);
     }
 
@@ -121,7 +121,7 @@ public sealed class RegistrationHttpTests
         using var factory = new FoundationFactory();
         using var client = factory.CreateHttpsClient();
         using var response = await client.PostAsJsonAsync(Path, new { email = "test@example.com", password = "fixture-value-123" });
-        await AssertProblem(response, 503, "Service unavailable");
+        await AssertProblem(response, 503, "Servicio no disponible");
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public sealed class RegistrationHttpTests
         }
         clientB.DefaultRequestHeaders.Add("X-Forwarded-For", "203.0.113.3");
         using var rejected = await clientB.PostAsync(Path, new StringContent("{}", Encoding.UTF8, "application/json"));
-        await AssertProblem(rejected, 429, "Too many requests");
+        await AssertProblem(rejected, 429, "Demasiadas solicitudes");
         Assert.Equal(TimeSpan.FromSeconds(60), rejected.Headers.RetryAfter?.Delta);
     }
 
@@ -150,7 +150,7 @@ public sealed class RegistrationHttpTests
         factory.Store.UnexpectedFailure = true;
         using var client = factory.CreateHttpsClient();
         using var response = await client.PostAsJsonAsync(Path, new { email = "test@example.com", password = "fixture-value-123" });
-        await AssertProblem(response, 500, "Internal server error");
+        await AssertProblem(response, 500, "Error interno del servidor");
         Assert.DoesNotContain("internal-collection-marker", await response.Content.ReadAsStringAsync());
     }
 

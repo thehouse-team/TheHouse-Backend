@@ -1,22 +1,7 @@
 ---
 description: Revisa Docker, Terraform, GitHub Actions, cloud, dos instancias, Load Balancer, TLS, observabilidad y costo $0. Solo lectura.
 mode: subagent
-permissions:
-  - action: "*"
-    resource: "*"
-    effect: deny
-  - action: read
-    resource: "*"
-    effect: allow
-  - action: glob
-    resource: "*"
-    effect: allow
-  - action: grep
-    resource: "*"
-    effect: allow
-  - action: skill
-    resource: "*"
-    effect: allow
+permission: { edit: deny, bash: deny, webfetch: deny, task: deny }
 ---
 
 # cloud-devops-agent

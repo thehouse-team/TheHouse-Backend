@@ -1,4 +1,4 @@
-﻿namespace TheHouse.UnitTests
+namespace TheHouse.UnitTests
 {
     public class UnitTest1
     {

@@ -9,16 +9,24 @@ public static class ApiConventions
     public const string Version = "v1";
     public const string Prefix = "/api/" + Version;
 
+    // Entorno exclusivo de pruebas automatizadas: se comporta como Development
+    // (OpenAPI visible, sin HSTS) pero no carga appsettings.Development.json.
+    public const string TestingEnvironment = "Testing";
+
+    public static bool ExposesOpenApi(IHostEnvironment environment) =>
+        environment.IsDevelopment() ||
+        environment.IsEnvironment(TestingEnvironment);
+
     public static void AddFoundationOpenApi(this IServiceCollection services)
     {
         services.AddOpenApi(Version, options =>
         {
             options.AddDocumentTransformer((document, _, _) =>
             {
-                document.Info.Title = "TheHouse U2 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Foundation, Registration, Login, Logout, Properties y Universities";
+                document.Info.Title = "TheHouse U2 — Foundation, Registration, Login, Logout, Properties y Universities";
                 document.Info.Version = Version;
                 document.Info.Description = "Foundation, Registration, Login, Logout, Properties y Universities U2 bajo /api/v1; health es operacional y no versionado. " +
-                    "JWT de acceso revocable vÃƒÂ­a Logout. Errores RFC 9457 con traceId.";
+                    "JWT de acceso revocable vía Logout. Errores RFC 9457 con traceId.";
                 return Task.CompletedTask;
             });
             options.AddSchemaTransformer((schema, context, _) =>

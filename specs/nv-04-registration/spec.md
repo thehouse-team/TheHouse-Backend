@@ -157,11 +157,11 @@ Todos los errores usan `application/problem+json` con `type`, `title`, `status`,
 
 | Caso | Status | `title` |
 | --- | --- | --- |
-| Validación | 400 | `Validation failed` |
-| Email duplicado | 409 | `Email already registered` |
-| Rate limit | 429 | `Too many requests` |
-| Dependencia no disponible | 503 | `Service unavailable` |
-| Error interno | 500 | `Internal server error` |
+| Validación | 400 | `Validación fallida` |
+| Email duplicado | 409 | `Conflicto` |
+| Rate limit | 429 | `Demasiadas solicitudes` |
+| Dependencia no disponible | 503 | `Servicio no disponible` |
+| Error interno | 500 | `Error interno del servidor` |
 
 ## 9. Requisitos verificables
 

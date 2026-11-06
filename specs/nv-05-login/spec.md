@@ -137,7 +137,7 @@ Esta sección no autoriza implementar refresh ni crear endpoints.
 - Buscar usuario por email normalizado.
 - Si no existe, ejecutar una verificación PBKDF2 con un hash dummy para reducir diferencias de tiempo.
 - Comparar el hash en tiempo constante.
-- Cualquier fallo devuelve 401 con `Invalid credentials`, sin distinguir email inexistente, contraseña incorrecta o usuario inactivo.
+- Cualquier fallo devuelve 401 con `No autorizado`, sin distinguir email inexistente, contraseña incorrecta o usuario inactivo.
 - No se registra email completo, contraseña, hash ni token.
 
 ### 8.2 Rate limiting
@@ -167,11 +167,11 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | Caso | Status | `title` |
 | --- | --- | --- |
-| Validación | 400 | `Validation failed` |
-| Credenciales | 401 | `Invalid credentials` |
-| Rate limit | 429 | `Too many requests` |
-| Dependencia | 503 | `Service unavailable` |
-| Interno | 500 | `Internal server error` |
+| Validación | 400 | `Validación fallida` |
+| Credenciales | 401 | `No autorizado` |
+| Rate limit | 429 | `Demasiadas solicitudes` |
+| Dependencia | 503 | `Servicio no disponible` |
+| Interno | 500 | `Error interno del servidor` |
 
 ## 10. Requisitos verificables
 

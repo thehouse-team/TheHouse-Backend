@@ -1,0 +1,173 @@
+# NV-02 — Evidencia CI y DevSecOps U2
+
+| Campo | Valor |
+| --- | --- |
+| ID | NV-02 |
+| Documento | `evidence.md` |
+| Versión | 1.1.0-u2 |
+| Fecha | 2026-11-05 |
+| Aprobación | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» de NV-02 1.1.0-u2) |
+| Rama | `fix/u2-review` |
+| Resultado | **PASS WITH WARNINGS**: CI en verde, ruleset de `main` activo y 15/15 tasks completas; advertencias en la §10 |
+
+Las 15 tasks se cierran con la evidencia de las §7 a §10.
+
+## 1. Archivos creados o modificados
+
+| Archivo | Task | Contenido |
+| --- | --- | --- |
+| `.github/workflows/ci.yml` | T01–T04, T06–T12 | Workflow `CI` con los jobs `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks`, `container-security`, `iac-terraform`, `mutation-stryker` y `quality-gate` |
+| `.github/scripts/coverage_summary.py` | T03 | Combina los reportes Cobertura y publica la tabla de cobertura en el resumen del run |
+| `.github/scripts/sca_gate.py` | T06 | Tabla de dependencias vulnerables; falla con High/Critical sin excepción (`.github/sca-exceptions.txt`) |
+| `.semgrep/thehouse.yml` y `.semgrep/thehouse.cs` | T05 | 9 reglas propias (7 ERROR, 2 WARNING) con casos que deben y no deben coincidir |
+| `.gitleaks.toml` | T08 | Reglas por defecto de Gitleaks; única exclusión: `.semgrep/thehouse.cs` (credenciales ficticias de prueba) |
+| `u2-linux-validation.yml`, `u2-container-validation.yml` | T13 | Retirados: `build-test` y `container-security` los reemplazan. `u2-ghcr-publish.yml` se conserva para NV-09 |
+
+## 2. Versiones fijadas (consultadas el 2026-11-05)
+
+| Componente | Versión | Fijación |
+| --- | --- | --- |
+| `actions/checkout` | v7.0.1 | SHA `3d3c42e5aac5ba805825da76410c181273ba90b1` |
+| `actions/setup-dotnet` | v6.1.0 | SHA `0f4a354dd5547a28c70b7853dbd95d5b67886e73` |
+| `actions/upload-artifact` | v7.0.2 | SHA `cf430e030ddbb5b0abf93d22962f4752f3646cd9` |
+| `hashicorp/setup-terraform` | v4.0.1 | SHA `dfe3c3f87815947d99a8997f908cb6525fc44e9e` |
+| Semgrep CE | 1.184.0 | Imagen `semgrep/semgrep:1.184.0` |
+| Gitleaks | 8.30.1 | Imagen `zricethezav/gitleaks:v8.30.1` (sin la action que exige licencia) |
+| Trivy | 0.76.2 | Imagen `aquasec/trivy:0.76.2` |
+| Dockle | 0.4.15 | Imagen `goodwithtech/dockle:v0.4.15` |
+| CycloneDX (.NET) | 6.3.1 | `dotnet tool install --version` |
+| Stryker.NET | 5.0.0 | `dotnet tool install --version` |
+| Terraform | 1.17.1 | `setup-terraform` |
+
+## 3. Reglas Semgrep propias
+
+| Regla | Severidad | Detecta |
+| --- | --- | --- |
+| `thehouse-log-sensitive-data` | ERROR | Contraseñas, tokens, llaves o cadenas de conexión pasados a un logger |
+| `thehouse-hardcoded-mongodb-credentials` | ERROR | URI de MongoDB con usuario y contraseña en el código |
+| `thehouse-hardcoded-signing-key` | ERROR | Llave de firma JWT literal |
+| `thehouse-tls-validation-disabled` | ERROR | Validación de certificados TLS desactivada |
+| `thehouse-weak-hash` | ERROR | MD5 o SHA-1 |
+| `thehouse-insecure-random` | WARNING | `System.Random` fuera de pruebas |
+| `thehouse-jwt-validation-disabled` | ERROR | Validación de JWT desactivada |
+| `thehouse-exception-details-to-client` | ERROR | Mensajes o trazas de excepción en respuestas |
+| `thehouse-bson-parse-input` | WARNING | `BsonDocument.Parse` con datos variables (inyección NoSQL) |
+
+Antes de escribirlas se verificó con búsquedas en el código que ninguna coincide con el código actual (sin falsos positivos esperados).
+
+## 4. Validación local (2026-11-05)
+
+| Verificación | Resultado |
+| --- | --- |
+| YAML de `ci.yml` y de las reglas Semgrep | Válido; 4 disparadores, 8 jobs, todos con `timeout-minutes`; acciones fijadas por SHA; `permissions: contents: read` |
+| `dotnet build` Release con `-warnaserror` | 0 errores, 0 advertencias |
+| `dotnet test` | 429 aprobadas, 0 fallidas |
+| `sca_gate.py` sobre `dotnet list package --vulnerable --include-transitive` | Sin dependencias vulnerables conocidas |
+| `coverage_summary.py` sobre los reportes Cobertura | Líneas 71.6 %, ramas 72.6 % (sin código autogenerado); Domain 97.3 %, Application 97.6 %, API 85.9 %, Infrastructure 27.6 % |
+| Historial Git (todas las ramas) con patrones de secretos | Sin hallazgos (búsqueda local; Gitleaks lo confirmará en CI) |
+
+No se ejecutaron localmente Semgrep, Gitleaks, Trivy, Dockle, CycloneDX ni Stryker.NET (requieren descargar sus imágenes o herramientas); se ejecutan en GitHub Actions.
+
+## 5. Protección de rama (T14) — guía
+
+Estado al 2026-11-05: el repositorio ya es **público**, pero `main` no tiene ningún ruleset (la API devuelve `[]` para las reglas de `main` y la lista de rulesets está vacía). Las capturas del profesor muestran la configuración a replicar.
+
+Después del primer run de `CI` en el pull request:
+
+1. GitHub → **Settings → Rules → Rulesets → New ruleset → New branch ruleset**.
+2. Nombre `Main Proteccion`, **Enforcement status: Active**, **Target branches: Include default branch** (`main`).
+3. Activar **Restrict deletions**, **Block force pushes** y **Require a pull request before merging** (1 aprobación).
+4. Activar **Require status checks to pass** y **Require branches to be up to date before merging**; en **Add checks** agregar `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks`, `container-security`, `iac-terraform` y `quality-gate`.
+5. Guardar y verificar con `gh api repos/thehouse-team/TheHouse-Backend/rules/branches/main`.
+
+## 6. Pendiente para cerrar las tasks
+
+Nada: los cuatro pendientes originales (primer run, mutación, ruleset y revisión final) se cerraron en las §7 a §10.
+
+## 7. Runs en GitHub Actions — PR #3 (`fix/u2-review` → `main`)
+
+### Run 1 — `42122260637` (commit `c784603`)
+
+- `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks` e `iac-terraform`: éxito.
+- `container-security`: **falla**. Trivy reportó `Total: 2 (HIGH: 2)`: CVE-2026-109518 en `apt` 2.8.3 de `mcr.microsoft.com/dotnet/aspnet:10.0.14-noble`, corregida en `2.8.4ubuntu0.1`.
+- `quality-gate`: falla (BLOCKED) por `container-security`, como corresponde.
+- Corrección: commit `6bd3e92`, el `Dockerfile` ejecuta `apt-get upgrade` en la etapa de runtime para aplicar los parches del sistema operativo. No se registraron excepciones.
+
+### Run 2 — `42122674335` (commit `6bd3e92`) — ✅ todos los checks en verde
+
+URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42122674335
+
+| Job | Resultado | Duración | Hallazgos |
+| --- | --- | --- | --- |
+| `build-test` | ✅ success | 0.8 min | 429 pruebas aprobadas; cobertura publicada en el resumen |
+| `sast-semgrep` | ✅ success | 0.5 min | Pruebas de las 9 reglas propias en verde; 0 hallazgos en todas las severidades |
+| `sca-sbom` | ✅ success | 0.4 min | 0 dependencias vulnerables; SBOM CycloneDX generado |
+| `secrets-gitleaks` | ✅ success | 0.1 min | 0 secretos en todo el historial |
+| `container-security` | ✅ success | 0.9 min | Trivy imagen: 0 vulnerabilidades (Ubuntu 24.04, `TheHouse.deps.json` y runtime .NET 10.0.14). Trivy config: 0 misconfiguraciones en `Dockerfile` e `infra/terraform`. Dockle: 0 FATAL, 0 WARN, 2 INFO (CIS-DI-0005 content trust, CIS-DI-0008 setuid/setgid), 14 PASS. Usuario no root verificado |
+| `iac-terraform` | ✅ success | 0.1 min | `fmt`, `init -backend=false` y `validate` correctos |
+| `quality-gate` | ✅ success | 0 min | PASS |
+| `mutation-stryker` | ⏭️ skipped | — | Solo semanal o manual, por diseño |
+
+- Artefactos (14 días): `test-results` (259 KB), `semgrep-sarif` (23 KB), `sca-sbom` (5 KB), `gitleaks-report` (6 KB) y `container-security` (1 KB).
+- Costo (NV-02-R13): el repositorio es público, por lo que los minutos de GitHub Actions no tienen costo. El run completo tarda ~1.2 minutos de reloj.
+- Los dos avisos INFO de Dockle no bloquean: content trust aplica a la firma de imágenes (NV-09, Cosign) y los binarios setuid/setgid son los de la imagen base de Ubuntu.
+
+## 8. Mutación — run manual `42122968043` (commit `6bd3e92`, `run_mutation=true`)
+
+URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42122968043 — los 8 jobs en éxito; `mutation-stryker` tardó 1 min 40 s.
+
+| Proyecto | Mutantes | Probados | Killed | Survived | NoCoverage | CompileError | Ignored | Score |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `TheHouse.Application` | 457 | 278 | 219 | 59 | 109 | 17 | 53 | **56.59 %** |
+| `TheHouse.Domain` | 17 | 15 | 0 | 15 | 2 | 0 | 0 | **0.00 %** |
+
+Lectura de la línea base:
+
+- **Application**: los validadores tienen la mejor cobertura de mutación (`EmailNormalizer` 46 killed, `PropertyQueryValidation` 44, `UniversityQueryValidation` 44). La mayoría de los mutantes sin cobertura están en datos y opciones sin lógica (`PropertySeedData` 61, opciones de rate limit 25) y en `PropertySeedService` (10), que se prueba en integración, no en `TheHouse.UnitTests`. Los sobrevivientes se concentran en `LogoutService` (8), en los validadores (7 cada uno) y en `PasswordPolicy` (6).
+- **Domain**: el proyecto solo tiene entidades anémicas y excepciones. Los 15 sobrevivientes son valores por defecto de propiedades (`= string.Empty` → `"Stryker was here!"`) y mensajes de excepción; las pruebas siempre asignan esas propiedades, así que estos mutantes son **equivalentes** y el 0 % no mide la calidad de las pruebas.
+- Stryker activó *Safe Mode* en `LogoutService.ValidateRequiredPrincipal` por un error de compilación de un mutante (CS0165); esos mutantes cuentan como `CompileError` y no afectan el score.
+
+Umbral propuesto (requiere aprobación de Victor antes de cambiar `ci.yml`):
+
+| Proyecto | `break-at` | `low` | `high` | Justificación |
+| --- | --- | --- | --- | --- |
+| `TheHouse.Application` | 50 | 60 | 80 | ~6.6 puntos de margen sobre la línea base; se sube a medida que se maten los sobrevivientes de `LogoutService` y `PasswordPolicy` |
+| `TheHouse.Domain` | 0 (informativo) | — | — | Sin lógica que mutar; se reevalúa cuando el dominio tenga reglas de negocio |
+
+Hasta que se apruebe, el job sigue con `--break-at 0`, así que es informativo y no bloquea. Costo: 1 min 40 s por run manual o semanal (repositorio público, $0).
+
+## 9. Ruleset de `main` (T14) — verificado con la API de GitHub
+
+Creado por Victor en la interfaz de GitHub el 2026-11-05. Consultas: `gh api repos/thehouse-team/TheHouse-Backend/rulesets/26657131` y `gh api repos/thehouse-team/TheHouse-Backend/rules/branches/main`.
+
+| Campo | Valor verificado |
+| --- | --- |
+| Nombre / ID | `Main Proteccion` / `26657131` |
+| Enforcement | `active` |
+| Rama objetivo | `~DEFAULT_BRANCH` (`main`) |
+| Bypass | ninguno (`bypass_actors: []`): nadie, ni administradores, puede saltarse las reglas |
+| `deletion` | ✅ bloquea borrar `main` |
+| `non_fast_forward` | ✅ bloquea force push |
+| `pull_request` | ✅ 1 aprobación requerida; métodos `merge`, `squash` y `rebase` |
+| `required_status_checks` | ✅ `build-test`, `sast-semgrep`, `sca-sbom`, `secrets-gitleaks`, `container-security`, `iac-terraform` y `quality-gate`, todos de GitHub Actions (`integration_id` 15368); rama al día requerida (`strict: true`) |
+
+`mutation-stryker` no es check requerido a propósito: en los pull requests queda omitido y bloquearía el merge para siempre.
+
+Prueba de que se aplica: con los 7 checks en verde (run `42123513805`, commit `66d2f5b`), el PR #3 queda `mergeStateStatus: BLOCKED` y `reviewDecision: REVIEW_REQUIRED` hasta que otro integrante lo apruebe.
+
+## 10. Revisión final de seguridad y coherencia (T15) — PASS WITH WARNINGS
+
+| Aspecto | Resultado |
+| --- | --- |
+| Coherencia spec → plan → task → evidencia | 13 requisitos, 15 tasks, sin requisitos sin task ni tasks sin requisito (chequeo de trazabilidad) |
+| Constitution / AGENTS | Spec aprobada antes de ejecutar («EJECUTA»); sin `terraform apply`; sin secretos en el workflow; cambios de configuración de GitHub hechos por humanos |
+| Superficie del workflow | `contents: read`; acciones fijadas por SHA; imágenes por versión; `pull_request` (no `pull_request_target`), así que los forks no reciben secretos ni permisos de escritura |
+| Hallazgos | 0 en Semgrep, Gitleaks, Trivy imagen, Trivy config y SCA; la CVE HIGH de `apt` se corrigió (§7), sin excepciones registradas |
+| Costo (COST-001) | $0: repositorio público; ~1.2 min por PR y 1 min 40 s por mutación |
+
+Advertencias (no bloquean el cierre):
+
+1. **Umbral de mutación sin aprobar**: `mutation-stryker` sigue con `--break-at 0`; la propuesta está en la §8.
+2. **Aprobaciones viejas**: el ruleset tiene `dismiss_stale_reviews_on_push: false`, así que un push después de la aprobación no la invalida. Recomendación: activar *Dismiss stale pull request approvals when new commits are pushed* en `Main Proteccion`.
+3. **Dockle INFO**: CIS-DI-0005 (firma de imágenes) se resuelve en NV-09 con Cosign; CIS-DI-0008 corresponde a binarios setuid de la imagen base.
+4. **SARIF fuera de code scanning**: los reportes quedan como artefactos; con el repositorio público se pueden subir gratis a la pestaña Security (mejora futura, requiere `security-events: write` en ese job).

@@ -288,3 +288,16 @@ NV-06 cumple su alcance funcional y de seguridad para U2.
 La comprobación contra Redis real se realizará en NV-03.
 
 **NV-06 queda EJECUTADA, VALIDADA Y CERRADA PARA U2.**
+
+## Addendum — Correcciones de revisión U2 (2026-11-05)
+
+Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `fix/u2-review`. No se modifican requisitos, alcance ni tasks de NV-06.
+
+- Problem Details de logout: títulos en español y consistentes (`No autorizado`, `Acceso denegado`, `Servicio no disponible`). El contrato omite `detail` e `instance` en este endpoint, sin datos internos ni tokens.
+- Pruebas actualizadas: `LogoutHttpTests` y `LogoutSecurityTests` verifican los títulos en español y la semántica de revocación.
+- La revocación distribuida mantiene fail-closed ante indisponibilidad de Redis; no se modificó su comportamiento.
+- Codificación reparada en pruebas y documentos; sin BOM. `.editorconfig` fija UTF-8.
+- Verificación ejecutada: `dotnet build --verbosity quiet` con 0 errores y 0 advertencias; `dotnet test --verbosity quiet` con 130 pruebas unitarias, 39 de seguridad y 227 de integración: 396 aprobadas y 0 fallidas.
+- Nota de entorno: `TheHouse/appsettings.Development.json` es un archivo local ignorado por Git, no forma parte del repositorio y habilita JWT sin `JWT_SIGNING_KEY`; para ejecutar la suite se excluyó temporalmente y se restauró byte a byte sin incorporarlo al commit. Esta limitación se declara para no atribuir a la suite una ejecución que dependa de configuración no versionada.
+- Seguridad: revisión de OWASP API Security Top 10, secretos, autenticación, autorización, validación de entrada, exposición de datos, errores, logging, rate limiting y mass assignment. Sin hallazgos Critical/High ni secretos confirmados en el alcance revisado. Resultado: PASS WITH WARNINGS. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación ni performance.
+- SDD: la revisión no crea tasks, no reabre el cierre U2 y no autoriza implementación adicional. Resultado: PASS WITH WARNINGS.

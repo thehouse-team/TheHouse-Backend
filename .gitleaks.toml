@@ -1,0 +1,12 @@
+# Configuración de Gitleaks (NV-02-R07, T08): reglas por defecto más una
+# exclusión acotada para los casos de prueba de Semgrep, que contienen
+# credenciales ficticias a propósito. Cualquier otra excepción se registra
+# en specs/nv-02-devsecops/evidence.md con justificación y responsable.
+title = "TheHouse Backend"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Casos de prueba de reglas Semgrep con credenciales ficticias"
+paths = ['''^\.semgrep/thehouse\.cs$''']

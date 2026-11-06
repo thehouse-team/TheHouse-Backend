@@ -4,21 +4,21 @@
 | --- | --- |
 | ID | NV-03 |
 | Documento | `task.md` |
-| Versión | 1.1.0-u2 |
-| Fecha | 2026-11-02 |
+| Versión | 1.2.0-u2 |
+| Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
-| Spec | `spec.md` 1.1.0-u2 |
-| Plan | `plan.md` 1.1.0-u2 |
-| Tasks totales | 23 |
-| Tasks U2 | 22 |
+| Spec | `spec.md` 1.2.0-u2 |
+| Plan | `plan.md` 1.2.0-u2 |
+| Tasks totales | 25 |
+| Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
-| Tasks completadas | 0 |
+| Tasks completadas | 4 (T13, T15, T23, T24; ver `evidence.md`) |
 
 ## Reglas de esta lista
 
-1. Todas las tasks están abiertas; esta fase documental no completa ninguna.
+1. Solo se marcan como completadas las tasks con evidencia real en `evidence.md` (T13, T15, T23 al 2026-11-05).
 2. Una task solo se completa con aceptación, evidencia y revisión.
 3. Solo se ejecutan las tasks marcadas **Alcance: U2** y autorizadas en Fase B.
 4. Cada task declara al menos un requisito.
@@ -26,6 +26,7 @@
 6. La aprobación de NV-01 o NV-02 no autoriza estas tasks.
 7. `terraform apply` requiere `OK PARA APPLY`; `terraform destroy` requiere autorización humana.
 8. Si el costo $0 no se demuestra, la task se detiene y se reporta BLOCKED.
+9. T24 y T25 (1.2.0-u2) requieren la autorización humana «EJECUTA»; `terraform apply` sigue requiriendo `OK PARA APPLY`.
 
 ## F1 — Auditoría stateless
 
@@ -50,13 +51,15 @@
 
 - [ ] **T11 · Instrumentación OpenTelemetry** — Requisito: NV-03-R07 · Fase: F4 · **Alcance: U2** · Aceptación: trazas, métricas y logs correlacionados entre réplicas y dependencias. · Evidencia: configuración y trazas. · Depende de: T08.
 - [ ] **T12 · Cardinalidad, PII, retención y costo de telemetría** — Requisitos: NV-03-R07, NV-03-R13 · Fase: F4 · **Alcance: U2** · Aceptación: exportador, muestreo, límites, retención y costo $0 verificados; sin datos sensibles. · Evidencia: matriz de telemetría y costo. · Depende de: T11.
-- [ ] **T13 · Imagen Docker multi-stage y no root** — Requisito: NV-03-R08 · Fase: F4 · **Alcance: U2** · Aceptación: base fijada, usuario no root, sin secretos, healthcheck y configuración para dos réplicas. · Evidencia: Dockerfile, `.dockerignore` y revisión. · Depende de: T01.
+- [x] **T13 · Imagen Docker multi-stage y no root** — Requisito: NV-03-R08 · Fase: F4 · **Alcance: U2** · Aceptación: base fijada, usuario no root, sin secretos, healthcheck y configuración para dos réplicas. · Evidencia: Dockerfile, `.dockerignore` y revisión. · Depende de: T01.
 - [ ] **T14 · Handoff de imagen a NV-02** — Requisito: NV-03-R08 · Fase: F4 · **Alcance: Futuro (no U2)** · Aceptación: digest, SBOM y contexto entregados para Trivy, Dockle y Cosign. · Evidencia: registro de handoff. · Depende de: T13 y NV-02.
 - [ ] **T22 · Publicación GHCR y VERSIONING.md** — Requisitos: NV-03-R08, NV-03-R14 · Fase: F4 · **Alcance: U2** · Aceptación: imagen publicada en `ghcr.io` con tag/commit, sin token impreso; `VERSIONING.md` registra versión, fecha, imagen, tag, commit, entorno, URL y estado. · Evidencia: digest, tag, registro y revisión. · Depende de: T13.
+- [x] **T24 · Log Analytics con tope diario en Terraform** — Requisitos: NV-03-R15, NV-03-R07, NV-03-R13 · Fase: F4 · **Alcance: U2 (1.2.0-u2)** · Aceptación: `azurerm_log_analytics_workspace` con SKU `PerGB2018`, `daily_quota_gb = 0.1`, `retention_in_days = 30` y etiquetas; el entorno de Container Apps envía sus logs a ese workspace; `terraform plan` sin reemplazo del entorno ni de la app (si lo propone: BLOCKED y opción B); apply solo con `OK PARA APPLY`. · Evidencia: diff, plan revisado y salida del apply. · Depende de: T15, T16 y autorización «EJECUTA».
+- [ ] **T25 · Evidencia de observabilidad y costo** — Requisitos: NV-03-R15, NV-03-R13 · Fase: F4 · **Alcance: U2 (1.2.0-u2)** · Aceptación: consulta KQL de errores y eventos con registros reales del backend; logs sin PII, tokens ni cadenas de conexión; uso de ingestión y Cost Management registrados con fecha; `evidence.md` actualizado. · Evidencia: consulta, salida sanitizada y costo. · Depende de: T24.
 
 ## F5 — Terraform y costo Azure
 
-- [ ] **T15 · Estructura Terraform y estado** — Requisito: NV-03-R09 · Fase: F5 · **Alcance: U2** · Aceptación: módulos, variables, versiones fijadas, estado protegido, etiquetado y plan/apply/destroy; sin secretos. · Evidencia: diseño IaC, `terraform fmt -check` y `terraform validate`. · Depende de: T08, T13.
+- [x] **T15 · Estructura Terraform y estado** — Requisito: NV-03-R09 · Fase: F5 · **Alcance: U2** · Aceptación: módulos, variables, versiones fijadas, estado protegido, etiquetado y plan/apply/destroy; sin secretos. · Evidencia: diseño IaC, `terraform fmt -check` y `terraform validate`. · Depende de: T08, T13.
 - [ ] **T16 · Evidencia de costo Azure U2** — Requisito: NV-03-R10 · Fase: F5 · **Alcance: U2** · Aceptación: región, SKU, free allowance, cuotas, tarjeta, riesgo y estimación para Container Apps, dos réplicas, GHCR, logs, egress, Redis, MongoDB y TLS. · Evidencia: matriz y fuentes con fecha. · Depende de: T15.
 - [ ] **T17 · Gate de costo y OK PARA APPLY** — Requisitos: NV-03-R10, NV-03-R13 · Fase: F5 · **Alcance: U2** · Aceptación: costo total $0 demostrado; si no, BLOCKED; el plan se muestra y se espera `OK PARA APPLY` humano antes de aplicar. · Evidencia: dictamen, resumen del plan y acta. · Depende de: T16.
 
@@ -66,7 +69,7 @@
 - [ ] **T19 · Verificación de despliegue, escalado, fallos y TLS** — Requisitos: NV-03-R01, NV-03-R02, NV-03-R03, NV-03-R04, NV-03-R05, NV-03-R06, NV-03-R07 · Fase: F6 · **Alcance: U2** · Aceptación: smoke tests de 7 endpoints, health, rate limit 429, logout/reuso, réplicas >= 2, TLS y fallos Redis/MongoDB verificados. · Evidencia: reportes de prueba. · Depende de: T18.
 - [ ] **T20 · Destrucción y verificación de recursos residuales** — Requisitos: NV-03-R12, NV-03-R13, NV-03-R09 · Fase: F6 · **Alcance: U2** · Aceptación: inventario vacío o justificado, sin recursos facturables y con evidencia posterior; destroy solo con autorización humana. · Evidencia: plan de destrucción, inventario y facturación. · Depende de: T18, T19.
 - [ ] **T21 · Atestación de costo observado** — Requisito: NV-03-R13 · Fase: F6 · **Alcance: U2** · Aceptación: costo del ciclo de vida reportado con evidencia; si Azure no refleja datos, se registra PENDIENTE DE REFLEJO; cualquier duda se reporta BLOCKED. · Evidencia: informe final y revisión. · Depende de: T20.
-- [ ] **T23 · Scale-to-zero y apagado operativo** — Requisitos: NV-03-R12, NV-03-R13 · Fase: F6 · **Alcance: U2** · Aceptación: reducción de `min replicas` a 0 con nombres reales, sin destruir datos ni recursos externos; comando exacto documentado. · Evidencia: comando, salida y estado. · Depende de: T18, T19.
+- [x] **T23 · Scale-to-zero y apagado operativo** — Requisitos: NV-03-R12, NV-03-R13 · Fase: F6 · **Alcance: U2** · Aceptación: reducción de `min replicas` a 0 con nombres reales, sin destruir datos ni recursos externos; comando exacto documentado. · Evidencia: comando, salida y estado. · Depende de: T18, T19.
 
 ## Matriz task → requisito
 
@@ -84,9 +87,9 @@
 | T10 | R06 | F3 | U2 | ABIERTA |
 | T11 | R07 | F4 | U2 | ABIERTA |
 | T12 | R07, R13 | F4 | U2 | ABIERTA |
-| T13 | R08 | F4 | U2 | ABIERTA |
+| T13 | R08 | F4 | U2 | COMPLETADA |
 | T14 | R08 | F4 | Futuro | ABIERTA |
-| T15 | R09 | F5 | U2 | ABIERTA |
+| T15 | R09 | F5 | U2 | COMPLETADA |
 | T16 | R10 | F5 | U2 | ABIERTA |
 | T17 | R10, R13 | F5 | U2 | ABIERTA |
 | T18 | R11, R02, R03, R04, R05, R06, R09 | F6 | U2 | ABIERTA |
@@ -94,7 +97,9 @@
 | T20 | R12, R13, R09 | F6 | U2 | ABIERTA |
 | T21 | R13 | F6 | U2 | ABIERTA |
 | T22 | R08, R14 | F4 | U2 | ABIERTA |
-| T23 | R12, R13 | F6 | U2 | ABIERTA |
+| T23 | R12, R13 | F6 | U2 | COMPLETADA |
+| T24 | R15, R07, R13 | F4 | U2 | COMPLETADA |
+| T25 | R15, R13 | F4 | U2 | ABIERTA |
 
 ## Cobertura requisito → task
 
@@ -114,17 +119,18 @@
 | R12 | T20, T23 |
 | R13 | T12, T17, T20, T21, T23 |
 | R14 | T22 |
+| R15 | T24, T25 |
 
 ## Resumen
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 14 |
-| Tasks | 23 |
-| Tasks U2 | 22 |
+| Requisitos | 15 |
+| Tasks | 25 |
+| Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
-| Tasks abiertas | 23 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 21 |
+| Tasks completadas | 4 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |

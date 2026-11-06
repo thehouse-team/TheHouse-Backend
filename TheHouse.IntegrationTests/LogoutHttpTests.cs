@@ -12,7 +12,7 @@ using TheHouse.Domain.Entities;
 
 namespace TheHouse.IntegrationTests;
 
-// NV-06 T08: 204, reutilizaciÃƒÂ³n 401, token ausente/invÃƒÂ¡lido/expirado
+// NV-06 T08: 204, reutilización 401, token ausente/inválido/expirado
 // 401, Authorization mal formado y cuerpo 400, Redis falla 503,
 // rate limit 429, cabeceras y Problem Details sanitizados.
 public sealed class LogoutHttpTests
@@ -68,7 +68,7 @@ public sealed class LogoutHttpTests
             logs,
             StringComparison.Ordinal);
 
-        // ReutilizaciÃƒÂ³n: el token ya estÃƒÂ¡ revocado.
+        // Reutilización: el token ya está revocado.
         using var second = await PostLogout(client, token);
 
         Assert.Equal(
@@ -77,7 +77,7 @@ public sealed class LogoutHttpTests
 
         using var problem = Problem(second);
         Assert.Equal(401, problem.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal("Unauthorized", problem.RootElement.GetProperty("title").GetString());
+        Assert.Equal("No autorizado", problem.RootElement.GetProperty("title").GetString());
         Assert.False(
             string.IsNullOrWhiteSpace(
                 problem.RootElement.GetProperty("traceId").GetString()));
@@ -96,7 +96,7 @@ public sealed class LogoutHttpTests
         await ErrorContractTests.AssertProblem(response, 401);
 
         using var problem = Problem(response);
-        Assert.Equal("Unauthorized", problem.RootElement.GetProperty("title").GetString());
+        Assert.Equal("No autorizado", problem.RootElement.GetProperty("title").GetString());
     }
 
     [Theory]
@@ -122,7 +122,7 @@ public sealed class LogoutHttpTests
 
         using var problem = Problem(response);
         Assert.Equal(400, problem.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal("Validation failed", problem.RootElement.GetProperty("title").GetString());
+        Assert.Equal("Validación fallida", problem.RootElement.GetProperty("title").GetString());
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public sealed class LogoutHttpTests
         await ErrorContractTests.AssertProblem(response, 401);
 
         using var problem = Problem(response);
-        Assert.Equal("Unauthorized", problem.RootElement.GetProperty("title").GetString());
+        Assert.Equal("No autorizado", problem.RootElement.GetProperty("title").GetString());
     }
 
     [Fact]
@@ -195,7 +195,7 @@ public sealed class LogoutHttpTests
 
         using var problem = Problem(response);
         Assert.Equal(503, problem.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal("Service unavailable", problem.RootElement.GetProperty("title").GetString());
+        Assert.Equal("Servicio no disponible", problem.RootElement.GetProperty("title").GetString());
     }
 
     [Fact]
@@ -252,7 +252,7 @@ public sealed class LogoutHttpTests
         using var first = await PostLogout(client, token);
         Assert.Equal(HttpStatusCode.NoContent, first.StatusCode);
 
-        // ReutilizaciÃƒÂ³n (revocado): cuenta contra el lÃƒÂ­mite IP.
+        // Reutilización (revocado): cuenta contra el límite IP.
         using var second = await PostLogout(client, token);
         Assert.Equal(HttpStatusCode.Unauthorized, second.StatusCode);
 
@@ -265,7 +265,7 @@ public sealed class LogoutHttpTests
                 .TotalSeconds);
 
         using var problem = Problem(third);
-        Assert.Equal("Too many requests", problem.RootElement.GetProperty("title").GetString());
+        Assert.Equal("Demasiadas solicitudes", problem.RootElement.GetProperty("title").GetString());
     }
 
     [Fact]
@@ -279,12 +279,12 @@ public sealed class LogoutHttpTests
         var token =
             await LoginTokenAsync(replicaA, "shared@example.com");
 
-        // Logout en la rÃƒÂ©plica B con un token emitido por la A.
+        // Logout en la réplica B con un token emitido por la A.
         using var clientB = replicaB.CreateHttpsClient();
         using var logoutB = await PostLogout(clientB, token);
         Assert.Equal(HttpStatusCode.NoContent, logoutB.StatusCode);
 
-        // ReutilizaciÃƒÂ³n en la rÃƒÂ©plica A: rechazada 401.
+        // Reutilización en la réplica A: rechazada 401.
         using var clientA = replicaA.CreateHttpsClient();
         using var reuseA = await PostLogout(clientA, token);
         Assert.Equal(HttpStatusCode.Unauthorized, reuseA.StatusCode);

@@ -4,19 +4,21 @@
 | --- | --- |
 | ID | NV-03 |
 | Documento | `spec.md` |
-| Versión | 1.1.0-u2 |
-| Fecha | 2026-11-02 |
+| Versión | 1.2.0-u2 |
+| Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Plan | `plan.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Plan | `plan.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Precondición | NV-01 U2 y specs funcionales U2 aprobadas documentalmente; M-BE-028; COST-001 |
 | Relación | No autoriza NV-01, NV-02 ni specs funcionales por transitividad |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
 
 Este documento está aprobado documentalmente para la Entrega Unidad 2. No autoriza crear recursos, ejecutar Docker, ejecutar Terraform ni desplegar. **La ejecución requiere autorización humana de Fase B y, para `terraform apply` o `terraform destroy`, una confirmación humana separada.**
+
+**Cambio 1.2.0-u2 (2026-11-05):** agrega NV-03-R15 (observabilidad persistente a costo $0) y las tasks T24 y T25. Aprobación documental: Victor Manuel Jose Jose, 2026-11-05 (M-BE-047). T24 y T25 quedan **⛔ NO EJECUTAR** hasta la autorización humana «EJECUTA»; `terraform apply` sigue requiriendo `OK PARA APPLY`.
 
 ## 1. Contexto
 
@@ -53,6 +55,7 @@ Definir los requisitos verificables para contenerizar, publicar, aprovisionar, d
 10. Scale-to-zero al finalizar la evaluación, si la arquitectura lo permite.
 11. Destrucción con `terraform destroy` y verificación de recursos residuales.
 12. `VERSIONING.md` con versión, fecha, imagen, tag, commit, entorno, URL y estado.
+13. Observabilidad persistente en la nube a costo $0: Log Analytics con tope diario de ingestión (1.2.0-u2).
 
 ## 5. Fuera de alcance
 
@@ -83,6 +86,7 @@ Definir los requisitos verificables para contenerizar, publicar, aprovisionar, d
 | NV-03-R12 | Destrucción y apagado | Existe inventario, scale-to-zero cuando aplique, plan de destrucción, verificación de recursos residuales y evidencia de costo posterior. | F6 | T20, T23 |
 | NV-03-R13 | Arquitectura de costo $0 | El costo total del ciclo de vida es $0, incluidos compute, dos réplicas, TLS, logs, Redis, MongoDB, registry y egress; si no se demuestra, BLOCKED. | F6 | T12, T17, T20, T21, T23 |
 | NV-03-R14 | Versionamiento del despliegue | `VERSIONING.md` registra versión, fecha, imagen, tag, commit, entorno, URL y estado, sin secretos; la información coincide con GHCR y Azure. | F4 | T22 |
+| NV-03-R15 | Observabilidad persistente en la nube | Los logs de consola y de sistema de Container Apps (eventos y errores) se conservan en un servicio de Azure con ingestión limitada (`daily_quota_gb` de 0.1) y retención de 30 días; existe una consulta de errores documentada; sin PII ni secretos; costo $0 con evidencia de precio vigente; si Terraform propone reemplazar el entorno o la app, BLOCKED y se usa la alternativa documentada. | F4 | T24, T25 |
 
 ## 7. Azure Container Apps U2 — condiciones COST-001
 
@@ -110,6 +114,27 @@ Reglas:
 3. Si dos réplicas o algún componente no pueden demostrarse $0, el resultado es **BLOCKED**.
 4. El apply requiere mostrar el plan y recibir **OK PARA APPLY** humano.
 5. El destroy requiere autorización humana separada.
+
+## 7.1 Observabilidad persistente (1.2.0-u2)
+
+Hoy los logs del entorno quedan solo en streaming (M-BE-037): no se conservan eventos ni errores, y el requisito académico pide un servicio en la nube para manejarlos. Decisión PROPUESTA (M-BE-047):
+
+- **Opción A (preferida):** `azurerm_log_analytics_workspace` en `rg-thehouse-u2` con SKU `PerGB2018`, `daily_quota_gb = 0.1` y `retention_in_days = 30`; el `azurerm_container_app_environment` envía sus logs a ese workspace (`logs_destination = "log-analytics"`). Conserva los logs de consola del backend y los de sistema (reinicios, probes, escalado).
+- **Opción B (si A recrea el entorno o la app):** conservar el entorno y exportar logs y trazas desde la aplicación con OpenTelemetry hacia Application Insights basado en el mismo workspace, con la cadena de conexión como secreto de Container Apps.
+- Consulta mínima documentada en `evidence.md`: errores y eventos del backend de las últimas 24 h por revisión y `correlationId`.
+- Los logs no contienen PII, tokens, contraseñas ni cadenas de conexión; se verifica con datos reales antes de cerrar.
+
+Evidencia de precio (Azure Retail Prices API, `prices.azure.com`, región `eastus2`, consultada el 2026-11-05):
+
+| Medidor | Tramo | Precio |
+| --- | --- | --- |
+| Analytics Logs Data Ingestion | 0–5 GB/mes | 0.00 USD/GB |
+| Analytics Logs Data Ingestion | más de 5 GB/mes | 2.76 USD/GB |
+| Analytics Logs Data Retention | más allá del periodo incluido | 0.12 USD/GB/mes |
+
+Cálculo: tope de 0.1 GB/día × 31 días = 3.1 GB/mes, por debajo del tramo de 5 GB a 0.00 USD. **Verificado el 2026-11-05** en la página oficial de precios de Azure Monitor: los primeros 5 GB/mes por cuenta de facturación son gratuitos en Analytics Logs (pago por uso) y se incluyen 31 días de retención sin costo, por lo que 30 días quedan dentro del periodo incluido.
+
+Al alcanzar el tope diario, Azure deja de ingerir logs hasta el día siguiente; se acepta la pérdida de los logs restantes de ese día (NV-03-RK11).
 
 ## 8. Decisiones y restricciones aplicables
 
@@ -153,6 +178,7 @@ La verificación U2 debe incluir:
 - TLS válido y redirección HTTPS cuando aplique.
 - Cost Management consultado y registrado.
 - Scale-to-zero o destroy al finalizar, con autorización humana.
+- Observabilidad persistente: consulta de errores y eventos con registros reales del backend, sin PII ni secretos, y uso de ingestión registrado (1.2.0-u2).
 
 Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran latencias, disponibilidad ni costos sin evidencia.
 
@@ -170,6 +196,8 @@ Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran late
 | NV-03-RK08 | GHCR con token expuesto | Acceso no autorizado | Token efímero, nunca impreso ni versionado |
 | NV-03-RK09 | Certificado o DNS mal configurado | TLS inválido | Verificación HTTPS y renovación |
 | NV-03-RK10 | Observabilidad con cardinalidad excesiva | Costo y ruido | Muestreo, límites y retención |
+| NV-03-RK11 | Tope diario de ingestión alcanzado | Pérdida de logs del resto del día | Tope de 0.1 GB/día aceptado; revisar uso y ajustar solo con evidencia de costo |
+| NV-03-RK12 | Cambiar el destino de logs fuerza recrear el entorno o la app | Caída o URL nueva | Revisar el plan; si propone reemplazo, BLOCKED y usar la opción B |
 
 ## 12. Dependencias
 
@@ -185,14 +213,14 @@ Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran late
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 14 |
+| Requisitos | 15 |
 | Fases del plan | 6 |
-| Tasks | 23 |
-| Tasks U2 | 22 |
+| Tasks | 25 |
+| Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 3 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
 
@@ -207,3 +235,5 @@ La aprobación documental U2 quedó registrada con:
 5. Restricciones: COST-001, sin apply automático y sin destroy automático.
 
 La ejecución sigue bloqueada. El apply y el destroy requieren confirmación humana explícita. Sin ese registro, el estado permanece **BLOCKED**.
+
+Cambio 1.2.0-u2: aprobación documental de Victor Manuel Jose Jose, 2026-11-05 (M-BE-047). T24 y T25 requieren la autorización humana «EJECUTA»; el apply, además, `OK PARA APPLY`.

@@ -6,10 +6,10 @@ using TheHouse.Domain.Entities;
 
 namespace TheHouse.UnitTests;
 
-// NV-06 T07: clave/TTL, token sin `jti`, expirado, semÃ¡ntica
-// 204/401 del caso de uso y fallo cerrado del almacÃ©n. La emisiÃ³n y
-// validaciÃ³n criptogrÃ¡fica REAL del JWT se evidencia en
-// SecurityTests y pruebas de integraciÃ³n; aquÃ­ el `jti`, el `exp` y
+// NV-06 T07: clave/TTL, token sin `jti`, expirado, semántica
+// 204/401 del caso de uso y fallo cerrado del almacén. La emisión y
+// validación criptográfica REAL del JWT se evidencia en
+// SecurityTests y pruebas de integración; aquí el `jti`, el `exp` y
 // la validez se controlan con stubs deterministas.
 public sealed class LogoutServiceTests
 {
@@ -39,7 +39,7 @@ public sealed class LogoutServiceTests
         var jti = "0123456789abcdef0123456789abcdef";
         var service = Create(store, time, jti);
 
-        // exp = Start + 900 s (igual que la emisiÃ³n NV-05).
+        // exp = Start + 900 s (igual que la emisión NV-05).
         var token = Token(jti, 900);
         time.Advance(TimeSpan.FromSeconds(100));
 
@@ -227,7 +227,7 @@ public sealed class LogoutServiceTests
         public override DateTimeOffset GetUtcNow() => value;
     }
 
-    // Stub que emula la validaciÃ³n de NV-05: identidad autenticada
+    // Stub que emula la validación de NV-05: identidad autenticada
     // con `jti` (32 hex antiguo) y `exp` configurables.
     private sealed class StubJwt(
         bool throwOnValidate,

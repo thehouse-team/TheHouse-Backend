@@ -26,6 +26,8 @@ public sealed class ConfigurationTests
     [InlineData("Foundation:RequestTimeoutSeconds", "0")]
     [InlineData("Foundation:RateLimitPermitLimit", "0")]
     [InlineData("Foundation:CompressionMinimumBytes", "0")]
+    [InlineData("Foundation:PublicCacheMaxAgeSeconds", "-1")]
+    [InlineData("Foundation:PublicCacheMaxAgeSeconds", "301")]
     [InlineData("MongoDB:MaxPoolSize", "0")]
     [InlineData("MongoDB:ConnectTimeoutSeconds", "0")]
     [InlineData("MongoDB:Enabled", "true")]

@@ -183,6 +183,9 @@ Cada informe identifica alcance, IDs evaluados, evidencia, pendientes y archivos
 
 Usar español, IDs estables, rutas relativas a raíz y estados explícitos. Mantener decisiones `M-BE-NNN` con Decisión, Estado, Justificación e Impacto; estados válidos: APROBADO, PROPUESTO, PENDIENTE, DESCARTADO. APROBADO como dirección arquitectónica no significa implementado ni autoriza una task.
 
+- Toda decisión técnica nueva se registra en `memoria.md`.
+- Todos los archivos se guardan en UTF-8.
+
 Cada spec tiene requisitos verificables y todos mapean a fases y tasks. No crear nuevas specs funcionales sin solicitud. No completar checkboxes por haber escrito la planificación. Los umbrales de calidad y los costos futuros son propuestas hasta revisión con evidencia.
 
 ## Cierre de esta tarea documental

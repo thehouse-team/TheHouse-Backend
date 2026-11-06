@@ -1,5 +1,5 @@
 ---
-name: API Contract
+name: api-contract
 description: Revisa REST, OpenAPI, versionado, Problem Details, validación, paginación, códigos HTTP, idempotencia y correlation IDs.
 ---
 

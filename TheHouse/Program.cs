@@ -26,7 +26,7 @@ builder.Services.AddHsts(options =>
 });
 builder.Services.AddResponseCompression(options =>
 {
-    options.EnableForHttps = true; // Unicamente contenido pÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Âºblico con opt-in explÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­cito.
+    options.EnableForHttps = true; // Unicamente contenido público con opt-in explícito.
     options.Providers.Add<BrotliCompressionProvider>();
     options.Providers.Add<GzipCompressionProvider>();
     options.MimeTypes = ["application/json", "text/plain"];
@@ -34,45 +34,101 @@ builder.Services.AddResponseCompression(options =>
 
 var app = builder.Build();
 
-if (args.Contains(
-        "--seed-universities",
-        StringComparer.Ordinal))
+var seedUniversities =
+    args.Contains(
+        SeedCommandPolicy.SeedUniversities,
+        StringComparer.Ordinal);
+
+var seedProperties =
+    args.Contains(
+        SeedCommandPolicy.SeedProperties,
+        StringComparer.Ordinal);
+
+if (seedUniversities || seedProperties)
 {
-    var seedOptions =
+    var universitySeedOptions =
         app.Services.GetRequiredService<
             TheHouse.Application.Common.UniversitySeedOptions>();
 
-    if (!seedOptions.Enabled)
+    var propertySeedOptions =
+        app.Services.GetRequiredService<
+            TheHouse.Application.Common.PropertySeedOptions>();
+
+    var decision = SeedCommandPolicy.Evaluate(
+        args,
+        universitySeedOptions.Enabled,
+        propertySeedOptions.Enabled,
+        app.Environment.IsProduction());
+
+    var rejection = decision switch
     {
-        Console.Error.WriteLine(
-            "University seed is disabled. Set UniversitySeed__Enabled=true only in an authorized environment.");
+        SeedCommandDecision.UniversitySeedDisabled =>
+            "University seed is disabled. Set UniversitySeed__Enabled=true only in an authorized environment.",
+        SeedCommandDecision.PropertySeedDisabled =>
+            "Property seed is disabled. Set PropertySeed__Enabled=true only in an authorized environment.",
+        SeedCommandDecision.ProductionNotAllowed =>
+            $"Seed commands are not allowed in Production without {SeedCommandPolicy.AllowProductionSeed}.",
+        _ => null
+    };
+
+    if (rejection is not null)
+    {
+        Console.Error.WriteLine(rejection);
 
         Environment.ExitCode = 2;
         return;
     }
 
-    if (app.Environment.IsProduction())
+    if (decision == SeedCommandDecision.RunInProduction)
     {
-        Console.Error.WriteLine(
-            "University seed is not allowed in Production.");
-
-        Environment.ExitCode = 2;
-        return;
+        app.Logger.LogWarning(
+            "Seed autorizado en Production mediante {Flag}: universidades={Universities}, propiedades={Properties}.",
+            SeedCommandPolicy.AllowProductionSeed,
+            seedUniversities,
+            seedProperties);
     }
 
     await using var scope =
         app.Services.CreateAsyncScope();
 
-    var seed =
-        scope.ServiceProvider
-            .GetRequiredService<
-                TheHouse.Application.UseCases.UniversitySeedService>();
+    if (seedUniversities)
+    {
+        var universitySeed =
+            scope.ServiceProvider
+                .GetRequiredService<
+                    TheHouse.Application.UseCases.UniversitySeedService>();
 
-    await seed.SeedAsync(
-        CancellationToken.None);
+        await universitySeed.SeedAsync(
+            CancellationToken.None);
 
-    Console.WriteLine(
-        "University seed completed.");
+        Console.WriteLine(
+            "University seed completed.");
+    }
+
+    if (seedProperties)
+    {
+        var propertySeed =
+            scope.ServiceProvider
+                .GetRequiredService<
+                    TheHouse.Application.UseCases.PropertySeedService>();
+
+        try
+        {
+            await propertySeed.SeedAsync(
+                CancellationToken.None);
+        }
+        catch (InvalidOperationException exception)
+        {
+            Console.Error.WriteLine(
+                exception.Message);
+
+            Environment.ExitCode = 2;
+            return;
+        }
+
+        Console.WriteLine(
+            "Property seed completed.");
+    }
 
     return;
 }
@@ -84,7 +140,7 @@ app.UseStatusCodePages(context => ProblemResponses.WriteAsync(context.HttpContex
 app.UseMiddleware<RequestBodyLimitMiddleware>();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (ApiConventions.ExposesOpenApi(app.Environment))
 {
     app.MapOpenApi().WithMetadata(new PublicResponseCompressionAttribute()).DisableRateLimiting();
 }

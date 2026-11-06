@@ -178,7 +178,7 @@ public sealed class PropertyHttpTests
             await response.Content.ReadAsStringAsync());
 
         Assert.Equal(
-            "Not found",
+            "Recurso no encontrado",
             body.RootElement.GetProperty("title").GetString());
     }
 
@@ -199,7 +199,7 @@ public sealed class PropertyHttpTests
             await response.Content.ReadAsStringAsync());
 
         Assert.Equal(
-            "Validation failed",
+            "Validación fallida",
             body.RootElement.GetProperty("title").GetString());
     }
 
@@ -252,7 +252,7 @@ public sealed class PropertyHttpTests
             StringComparison.OrdinalIgnoreCase);
 
         Assert.Equal(
-            "Service unavailable",
+            "Servicio no disponible",
             body.RootElement.GetProperty("title").GetString());
     }
 
@@ -287,7 +287,7 @@ public sealed class PropertyHttpTests
             await third.Content.ReadAsStringAsync());
 
         Assert.Equal(
-            "Too many requests",
+            "Demasiadas solicitudes",
             body.RootElement.GetProperty("title").GetString());
     }
 

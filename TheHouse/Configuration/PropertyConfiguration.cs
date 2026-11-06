@@ -14,7 +14,16 @@ public static class PropertyConfiguration
         builder.Services.AddSingleton(
             new PropertyRateLimitOptions());
 
+        var seedOptions =
+            builder.Configuration
+                .GetSection("PropertySeed")
+                .Get<PropertySeedOptions>()
+            ?? new PropertySeedOptions();
+
+        builder.Services.AddSingleton(seedOptions);
+
         builder.Services.AddSingleton<PropertyQueryService>();
+        builder.Services.AddSingleton<PropertySeedService>();
 
         builder.Services.AddSingleton<IPropertyRepository>(
             provider =>

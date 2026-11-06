@@ -1,22 +1,7 @@
 ---
 description: Revisa contratos REST, OpenAPI, versionado, Problem Details, validación, paginación, códigos HTTP, idempotencia y correlation IDs. Solo lectura.
 mode: subagent
-permissions:
-  - action: "*"
-    resource: "*"
-    effect: deny
-  - action: read
-    resource: "*"
-    effect: allow
-  - action: glob
-    resource: "*"
-    effect: allow
-  - action: grep
-    resource: "*"
-    effect: allow
-  - action: skill
-    resource: "*"
-    effect: allow
+permission: { edit: deny, bash: deny, webfetch: deny, task: deny }
 ---
 
 # api-contract-agent

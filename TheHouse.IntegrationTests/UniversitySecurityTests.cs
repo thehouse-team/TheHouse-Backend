@@ -41,9 +41,9 @@ public sealed class UniversitySecurityTests
     }
 
     [Theory]
-    [InlineData(400, "Validation failed", "?page=0")]
-    [InlineData(404, "Not found", "/665f1c2a9b1e4a0012999990")]
-    [InlineData(503, "Service unavailable", "")]
+    [InlineData(400, "Validación fallida", "?page=0")]
+    [InlineData(404, "Recurso no encontrado", "/665f1c2a9b1e4a0012999990")]
+    [InlineData(503, "Servicio no disponible", "")]
     public async Task Problem_details_use_exact_contracts(
         int status,
         string title,
@@ -103,7 +103,7 @@ public sealed class UniversitySecurityTests
             await exceeded.Content.ReadAsStringAsync());
 
         Assert.Equal(
-            "Too many requests",
+            "Demasiadas solicitudes",
             body.RootElement.GetProperty("title").GetString());
     }
 

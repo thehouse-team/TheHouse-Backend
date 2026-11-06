@@ -129,7 +129,7 @@ public sealed class LoginHttpTests
         await AssertProblem(
             unknown,
             401,
-            "Invalid credentials");
+            "No autorizado");
 
         using var wrongFactory =
             new LoginFactory();
@@ -156,7 +156,7 @@ public sealed class LoginHttpTests
         await AssertProblem(
             wrong,
             401,
-            "Invalid credentials");
+            "No autorizado");
     }
 
     [Theory]
@@ -184,7 +184,7 @@ public sealed class LoginHttpTests
         await AssertProblem(
             response,
             400,
-            "Validation failed");
+            "Validación fallida");
     }
 
     [Fact]
@@ -204,7 +204,7 @@ public sealed class LoginHttpTests
         await AssertProblem(
             response,
             415,
-            "Unsupported media type");
+            "Tipo de contenido no admitido");
     }
 
     [Fact]
@@ -241,7 +241,7 @@ public sealed class LoginHttpTests
         await AssertProblem(
             rejected,
             429,
-            "Too many requests");
+            "Demasiadas solicitudes");
 
         Assert.Equal(
             TimeSpan.FromSeconds(60),
@@ -282,7 +282,7 @@ public sealed class LoginHttpTests
         await AssertProblem(
             rejected,
             429,
-            "Too many requests");
+            "Demasiadas solicitudes");
     }
 
     [Fact]
@@ -305,7 +305,7 @@ public sealed class LoginHttpTests
         await AssertProblem(
             response,
             503,
-            "Service unavailable");
+            "Servicio no disponible");
     }
 
     [Fact]
@@ -328,7 +328,7 @@ public sealed class LoginHttpTests
         await AssertProblem(
             response,
             503,
-            "Service unavailable");
+            "Servicio no disponible");
     }
 
     private static User User(string hash) =>

@@ -94,6 +94,34 @@ variable "evaluation_mode" {
   default     = true
 }
 
+variable "log_analytics_workspace_name" {
+  description = "Log Analytics workspace for persistent Container Apps logs."
+  type        = string
+  default     = "log-thehouse-u2"
+}
+
+variable "log_daily_quota_gb" {
+  description = "Daily ingestion cap in GB. Keeps monthly ingestion inside the free 5 GB tier."
+  type        = number
+  default     = 0.1
+
+  validation {
+    condition     = var.log_daily_quota_gb > 0 && var.log_daily_quota_gb <= 0.16
+    error_message = "log_daily_quota_gb must be greater than 0 and at most 0.16 (5 GB / 31 days)."
+  }
+}
+
+variable "log_retention_in_days" {
+  description = "Log retention in days."
+  type        = number
+  default     = 30
+
+  validation {
+    condition     = var.log_retention_in_days == 30
+    error_message = "log_retention_in_days must stay at 30 days (M-BE-047)."
+  }
+}
+
 variable "tags" {
   description = "Additional Azure tags."
   type        = map(string)

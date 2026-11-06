@@ -4,13 +4,13 @@
 | --- | --- |
 | ID | NV-08 |
 | Documento | `plan.md` |
-| Versión | 1.0.0-u2 |
-| Fecha | 2026-11-02 |
+| Versión | 1.1.0-u2 |
+| Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
-| Spec | `spec.md` 1.0.0-u2 |
-| Tasks | `task.md` 1.0.0-u2 |
+| Spec | `spec.md` 1.1.0-u2 |
+| Tasks | `task.md` 1.1.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 
 Plan aprobado documentalmente para U2. No se implementa código en esta fase.
@@ -25,8 +25,8 @@ University Catalog se implementa en cuatro fases: contrato y validación; seed y
 | --- | --- | --- | --- | --- |
 | F1 | Contrato y validación | R01, R02, R03 | T01, T02 | DTOs y validación |
 | F2 | Seed y acceso a datos | R04, R05 | T03, T04 | Seed idempotente e índices |
-| F3 | Endpoints y errores | R01, R02, R05, R06 | T05, T06, T07 | 200/400/404/429/503 |
-| F4 | Pruebas y evidencia | R01–R07 | T08, T09, T10, T11 | Suite y evidencia |
+| F3 | Endpoints y errores | R01, R02, R05, R06, R08 | T05, T06, T07, T12 | 200/304/400/404/429/503 |
+| F4 | Pruebas y evidencia | R01–R08 | T08, T09, T10, T11, T13 | Suite y evidencia |
 
 ## 3. Detalle de fases
 
@@ -87,6 +87,7 @@ University Catalog se implementa en cuatro fases: contrato y validación; seed y
 - 200, 400, 404, 429, 503, 500.
 - Problem Details con `traceId`.
 - Rate limit 60/60 s por IP en Redis.
+- Caché HTTP condicional: `ETag` débil, `Cache-Control` y 304 (T12, 1.1.0-u2).
 
 **Criterios de salida:**
 
@@ -140,6 +141,8 @@ F4 Pruebas/evidencia
 - T09 depende de T03, T04, T05 y T06.
 - T10 depende de T04, T06 y T07.
 - T11 depende de T08, T09 y T10.
+- T12 depende de T05 y T06.
+- T13 depende de T10 y T12.
 
 ## 5. Testing
 
@@ -148,6 +151,7 @@ F4 Pruebas/evidencia
 | Unitaria | Paginación, ID, DTO, seed | xUnit | Reporte |
 | Integración | Listado, detalle, seed dos veces, 400/404/429/503 | WebApplicationFactory + Testcontainers si se autoriza | Reporte |
 | Seguridad | Datos personales, errores, rate limit | Pruebas negativas | Hallazgos |
+| Integración y seguridad | Caché HTTP: `ETag`, 304, `no-store` en errores | WebApplicationFactory | Reporte (T13) |
 
 Testcontainers no se instala en Fase A.
 
@@ -168,7 +172,7 @@ University Catalog no requiere servicios pagos. MongoDB/Redis deben caber en COS
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0-Doc | Antes de Fase B | Aprobación documental 1.0.0-u2 | BLOCKED |
+| G0-Doc | Antes de Fase B | Aprobación documental 1.0.0-u2; 1.1.0-u2 para T12 y T13 | BLOCKED |
 | G0-Ejec | Inicio | Autorización con SPEC/PLAN/TASK/ESTADO | BLOCKED |
 | G1 | Fin F1 | Contrato y validación | No avanzar |
 | G2 | Fin F2 | Seed idempotente e índices | No avanzar |
@@ -186,6 +190,7 @@ University Catalog no requiere servicios pagos. MongoDB/Redis deben caber en COS
 | R05 | F2 | T03, T05, T06, T09 |
 | R06 | F3 | T05, T06, T07, T09 |
 | R07 | F4 | T10, T11 |
+| R08 | F3 | T12, T13 |
 
 ## 10. No ejecución
 

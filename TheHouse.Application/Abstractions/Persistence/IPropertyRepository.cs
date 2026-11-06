@@ -12,4 +12,8 @@ public interface IPropertyRepository
     Task<Property?> GetByIdAsync(
         string id,
         CancellationToken cancellationToken);
+
+    Task UpsertSeedAsync(
+        IReadOnlyCollection<Property> properties,
+        CancellationToken cancellationToken);
 }

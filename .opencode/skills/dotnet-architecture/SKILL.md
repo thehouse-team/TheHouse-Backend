@@ -1,5 +1,5 @@
 ---
-name: .NET Architecture
+name: dotnet-architecture
 description: Revisa Clean Architecture, Modular Monolith, DI, configuración, resiliencia, stateless y performance en .NET 10.
 ---
 

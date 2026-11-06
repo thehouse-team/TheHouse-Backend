@@ -3,6 +3,7 @@ name: U2 GHCR Publish
 on:
   push:
     branches:
+      - main
       - feature/u2-entrega
     paths:
       - Dockerfile
@@ -94,7 +95,8 @@ jobs:
 
     if: >-
       github.event_name == 'workflow_dispatch' &&
-      github.ref == 'refs/heads/feature/u2-entrega' &&
+      (github.ref == 'refs/heads/main' ||
+       github.ref == 'refs/heads/feature/u2-entrega') &&
       inputs.confirm_publish == 'PUBLISH'
 
     needs:

@@ -1,5 +1,5 @@
 ---
-name: Testing Quality
+name: testing
 description: Planifica y revisa pruebas unitarias, integración, seguridad, contrato, mutación, performance y evidencia de calidad.
 ---
 

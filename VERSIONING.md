@@ -56,7 +56,7 @@ The workflow:
 
 requires:
 
-- branch `feature/u2-entrega`
+- branch `main` or `feature/u2-entrega`
 - explicit workflow_dispatch
 - explicit `PUBLISH` confirmation
 - `packages: write`

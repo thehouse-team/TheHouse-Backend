@@ -4,18 +4,20 @@
 | --- | --- |
 | ID | NV-07 |
 | Documento | `spec.md` |
-| Versión | 1.0.0-u2 |
-| Fecha | 2026-11-02 |
+| Versión | 1.1.0-u2 |
+| Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Plan | `plan.md` 1.0.0-u2 |
-| Tasks | `task.md` 1.0.0-u2 |
+| Plan | `plan.md` 1.1.0-u2 |
+| Tasks | `task.md` 1.1.0-u2 |
 | Precondición | NV-01 U2 para el contrato; NV-03 U2 para la verificación desplegada; M-BE-027; M-BE-029 |
 | Relación | Spec funcional independiente; no autoriza CRUD ni otros módulos |
 
 Este documento está aprobado documentalmente para U2. No autoriza implementación: la ejecución requiere autorización humana de Fase B.
+
+**Cambio 1.1.0-u2 (2026-11-05):** agrega NV-07-R08 (caché HTTP condicional) y las tasks T11 y T12. Aprobación documental: Victor Manuel Jose Jose, 2026-11-05 (M-BE-046). T11 y T12 quedan **⛔ NO EJECUTAR** hasta la autorización humana «EJECUTA»; las tasks 1.0.0-u2 siguen cerradas.
 
 ## 1. Contexto
 
@@ -30,7 +32,7 @@ Definir el contrato verificable de `GET /api/v1/properties` y `GET /api/v1/prope
 1. NV-01 U2 provee Problem Details, validación, paginación y configuración.
 2. NV-03 U2 aprobada documentalmente para la verificación desplegada; las pruebas locales pueden usar MongoDB y Redis aislados.
 3. Existe autorización de Fase B.
-4. Existe una colección `properties` con datos de prueba o seed controlado; no se crea contenido masivo.
+4. Existe una colección `properties` con datos de prueba o seed controlado. El seed idempotente de seis propiedades de demostración se activa solo por configuración (`PropertySeed__Enabled=true` y `--seed-properties`), requiere el seed de universidades NV-08 y en `Production` solo se permite con `--allow-production-seed`, registrado en el log; no crea contenido masivo.
 
 ## 4. Alcance
 
@@ -40,11 +42,13 @@ Definir el contrato verificable de `GET /api/v1/properties` y `GET /api/v1/prope
 4. Proyección de campos públicos.
 5. Índice MongoDB para el orden del listado.
 6. Problem Details.
-7. Pruebas unitarias, de integración y de seguridad.
+7. Seed idempotente de seis propiedades de demostración vinculadas a las universidades del seed NV-08.
+8. Pruebas unitarias, de integración y de seguridad.
+9. Caché HTTP condicional (`ETag`, `Cache-Control`, 304) en listado y detalle.
 
 ## 5. Fuera de alcance
 
-- Crear, actualizar o borrar propiedades.
+- Crear, actualizar o borrar propiedades mediante la API; el seed de inicialización es la única escritura y no forma parte del contrato HTTP.
 - Favoritos, visitas, chat, Smart Match, reviews o notificaciones.
 - Filtros por universidad, precio, ubicación o texto; no estaban aprobados para U2.
 - Exponer dirección exacta, coordenadas, propietario, contacto o campos internos.
@@ -140,11 +144,22 @@ No se devuelven `ownerId`, dirección exacta, coordenadas, contacto, estado de m
 | Código | Condición |
 | --- | --- |
 | 200 | Listado o detalle |
+| 304 | `If-None-Match` coincide con el `ETag` actual; sin cuerpo |
 | 400 | ID o paginación inválida |
 | 404 | Propiedad no encontrada |
 | 429 | Rate limit excedido; `Retry-After` |
 | 503 | MongoDB no disponible; sin detalles |
 | 500 | Error interno; Problem Details sin stack trace |
+
+### 6.5 Caché HTTP (1.1.0-u2)
+
+- Las respuestas 200 de listado y detalle incluyen un `ETag` débil (`W/"<hash>"`) calculado con SHA-256 sobre el cuerpo JSON sin comprimir y `Cache-Control: public, max-age=60` (valor PROPUESTO, configurable entre 0 y 300 s).
+- Si la solicitud trae `If-None-Match` y coincide con el `ETag` actual (comparación débil de RFC 9110, incluida una lista separada por comas y `*`), la respuesta es `304 Not Modified` sin cuerpo, con el mismo `ETag` y `Cache-Control`.
+- Las respuestas de error (4xx/5xx) conservan `Cache-Control: no-store` y no llevan `ETag`.
+- El rate limit se evalúa antes que la caché; un 304 también cuenta como solicitud.
+- Se envía `Vary: Accept-Encoding`; el `ETag` débil es válido con y sin compresión.
+- Solo aplica a estos endpoints públicos; nunca a respuestas autenticadas ni con datos de usuario.
+- Cubre el requisito académico 9 (caché en frontend): el cliente móvil reutiliza la respuesta y revalida con `If-None-Match`.
 
 ## 7. Persistencia y datos públicos
 
@@ -173,11 +188,11 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | Caso | Status | `title` |
 | --- | --- | --- |
-| Validación | 400 | `Validation failed` |
-| No encontrado | 404 | `Not found` |
-| Rate limit | 429 | `Too many requests` |
-| MongoDB no disponible | 503 | `Service unavailable` |
-| Interno | 500 | `Internal server error` |
+| Validación | 400 | `Validación fallida` |
+| No encontrado | 404 | `Recurso no encontrado` |
+| Rate limit | 429 | `Demasiadas solicitudes` |
+| MongoDB no disponible | 503 | `Servicio no disponible` |
+| Interno | 500 | `Error interno del servidor` |
 
 ## 10. Requisitos verificables
 
@@ -190,6 +205,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-07-R05 | Datos públicos seguros | Respuestas excluyen `ownerId`, dirección exacta, coordenadas, contacto y moderación. | F2 | T01, T03, T06, T07, T09 |
 | NV-07-R06 | Problem Details y límites | 400/404/429/503/500 usan Problem Details; rate limit 60/60 s por IP en Redis; fallo de Redis 503. | F3 | T04, T05, T06, T08, T09 |
 | NV-07-R07 | Pruebas y evidencia | Unitarias, integración y seguridad; evidencia de comandos, resultados y hallazgos. | F4 | T09, T10 |
+| NV-07-R08 | Caché HTTP condicional | GET 200 de listado y detalle devuelven `ETag` débil por contenido y `Cache-Control: public, max-age=60`; `If-None-Match` coincidente devuelve 304 sin cuerpo; los errores mantienen `no-store` sin `ETag`; no se cachean respuestas autenticadas. | F3 | T11, T12 |
 
 ## 11. Testing
 
@@ -197,6 +213,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 - Integración: listado con datos, vacío, página fuera de rango, detalle 200, 404, 400, 429, 503.
 - Seguridad: ausencia de `ownerId`/dirección/coordenadas, errores sin stack trace, rate limit.
 - MongoDB/Redis: dependencia efímera con Testcontainers solo si Fase B autoriza el paquete; alternativa aislada.
+- Caché HTTP: `ETag` presente y estable para el mismo contenido, 304 con `If-None-Match` (incluidos lista y `*`), 200 si no coincide, errores sin `ETag` y con `no-store`, interacción con compresión y rate limit.
 
 ## 12. Riesgos
 
@@ -208,6 +225,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-07-RK04 | N+1 o `universityId` expandido | Latencia/fuga | Proyección y referencia |
 | NV-07-RK05 | MongoDB caído | Error no controlado | 503 Problem Details |
 | NV-07-RK06 | Filtros no aprobados | Scope creep | Rechazar en spec |
+| NV-07-RK07 | Caché de datos desactualizados o de respuestas no públicas | Datos viejos o fuga | `max-age` corto, `ETag` por contenido y solo endpoints públicos |
 
 ## 13. Dependencias
 
@@ -220,16 +238,18 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 7 |
+| Requisitos | 8 |
 | Fases del plan | 4 |
-| Tasks | 10 |
-| Tasks U2 | 10 |
+| Tasks | 12 |
+| Tasks U2 | 12 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 10 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
 
 ## 15. Aprobación documental y ejecución
 
 Aprobación documental: Victor Manuel Jose Jose, 2026-11-02, versión `1.0.0-u2` de `spec.md`, `plan.md` y `task.md`. La ejecución sigue bloqueada hasta autorización de Fase B.
+
+Cambio 1.1.0-u2: aprobación documental de Victor Manuel Jose Jose, 2026-11-05 (M-BE-046). T11 y T12 requieren la autorización humana «EJECUTA» antes de implementarse.

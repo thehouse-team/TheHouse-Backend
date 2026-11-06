@@ -1,5 +1,5 @@
 ---
-name: Cloud Zero Cost
+name: cloud-zero-cost
 description: Verifica COST-001, matriz AWS/Azure/GCP, dos instancias, Load Balancer, TLS, Terraform, creación y destrucción sin costo.
 ---
 

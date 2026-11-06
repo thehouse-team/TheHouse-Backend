@@ -251,3 +251,193 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** superar el bloqueo del preflight U2 sin implementar, manteniendo la separación entre documentación aprobada y ejecución autorizada.
 - **Impacto:** la documentación queda aprobada para U2, pero la implementación sigue **BLOCKED** hasta la autorización de Fase B. `terraform apply` y `terraform destroy` requieren confirmación humana separada. M-BE-028 sigue vigente y M-BE-011 continúa pendiente para la selección general de proveedor. La referencia de M-BE-028 a NV-03-R10/T16 se interpreta conforme a esta versión: R10/T16 documentan evidencia de costo Azure U2, no una matriz comparativa general.
+
+## M-BE-032 — Hash de contraseñas con PBKDF2 210000 iteraciones
+
+- **ID:** M-BE-032
+- **Decisión:** usar PBKDF2-HMAC-SHA256 con 210000 iteraciones, sal aleatoria de 16 bytes y subclave de 32 bytes, con formato versionado `pbkdf2-sha256$210000$...`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** aumentar el costo de la fuerza bruta sin almacenar contraseñas en claro; la implementación y las pruebas de seguridad ya verifican el parámetro.
+- **Impacto:** cualquier reducción de iteraciones o cambio de algoritmo requiere nueva decisión y migración controlada. No se almacenan credenciales ni sales en repositorios, logs o evidencia.
+
+## M-BE-033 — Rate limit distribuido en Redis con script Lua
+
+- **ID:** M-BE-033
+- **Decisión:** aplicar los límites de intentos con un contador atómico en Redis mediante script Lua (`INCR`, `PEXPIRE`, `PTTL`), compartido entre réplicas.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** evitar ventanas de carrera y límites inconsistentes cuando hay más de una réplica; no usar memoria local como respaldo de seguridad.
+- **Impacto:** si Redis no está disponible, la operación se degrada de forma controlada y no abre controles; la disponibilidad del rate limit depende de Redis. Los cambios de claves, TTL o umbrales requieren nueva decisión y pruebas.
+
+## M-BE-034 — Redis en Upstash gratuito en lugar de Redis Cloud
+
+- **ID:** M-BE-034
+- **Decisión:** usar Redis en Upstash con su plan gratuito para el estado compartido de U2, en lugar de Redis Cloud.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** cubrir revocación y límites distribuidos dentro de COST-001 sin introducir un recurso facturable.
+- **Impacto:** la conexión TLS y las credenciales se administran como secreto fuera de Terraform y fuera del repositorio. El límite de conexiones, la latencia y la disponibilidad del plan gratuito deben revisarse antes de ampliar carga; el proveedor no se aprovisiona mediante Terraform.
+
+## M-BE-035 — MongoDB Atlas M0
+
+- **ID:** M-BE-035
+- **Decisión:** usar MongoDB Atlas M0 gratuito para la persistencia de U2, con TLS y credenciales administradas fuera de Terraform.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** disponer de persistencia administrada sin crear un recurso MongoDB facturable en Azure.
+- **Impacto:** Atlas M0 no se aprovisiona con Terraform y su endpoint es público con autenticación TLS; la aceptación literal de T07 sobre no exponer la base a Internet queda **REQUIERE DECISIÓN HUMANA** y T07 permanece abierta. No se deben imprimir cadenas de conexión ni credenciales.
+
+## M-BE-036 — Imagen GHCR desplegada por digest
+
+- **ID:** M-BE-036
+- **Decisión:** publicar la imagen en `ghcr.io/thehouse-team/thehouse-backend` y desplegarla por digest OCI inmutable `@sha256:...`; prohibir `latest` y etiquetas mutables.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** garantizar que cada revisión ejecute exactamente el artefacto publicado y trazable a un commit.
+- **Impacto:** la imagen actualmente desplegada es `@sha256:15f196af9c32fc843cf1723b4615f896668b0368b292e1246807ab0d03194775`, asociada al commit `c6518862788407fe678c1a524ad4d4b764dc6a71`; el HEAD posterior no está desplegado. Terraform valida el digest y no se permiten credenciales GHCR en Git, tfvars o state.
+
+## M-BE-037 — Logs solo en streaming, sin Log Analytics
+
+- **ID:** M-BE-037
+- **Decisión:** mantener los logs de Container Apps en Streaming Only, sin aprovisionar Log Analytics Workspace ni Application Insights para U2.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** preservar COST-001 y evitar un recurso de observabilidad facturable.
+- **Impacto:** no hay retención centralizada de trazas, métricas o logs; la evidencia operativa debe capturarse durante la ventana de verificación. Las tasks T11 y T12 permanecen abiertas porque no se demuestra correlación entre réplicas ni costo/retensión de telemetría.
+
+## M-BE-038 — Secretos y variables administrados fuera de Terraform
+
+- **ID:** M-BE-038
+- **Decisión:** administrar secretos y variables de ejecución de Container Apps fuera de Terraform; el template de IaC solo crea el bootstrap y declara `ignore_changes` para secretos y variables de entorno.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** impedir que cadenas de conexión, claves JWT, credenciales de Redis o MongoDB entren en `.tf`, `terraform.tfvars` o `terraform.tfstate`.
+- **Impacto:** el estado real puede divergir del bootstrap y debe revisarse con `terraform plan`; no se deben revertir variables validadas en Azure. La ausencia de secretos en el repositorio no autoriza a imprimirlos en evidencia o reportes.
+
+## M-BE-039 — Réplicas 0–2 en operación y 2–2 solo en evaluación
+
+- **ID:** M-BE-039
+- **Decisión:** operar NV-03 con mínimo 0 y máximo 2 réplicas (scale-to-zero); usar exactamente 2–2 réplicas únicamente durante una ventana controlada de evaluación.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** reducir consumo fuera de la ventana de evaluación sin perder la capacidad de escalar; la regla HTTP `http-scaler` con `concurrent_requests=10` controla la escala.
+- **Impacto:** el despliegue actual está en 0–2 y puede tener cero o una réplica; no satisface por sí solo la aceptación de dos réplicas de T08, T18 o T19. La ventana 2–2 debe activarse y evidenciarse de forma explícita. Esta decisión actualiza el estado de NV-03 frente a M-BE-026: T13, T15 y T23 quedan con evidencia; el resto sigue abierto.
+
+## M-BE-040 — Responsable del backend
+
+- **ID:** M-BE-040
+- **Decisión:** designar a Victor Manuel Jose Jose como responsable del backend desde 2026-11-05.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** centralizar la responsabilidad sobre decisiones técnicas, autorizaciones, evidencia, seguridad y costo del backend.
+- **Impacto:** el responsable debe aprobar cambios materiales y revisiones de evidencia; la designación no autoriza por sí sola implementación, `terraform apply`, `terraform destroy` ni gasto.
+
+## M-BE-041 — Adopción de la regla HTTP http-scaler
+
+- **ID:** M-BE-041
+- **Decisión:** adoptar en el template Terraform la regla existente `http-scaler` de Azure Container Apps, con `concurrent_requests=10`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** eliminar el drift entre Azure y Terraform sin cambiar el comportamiento operativo ya validado.
+- **Impacto:** la regla queda declarada en `infra/terraform/main.tf`; `terraform plan` no propone cambios en recursos y solo actualiza salidas de estado. No se ejecutó `terraform apply`; cualquier cambio futuro de umbral debe registrarse y reflejarse en IaC.
+
+## M-BE-042 — Entorno Testing para pruebas automatizadas
+
+- **ID:** M-BE-042
+- **Decisión:** los factories de pruebas usan el entorno `Testing` (`ApiConventions.TestingEnvironment`), que se comporta como Development (OpenAPI visible, sin HSTS) pero no carga `appsettings.Development.json`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** la configuración local de desarrollo contiene conexiones reales a MongoDB y Redis; las pruebas no deben depender de ella ni poder escribir en servicios reales.
+- **Impacto:** `dotnet test` pasa con o sin `appsettings.Development.json` presente. Production y Development no cambian su comportamiento.
+
+## M-BE-043 — Seed en Production solo con bandera explícita
+
+- **ID:** M-BE-043
+- **Decisión:** los comandos `--seed-universities` y `--seed-properties` se rechazan en Production salvo con la bandera exacta `--allow-production-seed`; la ejecución autorizada se registra en el log como advertencia. La regla vive en `SeedCommandPolicy` y tiene pruebas de seguridad.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** cargar datos de demostración en el entorno de evaluación es intencional, pero no debe lograrse cambiando el nombre del entorno (`ASPNETCORE_ENVIRONMENT=Staging`), que desactiva la protección sin dejar rastro.
+- **Impacto:** la bandera no omite `UniversitySeed__Enabled` ni `PropertySeed__Enabled`. NV-07 y NV-08 (spec y evidence) documentan el comando `az containerapp exec` actualizado. Requiere desplegar una imagen que incluya este cambio.
+
+## M-BE-044 — Publicación GHCR desde main
+
+- **ID:** M-BE-044
+- **Decisión:** `u2-ghcr-publish.yml` permite la publicación manual (`workflow_dispatch` + `PUBLISH`) desde `main` además de `feature/u2-entrega`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** `feature/u2-entrega` ya se integró a `main` (PR #2); las imágenes nuevas deben salir de la rama integrada.
+- **Impacto:** se mantienen el gate manual, la confirmación explícita y el despliegue por digest. `VERSIONING.md` refleja ambas ramas.
+
+## M-BE-045 — Finales de línea LF en el repositorio
+
+- **ID:** M-BE-045
+- **Decisión:** `.gitattributes` fija `* text=auto eol=lf`, en línea con `.editorconfig`.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** evitar mezclas CRLF/LF entre Windows y los runners Linux de CI.
+- **Impacto:** el índice ya estaba en LF; no hubo renormalización de archivos existentes.
+
+## M-BE-046 — Caché HTTP condicional en propiedades y universidades
+
+- **ID:** M-BE-046
+- **Decisión:** NV-07 y NV-08 pasan a 1.1.0-u2 con el requisito R08: los GET públicos de listado y detalle devuelven `ETag` débil por contenido y `Cache-Control: public, max-age=60`, responden 304 a un `If-None-Match` coincidente y mantienen `no-store` sin `ETag` en errores. Tasks nuevas: NV-07 T11–T12 y NV-08 T12–T13.
+- **Estado:** APROBADO (documental). Ejecución: PENDIENTE de la autorización humana «EJECUTA».
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** cubrir el requisito académico 9 (caché en frontend): el móvil revalida con `If-None-Match` y evita descargar de nuevo datos públicos sin cambios.
+- **Impacto:** no cambia el contrato JSON ni aplica a respuestas autenticadas. El valor `max-age=60` es propuesto y configurable entre 0 y 300 s.
+
+## M-BE-047 — Observabilidad persistente a costo $0
+
+- **ID:** M-BE-047
+- **Decisión:** NV-03 pasa a 1.2.0-u2 con el requisito R15: Log Analytics (`PerGB2018`, `daily_quota_gb = 0.1`, retención de 30 días) como destino de logs del entorno de Container Apps (opción A); si el plan propone recrear el entorno o la app, se usa OpenTelemetry hacia Application Insights sobre el mismo workspace (opción B). Tasks nuevas: T24 y T25.
+- **Estado:** APROBADO (documental). Ejecución: PENDIENTE de la autorización humana «EJECUTA» y, para el apply, de `OK PARA APPLY`.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** el requisito académico pide un servicio en la nube para logs de eventos y errores; M-BE-037 dejó los logs solo en streaming. La API de precios de Azure (`eastus2`, 2026-11-05) muestra la ingestión de 0–5 GB/mes a 0.00 USD; el tope diario limita el uso a ~3.1 GB/mes.
+- **Impacto:** sustituye a M-BE-037 una vez ejecutado T24. Antes del apply debe verificarse en la documentación vigente que el tramo gratuito aplica a la cuenta y que 30 días de retención están incluidos; si no, BLOCKED. Al llegar al tope diario se pierden los logs restantes de ese día (NV-03-RK11).
+
+## M-BE-048 — Errores de lecturas públicas con no-store y max-age configurable
+
+- **ID:** M-BE-048
+- **Decisión:** los errores de `/api/v1/properties` y `/api/v1/universities` envían `Cache-Control: no-store`; el `max-age` de las respuestas cacheables se configura con `Foundation:PublicCacheMaxAgeSeconds` (0–300, por defecto 60).
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** al implementar M-BE-046 las pruebas mostraron que esos errores no enviaban `no-store`, contrario a NV-07-R08 y NV-08-R08; también se observó así en Azure el 2026-11-04.
+- **Impacto:** ningún error de estos endpoints es cacheable por clientes o intermediarios. Configurar el `max-age` fuera de rango impide el arranque.
+
+## M-BE-049 — NV-02 como CI y NV-09 como CD
+
+- **ID:** M-BE-049
+- **Decisión:** reemitir NV-02 como "CI y DevSecOps" versión `1.1.0-u2` (workflow `ci.yml` en cada pull request y push a `main` con build, pruebas, cobertura, Semgrep, SCA, SBOM, Gitleaks, Trivy, Dockle, Terraform, mutación programada y quality gate) y especificar la entrega continua en una spec nueva NV-09 (publicación, firma, despliegue manual con aprobación, smoke tests, DAST, fuzzing y performance). El roadmap funcional de M-BE-023 se recorre a partir de NV-10 cuando se reemita.
+- **Estado:** APROBADO.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose («EJECUTA» de NV-02 1.1.0-u2).
+- **Justificación:** en la revisión académica del 2026-11-05 el profesor observó que no hay CI/CD visible en los pull requests: los workflows existentes solo corren en `feature/u2-entrega` o de forma manual. Separar CI y CD sigue la estructura pedida: base → infraestructura → endpoints → CI → CD.
+- **Impacto:** `u2-linux-validation.yml` y `u2-container-validation.yml` se retirarán al implementar `ci.yml`; `u2-ghcr-publish.yml` pasa a NV-09. La CI no usa secretos ni despliega.
+
+## M-BE-050 — Ruleset de main no aplicado por plan y visibilidad
+
+- **ID:** M-BE-050
+- **Decisión:** registrar que el ruleset "Main Proteccion" de `main` no se aplica: la organización `thehouse-team` está en el plan Free y el repositorio es privado (respuesta de la API de GitHub del 2026-11-05: "Upgrade to GitHub Pro or make this repository public to enable this feature"). Recomendación: hacer público el repositorio después de que Gitleaks pase sobre todo el historial; alternativa: GitHub Pro/Team con beneficio educativo.
+- **Estado:** APROBADO — repositorio hecho público por el equipo el 2026-11-05.
+- **Fecha:** 2026-11-05.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** sin aplicación del ruleset, los checks requeridos y la aprobación obligatoria no bloquean el merge. Un repositorio público además da minutos ilimitados de Actions y habilita gratis SARIF en code scanning y SonarCloud (COST-001).
+- **Impacto:** antes de hacerlo público se buscó localmente en todo el historial patrones de secretos, sin hallazgos (Gitleaks lo confirmará en CI). Con el repositorio público, `main` todavía no tiene ruleset: las capturas del profesor eran la referencia a replicar. Se crea después del primer run de CI con los checks requeridos (NV-02 T14). **Actualización 2026-11-05:** ruleset `Main Proteccion` (ID 26657131) creado por Victor y activo, sin bypass, con 1 aprobación y los 7 checks de `CI` requeridos; verificado con la API (NV-02 `evidence.md` §9).

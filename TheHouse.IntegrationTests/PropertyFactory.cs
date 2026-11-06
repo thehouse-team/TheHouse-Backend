@@ -95,4 +95,51 @@ public sealed class PropertyTestStore : IPropertyRepository
             Properties.FirstOrDefault(
                 property => property.Id == id));
     }
+
+    public Task UpsertSeedAsync(
+        IReadOnlyCollection<Property> properties,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+
+        foreach (var property in properties)
+        {
+            var existing = Properties.FirstOrDefault(
+                candidate => candidate.Id == property.Id);
+
+            if (existing is null)
+            {
+                Properties.Add(property);
+                continue;
+            }
+
+            // Upsert por `_id`: actualiza los campos del seed y
+            // conserva el `createdAt` original.
+            Properties.Remove(existing);
+
+            Properties.Add(
+                new Property
+                {
+                    Id = existing.Id,
+                    Title = property.Title,
+                    Description = property.Description,
+                    Price = property.Price,
+                    Currency = property.Currency,
+                    City = property.City,
+                    UniversityId = property.UniversityId,
+                    Bedrooms = property.Bedrooms,
+                    Bathrooms = property.Bathrooms,
+                    AreaM2 = property.AreaM2,
+                    Amenities = property.Amenities,
+                    CreatedAt = existing.CreatedAt
+                });
+        }
+
+        return Task.CompletedTask;
+    }
 }

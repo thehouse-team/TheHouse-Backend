@@ -304,5 +304,13 @@ public sealed class PropertyTests
             Task.FromResult(
                 properties.FirstOrDefault(
                     property => property.Id == id));
+
+        public Task UpsertSeedAsync(
+            IReadOnlyCollection<Property> seeded,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.CompletedTask;
+        }
     }
 }

@@ -157,11 +157,11 @@ Se validó:
 
 Se validaron títulos:
 
-- `400 Validation failed`;
-- `404 Not found`;
-- `429 Too many requests`;
-- `503 Service unavailable`;
-- `500 Internal server error`.
+- `400 Validación fallida`;
+- `404 Recurso no encontrado`;
+- `429 Demasiadas solicitudes`;
+- `503 Servicio no disponible`;
+- `500 Error interno del servidor`.
 
 Los errores usan:
 
@@ -380,3 +380,32 @@ NV-08 cumple el alcance funcional, de seguridad y testing requerido para U2.
 Las brechas restantes pertenecen a la verificación desplegada de NV-03.
 
 **NV-08 queda EJECUTADA, VALIDADA Y CERRADA PARA U2.**
+
+## Addendum — Correcciones de revisión U2 (2026-11-05)
+
+Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `fix/u2-review`. Este addendum documenta la activación controlada del seed solicitada en la revisión; el seed real sigue **NO EJECUTADO**.
+
+- Problem Details de universidades: títulos en español y consistentes (`Validación fallida`, `Recurso no encontrado`, `Demasiadas solicitudes`, `Servicio no disponible`). El contrato omite `detail` e `instance` en estos endpoints.
+- Activación: `--seed-universities` requiere `UniversitySeed__Enabled=true`; `--seed-properties` requiere `PropertySeed__Enabled=true`. En `Production` ambos comandos se rechazan salvo con la bandera explícita `--allow-production-seed`, que se registra en el log (M-BE-043); cambiar el nombre del entorno no es un mecanismo autorizado. El seed de propiedades exige que el de universidades se haya ejecutado primero y resuelve la relación por `code`.
+- MongoDB: la ejecución real requiere `MongoDB__Enabled=true` y que el contenedor ya tenga `MongoDB__ConnectionString` provisto como secreto de Azure Container Apps; el comando no incluye ni imprime credenciales. Sin conexión, el seed falla de forma cerrada.
+- Comando exacto preparado para una ejecución autorizada (no ejecutado en esta revisión):
+  `az containerapp exec -n ca-thehouse-u2 -g rg-thehouse-u2 --container thehouse-backend --command "/bin/sh -c 'UniversitySeed__Enabled=true PropertySeed__Enabled=true dotnet TheHouse.dll --seed-universities --seed-properties --allow-production-seed'"`
+  El contenedor conserva `ASPNETCORE_ENVIRONMENT=Production` y su configuración de MongoDB; la ejecución queda registrada en el log como advertencia (M-BE-043). Requiere una imagen que incluya `--allow-production-seed`.
+- El comando sobrescribe el entorno solo para el proceso de seed y debe ejecutarse únicamente con autorización humana explícita en el entorno autorizado; no se ejecutó contra Azure ni MongoDB real. Los conteos antes/después quedan pendientes para NV-03.
+- Pruebas: `PropertySeedTests` verifica la dependencia del seed de universidades y la idempotencia del seed de propiedades; las pruebas de universidades conservan la cobertura de idempotencia por `code`.
+- Verificación ejecutada: `dotnet build --verbosity quiet` con 0 errores y 0 advertencias; `dotnet test --verbosity quiet` con 130 pruebas unitarias, 39 de seguridad y 227 de integración: 396 aprobadas y 0 fallidas.
+- Nota de entorno: `TheHouse/appsettings.Development.json` es un archivo local ignorado por Git, no forma parte del repositorio y habilita JWT sin `JWT_SIGNING_KEY`; para ejecutar la suite se excluyó temporalmente y se restauró byte a byte sin incorporarlo al commit. Esta limitación se declara para no atribuir a la suite una ejecución que dependa de configuración no versionada.
+- Seguridad: revisión de OWASP API Security Top 10, secretos, autenticación, autorización, validación de entrada, exposición de datos, errores, logging, rate limiting y mass assignment. Sin hallazgos Critical/High ni secretos confirmados en el alcance revisado. Resultado: PASS WITH WARNINGS. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación ni performance.
+- SDD: la revisión no crea tasks, no reabre el cierre U2 y no autoriza implementación adicional. Resultado: PASS WITH WARNINGS.
+
+## Addendum 1.1.0-u2 — Caché HTTP condicional (T12 y T13)
+
+Ejecutado el 2026-11-05 en la rama `fix/u2-review` con la autorización humana «EJECUTA» de Victor Manuel Jose Jose (M-BE-046).
+
+- Implementación: `TheHouse/Http/HttpCaching.cs` serializa la respuesta con las opciones JSON del host, calcula un `ETag` débil (SHA-256 en base64url del cuerpo sin comprimir), envía `Cache-Control: public, max-age=60` y `Vary: Accept-Encoding`, y responde 304 sin cuerpo cuando `If-None-Match` coincide (comparación débil, listas y `*`).
+- `max-age` configurable con `Foundation:PublicCacheMaxAgeSeconds` (0–300, por defecto 60); valores fuera de rango impiden el arranque.
+- Corrección encontrada al probar: los errores de este endpoint no enviaban `Cache-Control: no-store`. Ahora todos los errores (400/404/429/503) lo envían y nunca llevan `ETag` (M-BE-048).
+- OpenAPI documenta la respuesta 304. El contrato JSON no cambia.
+- Pruebas (`HttpCachingTests`, `ConfigurationTests`): `ETag` débil y `Cache-Control` en 200, mismo `ETag` para el mismo contenido, 304 sin cuerpo con `If-None-Match`, lista y `*`, comparación débil, `ETag` nuevo cuando cambia el contenido, 200 sin coincidencia, errores sin `ETag` y con `no-store`, el 304 cuenta para el rate limit, `ETag` independiente de `Accept-Encoding` y rechazo de `max-age` fuera de rango.
+- Resultado local: `dotnet build` 0 errores y 0 advertencias; `dotnet test` 429 aprobadas, 0 fallidas (130 unitarias, 47 de seguridad, 252 de integración), con `appsettings.Development.json` presente.
+- Pendiente: la verificación contra Azure requiere publicar y desplegar una imagen nueva; la imagen actual (`c651886`) no incluye este cambio.

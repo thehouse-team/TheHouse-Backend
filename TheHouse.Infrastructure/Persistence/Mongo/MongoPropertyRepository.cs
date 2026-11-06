@@ -150,6 +150,97 @@ public sealed class MongoPropertyRepository(
         }
     }
 
+    public async Task UpsertSeedAsync(
+        IReadOnlyCollection<Property> properties,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(
+            properties);
+
+        try
+        {
+            await EnsureIndexAsync(cancellationToken);
+
+            foreach (var property in properties)
+            {
+                cancellationToken
+                    .ThrowIfCancellationRequested();
+
+                if (!PropertyQueryValidation.IsObjectId(
+                        property.Id))
+                {
+                    throw new RequestValidationException(
+                        "id",
+                        "seed id must be a 24-character hexadecimal ObjectId.");
+                }
+
+                var objectId =
+                    MongoDB.Bson.ObjectId.Parse(
+                        property.Id);
+
+                var update =
+                    Builders<PropertyDocument>.Update
+                        .Set(
+                            document => document.Title,
+                            property.Title)
+                        .Set(
+                            document => document.Description,
+                            property.Description)
+                        .Set(
+                            document => document.Price,
+                            property.Price)
+                        .Set(
+                            document => document.Currency,
+                            property.Currency)
+                        .Set(
+                            document => document.City,
+                            property.City)
+                        .Set(
+                            document => document.UniversityId,
+                            property.UniversityId)
+                        .Set(
+                            document => document.Bedrooms,
+                            property.Bedrooms)
+                        .Set(
+                            document => document.Bathrooms,
+                            property.Bathrooms)
+                        .Set(
+                            document => document.AreaM2,
+                            property.AreaM2)
+                        .Set(
+                            document => document.Amenities,
+                            property.Amenities
+                                ?.ToArray() ??
+                            Array.Empty<string>())
+                        .SetOnInsert(
+                            document => document.CreatedAt,
+                            MongoDates.ToUtc(
+                                property.CreatedAt));
+
+                await Collection.UpdateOneAsync(
+                    document =>
+                        document.Id == objectId,
+                    update,
+                    new UpdateOptions
+                    {
+                        IsUpsert = true
+                    },
+                    cancellationToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+            when (exception is
+                  MongoException or
+                  TimeoutException)
+        {
+            throw MongoFailure.Unavailable();
+        }
+    }
+
     private async Task EnsureIndexAsync(
         CancellationToken cancellationToken)
     {

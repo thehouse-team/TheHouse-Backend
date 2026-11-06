@@ -21,4 +21,8 @@ public sealed class FoundationOptions
 
     [Range(1, 3600)]
     public int RateLimitWindowSeconds { get; set; } = 60;
+
+    // max-age de las lecturas públicas cacheables (NV-07-R08, NV-08-R08).
+    [Range(0, 300)]
+    public int PublicCacheMaxAgeSeconds { get; set; } = 60;
 }

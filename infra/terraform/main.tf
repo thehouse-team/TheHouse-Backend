@@ -17,6 +17,19 @@ resource "azurerm_resource_group" "this" {
   tags = local.common_tags
 }
 
+# NV-03-R15 / M-BE-047: logs persistentes de eventos y errores con tope
+# diario de ingestión (~3.1 GB/mes como máximo, dentro del tramo de 0 USD).
+resource "azurerm_log_analytics_workspace" "this" {
+  name                = var.log_analytics_workspace_name
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+  sku                 = "PerGB2018"
+  retention_in_days   = var.log_retention_in_days
+  daily_quota_gb      = var.log_daily_quota_gb
+
+  tags = local.common_tags
+}
+
 resource "azurerm_container_app_environment" "this" {
   name                = var.container_app_environment_name
   location            = azurerm_resource_group.this.location
@@ -27,11 +40,10 @@ resource "azurerm_container_app_environment" "this" {
     workload_profile_type = "Consumption"
   }
 
-  # Intentionally no Log Analytics workspace.
-  #
-  # AzureRM 5.x leaves logs in Streaming Only mode when
-  # logs_destination is omitted. This avoids provisioning
-  # an additional billable observability resource for U2.
+  # Logs de consola y de sistema hacia Log Analytics (opción A de NV-03 §7.1).
+  # Si el plan propone reemplazar el entorno, se detiene y se usa la opción B.
+  logs_destination           = "log-analytics"
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
 
   tags = local.common_tags
 }
@@ -50,6 +62,13 @@ resource "azurerm_container_app" "this" {
   template {
     min_replicas = var.min_replicas
     max_replicas = var.max_replicas
+
+    # Regla creada originalmente fuera de Terraform y adoptada en el
+    # template para evitar drift. Escala por solicitudes concurrentes.
+    http_scale_rule {
+      name                = "http-scaler"
+      concurrent_requests = "10"
+    }
 
     container {
       name   = "thehouse-backend"

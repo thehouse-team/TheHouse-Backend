@@ -40,3 +40,8 @@ output "estimated_max_free_window_hours" {
   description = "Theoretical maximum at two 0.25 vCPU / 0.5Gi replicas if the monthly Container Apps free grant is entirely unused."
   value       = 100
 }
+
+output "log_analytics_workspace_name" {
+  description = "Log Analytics workspace receiving Container Apps logs."
+  value       = azurerm_log_analytics_workspace.this.name
+}
