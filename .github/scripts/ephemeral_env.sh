@@ -29,6 +29,12 @@ common_env() {
     -e Redis__ConnectionString=127.0.0.1:6379
     -e Jwt__Enabled=true
     -e JWT_SIGNING_KEY
+    # La API redirige a HTTPS fuera de /health. Como el ingress de Azure, el
+    # cliente local (loopback) declara el esquema con X-Forwarded-Proto.
+    -e Proxy__Enabled=true
+    -e Proxy__ForwardLimit=1
+    -e Proxy__KnownProxies__0=127.0.0.1
+    -e Proxy__KnownProxies__1=::1
   )
 }
 

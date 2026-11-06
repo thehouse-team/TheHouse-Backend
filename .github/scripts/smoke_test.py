@@ -22,13 +22,17 @@ API = "/api/v1"
 
 
 class Client:
-    def __init__(self, base_url, timeout=20):
+    def __init__(self, base_url, timeout=20, forwarded_proto=None):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self.forwarded_proto = forwarded_proto
 
     def request(self, method, path, body=None, headers=None):
         data = None
         hdrs = {"Accept": "application/json"}
+        if self.forwarded_proto:
+            # Entorno efímero: simula el ingress TLS (la API redirige HTTP a HTTPS).
+            hdrs["X-Forwarded-Proto"] = self.forwarded_proto
         if body is not None:
             data = json.dumps(body).encode("utf-8")
             hdrs["Content-Type"] = "application/json"
@@ -181,9 +185,10 @@ def main():
     parser.add_argument("--ready-attempts", type=int, default=30)
     parser.add_argument("--ready-delay", type=float, default=5)
     parser.add_argument("--login-email-limit", type=int, default=5)
+    parser.add_argument("--forwarded-proto", choices=["https"])
     args = parser.parse_args()
 
-    client = Client(args.base_url)
+    client = Client(args.base_url, forwarded_proto=args.forwarded_proto)
     run = Runner()
     # Primero readiness con reintentos: con 0 réplicas la primera solicitud
     # activa la réplica (arranque en frío) y puede exceder el timeout.
