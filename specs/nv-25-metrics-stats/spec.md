@@ -14,6 +14,7 @@
 | No funcionales | RNF-05, RNF-11 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Analytics |
 | Precondición | NV-14, NV-16 y NV-23 |
 | Relación | Consume eventos de vistas (NV-14), favoritos (NV-15), solicitudes (NV-16) y Smart Match (NV-23) |
 
@@ -56,19 +57,33 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 - Las recomendaciones son reglas transparentes (por ejemplo, "agrega fotos" si el cuarto tiene menos de 2, o "precio arriba de la mediana de la zona").
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Analytics** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `room_events`, `room_stats_daily` |
+| Usa (puertos de otros módulos) | Listings `IListingOwnership` (NV-12); Identity `IRoleQuery` (NV-10) |
+| Publica (eventos de dominio) | — |
+| Consume (eventos de dominio) | `RoomViewed (NV-14)`, `FavoriteAdded (NV-15)`, `RequestCreated (NV-16)`, `RecommendationShown, RecommendationClicked y FeedbackRecorded (NV-23)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `room_events`: `roomId`, `type` (`view`, `favorite`, `request`, `recommendation_shown`, `recommendation_clicked`), `day`, `actorHash` (HMAC diario para deduplicar sin identificar), TTL de 180 días.
 - `room_stats_daily`: `roomId`, `buildingId`, `ownerId`, `day`, contadores; índice `{ ownerId, day }`.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Una vista por usuario y cuarto por día.
 2. Los agregados se calculan con una tarea diaria idempotente.
 3. Los tableros solo muestran agregados; nunca quién vio o guardó un cuarto.
 4. Las métricas de Smart Match se separan por `modelVersion`.
+5. La tarea diaria se ejecuta una sola vez aunque haya dos réplicas: Container Apps Job o lock distribuido en Redis con TTL; nunca un temporizador por instancia (constitution §14 y §15).
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -85,7 +100,7 @@ Específicas de esta spec:
 - `actorHash` con llave rotada diariamente para que no permita rastrear usuarios (RNF-11).
 - Rate limit 30/min por usuario.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -98,7 +113,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -110,7 +125,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-25-R06 | Privacidad de la analítica | Ninguna respuesta permite identificar usuarios; prueba con eventos de un mismo usuario en dos días. | F3 | T06 |
 | NV-25-R07 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T07, T08, T09 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -119,16 +134,16 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Ejecución de la tarea diaria | Container Apps Job programado (dentro de la concesión gratuita) o tarea en segundo plano del API | PENDIENTE |
 | Retención de eventos | 180 días | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | TTL controla el volumen |
 | Tarea diaria | $0 dentro de la concesión de Container Apps | PENDIENTE DE VERIFICAR según la opción elegida |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -136,12 +151,12 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-25-RK02 | Crecimiento de eventos | Límite de 512 MB | TTL y agregados |
 | NV-25-RK03 | Métricas engañosas | Decisiones erróneas | Definiciones documentadas por métrica |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-14, NV-15, NV-16 y NV-23 (eventos).
 - NV-21 (rol admin).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -154,6 +169,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

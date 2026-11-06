@@ -14,6 +14,7 @@
 | No funcionales | RNF-02, RNF-09, RNF-17, RNF-18 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Rentals |
 | Precondición | NV-12 y NV-16 |
 | Relación | Cambia el estado del cuarto (NV-12) y cierra solicitudes (NV-16); habilita reseñas (NV-19) |
 
@@ -62,21 +63,34 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - `issue-code` devuelve `qrToken` (firmado, opaco), `backupCode` (8 caracteres sin ambigüedad) y `expiresAt`.
 - `redeem` con código vencido o usado responde 410.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Rentals** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `agreements`, `closing_codes` |
+| Usa (puertos de otros módulos) | Messaging `IRequestQuery` (NV-16); Listings `IRoomOccupancy` (NV-12), que participa en la misma transacción; Listings `IRoomQuery` (NV-12) |
+| Publica (eventos de dominio) | `AgreementIssued`, `AgreementActivated`, `AgreementEnded` |
+| Consume (eventos de dominio) | — |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `agreements`: `roomId`, `ownerId`, `studentId`, términos, `status` (`draft`, `code_issued`, `active`, `ended`, `cancelled`), fechas; índice único parcial de un convenio activo por cuarto.
 - `closing_codes`: `agreementId`, `codeHash`, `qrTokenHash`, `expiresAt`, `usedAt`, `attempts`; índice TTL.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Solo para un estudiante con solicitud aceptada del mismo cuarto y con el cuarto Libre.
 2. Un solo código vigente por convenio; emitir otro invalida el anterior.
 3. El código expira a los 10 minutos, es de un solo uso y tiene 5 intentos de canje antes de invalidarse (RNF-17).
-4. Aceptar ejecuta en una transacción: convenio `active`, cuarto Rentado, otras solicitudes del cuarto cerradas y código consumido (RNF-18).
+4. Aceptar ejecuta una transacción de MongoDB: Rentals marca el convenio `active` y consume el código, y el puerto `IRoomOccupancy` de Listings marca el cuarto Rentado en la misma sesión (Listings no depende de Rentals); después se publica `AgreementActivated` y Messaging cierra las demás solicitudes del cuarto (RNF-18).
 5. Mi renta muestra la dirección exacta y el contacto del propietario solo mientras el convenio está activo.
 6. Terminar la renta deja el cuarto Libre y conserva el convenio como historial.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -94,7 +108,7 @@ Específicas de esta spec:
 - El QR no contiene datos personales ni términos del convenio, solo un token opaco.
 - Solo el estudiante destinatario puede canjear y aceptar (BOLA).
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -109,7 +123,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -121,7 +135,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-18-R06 | Protección contra fuerza bruta | Rate limits y bloqueo por intentos verificados; códigos en hash; comparación en tiempo constante. | F3 | T06 |
 | NV-18-R07 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T07, T08, T09 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -130,15 +144,15 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Transacciones en Atlas M0 | Usar transacciones multi-documento (M0 es replica set) | PROPUESTO |
 | Contacto en Mi renta | Chat de NV-16 y teléfono del arrendador solo con convenio activo | PENDIENTE |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | Transacciones incluidas |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -146,14 +160,14 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-18-RK02 | Doble aceptación | Dos rentas para un cuarto | Transacción e índice único parcial |
 | NV-18-RK03 | Exponer la dirección sin renta | Privacidad | Regla por estado del convenio |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-12 (estado del cuarto).
 - NV-16 (solicitud aceptada).
 - NV-19 (reseña tras renta).
 - NV-20 (notificaciones).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -166,6 +180,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

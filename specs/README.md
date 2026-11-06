@@ -167,6 +167,34 @@ Cada spec debe cumplir, y se revisa en cada iteración:
 | A7 | Contradicción entre RF-24 (detalle con sesión) y NV-07 (detalle público en U2) | NV-07, NV-14 | Registrada como decisión PENDIENTE en NV-14 |
 | A8 | No existía un índice de specs ni una matriz de cobertura de RF | — | Este documento |
 
-## 6. Mantenimiento de este índice
+## 6. Revisión contra `constitution.md` y `AGENTS.md` (2026-11-06)
+
+### 6.1 Ajustes aplicados a NV-10..NV-25
+
+| # | Norma | Ajuste |
+| --- | --- | --- |
+| C1 | constitution §6 (monolito modular) | Cada spec declara su módulo, sus colecciones propias, los puertos que usa y los eventos que publica y consume; verificación automática: 16 módulos sin dependencias circulares |
+| C2 | constitution §6 (propiedad de datos) | Ningún módulo escribe en colecciones ajenas: borrado de cuenta por evento `UserDeleted`, promedios de reseñas en `rating_summaries` (Reviews), roles como datos de Identity, transacción de cierre de trato por el puerto `IRoomOccupancy` |
+| C3 | constitution §5 (Clean Architecture) | ML.NET y el proveedor de IA quedan como adaptadores de Infrastructure detrás de puertos (`ICompatibilityModel`, `IExplanationGenerator`) |
+| C4 | constitution §17 (COST-001) | Nota común: un plan gratuito no prueba por sí solo costo $0; se exige evidencia vigente |
+| C5 | constitution §30 (proveedores permitidos) | Correo, almacenamiento e IA generativa replanteados: opciones de AWS/Azure/Google o excepción registrada en `memoria.md` (precedente M-BE-034) |
+| C6 | constitution §20 (refresh tokens) | Rotación atómica ante concurrencia y transporte en el cuerpo, sin cookies (sin CSRF) |
+| C7 | constitution §14 y §15 (stateless, dos instancias) | Eventos idempotentes y tarea diaria de NV-25 con ejecución única entre réplicas |
+| C8 | constitution §23 (caché) | Contador de notificaciones con `Cache-Control: private` |
+| C9 | AGENTS (estados M-BE válidos) | RF-70 como DESCARTADO y M-BE-055 como PROPUESTO |
+| C10 | AGENTS ("No crear nuevas specs funcionales sin solicitud") | Cumplido: las specs se crearon por solicitud de Victor (2026-11-06) y quedan en borrador, sin autorización de ejecución |
+
+### 6.2 Hallazgos en los documentos superiores (requieren decisión humana; no se modificaron)
+
+| # | Documento | Hallazgo | Propuesta |
+| --- | --- | --- | --- |
+| H1 | constitution §2, §4, §27–§29, §35; AGENTS "Estado de esta entrega" | Describen la fase inicial solo documental ("NV-01 a NV-03 ⛔ NO EJECUTAR", "no crear workflows, Dockerfile ni Terraform", "SPEC ACTIVA: NINGUNA"), aunque NV-01 a NV-09 ya se ejecutaron con autorización | Reemitir constitution 1.1.0 y AGENTS con el estado vigente y el protocolo «EJECUTA» / «OK PARA APPLY» |
+| H2 | constitution §30 | "Ninguno está seleccionado", pero Azure está seleccionado y desplegado (NV-03, M-BE-036 a M-BE-041) | Registrar Azure como proveedor seleccionado |
+| H3 | constitution §33 | Git Flow con `develop` y `feature/<spec>-...`; la práctica real son ramas cortas hacia `main` con PR, checks obligatorios y ruleset | Actualizar la convención a la práctica aprobada |
+| H4 | AGENTS (rutas protegidas) | "No hacer commit ni push", mientras el flujo aprobado sí lo hace a petición humana en ramas con PR | Precisar: commit y push solo a petición humana, nunca directo a `main` |
+| H5 | AGENTS "Cierre de esta tarea documental" | Se refiere a la verificación inicial de 27 archivos | Retirar o mover a la evidencia histórica |
+| H6 | constitution §6 y M-BE-022 | Cualquier servicio separado para Smart Match o IA generativa contradice "monolito modular, no microservicios" | Mantenerlos como módulos; un servicio aparte solo con reforma de la constitución |
+
+## 7. Mantenimiento de este índice
 
 Este archivo se regenera cuando se crea o cambia de estado una spec. El mapa y la cobertura se calculan a partir de los encabezados de cada `spec.md` y de las casillas de cada `task.md`.

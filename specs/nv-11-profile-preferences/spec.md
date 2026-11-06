@@ -14,6 +14,7 @@
 | No funcionales | RNF-04, RNF-09, RNF-10, RNF-11 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Profile |
 | Precondición | NV-08 y NV-10 |
 | Relación | NV-23 (Smart Match) consume las preferencias; NV-14 usa la universidad seleccionada |
 
@@ -63,20 +64,33 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - `universities/search`: `q` de 2 a 60 caracteres o `lat` y `lng` válidos; máximo 20 resultados; con coordenadas ordena por distancia y devuelve `distanceKm`.
 - Las coordenadas del usuario no se almacenan.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Profile** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `user_profiles`, `user_preferences` |
+| Usa (puertos de otros módulos) | Catalog `IUniversityQuery` (NV-08) |
+| Publica (eventos de dominio) | `PreferencesChanged` |
+| Consume (eventos de dominio) | `UserDeleted (NV-10)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `user_profiles`: `userId` (único), `name`, `universityId`, `updatedAt`.
 - `user_preferences`: `userId` (único), campos de la §6, `version` (para invalidar cálculos de Smart Match), `updatedAt`.
 - `universities` (NV-08) agrega `acronym`, `cityNormalized`, `location` con índice `2dsphere` e índice de texto en `acronym`, `name` y `city`.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Los servicios y enumeraciones se validan contra catálogos cerrados; valores desconocidos 400.
 2. `budget.min` ≤ `budget.max`; moneda MXN por defecto.
 3. Cada `PUT` de preferencias incrementa `version`.
 4. Las preferencias rápidas (presupuesto, con quién vivir y tipo de lugar) marcan `quickSetupCompleted=true` y pueden completarse después.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -93,7 +107,7 @@ Específicas de esta spec:
 - La búsqueda pública de universidades tiene rate limit 60/min por IP y no expone campos internos.
 - Las coordenadas enviadas para buscar universidad no se registran en logs ni se persisten (RNF-02, RNF-11).
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -106,7 +120,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -118,7 +132,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-11-R06 | Privacidad de ubicación | Las coordenadas usadas en la búsqueda no se persisten ni se registran; prueba que lo verifica. | F3 | T06 |
 | NV-11-R07 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T07, T08, T09 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -127,15 +141,15 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Extensión del modelo de universidades | Campos aditivos en NV-08 (versión 1.2.0) con migración del seed | PENDIENTE |
 | Moneda | MXN única en la primera versión | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | Índices dentro del límite de 512 MB |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -143,13 +157,13 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-11-RK02 | Fuga de ubicación del usuario | Privacidad | No persistir ni registrar coordenadas |
 | NV-11-RK03 | Búsqueda lenta sin índices | Experiencia pobre | Índices de texto y geoespacial |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-08 (catálogo de universidades).
 - NV-10 (`/users/me`).
 - NV-14 y NV-23 consumen preferencias y universidad.
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -162,6 +176,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

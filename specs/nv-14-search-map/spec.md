@@ -14,6 +14,7 @@
 | No funcionales | RNF-02, RNF-05, RNF-08 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Search |
 | Precondición | NV-11 y NV-12 |
 | Relación | Evoluciona NV-07 (listado y detalle públicos); NV-15, NV-16 y NV-23 parten de sus resultados |
 
@@ -31,7 +32,7 @@ Definir la búsqueda pública de cuartos Libres con filtros, orden, mapa y conte
 
 1. NV-12 (cuartos y estados).
 2. NV-11 (universidades con ubicación).
-3. Decisión sobre la migración de NV-07 (§12).
+3. Decisión sobre la migración de NV-07 (§13).
 4. Autorización «EJECUTA».
 
 ## 4. Alcance
@@ -66,12 +67,25 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - `rooms/map` recibe `universityId` y un `bbox`; devuelve `id`, `price`, `approxLocation`, `distanceKm`.
 - El detalle incluye fotos, servicios, características, condiciones y ubicación aproximada; nunca la dirección exacta.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Search** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `room_search (modelo de lectura)`, `places` |
+| Usa (puertos de otros módulos) | — |
+| Publica (eventos de dominio) | `RoomViewed` |
+| Consume (eventos de dominio) | `RoomStatusChanged y BuildingStatusChanged (NV-12)`, `PhotosChanged (NV-13)`, `RatingChanged (NV-19)`, `UserSuspended (NV-21)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - Vista de lectura `room_search` (o consulta agregada) con `universityId`, `price`, `modality`, `propertyType`, `services`, `approxLocation` y `location` interna; índices `2dsphere` y compuestos por universidad y precio.
 - `places`: colonias y ciudades por universidad con `name`, `nameNormalized`, `type`, `location`; seed controlado sin servicios externos.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Solo cuartos Libres de edificios Verificados y arrendadores no suspendidos.
 2. La ubicación aproximada se calcula de forma determinista (desplazamiento estable de 150–300 m por edificio) para que no se pueda promediar entre consultas.
@@ -79,7 +93,7 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 4. Las respuestas públicas usan `ETag` y `Cache-Control: public, max-age=30`; el detalle autenticado usa `private, no-store`.
 5. Presupuesto de rendimiento: p95 < 500 ms con 50 resultados (RNF-05).
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -96,7 +110,7 @@ Específicas de esta spec:
 - Rate limit 60/min por IP en búsqueda y mapa; `bbox` y `pageSize` acotados para evitar extracción masiva.
 - El detalle exige sesión (RF-24) y registra la vista para NV-25 sin datos personales.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -109,7 +123,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -122,7 +136,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-14-R07 | Ubicación aproximada y anti-extracción | La ubicación aproximada es estable y está a 150–300 m de la real; límites de `bbox`, `pageSize` y rate limit verificados. | F3 | T07 |
 | NV-14-R08 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T08, T09, T10 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -132,16 +146,16 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Fuente de colonias | Seed propio por ciudad (datos abiertos) sin geocodificación de pago | PROPUESTO |
 | Detalle con sesión | Aplicar RF-24 (requiere sesión) aunque NV-07 lo expuso público en U2 | PENDIENTE |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | Índices geoespaciales incluidos |
 | Mapas en el cliente | $0 en el backend | El proveedor de mapas es decisión del cliente móvil |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -150,14 +164,14 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-14-RK03 | Consultas lentas | Mala experiencia | Índices y presupuesto de rendimiento |
 | NV-14-RK04 | Ruptura de la app con el cambio de NV-07 | Pantallas vacías | Alias y deprecación |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-12 (cuartos) y NV-13 (fotos).
 - NV-11 (universidad y preferencias).
 - NV-07 (contrato actual que se migra).
 - NV-25 (registro de vistas).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -170,6 +184,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

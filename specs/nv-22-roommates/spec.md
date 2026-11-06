@@ -14,6 +14,7 @@
 | No funcionales | RNF-02, RNF-03 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Roommates |
 | Precondición | NV-11 y NV-16 |
 | Relación | El filtro de cuartos compartidos (RF-45, RF-47) vive en NV-12 y NV-14; el contacto usa el chat de NV-16 |
 
@@ -56,18 +57,31 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 - Publicación: `universityId`, `budgetMax`, `moveInFrom`, `livingWith`, `about` (≤ 500), `hasPlace` (si ya tiene vivienda y busca con quién compartirla).
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Roommates** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `roommate_posts` |
+| Usa (puertos de otros módulos) | Messaging `IConversationService` (NV-16); Profile `IProfileQuery` (NV-11) |
+| Publica (eventos de dominio) | — |
+| Consume (eventos de dominio) | `ContentHidden (NV-21)`, `UserDeleted (NV-10)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `roommate_posts`: `authorId`, campos, `status` (`active`, `closed`, `expired`), `expiresAt`, `createdAt`; índice `{ universityId, status, budgetMax }` y TTL lógico a 60 días.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Una publicación activa por usuario (409).
 2. Caduca a los 60 días; el autor puede renovarla.
 3. La publicación muestra el nombre visible y la insignia de estudiante, nunca correo ni teléfono.
 4. No se puede contactar la propia publicación.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -84,7 +98,7 @@ Específicas de esta spec:
 - Rate limit: 10 contactos/día por usuario.
 - Publicaciones reportables y ocultables por NV-21.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -98,7 +112,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -108,7 +122,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-22-R04 | Caducidad y privacidad | Expiración a 60 días; ninguna respuesta incluye correo ni teléfono. | F3 | T04 |
 | NV-22-R05 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T05, T06, T07 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -116,27 +130,27 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | --- | --- | --- |
 | Caducidad | 60 días con renovación | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | — |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
 | NV-22-RK01 | Perfiles falsos | Riesgo personal | Insignia de estudiante visible y reportes |
 | NV-22-RK02 | Contacto masivo | Acoso | Límites diarios y suspensión |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-11, NV-16 y NV-21.
 - NV-10 (insignia de estudiante).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -149,6 +163,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

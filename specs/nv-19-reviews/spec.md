@@ -14,6 +14,7 @@
 | No funcionales | RNF-03, RNF-09 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Reviews |
 | Precondición | NV-17 y NV-18 |
 | Relación | Las reseñas se muestran en el detalle de NV-14 y se reportan en NV-21 |
 
@@ -55,12 +56,25 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 - Reseña: `propertyRating` y `landlordRating` (enteros 1–5) y `comment` opcional (≤ 1000).
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Reviews** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `reviews`, `rating_summaries` |
+| Usa (puertos de otros módulos) | Visits `IVisitHistoryQuery` (NV-17); Rentals `IRentalHistoryQuery` (NV-18) |
+| Publica (eventos de dominio) | `RatingChanged` |
+| Consume (eventos de dominio) | `ContentHidden (NV-21)`, `UserDeleted (NV-10)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `reviews`: `roomId`, `buildingId`, `ownerId`, `authorId`, `propertyRating`, `landlordRating`, `comment`, `status` (`published`, `hidden`), fechas; índice único `{ authorId, roomId }`.
-- Agregados en `rooms` y `landlord_profiles`: `ratingAvg`, `ratingCount`.
+- `rating_summaries` (propiedad de Reviews): `roomId`, `ownerId`, `ratingAvg`, `ratingCount`; el modelo de lectura de Search (NV-14) se actualiza con el evento `RatingChanged`, sin que Reviews escriba en colecciones de otros módulos.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Elegible: visita `completed` (NV-17) o convenio `active`/`ended` (NV-18) del autor para ese cuarto.
 2. Una reseña por autor y cuarto; editable 30 días.
@@ -68,7 +82,7 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 4. Una reseña oculta por moderación no cuenta en los promedios.
 5. El autor de una cuenta eliminada se muestra como "Usuario eliminado".
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -85,7 +99,7 @@ Específicas de esta spec:
 - Sin correo ni datos del autor más allá del nombre visible.
 - Rate limit 10 reseñas/día por usuario.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -100,7 +114,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -110,7 +124,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-19-R04 | Integridad de agregados | Promedios consistentes con las reseñas publicadas tras operaciones concurrentes. | F2 | T04 |
 | NV-19-R05 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T05, T06, T07 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -118,28 +132,28 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | --- | --- | --- |
 | Visibilidad de reseñas | Requieren sesión, igual que el detalle (RF-24) | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | — |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
 | NV-19-RK01 | Reseñas falsas | Pérdida de confianza | Elegibilidad estricta y reportes |
 | NV-19-RK02 | Promedios desincronizados | Datos incorrectos | Recalculo transaccional y prueba |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-17 y NV-18 (elegibilidad).
 - NV-14 (detalle).
 - NV-21 (ocultar reseñas).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -152,6 +166,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

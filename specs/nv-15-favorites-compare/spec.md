@@ -14,6 +14,7 @@
 | No funcionales | RNF-09 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Favorites |
 | Precondición | NV-14 |
 | Relación | Usa los cuartos públicos de NV-14; los favoritos alimentan las métricas de NV-25 |
 
@@ -56,18 +57,31 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 - La comparación devuelve, por cuarto, precio, distancia, minutos a pie, servicios, tipo, baño, tamaño, contrato mínimo y si está disponible.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Favorites** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `favorites` |
+| Usa (puertos de otros módulos) | Search `IRoomCatalogQuery` (NV-14) |
+| Publica (eventos de dominio) | `FavoriteAdded` |
+| Consume (eventos de dominio) | `UserDeleted (NV-10)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `favorites`: `userId`, `roomId`, `createdAt`; índice único `{ userId, roomId }` e índice `{ userId, createdAt: -1 }`.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Máximo 200 favoritos por usuario (409 al exceder).
 2. Un cuarto que deja de estar Libre permanece en favoritos con `available=false` y sin datos sensibles.
 3. Agregar un favorito existente o quitar uno inexistente responde 204.
 4. La comparación solo acepta cuartos publicables; ids duplicados o fuera de rango 400.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -84,7 +98,7 @@ Específicas de esta spec:
 - La comparación no expone campos distintos a los del detalle público de NV-14.
 - Rate limit de escritura 60/min por usuario.
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -98,7 +112,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -108,7 +122,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-15-R04 | Persistencia e índices | Índice único evita duplicados en concurrencia; consulta del listado sin N+1. | F2 | T04 |
 | NV-15-R05 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T05, T06, T07 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -116,28 +130,28 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | --- | --- | --- |
 | Límite de favoritos | 200 por usuario | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | Documentos pequeños |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
 | NV-15-RK01 | Duplicados por doble toque | Datos inconsistentes | Índice único e idempotencia |
 | NV-15-RK02 | N+1 al listar | Latencia | Consulta por lotes de cuartos |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-14 (cuartos públicos).
 - NV-10 (eliminar cuenta borra favoritos).
 - NV-25 (conteo de favoritos).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -150,6 +164,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

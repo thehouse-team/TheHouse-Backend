@@ -14,6 +14,7 @@
 | No funcionales | RNF-02, RNF-08, RNF-09, RNF-10 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Listings |
 | Precondición | NV-10 y NV-11 |
 | Relación | Fuente de los cuartos que publica NV-14; NV-13 (fotos y documentos) y NV-21 (verificación) completan la publicación; sustituye el modelo provisional de NV-07 |
 
@@ -30,7 +31,7 @@ Definir el alta de arrendador y la gestión completa de edificios y cuartos con 
 ## 3. Precondiciones
 
 1. NV-10 (cuenta) y NV-11 (universidades con ubicación).
-2. Decisión sobre la migración de NV-07 (§12).
+2. Decisión sobre la migración de NV-07 (§13).
 3. Autorización «EJECUTA».
 
 ## 4. Alcance
@@ -72,23 +73,36 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - Cuarto: `number`, `floor`, `price` (MXN), `sizeM2`, `type` (`single`, `double`, `shared`), `bathroom` (`private`, `shared`), `furniture[]`, `availableFrom`, `minContract` (`four_months`, `six_months`, `annual`), `sharedMode`.
 - `rooms:generate` recibe `floors` (1–30), `roomsPerFloor[]` y `base`; máximo 200 cuartos por edificio.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Listings** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `landlord_profiles`, `buildings`, `rooms` |
+| Usa (puertos de otros módulos) | Catalog `IUniversityQuery` (NV-08) |
+| Publica (eventos de dominio) | `BuildingPublicationRequested`, `BuildingStatusChanged`, `RoomStatusChanged` |
+| Consume (eventos de dominio) | `VerificationDocumentsCompleted (NV-13)`, `BuildingReviewDecided (NV-21)`, `AgreementActivated y AgreementEnded (NV-18)`, `UserSuspended (NV-21)`, `UserDeleted (NV-10)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `landlord_profiles`: `userId` (único), datos de la §6, `createdAt`.
 - `buildings`: `ownerId`, datos, `location` GeoJSON con índice `2dsphere`, `distanceToUniversityKm`, `walkingMinutes`, `status`, `version`.
 - `rooms`: `buildingId`, `ownerId`, datos del cuarto, `status`, `services` heredados por referencia; índices `{ buildingId, floor, number }` único y `{ status, price }`.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Estados del edificio: Borrador → En revisión → Verificado; desde revisión puede volver a Borrador con correcciones (NV-21).
 2. Estados del cuarto: Por configurar → Lista → En revisión → Libre ⇄ Pausado; Libre → Rentado (NV-18); solo los cuartos Libres de edificios Verificados son públicos.
 3. Los servicios se definen una vez en el edificio y todos los cuartos los heredan (RF-17).
 4. La distancia y los minutos a pie se calculan con haversine a 5 km/h respecto a la universidad elegida (RF-16).
-5. Publicar exige datos del edificio completos, al menos un cuarto Listo y documentos cargados (NV-13); si falta algo, 409 con la lista de pasos.
+5. Publicar exige datos del edificio completos, al menos un cuarto Listo y documentos completos (Listings lo sabe por el evento `VerificationDocumentsCompleted` de Media, NV-13); si falta algo, 409 con la lista de pasos.
 6. No se elimina un cuarto Rentado ni un edificio con cuartos Rentados (409).
 7. Editar precio o datos de un cuarto Libre no cambia su estado; editar datos sensibles del edificio Verificado lo regresa a revisión.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -106,7 +120,7 @@ Específicas de esta spec:
 - Validación de RFC y teléfono; límites de tamaño en textos y listas.
 - Operaciones de escritura con control de concurrencia optimista (`version`, 409 si cambió).
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -121,7 +135,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -135,7 +149,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-12-R08 | Autorización del dueño | Ningún endpoint permite leer o modificar edificios o cuartos ajenos; pruebas con dos arrendadores. | F3 | T08 |
 | NV-12-R09 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T09, T10, T11 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -144,15 +158,15 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Migración de NV-07 | El listado público pasa a leer cuartos Libres (NV-14); `GET /properties` se mantiene como alias temporal y se depreca con aviso | PENDIENTE |
 | Límite de cuartos | 200 por edificio | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | Volumen estimado dentro de 512 MB |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -161,14 +175,14 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-12-RK03 | Generación masiva abusiva | Saturación de la base | Límite de pisos y cuartos y rate limit |
 | NV-12-RK04 | Ruptura del contrato de NV-07 | App móvil afectada | Alias y deprecación anunciada |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-10 y NV-11.
 - NV-13 (fotos y documentos) para publicar.
 - NV-21 (revisión) para Verificado.
 - NV-14 (búsqueda) y NV-18 (Rentado).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -181,6 +195,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

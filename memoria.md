@@ -486,9 +486,19 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 
 - **ID:** M-BE-055
 - **Decisión:** corregir solo documentación: estados de spec/plan alineados con `task.md`, conteos de tasks completadas, referencias obsoletas a NV-02 bloqueada, trazabilidad bidireccional (NV-03, NV-07, NV-08) y requerimientos de origen RF/RNF en cada spec. Las `evidence.md` no se modifican porque son registros fechados.
-- **Estado:** APLICADO EN BORRADOR — pendiente de revisión de Victor en el pull request.
+- **Estado:** PROPUESTO — correcciones aplicadas en el PR #8, pendientes de revisión de Victor.
 - **Fecha:** 2026-11-06.
 - **Aprobador:** pendiente (Victor Manuel Jose Jose).
 - **Justificación:** las inconsistencias de estado y trazabilidad contradicen la regla de un solo estado por spec y dificultan la revisión del profesor.
 - **Impacto:** sin cambios de código ni de infraestructura. Hallazgos y correcciones en `specs/README.md` §5. Queda registrada la contradicción RF-24 (detalle con sesión) frente a NV-07 (detalle público) como decisión PENDIENTE en NV-14.
+
+## M-BE-056 — Revisión de specs contra constitution y AGENTS; documentos superiores desactualizados
+
+- **ID:** M-BE-056
+- **Decisión:** ajustar NV-10 a NV-25 a la constitución (módulos con datos propios y sin ciclos, adaptadores detrás de puertos, COST-001 §17, proveedores §30, refresh tokens §20, ejecución única entre réplicas) y reportar, sin modificarlos, los puntos desactualizados de `constitution.md` y `AGENTS.md` (`specs/README.md` §6.2: fase inicial solo documental, proveedor cloud "no seleccionado", Git Flow con `develop`, prohibición de commit/push).
+- **Estado:** PROPUESTO.
+- **Fecha:** 2026-11-06.
+- **Aprobador:** pendiente (Victor Manuel Jose Jose).
+- **Justificación:** solicitud de Victor de verificar que lo agregado coincida con `constitution.md` y `AGENTS.md`; la constitución solo cambia con revisión humana explícita (§35).
+- **Impacto:** las specs nuevas quedan coherentes con las normas vigentes; la reemisión de la constitución 1.1.0 y de AGENTS requiere una decisión aparte. Smart Match e IA generativa se mantienen como módulos del monolito mientras no se reforme §6.
 

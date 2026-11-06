@@ -14,6 +14,7 @@
 | No funcionales | RNF-02, RNF-09 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Notifications |
 | Precondición | NV-16 a NV-18 (eventos) |
 | Relación | Recibe eventos de NV-12, NV-16, NV-17, NV-18 y NV-21 |
 
@@ -57,17 +58,30 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 - Notificación: `id`, `type`, `title`, `body`, `target { kind, id }`, `read`, `createdAt`; `type` de catálogo cerrado (`request_received`, `request_accepted`, `message_received`, `visit_confirmed`, `agreement_active`, `building_verified`, etc.).
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Notifications** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `notifications` |
+| Usa (puertos de otros módulos) | — |
+| Publica (eventos de dominio) | — |
+| Consume (eventos de dominio) | `RequestCreated, RequestAccepted, RequestRejected y MessageSent (NV-16)`, `VisitConfirmed, VisitRescheduled y VisitCancelled (NV-17)`, `AgreementIssued, AgreementActivated y AgreementEnded (NV-18)`, `BuildingReviewDecided (NV-21)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `notifications`: `userId`, `type`, `title`, `body`, `target`, `readAt`, `createdAt`; índices `{ userId, createdAt: -1 }` y `{ userId, readAt }`; TTL de 90 días.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Los textos no incluyen dirección exacta, teléfono ni contenido completo de mensajes.
 2. Mensajes de chat se agrupan: una notificación por conversación mientras haya no leídos.
 3. Las notificaciones se crean en el mismo flujo del evento o con reintento idempotente (clave del evento).
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -82,9 +96,9 @@ Específicas de esta spec:
 
 - Solo el dueño lee y marca sus notificaciones (BOLA).
 - Sin datos sensibles en el cuerpo (RNF-02).
-- El contador usa `ETag` para que el sondeo del cliente sea barato.
+- El contador usa `ETag` con `Cache-Control: private, no-cache` para que el sondeo del cliente sea barato sin que ninguna caché compartida lo almacene (constitution §23).
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -97,7 +111,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -108,7 +122,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-20-R05 | Retención | TTL de 90 días; sin datos sensibles en el cuerpo. | F2 | T05 |
 | NV-20-R06 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T06, T07, T08 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -116,27 +130,27 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | --- | --- | --- |
 | Notificaciones push | FCM (gratuito) como extensión; el cuerpo push sin datos personales | PENDIENTE |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 | $0 | TTL controla el volumen |
 | FCM | $0 | Solo si se aprueba la decisión |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
 | NV-20-RK01 | Fuga de datos en notificaciones | Privacidad | Plantillas sin datos sensibles |
 | NV-20-RK02 | Notificaciones duplicadas | Ruido | Clave idempotente por evento |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-12, NV-16, NV-17, NV-18 y NV-21 (emisores).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -149,6 +163,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

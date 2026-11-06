@@ -14,6 +14,7 @@
 | No funcionales | RNF-01, RNF-02, RNF-03 |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
+| Módulo | Messaging |
 | Precondición | NV-12 y NV-14 |
 | Relación | Una solicitud aceptada habilita visitas (NV-17) y cierre de trato (NV-18); los eventos van a NV-20 |
 
@@ -64,13 +65,26 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 - Rechazo: `reason` (`not_available`, `profile_mismatch`, `other`) y `note` opcional (≤ 300).
 - Mensaje: `text` de 1 a 1000 caracteres; la respuesta de mensajes usa cursor y `ETag` para consultas incrementales baratas.
 
-## 7. Modelo de datos
+## 7. Módulo, datos propios e integración
+
+Módulo **Messaging** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
+
+| Aspecto | Detalle |
+| --- | --- |
+| Colecciones propias | `rental_requests`, `conversations`, `messages` |
+| Usa (puertos de otros módulos) | Search `IRoomCatalogQuery` (NV-14); Listings `IRoomQuery` (NV-12) para conocer al dueño |
+| Publica (eventos de dominio) | `RequestCreated`, `RequestAccepted`, `RequestRejected`, `MessageSent` |
+| Consume (eventos de dominio) | `AgreementActivated (NV-18)`, `UserSuspended (NV-21)`, `UserDeleted (NV-10)` |
+
+Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
+
+## 8. Modelo de datos
 
 - `rental_requests`: `roomId`, `buildingId`, `studentId`, `ownerId`, `quickQuestions`, `message`, `proposedVisitAt`, `status` (`pending`, `accepted`, `rejected`, `cancelled`, `closed`), `reason`, fechas; índice único parcial `{ studentId, roomId }` para solicitudes activas.
 - `conversations`: `participants[2]`, `requestId`, `lastMessageAt`, `unread` por participante.
 - `messages`: `conversationId`, `senderId`, `text`, `createdAt`; índice `{ conversationId, _id }`.
 
-## 8. Reglas de negocio
+## 9. Reglas de negocio
 
 1. Una sola solicitud activa por estudiante y cuarto (409).
 2. El propietario no puede solicitar su propio cuarto.
@@ -78,7 +92,7 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 4. Cuando el cuarto pasa a Rentado (NV-18) las demás solicitudes activas se cierran con motivo `not_available`.
 5. Los mensajes son inmutables; un usuario suspendido (NV-21) no puede enviar.
 
-## 9. Seguridad
+## 10. Seguridad
 
 Comunes a todas las specs funcionales:
 
@@ -96,7 +110,7 @@ Específicas de esta spec:
 - Rate limit: 10 solicitudes/día por estudiante y 30 mensajes/min por usuario.
 - El contenido de los mensajes no se registra en logs; se puede reportar a moderación (NV-21).
 
-## 10. Errores
+## 11. Errores
 
 Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
 
@@ -111,7 +125,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
 
-## 11. Requisitos verificables
+## 12. Requisitos verificables
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
@@ -123,7 +137,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-16-R06 | Privacidad y abuso | Ninguna respuesta incluye teléfono ni correo; rate limits verificados; usuario suspendido no puede escribir. | F3 | T06 |
 | NV-16-R07 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T07, T08, T09 |
 
-## 12. Decisiones pendientes
+## 13. Decisiones pendientes
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
@@ -132,15 +146,15 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Tiempo real | Consulta incremental en la primera versión; SignalR con backplane Redis como evolución | PROPUESTO |
 | Retención de mensajes | Mientras exista la cuenta; se anonimizan al eliminarla | PROPUESTO |
 
-## 13. Costo — COST-001
+## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | MongoDB Atlas M0 y Redis Upstash | $0 | Volumen de mensajes dentro del plan gratuito; vigilar el límite de comandos de Upstash |
 
-Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
+Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
-## 14. Riesgos
+## 15. Riesgos
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
@@ -148,13 +162,13 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | NV-16-RK02 | Spam a propietarios | Abuso | Límites diarios y reportes |
 | NV-16-RK03 | Consulta incremental costosa | Consumo de Redis y CPU | Cursor, `ETag` e intervalo mínimo sugerido al cliente |
 
-## 15. Dependencias
+## 16. Dependencias
 
 - NV-12 y NV-14.
 - NV-17 y NV-18 consumen la solicitud aceptada.
 - NV-20 (notificaciones) y NV-21 (reportes y suspensión).
 
-## 16. Trazabilidad y cobertura
+## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
@@ -167,6 +181,6 @@ Si algún componente no puede demostrarse en $0, la task correspondiente queda *
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
-## 17. Aprobación pendiente
+## 18. Aprobación pendiente
 
-Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §12. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
+Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.
