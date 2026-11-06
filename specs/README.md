@@ -195,7 +195,7 @@ Cada spec debe cumplir, y se revisa en cada iteración:
 | H5 | AGENTS "Cierre de esta tarea documental" | Se refiere a la verificación inicial de 27 archivos | Retirar o mover a la evidencia histórica |
 | H6 | constitution §6 y M-BE-022 | Cualquier servicio separado para Smart Match o IA generativa contradice "monolito modular, no microservicios" | Mantenerlos como módulos; un servicio aparte solo con reforma de la constitución |
 
-**Estado:** H1 a H5 atendidos en el borrador `constitution.md` 1.1.0 y `AGENTS.md` 1.1.0 (M-BE-057), pendiente de aprobación humana; H6 queda codificado en constitution §6 1.1.0.
+**Estado:** H1 a H5 atendidos en el borrador `constitution.md` 1.1.0 y `AGENTS.md` 1.1.0 (M-BE-057), aprobados por Victor el 2026-11-06; H6 queda codificado en constitution §6 1.1.0.
 
 ## 7. Mantenimiento de este índice
 

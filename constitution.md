@@ -4,8 +4,8 @@
 | --- | --- |
 | Versión | 1.1.0 |
 | Fecha | 2026-11-06 |
-| Estado | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** (mientras no se apruebe, rige la versión 1.0.0 del historial de Git) |
-| Aprobación humana | Pendiente (Victor Manuel Jose Jose, responsable del backend, M-BE-040) |
+| Estado | **✅ APROBADA — VIGENTE** (sustituye a la versión 1.0.0) |
+| Aprobación humana | Victor Manuel Jose Jose, responsable del backend (M-BE-040) — 2026-11-06 («Apruebo 1.1.0») |
 | Decisión | M-BE-057 |
 
 Autoridad: máxima norma del Backend dentro de las instrucciones humanas y políticas del entorno.

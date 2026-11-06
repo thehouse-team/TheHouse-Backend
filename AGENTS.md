@@ -4,7 +4,8 @@
 | --- | --- |
 | Versión | 1.1.0 |
 | Fecha | 2026-11-06 |
-| Estado | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** (mientras no se apruebe, rige la versión anterior del historial de Git) |
+| Estado | **✅ APROBADO — VIGENTE** (sustituye a la versión anterior) |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-06 («Apruebo 1.1.0») |
 | Decisión | M-BE-057 |
 
 **Cambios 1.1.0:** sustituye el estado de la "entrega documental" inicial por el estado vigente, incorpora el protocolo de autorizaciones en uso («EJECUTA», «OK PARA APPLY», aprobación de despliegues y seeds), el flujo de Git con pull requests y las reglas de uso eficiente de recursos. Las reglas de seguridad, verificación iterativa y separación SDD/ejecución se conservan sin cambios de fondo.
