@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Autorización | «EJECUTA NV-09 1.0.0-u2, tasks T01–T14» — Victor Manuel Jose Jose, 2026-11-05 (M-BE-051) |
 | Rama | `feat/nv-09-cd` |
-| Resultado | **🟡 EN EJECUCIÓN**: código listo y verificación efímera en verde; pendientes «OK PARA APPLY» (T01/T02), Environment `production` (T03) y el primer run real de `cd.yml` en `main` |
+| Resultado | **🟡 EN EJECUCIÓN**: código listo y verificación efímera en verde; T01 aplicada; pendientes Environment `production` (T03) y el primer run real de `cd.yml` en `main` |
 
 Esta evidencia no incluye valores de secretos, cadenas de conexión, llaves ni identificadores de suscripción. No se leyeron ni mostraron `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -62,7 +62,17 @@ Plan: 5 to add, 0 to change, 0 to destroy.
 
 - La Container App **no cambia** en el plan: agregar la imagen a `ignore_changes` no genera diferencias.
 - Rol integrado descartado: `Container Apps Contributor` incluye `*/delete` y `*/action` (que abarca `listSecrets`). El rol personalizado no puede borrar la app ni leer sus secretos (M-BE-052). Las 8 acciones se validaron contra `az provider operation show --namespace Microsoft.App`.
-- **Estado:** esperando «OK PARA APPLY». Tras el apply se registran el inventario y un segundo `plan` sin cambios.
+- **Apply** autorizado por Victor con «OK PARA APPLY» (2026-11-06):
+  1. Primer intento: se creó `azurerm_role_definition.cd_deployer` y la identidad falló con `MissingSubscriptionRegistration` (el proveedor `Microsoft.ManagedIdentity` no estaba registrado en la suscripción).
+  2. Con autorización explícita de Victor se ejecutó `az provider register --namespace Microsoft.ManagedIdentity --wait` → `Registered` (sin costo ni recursos nuevos).
+  3. Plan nuevo: `4 to add, 0 to change, 0 to destroy`; apply: `Resources: 4 added, 0 changed, 0 destroyed`.
+  4. `terraform plan -detailed-exitcode` posterior: código 0, *No changes*.
+- **Inventario verificado con `az`:**
+  - Grupo `rg-thehouse-u2`: `cae-thehouse-u2`, `ca-thehouse-u2`, `log-thehouse-u2` e `id-thehouse-u2-deploy` (nuevo).
+  - Credencial federada `github-production`: issuer `https://token.actions.githubusercontent.com`, subject `repo:thehouse-team/TheHouse-Backend:environment:production`, audience `api://AzureADTokenExchange`.
+  - Asignaciones de la identidad: solo `TheHouse CD Deployer (rg-thehouse-u2)` sobre `ca-thehouse-u2` y sobre `cae-thehouse-u2`; ninguna a nivel de grupo ni de suscripción.
+  - Acciones del rol: las 8 listadas en `cd_identity.tf`; sin `delete` ni `listSecrets`.
+- T01 completada. T02 queda abierta hasta repetir el `plan` sin cambios después del primer despliegue del CD.
 
 ## 4. Validación local (2026-11-05)
 
@@ -121,7 +131,8 @@ Límite del escaneo: los límites por endpoint de propiedades y universidades (6
 
 | Task | Estado | Falta |
 | --- | --- | --- |
-| T01, T02 | Plan listo | «OK PARA APPLY», inventario y `plan` sin cambios |
+| T01 | ✅ Completada | — |
+| T02 | Aplicada | `plan` sin cambios después del primer despliegue del CD |
 | T03 | Guía pendiente | Valores de `cd_azure_*` (salen del apply) y configuración humana |
 | T04–T07 | Implementadas | Primer run real de `cd.yml` en `main` |
 | T08 | Implementada | Integración del pull request |
