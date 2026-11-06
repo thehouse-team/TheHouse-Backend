@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Autorización | «EJECUTA NV-09 1.0.0-u2, tasks T01–T14» — Victor Manuel Jose Jose, 2026-11-05 (M-BE-051) |
 | Rama | `feat/nv-09-cd` |
-| Resultado | **🟡 EN EJECUCIÓN**: código listo y verificación efímera en verde; T01 y T03 completadas; pendiente el primer run real de `cd.yml` en `main` |
+| Resultado | **🟡 CD EN PRODUCCIÓN**: run `42180858665` en verde y versión de `main` desplegada; 13 de 14 tasks autorizadas completas; falta T13 (rollback controlado) |
 
 Esta evidencia no incluye valores de secretos, cadenas de conexión, llaves ni identificadores de suscripción. No se leyeron ni mostraron `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -143,17 +143,17 @@ Límite del escaneo: los límites por endpoint de propiedades y universidades (6
 
 ## 8. Estado de las tasks autorizadas
 
-| Task | Estado | Falta |
+| Task | Estado | Evidencia |
 | --- | --- | --- |
-| T01 | ✅ Completada | — |
-| T02 | Aplicada | `plan` sin cambios después del primer despliegue del CD |
-| T03 | ✅ Completada | — |
-| T04–T07 | Implementadas | Primer run real de `cd.yml` en `main` |
-| T08 | Implementada | Integración del pull request |
-| T09, T10 | Verificadas con imagen local | Run real con el digest publicado |
-| T11–T14 | Implementadas | Run real con aprobación y prueba controlada de rollback (T13) |
-
-Ninguna task se marca como completada hasta tener evidencia del run real.
+| T01 | ✅ Completada | §3 |
+| T02 | ✅ Completada | §11: `plan` posterior al despliegue sin cambios en recursos |
+| T03 | ✅ Completada | §3.1 |
+| T04–T07 | ✅ Completadas | §11 (`publish`) |
+| T08 | ✅ Completada | PR #4 integrado: `u2-ghcr-publish.yml` retirado, `VERSIONING.md` actualizado |
+| T09, T10 | ✅ Completadas | §11 (`verify-ephemeral` con el digest publicado) |
+| T11, T12 | ✅ Completadas | §11 (`deploy`) |
+| T13 | 🟡 Abierta | El rollback se ejecutó en §10, pero con la espera defectuosa; falta la prueba controlada con `simulate_smoke_failure` |
+| T14 | ✅ Completada | §11 (`dast-baseline`) |
 
 ## 9. Primer run real de `cd.yml` — `42174853458` (commit `84c526e`, merge del PR #4)
 
@@ -194,4 +194,27 @@ URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42178536348 
 - **Estado de producción tras el run** (verificado con `az`): una sola revisión activa, `ca-thehouse-u2--rb-2-1`, imagen `sha256:15f196af…`, `Healthy`/`Running`, 100 % del tráfico. Sin caída del servicio.
 - **Corrección** (rama `fix/nv-09-revision-wait`): `.github/scripts/wait_revision.sh` espera `Provisioned` **y** que la revisión sea `latestReadyRevisionName` (la que recibe el 100 % en modo `Single`); se usa en el despliegue y en el rollback. El chequeo de salud consulta cada campo por separado. Ambos probados en local contra Azure (solo lectura) sobre `rb-2-1`: `exit 0`, `healthState=Healthy runningState=Running`.
 - **Lo que sí quedó demostrado**: login OIDC, rol mínimo suficiente para `az containerapp update` (sin `listSecrets`), despliegue por digest firmado y el camino de rollback hasta restaurar la imagen anterior. T13 sigue abierta hasta la prueba controlada con la espera corregida.
+
+## 11. Tercer run de `cd.yml` — `42180858665` (commit `d1bbbea`, merge del PR #6) — ✅ PASS
+
+URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42180858665 — aprobado por `vicmanujo` (merge de `IsaiAxel`).
+
+| Job | Resultado | Detalle |
+| --- | --- | --- |
+| `resolve` | ✅ | `mode=publish` |
+| `publish` | ✅ | `sha256:caa6f417eef39a75ba5fe180cf082b95b501e0ea1cacdb98f69bddbc92db061e`; Trivy sin Critical/High corregibles; SBOM CycloneDX; firma y atestación verificadas |
+| `verify-ephemeral` | ✅ | Smoke `full` y ZAP API scan con 0 High **sobre el digest publicado** |
+| `deploy` | ✅ | Firma verificada de nuevo en otro runner; OIDC; imagen anterior `sha256:15f196af…`; revisión `ca-thehouse-u2--cd1bbbea-3-1` **lista y activa** (`latestReadyRevisionName`); smoke `readonly` en verde; `healthState=Healthy`, `runningState=Running`; sin rollback |
+| `dast-baseline` | ✅ | ZAP pasivo en producción: 0 High, 0 Medium, 2 Low (90004 CORP, 10021 `nosniff` = H-01), 3 informativas |
+| `cd-summary` | ✅ | `deployment-record.json`: `result: PASS`, `rolled_back: false` |
+
+Smoke `readonly` en producción (versión nueva): health live/ready, catálogos con `Cache-Control: public, max-age=60` y **304** con `If-None-Match`, 404 de inexistentes, HSTS `max-age=2592000`, registro inválido 400, login inexistente 401 y logout sin token 401. WARN: catálogos vacíos (seed pendiente, T18) y H-01.
+
+**Verificación posterior (2026-11-06):**
+
+- `az containerapp show`: imagen `ghcr.io/thehouse-team/thehouse-backend@sha256:caa6f417…`, `latestReadyRevisionName=ca-thehouse-u2--cd1bbbea-3-1`.
+- `terraform plan`: **ningún cambio en recursos**. Solo detecta fuera de Terraform el nuevo `latest_revision_fqdn` y actualizaría el output `container_app_fqdn`; no revierte la imagen. T02 cumplida.
+- La firma se verificó en dos runners distintos (job `publish` y job `deploy`) con la identidad `cd.yml@refs/heads/main`. Para verificarla localmente: `cosign verify` con el comando de `VERSIONING.md` §5.
+
+**Producción ahora ejecuta la versión de `main`** con caché HTTP (NV-07/NV-08 1.1.0-u2), errores con `no-store`, seed controlado y observabilidad (NV-03 1.2.0-u2). El despliegue anterior (`c651886`) queda sustituido.
 

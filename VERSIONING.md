@@ -137,4 +137,7 @@ No GHCR credentials may be committed to Git or embedded in the Docker image.
 
 | Date | Commit | Digest | CD run | Approver(s) | Revision | Result |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-05 (before NV-09) | `c6518862788407fe678c1a524ad4d4b764dc6a71` | `sha256:15f196af9c32fc843cf1723b4615f896668b0368b292e1246807ab0d03194775` | manual (`u2-ghcr-publish.yml`) | — | — | Running in Azure (M-BE-036) |
+| 2026-11-05 (before NV-09) | `c6518862788407fe678c1a524ad4d4b764dc6a71` | `sha256:15f196af9c32fc843cf1723b4615f896668b0368b292e1246807ab0d03194775` | manual (`u2-ghcr-publish.yml`) | — | — | Replaced on 2026-11-06 |
+| 2026-11-06 | `84c526e` | `sha256:57f3a640…` | [42174853458](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42174853458) | vicmanujo | — | FAILED before deploy (OIDC subject); production unchanged |
+| 2026-11-06 | `ddc552a` | `sha256:33402d6303ec…` | [42178536348](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42178536348) | vicmanujo | `ca-thehouse-u2--cddc552a-2-1` | Rolled back by a workflow bug (health step); restored `sha256:15f196af…` |
+| 2026-11-06 | `d1bbbeacfe1207f4c86736e5ed4bc6abe1fe43b6` | `sha256:caa6f417eef39a75ba5fe180cf082b95b501e0ea1cacdb98f69bddbc92db061e` | [42180858665](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42180858665) | vicmanujo | `ca-thehouse-u2--cd1bbbea-3-1` | PASS — running in Azure |
