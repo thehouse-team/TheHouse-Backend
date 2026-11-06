@@ -12,7 +12,7 @@
 | Spec | `spec.md` 1.0.0-u2 |
 | Plan | `plan.md` 1.0.0-u2 |
 | Tasks totales | 19 |
-| Tasks completadas | 1 |
+| Tasks completadas | 2 |
 
 ## Reglas de esta lista
 
@@ -27,7 +27,7 @@
 
 - [x] **T01 · Identidad federada con rol mínimo** — Requisito: NV-09-R07 · Fase: F1 · Aceptación: `cd_identity.tf` con identidad administrada, credencial federada para `repo:thehouse-team/TheHouse-Backend:environment:production` y rol con alcance a `ca-thehouse-u2` (integrado si alcanza, personalizado si no); sin client secret; plan revisado y `apply` con «OK PARA APPLY». · Evidencia: plan, inventario y definición del rol. · Depende de: autorización «EJECUTA».
 - [ ] **T02 · Imagen fuera del control de Terraform** — Requisito: NV-09-R09 · Fase: F1 · Aceptación: `template[0].container[0].image` en `ignore_changes`; `var.image` conserva la validación de digest; `terraform plan` sin cambios después de un despliegue del CD. · Evidencia: diff y salida del plan. · Depende de: «OK PARA APPLY».
-- [ ] **T03 · Environment `production`** — Requisito: NV-09-R08 · Fase: F1 · Aceptación: guía paso a paso; Environment con revisores Victor e Isai, "Prevent self-review", solo rama `main` y variables `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` y `AZURE_SUBSCRIPTION_ID`; verificado con la API de GitHub. · Evidencia: guía y respuesta de la API. · Depende de: T01 (para los valores de las variables).
+- [x] **T03 · Environment `production`** — Requisito: NV-09-R08 · Fase: F1 · Aceptación: guía paso a paso; Environment con revisores Victor e Isai, "Prevent self-review", solo rama `main` y variables `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` y `AZURE_SUBSCRIPTION_ID`; verificado con la API de GitHub. · Evidencia: guía y respuesta de la API. · Depende de: T01 (para los valores de las variables).
 
 ## F2 — Publicación y cadena de suministro
 
@@ -66,7 +66,7 @@
 | --- | --- | --- | --- |
 | T01 | R07 | F1 | COMPLETADA |
 | T02 | R09 | F1 | ABIERTA |
-| T03 | R08 | F1 | ABIERTA |
+| T03 | R08 | F1 | COMPLETADA |
 | T04 | R01 | F2 | ABIERTA |
 | T05 | R02 | F2 | ABIERTA |
 | T06 | R03 | F2 | ABIERTA |
@@ -111,8 +111,8 @@
 | --- | --- |
 | Requisitos | 16 |
 | Tasks | 19 |
-| Tasks abiertas | 18 |
-| Tasks completadas | 1 |
+| Tasks abiertas | 17 |
+| Tasks completadas | 2 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |

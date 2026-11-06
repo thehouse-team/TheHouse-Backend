@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Autorización | «EJECUTA NV-09 1.0.0-u2, tasks T01–T14» — Victor Manuel Jose Jose, 2026-11-05 (M-BE-051) |
 | Rama | `feat/nv-09-cd` |
-| Resultado | **🟡 EN EJECUCIÓN**: código listo y verificación efímera en verde; T01 aplicada; pendientes Environment `production` (T03) y el primer run real de `cd.yml` en `main` |
+| Resultado | **🟡 EN EJECUCIÓN**: código listo y verificación efímera en verde; T01 y T03 completadas; pendiente el primer run real de `cd.yml` en `main` |
 
 Esta evidencia no incluye valores de secretos, cadenas de conexión, llaves ni identificadores de suscripción. No se leyeron ni mostraron `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -74,6 +74,20 @@ Plan: 5 to add, 0 to change, 0 to destroy.
   - Acciones del rol: las 8 listadas en `cd_identity.tf`; sin `delete` ni `listSecrets`.
 - T01 completada. T02 queda abierta hasta repetir el `plan` sin cambios después del primer despliegue del CD.
 
+## 3.1 T03 — Environment `production` (verificado con la API de GitHub, 2026-11-06)
+
+Configurado por Victor en la interfaz de GitHub; consulta `gh api repos/thehouse-team/TheHouse-Backend/environments/production`.
+
+| Campo | Valor verificado |
+| --- | --- |
+| `required_reviewers` | `IsaiAxel` y `vicmanujo` |
+| `prevent_self_review` | `true` |
+| `can_admins_bypass` | `false` |
+| Política de ramas | personalizada: solo `main` |
+| Variables | `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` (identificadores, no secretos; coinciden con los outputs `cd_azure_*` de Terraform) |
+
+La primera verificación encontró el Environment sin revisores y con bypass de administradores; Victor lo corrigió y la segunda verificación pasó.
+
 ## 4. Validación local (2026-11-05)
 
 - YAML de `cd.yml` válido; todas las acciones fijadas por SHA de 40 caracteres.
@@ -133,7 +147,7 @@ Límite del escaneo: los límites por endpoint de propiedades y universidades (6
 | --- | --- | --- |
 | T01 | ✅ Completada | — |
 | T02 | Aplicada | `plan` sin cambios después del primer despliegue del CD |
-| T03 | Guía pendiente | Valores de `cd_azure_*` (salen del apply) y configuración humana |
+| T03 | ✅ Completada | — |
 | T04–T07 | Implementadas | Primer run real de `cd.yml` en `main` |
 | T08 | Implementada | Integración del pull request |
 | T09, T10 | Verificadas con imagen local | Run real con el digest publicado |
