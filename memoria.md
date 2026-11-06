@@ -472,3 +472,23 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** MongoDB 8.0+ no arranca en los runners de GitHub con kernel Linux ≥ 6.19 (tcmalloc/rseq; SERVER-121912 cerrado, SERVER-125742 abierto). Verificado en el run 42170097726.
 - **Impacto:** producción sigue en Atlas 8.0. Las consultas de la API son compatibles con 7.0; se vuelve a 8.x cuando MongoDB publique la corrección.
 
+## M-BE-054 — Roadmap funcional reemitido como specs NV-10 a NV-25
+
+- **ID:** M-BE-054
+- **Decisión:** sustituir la tabla de M-BE-023 (cuyo NV-09 pasó a ser la CD, M-BE-049) por 16 specs funcionales en borrador que cubren todos los RF de `Requerimientos_TheHouse_v2`: NV-10 Sesión y cuenta, NV-11 Perfil y preferencias, NV-12 Arrendador, edificios y cuartos, NV-13 Fotografías y documentos, NV-14 Búsqueda y mapa, NV-15 Favoritos y comparación, NV-16 Contacto, solicitudes y chat, NV-17 Visitas, NV-18 Cierre de trato con QR y renta, NV-19 Reseñas, NV-20 Notificaciones, NV-21 Verificación y moderación, NV-22 Compañeros de vivienda, NV-23 Smart Match ML, NV-24 Smart Match IA generativa y NV-25 Métricas. El índice `specs/README.md` muestra el mapa y la cobertura RF → spec.
+- **Estado:** PROPUESTO — cada spec está en `1.0.0-borrador` y requiere aprobación documental y «EJECUTA» propios.
+- **Fecha:** 2026-11-06.
+- **Aprobador:** pendiente (Victor Manuel Jose Jose).
+- **Justificación:** observación del profesor del 2026-11-05 ("faltan specs para todo el proyecto, no solo los 7 endpoints").
+- **Impacto:** RF-67, RF-69 y RF-74 son solo del cliente móvil; RF-70 (SMS) queda BLOCKED por COST-001. Decisiones abiertas que bloquean tasks: proveedor de correo (NV-10), almacenamiento y cifrado de archivos (NV-13), migración de NV-07 y detalle con sesión (NV-12/NV-14), asignación de roles (NV-21), enfoque de modelo (NV-23) y proveedor de IA generativa (NV-24).
+
+## M-BE-055 — Auditoría SDD de las specs NV-01 a NV-09
+
+- **ID:** M-BE-055
+- **Decisión:** corregir solo documentación: estados de spec/plan alineados con `task.md`, conteos de tasks completadas, referencias obsoletas a NV-02 bloqueada, trazabilidad bidireccional (NV-03, NV-07, NV-08) y requerimientos de origen RF/RNF en cada spec. Las `evidence.md` no se modifican porque son registros fechados.
+- **Estado:** APLICADO EN BORRADOR — pendiente de revisión de Victor en el pull request.
+- **Fecha:** 2026-11-06.
+- **Aprobador:** pendiente (Victor Manuel Jose Jose).
+- **Justificación:** las inconsistencias de estado y trazabilidad contradicen la regla de un solo estado por spec y dificultan la revisión del profesor.
+- **Impacto:** sin cambios de código ni de infraestructura. Hallazgos y correcciones en `specs/README.md` §5. Queda registrada la contradicción RF-24 (detalle con sesión) frente a NV-07 (detalle público) como decisión PENDIENTE en NV-14.
+
