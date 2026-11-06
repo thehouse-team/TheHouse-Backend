@@ -8,8 +8,9 @@
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
+| Requerimientos de origen | RF-03 (`Requerimientos_TheHouse_v2`) |
 | Plan | `plan.md` 1.0.0-u2 |
 | Tasks | `task.md` 1.0.0-u2 |
 | Precondición | NV-05 U2 y NV-01 U2 para el contrato; NV-03 U2 para la verificación desplegada; M-BE-027; M-BE-029 |
@@ -166,7 +167,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 - NV-05 U2 para JWT y `jti`.
 - NV-03 U2 para Redis y HTTPS.
 - NV-01 U2 para Problem Details y configuración.
-- NV-02 permanece **⛔ NO EJECUTAR**.
+- NV-02 (CI) quedó completada el 2026-11-05 y la CD se especifica en NV-09 (M-BE-049).
 
 ## 14. Trazabilidad y cobertura
 
@@ -178,9 +179,9 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Tasks U2 | 10 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 10 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** |
 
 ## 15. Aprobación documental y ejecución
 

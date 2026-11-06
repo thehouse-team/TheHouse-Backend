@@ -8,7 +8,7 @@
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** |
 | Spec | `spec.md` 1.0.0-u2 |
 | Tasks | `task.md` 1.0.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -189,4 +189,4 @@ Login no requiere servicios pagos. MongoDB/Redis deben caber en COST-001 según 
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, build, tests, Docker, Terraform ni despliegue. Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B**.
+Este plan no autoriza código, paquetes, build, tests, Docker, Terraform ni despliegue. Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2**.

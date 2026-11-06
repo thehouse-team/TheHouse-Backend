@@ -179,7 +179,7 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Tasks | 15 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 15 |
 | Estado documental | **✅ APROBADA** |
 | Estado de ejecución | **✅ COMPLETADA — PASS WITH WARNINGS** |
 

@@ -8,8 +8,9 @@
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
+| Requerimientos de origen | RNF-01, RNF-05, RNF-06, RNF-08, RNF-10 (transversales) (`Requerimientos_TheHouse_v2`) |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
 | Precondición | Bootstrap técnico existente (M-BE-001); M-BE-027; M-BE-028 |
@@ -161,7 +162,7 @@ La evidencia futura debe incluir comando reproducible, versión, resultado y art
 - NV-04 a NV-08 aprobadas documentalmente para U2.
 - NV-03 aprobada documentalmente para U2.
 - Autorización humana de Fase B para ejecutar las tasks U2.
-- NV-02 permanece **⛔ NO EJECUTAR**; su aprobación es independiente.
+- NV-02 (CI) quedó completada el 2026-11-05 y la CD se especifica en NV-09 (M-BE-049).
 
 ## 13. Trazabilidad y cobertura
 
@@ -174,9 +175,9 @@ La evidencia futura debe incluir comando reproducible, versión, resultado y art
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 17 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
 
 Cada fila de la tabla del apartado 6 enlaza un requisito con una fase principal y una o más tasks. El detalle de aceptación y evidencia por task está en `task.md`; la secuencia y las puertas están en `plan.md`. R13/T13 se conserva como trabajo futuro y **no forma parte de U2**; por eso no bloquea el cierre de las tasks U2.
 

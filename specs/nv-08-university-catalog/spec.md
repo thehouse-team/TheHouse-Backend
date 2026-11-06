@@ -8,8 +8,9 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
+| Requerimientos de origen | RF-07 (parcial: catálogo; búsqueda y selección en NV-11) (`Requerimientos_TheHouse_v2`) |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
 | Precondición | NV-01 U2 para el contrato; NV-03 U2 para la verificación desplegada; M-BE-027; M-BE-029 |
@@ -209,7 +210,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-08-R04 | Seed idempotente | Tres registros definidos; upsert por `code`; ejecutar dos veces no duplica; sin datos personales; origen y validación en `evidence.md`. | F2 | T04, T08, T09, T10 |
 | NV-08-R05 | Acceso MongoDB e índices | Proyección explícita, índice único `{code:1}`, orden `{name:1,_id:1}` y sin N+1. | F2 | T03, T05, T06, T09 |
 | NV-08-R06 | Problem Details y límites | 400/404/429/503/500 usan Problem Details; rate limit 60/60 s por IP en Redis; fallo de Redis 503. | F3 | T05, T06, T07, T09 |
-| NV-08-R07 | Pruebas y evidencia | Unitarias, integración y seguridad; evidencia del seed y de los endpoints. | F4 | T10, T11 |
+| NV-08-R07 | Pruebas y evidencia | Unitarias, integración y seguridad; evidencia del seed y de los endpoints. | F4 | T10, T11, T13 |
 | NV-08-R08 | Caché HTTP condicional | GET 200 de listado y detalle devuelven `ETag` débil por contenido y `Cache-Control: public, max-age=60`; `If-None-Match` coincidente devuelve 304 sin cuerpo; los errores mantienen `no-store` sin `ETag`; no se cachean respuestas autenticadas. | F3 | T12, T13 |
 
 ## 11. Testing
@@ -237,7 +238,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 - NV-01 U2 para Problem Details, validación y paginación.
 - NV-03 U2 para MongoDB, Redis, HTTPS y despliegue.
 - NV-07 comparte convenciones de paginación, pero es independiente.
-- NV-02 permanece **⛔ NO EJECUTAR**.
+- NV-02 (CI) quedó completada el 2026-11-05 y la CD se especifica en NV-09 (M-BE-049).
 
 ## 14. Trazabilidad y cobertura
 
@@ -249,9 +250,9 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Tasks U2 | 13 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 11 |
+| Tasks completadas | 13 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA AUTORIZACIÓN DE FASE B** |
+| Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
 
 ## 15. Aprobación documental y ejecución
 
