@@ -8,7 +8,7 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-06 («Apruebo y EJECUTA»: NV-10 1.1.0, tasks T01–T11, rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/` y `specs/nv-10-account-session/`) |
-| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
+| Estado de ejecución | **✅ COMPLETADA — DESPLEGADA EN AZURE (revisión `c55feed2-7-1`) Y VERIFICADA 13/13 (2026-11-06)** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-02 (sesión persistente sin volver a iniciar sesión); requisito académico U2 (refresh y `/users/me`). RF-01, RF-04, RF-36 y RF-71 se cubrirán en la versión posterior de NV-10 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-09 |
@@ -195,9 +195,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 10 |
+| Tasks completadas | 11 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
+| Estado de ejecución | **✅ COMPLETADA — DESPLEGADA EN AZURE (revisión `c55feed2-7-1`) Y VERIFICADA 13/13 (2026-11-06)** |
 
 ## 18. Aprobación y ejecución
 
