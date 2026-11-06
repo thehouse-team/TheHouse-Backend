@@ -1,16 +1,26 @@
 # TheHouse Backend — Constitution
 
-Versión: 1.0.0. Autoridad: máxima norma del Backend dentro de las instrucciones humanas y políticas del entorno. Alcance de esta entrega: documentación SDD, sin implementación.
+| Campo | Valor |
+| --- | --- |
+| Versión | 1.1.0 |
+| Fecha | 2026-11-06 |
+| Estado | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** (mientras no se apruebe, rige la versión 1.0.0 del historial de Git) |
+| Aprobación humana | Pendiente (Victor Manuel Jose Jose, responsable del backend, M-BE-040) |
+| Decisión | M-BE-057 |
+
+Autoridad: máxima norma del Backend dentro de las instrucciones humanas y políticas del entorno.
+
+**Cambios 1.1.0 (2026-11-06):** la versión 1.0.0 describía la fase inicial solo documental. Esta versión conserva todas las reglas de fondo (SDD, COST-001, seguridad, Clean Architecture, monolito modular) y actualiza lo que quedó desfasado tras ejecutar NV-01 a NV-09: estado de la solución, proveedor cloud seleccionado, CI/CD vigente, protocolo de autorizaciones y flujo de Git. Detalle en `specs/README.md` §6.2 y en M-BE-056/M-BE-057.
 
 ## 1. Propósito
 
 Gobernar un backend académico seguro, verificable, mantenible y escalable para TheHouse. Las decisiones deben ser trazables y diferenciar lo existente, lo aprobado como dirección y lo pendiente de implementar.
 
-## 2. Alcance y precondiciones técnicas
+## 2. Alcance y estado técnico
 
-La solución `TheHouse.slnx` y sus siete proyectos ya existen y su bootstrap está terminado. La compilación de referencia fue correcta, con 0 errores y 0 advertencias; no se vuelve a ejecutar durante esta entrega documental.
+La solución `TheHouse.slnx` y sus siete proyectos existen. Con autorización humana se implementaron y verificaron NV-01 (fundamentos), NV-04 a NV-08 (registro, login, logout, propiedades y universidades) y la infraestructura de NV-03; la CI (NV-02) y la CD (NV-09) están operativas y el backend corre en Azure. El estado vigente de cada spec vive en su `task.md` y se resume en `specs/README.md`.
 
-Quedan protegidos `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/`, la solución, todos los `.csproj`, `Program.cs`, `appsettings*.json`, `Controllers/` y `Properties/`. No se recrean, renombran, mueven ni cambian sus referencias. Una futura implementación requerirá levantar explícitamente la restricción aplicable mediante autorización humana de alcance preciso.
+Quedan protegidos `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/`, la solución, todos los `.csproj`, `Program.cs`, `appsettings*.json`, `Controllers/` y `Properties/`. Solo se modifican cuando una autorización «EJECUTA» incluye esas rutas de forma explícita. No se recrean, renombran ni mueven proyectos, y agregar proyectos o paquetes requiere que la autorización lo nombre.
 
 ## 3. SDD obligatorio — SDD-001
 
@@ -22,19 +32,19 @@ La preparación de estos documentos no equivale a aprobarlos ni a ejecutarlos. C
 
 > Cada incremento funcional o arquitectónico relevante deberá tener una spec independiente.
 
-Cada carpeta contiene `spec.md`, `plan.md` y `task.md`. La cadena obligatoria es Requirement → Plan Phase → Task → evidencia. No existen requisitos sin tasks ni tasks sin requisito. Las dependencias entre specs se declaran; no otorgan autorización transitiva. NV-01, NV-02 y NV-03 están en borrador y en estado **⛔ NO EJECUTAR**.
+Cada carpeta contiene `spec.md`, `plan.md` y `task.md`, y `evidence.md` cuando hay ejecución. La cadena obligatoria es Requerimiento de origen (RF/RNF) → Requirement → Plan Phase → Task → evidencia. No existen requisitos sin tasks ni tasks sin requisito, y la trazabilidad es bidireccional. Las dependencias entre specs se declaran; no otorgan autorización transitiva. Los tres documentos de una spec muestran el mismo estado. El índice `specs/README.md` mantiene el mapa de specs y la cobertura de requerimientos.
 
 ## 5. Clean Architecture
 
-Domain contiene reglas de negocio puras; Application coordina casos de uso y define puertos; Infrastructure implementa adaptadores; TheHouse aloja ASP.NET Core, HTTP y el composition root. No se filtran tipos HTTP, BSON, Redis ni detalles de proveedores a Domain. Los DTO de transporte no sustituyen modelos de dominio.
+Domain contiene reglas de negocio puras; Application coordina casos de uso y define puertos; Infrastructure implementa adaptadores; TheHouse aloja ASP.NET Core, HTTP y el composition root. No se filtran tipos HTTP, BSON, Redis, librerías de ML ni detalles de proveedores a Domain. Los DTO de transporte no sustituyen modelos de dominio.
 
 ## 6. Modular Monolith
 
-Se adopta un monolito modular, no microservicios. Los módulos futuros tendrán propiedad explícita sobre sus casos de uso y datos, comunicación por contratos y ausencia de dependencias circulares. No se crean entidades o módulos funcionales en esta entrega.
+Se adopta un monolito modular, no microservicios. Cada módulo tiene propiedad exclusiva sobre sus casos de uso y sus colecciones; otros módulos solo acceden mediante contratos (puertos de Application) o eventos de dominio en proceso, idempotentes y sin dependencias circulares. Separar un módulo en un servicio desplegable aparte requiere reformar esta sección con revisión humana.
 
 ## 7. Dependency Rule y arquitectura actual
 
-Las referencias internas actuales, que no deben modificarse, son:
+Las referencias internas actuales son:
 
 ```text
 TheHouse
@@ -52,126 +62,137 @@ TheHouse.Domain
 └── ninguna dependencia interna
 ```
 
-La referencia del host a Infrastructure existe para composición, no para colocar lógica de negocio en controllers. Las dependencias apuntan hacia el interior; Domain no referencia Application, Infrastructure o la API.
+La referencia del host a Infrastructure existe para composición, no para colocar lógica de negocio en endpoints. Las dependencias apuntan hacia el interior; Domain no referencia Application, Infrastructure o la API. Cambiar estas referencias requiere autorización explícita.
 
 ## 8. REST y JSON
 
-Contratos HTTP orientados a recursos, semántica REST, JSON, métodos y códigos de estado coherentes. Validación, paginación, idempotencia de operaciones que lo requieran y errores Problem Details deben quedar especificados antes del código. No se inventan endpoints funcionales durante el gobierno inicial.
+Contratos HTTP orientados a recursos, semántica REST, JSON, métodos y códigos de estado coherentes. Validación, paginación, idempotencia de operaciones que lo requieran y errores Problem Details en español deben quedar especificados en la spec antes del código. No se inventan endpoints fuera de una spec aprobada.
 
 ## 9. OpenAPI
 
-Cada operación futura deberá tener contrato OpenAPI coherente con la implementación: versión, esquemas, errores, autenticación y ejemplos sin datos sensibles. Los cambios incompatibles necesitan una estrategia explícita de evolución y comprobación contractual. NV-01 define la base; NV-02 planifica su verificación.
+Cada operación debe tener contrato OpenAPI coherente con la implementación: versión, esquemas, errores, autenticación y ejemplos sin datos sensibles. El documento se expone solo en `Development` y `Testing`. Los cambios incompatibles necesitan una estrategia explícita de evolución y deprecación.
 
 ## 10. HTTPS y TLS
 
-Todo acceso público requiere HTTPS con certificados válidos. HSTS, terminación TLS, renovación y confianza en cabeceras de proxy se decidirán y probarán. No se desactiva la validación de certificados ni se confía en proxies arbitrarios. La conexión a MongoDB y Redis debe protegerse conforme al entorno aprobado.
+Todo acceso público requiere HTTPS con certificados válidos y HSTS; en Azure Container Apps el TLS termina en el ingress administrado y solo se confía en sus cabeceras reenviadas. No se desactiva la validación de certificados ni se confía en proxies arbitrarios. Las conexiones a MongoDB y Redis usan TLS.
 
 ## 11. MongoDB
 
-MongoDB es la persistencia aprobada y `MongoDB.Driver` el driver previsto. Sus detalles pertenecen a Infrastructure; conexiones reutilizables, límites, cancelación y timeouts deben diseñarse antes de implementarse. No existe autorización para instalarlo, conectarlo o crear repositorios ahora.
+MongoDB es la persistencia aprobada, con `MongoDB.Driver` en Infrastructure y MongoDB Atlas M0 como servicio (M-BE-035). Conexiones reutilizables, límites, cancelación y timeouts se definen en la spec antes de implementarse.
 
 ## 12. NoSQL
 
-El modelo documental se diseña a partir de patrones de acceso, límites de agregados, consistencia, índices y crecimiento de documentos. Embedding, referencias, índices únicos/TTL y atomicidad necesitan justificación. SQL Server y EF Core de los repositorios de referencia no se adoptan por imitación.
+El modelo documental se diseña a partir de patrones de acceso, límites de agregados, consistencia, índices y crecimiento de documentos. Embedding, referencias, índices únicos/TTL, transacciones y atomicidad necesitan justificación. SQL Server y EF Core no se adoptan por imitación.
 
 ## 13. Redis distribuido
 
-Redis es el estado compartido previsto para caché distribuida y, cuando exista una spec de autenticación, controles distribuidos que correspondan. Claves con namespace, TTL, invalidación, atomicidad y comportamiento ante fallos son obligatorios. Redis no sustituye automáticamente la fuente de verdad persistente.
+Redis es el estado compartido para caché distribuida y controles de seguridad distribuidos (rate limit, revocación de tokens), con Upstash como servicio (M-BE-034). Claves con namespace, TTL, invalidación, atomicidad y comportamiento ante fallos son obligatorios; ante fallo de Redis, los controles de seguridad fallan cerrados. Redis no sustituye la fuente de verdad persistente.
 
 ## 14. Stateless
 
-Ninguna instancia de API debe ser propietaria exclusiva de sesiones, revocación de tokens, bloqueos de acceso u otro estado necesario para la corrección. Stateless no significa ausencia de estado: el estado necesario reside en servicios compartidos. No se permite fallback local de seguridad que produzca decisiones distintas entre réplicas.
+Ninguna instancia de API debe ser propietaria exclusiva de sesiones, revocación de tokens, bloqueos de acceso u otro estado necesario para la corrección. Stateless no significa ausencia de estado: el estado necesario reside en servicios compartidos. No se permite fallback local de seguridad que produzca decisiones distintas entre réplicas, ni tareas programadas que se ejecuten una vez por instancia.
 
 ## 15. Mínimo dos instancias
 
-La arquitectura objetivo debe demostrar funcionamiento con al menos dos instancias de la misma API. Reiniciar o reemplazar una instancia no puede perder estado de negocio ni eludir controles de seguridad. La existencia actual de una solución no constituye evidencia de escalado.
+La arquitectura debe demostrar funcionamiento con al menos dos instancias de la misma API. Reiniciar o reemplazar una instancia no puede perder estado de negocio ni eludir controles de seguridad. La operación normal puede escalar a cero para cumplir COST-001; la demostración con dos réplicas se hace en una ventana controlada (M-BE-039).
 
 ## 16. Load Balancer
 
-Un balanceador distribuirá tráfico a las instancias con health checks y retirada de instancias no listas. No se aceptan sticky sessions como solución al estado local. Deben probarse cabeceras reenviadas, IP del cliente, distribución y fallos.
+Un balanceador distribuye tráfico a las instancias con health checks y retirada de instancias no listas; en Azure lo provee el ingress de Container Apps. No se aceptan sticky sessions como solución al estado local. Deben probarse cabeceras reenviadas, IP del cliente, distribución y fallos.
 
 ## 17. COST-001 — costo obligatorio $0
 
 > El costo obligatorio del entorno académico deberá permanecer en $0.
 
-**Todo recurso académico: Costo obligatorio = $0.** Aplica a cómputo, dos instancias, Load Balancer, TLS, red/egress, almacenamiento/CDN, Redis, conectividad MongoDB, observabilidad, CI/CD, registros y retención de artefactos. Un free tier, un crédito o una alerta de presupuesto no prueban costo cero ni constituyen un límite duro de gasto.
+**Todo recurso académico: Costo obligatorio = $0.** Aplica a cómputo, dos instancias, Load Balancer, TLS, red/egress, almacenamiento/CDN, Redis, conectividad MongoDB, observabilidad, CI/CD, registros, servicios externos (correo, IA, archivos) y retención de artefactos. Un free tier, un crédito o una alerta de presupuesto no prueban costo cero ni constituyen un límite duro de gasto.
 
-Antes de provisionar se exige evidencia vigente de elegibilidad, región, cuotas, duración, tarjeta, riesgo de cobro, destrucción y costo esperado total. Ante incertidumbre o imposibilidad de satisfacer simultáneamente $0 y dos instancias/balanceador, el resultado es **BLOCKED**: se presenta la incompatibilidad a revisión humana, sin rebajar el objetivo, contratar ni desplegar. La demostración local puede ser evidencia técnica, nunca una afirmación de despliegue cloud completado.
+Antes de provisionar o contratar se exige evidencia vigente de elegibilidad, región, cuotas, duración, tarjeta, riesgo de cobro, destrucción y costo esperado total. Ante incertidumbre o imposibilidad de satisfacer simultáneamente $0 y dos instancias/balanceador, el resultado es **BLOCKED**: se presenta la incompatibilidad a revisión humana, sin rebajar el objetivo, contratar ni desplegar.
 
 ## 18. Seguridad
 
-Aplicar mínimo privilegio, deny-by-default, validación de entrada, autorización por recurso, protección de datos y modelos de amenazas. Limitar cuerpos, tiempo de ejecución y exposición de diagnósticos. CORS y headers requieren políticas explícitas. No devolver trazas internas ni registrar contraseñas, tokens o cadenas de conexión.
+Aplicar mínimo privilegio, deny-by-default, validación de entrada, autorización por recurso (BOLA) y por función (BFLA), protección de datos y modelos de amenazas. Limitar cuerpos, tiempo de ejecución y exposición de diagnósticos. CORS y headers requieren políticas explícitas. No devolver trazas internas ni registrar contraseñas, tokens, cadenas de conexión ni datos personales innecesarios.
 
-## 19. JWT futuro
+## 19. JWT
 
-JWT es tecnología aprobada para una futura spec de Login, no una funcionalidad existente. Se deberán validar firma, algoritmo permitido, emisor, audiencia y expiración; definir rotación de claves, claims mínimos y pruebas negativas. No se fijan duraciones o algoritmos copiando ejemplos sin análisis.
+El access token es un JWT firmado (NV-05) con validación de firma, algoritmo permitido, emisor, audiencia y expiración, y claims mínimos. Duraciones, algoritmos y rotación de llaves se deciden en la spec con análisis y pruebas negativas, sin copiar ejemplos. La llave de firma vive solo en el almacén de secretos (§31).
 
 ## 20. Refresh Tokens
 
-La futura autenticación especificará tokens de refresco revocables, almacenamiento seguro mediante hash, rotación y detección de reutilización, expiración y protección contra concurrencia. El mecanismo de transporte y sus riesgos de CSRF/XSS se decidirán por contrato, sin implementarlos ahora.
+Los tokens de refresco deben ser revocables, almacenados solo como hash, con rotación, detección de reutilización, expiración y protección contra concurrencia. El transporte y sus riesgos de CSRF/XSS se deciden por contrato (spec NV-10).
 
 ## 21. Logout
 
-Una spec independiente definirá revocación de refresh tokens y semántica de invalidación de JWT de acceso, incluido su alcance entre instancias y tiempo efectivo. Eliminar un token del cliente no prueba revocación en servidor. El estado de seguridad debe compartirse y no degradarse a memoria local.
+La revocación del access token se comparte entre instancias en Redis (NV-06); cuando existan refresh tokens (NV-10), el logout revoca también su familia. Eliminar un token del cliente no prueba revocación en servidor. El estado de seguridad no se degrada a memoria local.
 
 ## 22. Rate Limiting
 
-Las políticas deberán distinguir endpoints, identidad/IP y límites globales de límites por instancia. Respuestas 429 y `Retry-After` se documentarán. Un limitador local no se presentará como cuota global bajo balanceo; la coordinación distribuida y el tratamiento de fallos se validarán en NV-03.
+Las políticas distinguen endpoints, identidad/IP y límites globales, coordinadas en Redis (M-BE-033). Respuestas 429 con `Retry-After`. Un limitador local no se presenta como cuota global bajo balanceo.
 
 ## 23. Caché
 
-Cache-aside será evaluado por caso de uso: claves versionadas, TTL explícito, invalidación tras cambios confirmados, prevención de stampede y ausencia de filtración entre usuarios. No cachear secretos ni respuestas privadas sin aislamiento y autorización. El fallback a MongoDB puede admitirse para datos no críticos, pero no para eludir controles de seguridad.
+Cache-aside y caché HTTP se evalúan por caso de uso: claves versionadas, TTL explícito, invalidación tras cambios confirmados, prevención de stampede y ausencia de filtración entre usuarios. La caché HTTP pública solo aplica a lecturas públicas (M-BE-046); las respuestas autenticadas son `private` o `no-store`. No cachear secretos ni respuestas privadas sin aislamiento y autorización.
 
 ## 24. Observabilidad
 
-OpenTelemetry es la tecnología prevista para trazas, métricas y correlación con logs estructurados. Definir correlation/trace IDs, latencia, errores, disponibilidad y dependencias; evitar PII y cardinalidad ilimitada. Retención y exportadores deben cumplir COST-001. Health checks no son sustitutos de telemetría ni deben exponer credenciales.
+OpenTelemetry es la tecnología prevista para trazas y métricas, con logs estructurados y correlation/trace IDs; los logs persistentes usan Log Analytics con tope diario (M-BE-047). Evitar PII y cardinalidad ilimitada. Retención y exportadores deben cumplir COST-001. Health checks no sustituyen telemetría ni exponen credenciales.
 
 ## 25. Testing
 
-`TheHouse.UnitTests` verifica reglas de Domain/Application de forma aislada; `TheHouse.IntegrationTests` verificará composición, HTTP y adaptadores; `TheHouse.SecurityTests` verificará abuso, autorización y controles defensivos. xUnit ya está referenciado; la prueba unitaria actual es un placeholder, no cobertura funcional.
+`TheHouse.UnitTests` verifica reglas de Domain/Application; `TheHouse.IntegrationTests`, composición, HTTP y adaptadores en el entorno `Testing` (M-BE-042); `TheHouse.SecurityTests`, abuso, autorización y controles defensivos.
 
-Se planifican WebApplicationFactory, Mutation Testing con Stryker.NET, Contract Testing con PactNet, Performance Testing con NBomber, DAST con OWASP ZAP y REST Fuzzing con RESTler. Son herramientas previstas, no instaladas por esta entrega. Ninguna suite vacía representa un control satisfecho.
+Herramientas en uso: Stryker.NET (mutación, NV-02), OWASP ZAP (DAST, NV-09). Previstas: Contract Testing con PactNet, Performance con NBomber (sujeto a su licencia) y REST Fuzzing con RESTler. Ninguna suite vacía o no ejecutada representa un control satisfecho.
 
 ## 26. DevSecOps
 
-Se prevén SAST (Semgrep, SonarCloud/SonarAnalyzer), SCA (NuGet vulnerability scanning), SBOM (CycloneDX), imágenes (Trivy, Dockle), firma (Cosign), DAST y fuzzing. Findings y excepciones tendrán severidad, responsable, vencimiento y evidencia. Un fallo del scanner o un control obligatorio no ejecutado no equivale a PASS.
+La CI (NV-02) ejecuta SAST (Semgrep), SCA (NuGet), SBOM (CycloneDX), secretos (Gitleaks), imágenes (Trivy, Dockle) y validación de Terraform; la CD (NV-09) firma imágenes con Cosign y ejecuta DAST. Findings y excepciones tienen severidad, responsable, vencimiento y evidencia. Un fallo del scanner o un control obligatorio no ejecutado no equivale a PASS.
 
-Referencias metodológicas consultadas solo en lectura: [WebAPIDevSecOps](https://github.com/edelomeza/WebAPIDevSecOps) y [WebAPIDevSecOpsScalling](https://github.com/edelomeza/WebAPIDevSecOpsScalling). No se clona ni copia su código; sus umbrales, SQL Server, servicios adicionales o fallbacks no son decisiones de TheHouse.
+Referencias metodológicas consultadas solo en lectura: [WebAPIDevSecOps](https://github.com/edelomeza/WebAPIDevSecOps) y [WebAPIDevSecOpsScalling](https://github.com/edelomeza/WebAPIDevSecOpsScalling). No se clona ni copia su código.
 
 ## 27. CI/CD
 
-GitHub Actions es la plataforma prevista. La futura cadena será verificable: build y testing, SAST/SCA, SBOM, contrato/mutación/performance según alcance, imagen/escaneo/firma y DAST/fuzzing en entornos aislados. Gates, permisos mínimos, dependencias fijadas y evidencias preceden cualquier despliegue. No crear workflows ni activar pipelines en esta entrega.
+GitHub Actions es la plataforma. Todo cambio llega a `main` por pull request con los checks obligatorios de la CI y una aprobación humana (ruleset de `main`). La CD publica la imagen por digest, la firma, la verifica en un entorno efímero y solo despliega con aprobación en el Environment `production`, con rollback automático. Acciones fijadas por SHA, permisos mínimos y sin secretos de larga duración (OIDC).
 
 ## 28. Docker
 
-La contenerización futura deberá usar imágenes mínimas, usuario no root, versiones/digests controlados, ausencia de secretos, límites y escaneo. Se verificará el costo de licencias y del registro. No crear Dockerfile, compose ni imágenes ahora.
+Imágenes mínimas, usuario no root, versiones y digests controlados, parches del sistema operativo aplicados, ausencia de secretos, límites y escaneo. Se verifica el costo de licencias y del registro.
 
 ## 29. Terraform
 
-La infraestructura futura se describirá declarativamente y separará plan, aplicación y destrucción con aprobaciones. Estado y credenciales no se versionan ni exponen. Destruir recursos requiere alcance e inventario autorizados; no se supone que todo recurso conlleve limpieza automática ni que `destroy` elimine recursos externos.
+La infraestructura se describe en `infra/terraform/` y separa plan, aplicación y destrucción. `terraform apply` requiere la confirmación humana «OK PARA APPLY» sobre un plan revisado; `destroy`, una autorización aparte con inventario. El estado y los valores de variables no se versionan ni se exponen. Secretos y variables de ejecución de la aplicación se administran fuera de Terraform (M-BE-038).
 
-## 30. AWS / Azure / Google Cloud
+## 30. Proveedores cloud y servicios externos
 
-Son los únicos proveedores cloud permitidos. **Ninguno está seleccionado.** NV-03 debe comparar compute, dos instancias, Load Balancer, HTTPS, container hosting, observabilidad, storage/CDN, Redis, conectividad MongoDB, Terraform, tarjeta, riesgo y costo esperado. Los servicios concretos y tarifas quedan pendientes de evidencia vigente y revisión humana.
+AWS, Azure y Google Cloud son los únicos proveedores cloud permitidos. **Azure es el proveedor seleccionado** para cómputo e infraestructura (M-BE-028): Container Apps, Log Analytics e identidad administrada. Un servicio gestionado de terceros (por ejemplo MongoDB Atlas o Upstash) solo se usa con una decisión M-BE aprobada que justifique la excepción y demuestre COST-001 (precedentes: M-BE-034 y M-BE-035).
 
 ## 31. Gestión de secretos
 
-Usar variables de entorno, almacenes de secretos u otros mecanismos aprobados con costo $0 y mínimo privilegio. En documentación solo placeholders. Nunca escribir credenciales en specs, repositorio, logs, imágenes o estado Terraform expuesto. Una filtración exige revocación/rotación y revisión; borrarla del último archivo no basta.
+Secretos de la aplicación como secretos de Container Apps (M-BE-038); GitHub Actions usa OIDC y `GITHUB_TOKEN` sin secretos de larga duración. En documentación solo placeholders. Nunca escribir credenciales en specs, repositorio, logs, imágenes o estado Terraform expuesto. Una filtración exige revocación/rotación y revisión; borrarla del último archivo no basta.
 
 ## 32. Versionamiento
 
-Documentos y entregas usarán versiones identificables; los contratos API tendrán estrategia de versión y deprecación definida en NV-01. Cambios incompatibles requieren nueva aprobación. Versionar contrato, imagen e infraestructura de forma trazable sin asumir que una aprobación cubre revisiones futuras.
+Documentos y entregas usan versiones identificables; los contratos API tienen estrategia de versión y deprecación (NV-01). Cambios incompatibles requieren nueva aprobación. Contrato, imagen (digest) e infraestructura se versionan de forma trazable; `VERSIONING.md` registra cada despliegue.
 
-## 33. Git Flow
+## 33. Flujo de Git
 
-Convención futura: `main` estable, `develop` de integración, `feature/<spec>-<descripcion>`, `release/<version>` y `hotfix/<descripcion>`. PR con trazabilidad y revisión humana antes de integrar. Esta convención no autoriza crear ramas, inicializar Git, hacer commit o push; no se realiza ninguna de esas acciones en esta entrega.
+`main` es la rama estable y protegida: sin push directo, sin force push ni borrado. El trabajo se hace en ramas cortas (`feat/`, `fix/`, `docs/` + spec o tema) que llegan a `main` por pull request con trazabilidad a la spec, los checks obligatorios y la aprobación de otra persona. Los agentes solo hacen commit o push cuando un humano lo pide, nunca reescriben historial publicado y no mezclan pull requests por iniciativa propia.
 
 ## 34. Reglas para agentes
 
 Orden normativo: constitution → AGENTS → memoria → spec activa → plan activo → task activo. Las skills y perfiles no alteran ese orden. Antes de implementar, todo agente identifica SPEC ACTIVA, PLAN ACTIVO, TASK ACTIVO y ESTADO AUTORIZADO. Sin autorización verificable: **BLOCKED**. PASS del guardian es revisión de cumplimiento, no permiso humano. No inventar evidencia, aprobación, métricas o costos.
 
+Autorizaciones humanas reconocidas, cada una independiente:
+
+| Frase | Autoriza |
+| --- | --- |
+| «EJECUTA» + spec, versión, tasks y rutas | Implementar solo esas tasks en esas rutas |
+| «OK PARA APPLY» | Aplicar un plan de Terraform ya revisado |
+| Aprobación en el Environment `production` | Un despliegue concreto de la CD |
+| Autorización explícita de seed en Production | Una carga de datos con `--allow-production-seed` (M-BE-043) |
+
+Cambios en cuentas o configuración externa (suscripción, GitHub, proveedores) requieren permiso explícito para esa acción concreta.
+
 ## 35. Prohibiciones y cambios de gobierno
 
-En esta etapa solo se crean los artefactos SDD solicitados. Se prohíbe modificar código, proyectos, referencias, configuración de aplicación, crear entidades/controllers/endpoints/repositorios, implementar MongoDB/Redis/JWT, instalar paquetes, generar infraestructura, Dockerfile, Terraform o GitHub Actions, ejecutar specs o operaciones Git de escritura. No crear carpetas `src` o `tests` ni nuevas carpetas del roadmap funcional.
+Sin la autorización correspondiente se prohíbe: modificar rutas protegidas, crear endpoints, entidades o repositorios fuera de una spec aprobada, instalar paquetes, cambiar infraestructura, workflows o configuración de GitHub, desplegar, ejecutar seeds en producción y realizar operaciones Git de escritura sobre `main`. No crear carpetas `src` o `tests`; los proyectos nuevos solo con autorización que los nombre.
 
-No eliminar `UnitTest/` residual sin autorización humana. No clonar referencias, copiar código, seleccionar cloud ni asumir gratuidad. Cualquier cambio de constitución o excepción necesita revisión humana explícita, registro de decisión y análisis de impacto; no se relaja COST-001 de manera unilateral. Ante conflicto de alcance o ausencia de evidencia, detener la implementación.
+No eliminar `UnitTest/` residual sin autorización humana. No clonar referencias ni copiar código. Cualquier cambio de esta constitución o excepción necesita revisión humana explícita, registro de decisión y análisis de impacto; no se relaja COST-001 de manera unilateral. Ante conflicto de alcance o ausencia de evidencia, detener la implementación.

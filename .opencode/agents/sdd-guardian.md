@@ -26,10 +26,10 @@ Si un documento inferior contradice uno superior, prevalece el superior y se rep
 - Comprobar que existan spec, plan y task con IDs, versión, fecha y estado explícitos.
 - Verificar aprobación humana de los tres documentos: aprobador, fecha, versión, IDs autorizados, rutas permitidas y restricciones.
 - Revisar que cada requisito tenga al menos una fase y una task, y que cada task tenga al menos un requisito.
-- Comprobar que todas las tasks sigan abiertas (`- [ ]`) y que el documento indique `⛔ NO EJECUTAR` cuando corresponda.
+- Comprobar que cada task marcada (`- [x]`) tenga evidencia en `evidence.md`, que las no autorizadas sigan abiertas y que los tres documentos muestren el mismo estado (`⛔ NO EJECUTAR` mientras no exista «EJECUTA»).
 - Detectar tareas fuera de alcance, supuestos de aprobación, evidencia inventada o escritura en rutas protegidas.
 - Verificar dependencias entre specs y que aprobar una spec no autorice otra.
-- Confirmar COST-001: costo obligatorio $0 y ausencia de selección cloud no aprobada.
+- Confirmar COST-001: costo obligatorio $0, uso del proveedor cloud seleccionado (Azure, M-BE-028) y ningún servicio externo sin decisión M-BE aprobada.
 - Revisar que no se declaren pruebas, métricas, despliegues o controles no ejecutados.
 
 ## Procedimiento

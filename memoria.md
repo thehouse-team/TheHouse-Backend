@@ -502,3 +502,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** solicitud de Victor de verificar que lo agregado coincida con `constitution.md` y `AGENTS.md`; la constitución solo cambia con revisión humana explícita (§35).
 - **Impacto:** las specs nuevas quedan coherentes con las normas vigentes; la reemisión de la constitución 1.1.0 y de AGENTS requiere una decisión aparte. Smart Match e IA generativa se mantienen como módulos del monolito mientras no se reforme §6.
 
+## M-BE-057 — Reemisión de constitution 1.1.0 y AGENTS 1.1.0
+
+- **ID:** M-BE-057
+- **Decisión:** reemitir `constitution.md` y `AGENTS.md` en la versión 1.1.0 para reflejar el estado real del proyecto, sin relajar ninguna regla de fondo: estado técnico vigente (NV-01 a NV-09), Azure como proveedor seleccionado (M-BE-028) y excepción formal para servicios gestionados de terceros con decisión M-BE (precedentes M-BE-034 y M-BE-035), CI/CD vigente (NV-02, NV-09), protocolo de autorizaciones («EJECUTA», «OK PARA APPLY», aprobación en `production`, seed en Production, cambios en cuentas externas), flujo de Git con ramas cortas y pull request hacia `main`, módulos con propiedad de datos y sin ciclos, `specs/README.md` como índice obligatorio y reglas de uso eficiente de recursos. Se ajusta `sdd-guardian` a estas reglas.
+- **Estado:** PROPUESTO — borrador pendiente de aprobación; mientras tanto rige la versión 1.0.0 del historial de Git.
+- **Fecha:** 2026-11-06.
+- **Aprobador:** pendiente (Victor Manuel Jose Jose).
+- **Justificación:** hallazgos H1 a H6 de `specs/README.md` §6.2 (M-BE-056); constitution §35 exige revisión humana explícita, registro de decisión y análisis de impacto.
+- **Impacto:** sin cambios de código ni de infraestructura. Al aprobarse, M-BE-011 (proveedor pendiente) queda sustituida por M-BE-028 y constitution §30; la convención Git Flow con `develop` se reemplaza por la práctica con ruleset; los agentes pueden hacer commit y push solo a petición humana y nunca directo a `main`. COST-001, SDD-001/002, seguridad y rutas protegidas se mantienen.
+
