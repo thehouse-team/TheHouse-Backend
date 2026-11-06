@@ -3,7 +3,7 @@
 #
 # Ejecuta la imagen en ASPNETCORE_ENVIRONMENT=Testing contra MongoDB y Redis
 # levantados como `services` del job (expuestos en 127.0.0.1). La llave JWT
-# llega por la variable de entorno Jwt__SigningKey (aleatoria por run) y se
+# llega por la variable de entorno JWT_SIGNING_KEY (aleatoria por run) y se
 # pasa a Docker por nombre, sin escribirla en la línea de comandos.
 #
 # Uso:
@@ -17,8 +17,8 @@ NAME="thehouse-ephemeral"
 cmd="${1:?comando requerido}"
 
 common_env() {
-  : "${Jwt__SigningKey:?Jwt__SigningKey requerido}"
-  export Jwt__SigningKey
+  : "${JWT_SIGNING_KEY:?JWT_SIGNING_KEY requerido}"
+  export JWT_SIGNING_KEY
   ENV_ARGS=(
     -e ASPNETCORE_ENVIRONMENT=Testing
     -e ASPNETCORE_HTTP_PORTS=8080
@@ -28,7 +28,7 @@ common_env() {
     -e Redis__Enabled=true
     -e Redis__ConnectionString=127.0.0.1:6379
     -e Jwt__Enabled=true
-    -e Jwt__SigningKey
+    -e JWT_SIGNING_KEY
   )
 }
 

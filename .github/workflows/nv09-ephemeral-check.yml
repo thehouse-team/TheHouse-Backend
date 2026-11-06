@@ -55,7 +55,7 @@ jobs:
           set -euo pipefail
           key="$(openssl rand -base64 48 | tr -d '\n')"
           echo "::add-mask::$key"
-          echo "Jwt__SigningKey=$key" >> "$GITHUB_ENV"
+          echo "JWT_SIGNING_KEY=$key" >> "$GITHUB_ENV"
 
       - name: Seed de catálogo (Testing)
         run: bash .github/scripts/ephemeral_env.sh seed "$REF"
