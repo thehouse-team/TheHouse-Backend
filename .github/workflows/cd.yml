@@ -282,7 +282,7 @@ jobs:
         run: bash .github/scripts/ephemeral_env.sh start "$REF" smoke
 
       - name: Smoke tests completos (T09)
-        run: python3 .github/scripts/smoke_test.py --base-url http://127.0.0.1:8080 --mode full --report smoke-ephemeral.md --ready-attempts 10 --ready-delay 2
+        run: python3 .github/scripts/smoke_test.py --base-url http://127.0.0.1:8080 --mode full --forwarded-proto https --report smoke-ephemeral.md --ready-attempts 10 --ready-delay 2
 
       - name: Reiniciar API para el escaneo activo
         run: bash .github/scripts/ephemeral_env.sh start "$REF" scan
@@ -294,7 +294,8 @@ jobs:
           mkdir -p zap && cp .zap/rules.tsv zap/ && chmod -R 777 zap
           docker run --rm --network host -v "$PWD/zap:/zap/wrk:rw" "$ZAP_IMAGE" \
             zap-api-scan.py -t http://127.0.0.1:8080/openapi/v1.json -f openapi \
-            -c rules.tsv -J zap-api.json -r zap-api.html -I
+            -c rules.tsv -J zap-api.json -r zap-api.html -I \
+            -z "-config replacer.full_list(0).description=xfp -config replacer.full_list(0).enabled=true -config replacer.full_list(0).matchtype=REQ_HEADER -config replacer.full_list(0).matchstr=X-Forwarded-Proto -config replacer.full_list(0).regex=false -config replacer.full_list(0).replacement=https"
           code=$?
           if [ "$code" -ge 3 ]; then
             echo "::error::ZAP no pudo completar el escaneo (código $code)."
