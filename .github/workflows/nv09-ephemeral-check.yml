@@ -24,7 +24,9 @@ jobs:
     timeout-minutes: 30
     services:
       mongo:
-        image: mongo:8.0.34
+        # 7.0: MongoDB 8.0+ no arranca en kernels Linux >= 6.19 del runner
+        # (tcmalloc/rseq, SERVER-125742). Producción sigue en Atlas 8.0.
+        image: mongo:7.0.45
         ports:
           - 27017:27017
         options: >-
