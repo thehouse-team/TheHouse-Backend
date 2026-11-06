@@ -7,7 +7,7 @@ namespace TheHouse.Infrastructure.Security;
 
 public sealed class UnavailableJwtTokenService : IJwtTokenService
 {
-    public AccessToken CreateAccessToken(User user) =>
+    public AccessToken CreateAccessToken(User user, string sessionId) =>
         throw new DependencyUnavailableException();
 
     public ClaimsPrincipal ValidateAccessToken(string token) =>

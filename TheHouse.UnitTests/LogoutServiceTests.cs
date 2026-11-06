@@ -235,7 +235,7 @@ public sealed class LogoutServiceTests
         long? expSeconds = null,
         bool includeExp = true) : IJwtTokenService
     {
-        public AccessToken CreateAccessToken(User user) =>
+        public AccessToken CreateAccessToken(User user, string sessionId) =>
             throw new InvalidOperationException();
 
         public ClaimsPrincipal ValidateAccessToken(string token)
@@ -271,7 +271,7 @@ public sealed class LogoutServiceTests
     // Stub sin identidad autenticada: el principal no vale.
     private sealed class AnonymousJwt : IJwtTokenService
     {
-        public AccessToken CreateAccessToken(User user) =>
+        public AccessToken CreateAccessToken(User user, string sessionId) =>
             throw new InvalidOperationException();
 
         public ClaimsPrincipal ValidateAccessToken(string token) =>

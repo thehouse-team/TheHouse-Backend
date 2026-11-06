@@ -336,6 +336,8 @@ public sealed class LogoutHttpTests
                 path is "/api/v1/auth/register"
                     or "/api/v1/auth/login"
                     or "/api/v1/auth/logout"
+                    or "/api/v1/auth/refresh"
+                    or "/api/v1/users/me"
                     or "/api/v1/properties"
                     or "/api/v1/properties/{id}"
                     or "/api/v1/universities"

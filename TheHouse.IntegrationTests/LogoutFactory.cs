@@ -15,7 +15,9 @@ namespace TheHouse.IntegrationTests;
 public sealed class LogoutFactory(
     LogoutTestRevocationStore? revocation = null,
     LogoutTestRateLimitStore? rateLimit = null,
-    IReadOnlyDictionary<string, string?>? settings = null)
+    IReadOnlyDictionary<string, string?>? settings = null,
+    InMemoryRefreshTokenStore? refreshTokens = null,
+    InMemorySessionRevocationStore? sessionRevocation = null)
     : FoundationFactory(BuildSettings(settings))
 {
     public const string SigningKey =
@@ -31,6 +33,12 @@ public sealed class LogoutFactory(
 
     public ConcurrentQueue<string> Logs { get; } = new();
 
+    public InMemoryRefreshTokenStore RefreshTokens { get; } =
+        refreshTokens ?? new();
+
+    public InMemorySessionRevocationStore SessionRevocation { get; } =
+        sessionRevocation ?? new();
+
     protected override void ConfigureWebHost(
         IWebHostBuilder builder)
     {
@@ -45,6 +53,10 @@ public sealed class LogoutFactory(
             services.AddSingleton<IUserRepository>(Store);
             services.AddSingleton<IRateLimitStore>(RateLimit);
             services.AddSingleton<ITokenRevocationStore>(Revocation);
+            services.RemoveAll<IRefreshTokenStore>();
+            services.RemoveAll<ISessionRevocationStore>();
+            services.AddSingleton<IRefreshTokenStore>(RefreshTokens);
+            services.AddSingleton<ISessionRevocationStore>(SessionRevocation);
 
             services.AddSingleton<ILoggerProvider>(
                 new CaptureProvider(Logs));
@@ -141,6 +153,19 @@ public sealed class LogoutTestStore : IUserRepository
             User?.Email == normalizedEmail
                 ? User
                 : null);
+    }
+
+    public Task<User?> GetByIdAsync(
+        string id,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+    
+        return Task.FromResult(User?.Id == id ? User : null);
     }
 
     public Task<User> CreateAsync(

@@ -73,6 +73,29 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
         }
     }
 
+    public async Task<User?> GetByIdAsync(
+        string id,
+        CancellationToken cancellationToken)
+    {
+        // Un id con formato inválido no puede existir: null sin consultar.
+        if (!MongoDB.Bson.ObjectId.TryParse(id, out var objectId))
+        {
+            return null;
+        }
+
+        try
+        {
+            var document = await Collection
+                .Find(user => user.Id == objectId)
+                .FirstOrDefaultAsync(cancellationToken);
+            return document is null ? null : Map(document);
+        }
+        catch (Exception exception) when (exception is MongoException or TimeoutException)
+        {
+            throw MongoFailure.Unavailable();
+        }
+    }
+
     public async Task<User> CreateAsync(
         User user,
         CancellationToken cancellationToken)

@@ -12,6 +12,7 @@ namespace TheHouse.Infrastructure.Security;
 public sealed class RedisTokenRevocationStore(
     ConfigurationOptions? configuration) :
     ITokenRevocationStore,
+    ISessionRevocationStore,
     IDisposable
 {
     private readonly Lazy<Task<ConnectionMultiplexer>> connection =
@@ -107,6 +108,92 @@ public sealed class RedisTokenRevocationStore(
                 .WaitAsync(timeout, cancellationToken);
 
             return exists;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+            when (exception is RedisException or TimeoutException)
+        {
+            throw new DependencyUnavailableException();
+        }
+    }
+
+    // NV-10: revocación de sesión (`sid`) con la misma semántica de
+    // `SET NX` + TTL y fallo cerrado que la revocación por `jti`.
+    public async Task RevokeSessionAsync(
+        string sessionId,
+        TimeSpan ttl,
+        CancellationToken cancellationToken)
+    {
+        if (!SessionTokens.IsCanonicalSessionId(sessionId))
+        {
+            throw new ArgumentException(
+                "Invalid session identifier.",
+                nameof(sessionId));
+        }
+
+        await ExecuteAsync(
+            "redis.session_revoke",
+            database => database.StringSetAsync(
+                new RedisKey(SessionTokens.RevokedSessionKey(sessionId)),
+                new RedisValue("1"),
+                ttl,
+                When.NotExists),
+            cancellationToken);
+    }
+
+    public async Task<bool> IsSessionRevokedAsync(
+        string sessionId,
+        CancellationToken cancellationToken)
+    {
+        if (!SessionTokens.IsCanonicalSessionId(sessionId))
+        {
+            throw new ArgumentException(
+                "Invalid session identifier.",
+                nameof(sessionId));
+        }
+
+        return await ExecuteAsync(
+            "redis.session_revocation_check",
+            database => database.KeyExistsAsync(
+                new RedisKey(SessionTokens.RevokedSessionKey(sessionId))),
+            cancellationToken);
+    }
+
+    private async Task<T> ExecuteAsync<T>(
+        string activityName,
+        Func<IDatabase, Task<T>> operation,
+        CancellationToken cancellationToken)
+    {
+        if (configuration is null)
+        {
+            throw new DependencyUnavailableException();
+        }
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using var activity =
+                TelemetrySources.Redis.StartActivity(
+                    activityName,
+                    System.Diagnostics.ActivityKind.Client);
+
+            activity?.SetTag(
+                "db.system.name",
+                "redis");
+
+            var timeout =
+                TimeSpan.FromMilliseconds(configuration.AsyncTimeout);
+
+            var client = await connection.Value.WaitAsync(
+                timeout,
+                cancellationToken);
+
+            return await operation(client.GetDatabase())
+                .WaitAsync(timeout, cancellationToken);
         }
         catch (OperationCanceledException)
         {

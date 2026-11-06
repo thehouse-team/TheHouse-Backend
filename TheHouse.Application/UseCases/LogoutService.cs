@@ -12,7 +12,8 @@ namespace TheHouse.Application.UseCases;
 public sealed class LogoutService(
     IJwtTokenService jwtTokenService,
     ITokenRevocationStore revocationStore,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    SessionService? sessions = null)
 {
     // Primer logout con token válido: revoca y devuelve 204 en el
     // endpoint. Reutilización: 401. Este método es usado tanto por el
@@ -42,6 +43,30 @@ public sealed class LogoutService(
             jti,
             ttl,
             cancellationToken);
+
+        // NV-10: si el token pertenece a una sesión, se revocan también
+        // su refresh token y los demás access tokens de la sesión.
+        var sessionId = SessionId(principal);
+        if (sessionId is not null && sessions is not null)
+        {
+            await sessions.RevokeSessionAsync(
+                sessionId,
+                SessionService.ReasonLogout,
+                cancellationToken);
+        }
+    }
+
+    // NV-10: igual que EnsureNotRevokedAsync, pero devuelve el principal
+    // validado para que el endpoint use `sub` sin volver a validar.
+    public async Task<ClaimsPrincipal> ValidateActiveAsync(
+        string token,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var principal = ValidateRequiredPrincipal(token);
+        await EnsureNotRevokedCoreAsync(principal, cancellationToken);
+        return principal;
     }
 
     // Consulta de revocación para solicitudes autenticadas (T03):
@@ -69,6 +94,39 @@ public sealed class LogoutService(
         {
             throw new InvalidCredentialsException();
         }
+
+        // NV-10: un access token de una sesión revocada (logout o reuso
+        // de refresh token) se rechaza de inmediato en cualquier réplica.
+        var sessionId = SessionId(principal);
+        if (sessionId is not null &&
+            sessions is not null &&
+            await sessions.IsSessionRevokedAsync(
+                sessionId,
+                cancellationToken))
+        {
+            throw new InvalidCredentialsException();
+        }
+    }
+
+    // `sid` es opcional (tokens emitidos antes de NV-10 no lo traen),
+    // pero si existe debe tener el formato canónico.
+    private static string? SessionId(ClaimsPrincipal principal)
+    {
+        var value = principal
+            .FindFirst(SessionTokens.SessionIdClaim)
+            ?.Value;
+
+        if (value is null)
+        {
+            return null;
+        }
+
+        if (!SessionTokens.IsCanonicalSessionId(value))
+        {
+            throw new InvalidCredentialsException();
+        }
+
+        return value;
     }
 
     private ClaimsPrincipal ValidateRequiredPrincipal(

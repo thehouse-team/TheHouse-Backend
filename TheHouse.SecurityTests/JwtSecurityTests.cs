@@ -14,12 +14,63 @@ public sealed class JwtSecurityTests
     private const string Key =
         "0123456789abcdef0123456789abcdef";
 
+    private const string SessionId =
+        "fedcba9876543210fedcba9876543210";
+
+    // NV-10: el access token lleva `sid` y los tokens sin `sid` (emitidos
+    // antes de NV-10) siguen siendo válidos hasta su expiración.
+    [Fact]
+    public void Access_token_includes_session_id_claim()
+    {
+        var service = Create();
+
+        var token = service.CreateAccessToken(User(), SessionId);
+        var principal = service.ValidateAccessToken(token.Token);
+
+        Assert.Equal(SessionId, principal.FindFirst("sid")?.Value);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("short")]
+    [InlineData("FEDCBA9876543210FEDCBA9876543210")]
+    public void Non_canonical_session_id_is_refused(string sessionId)
+    {
+        Assert.Throws<ArgumentException>(() =>
+            Create().CreateAccessToken(User(), sessionId));
+    }
+
+    [Fact]
+    public void Legacy_token_without_session_id_is_still_valid()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var legacy = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
+            issuer: "thehouse-api",
+            audience: "thehouse-clients",
+            claims:
+            [
+                new Claim(JwtRegisteredClaimNames.Sub, "665f1c2a9b1e4a0012345678"),
+                new Claim(JwtRegisteredClaimNames.Email, "user@example.com"),
+                new Claim(JwtRegisteredClaimNames.Jti, "0123456789abcdef0123456789abcdef"),
+                new Claim(JwtRegisteredClaimNames.Iat, now.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
+            ],
+            notBefore: now.UtcDateTime,
+            expires: now.AddMinutes(15).UtcDateTime,
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key)),
+                SecurityAlgorithms.HmacSha256)));
+
+        var principal = Create().ValidateAccessToken(legacy);
+
+        Assert.Null(principal.FindFirst("sid"));
+    }
+
     [Fact]
     public void Access_token_uses_expected_algorithm_and_required_claims()
     {
         var service = Create();
 
-        var token = service.CreateAccessToken(User());
+        var token = service.CreateAccessToken(User(), SessionId);
 
         Assert.Equal("Bearer", token.TokenType);
         Assert.Equal(900, token.ExpiresIn);
@@ -53,7 +104,7 @@ public sealed class JwtSecurityTests
             Options("abcdefghijklmnopqrstuvwxyzABCDEF"),
             TimeProvider.System);
 
-        var token = untrusted.CreateAccessToken(User());
+        var token = untrusted.CreateAccessToken(User(), SessionId);
 
         Assert.ThrowsAny<SecurityTokenException>(() =>
             trusted.ValidateAccessToken(token.Token));

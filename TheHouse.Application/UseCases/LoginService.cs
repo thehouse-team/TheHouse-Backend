@@ -8,7 +8,7 @@ namespace TheHouse.Application.UseCases;
 public sealed class LoginService(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
-    IJwtTokenService jwtTokenService)
+    SessionService sessions)
 {
     public async Task<LoginResponse> LoginAsync(
         LoginRequest request,
@@ -48,11 +48,10 @@ public sealed class LoginService(
             throw new InvalidCredentialsException();
         }
 
-        var token = jwtTokenService.CreateAccessToken(user);
-
-        return new LoginResponse(
-            token.Token,
-            token.TokenType,
-            token.ExpiresIn);
+        // NV-10: el login inicia una sesión con refresh token. Si no
+        // puede guardarse, DependencyUnavailableException → 503 sin tokens.
+        return await sessions.StartAsync(
+            user,
+            cancellationToken);
     }
 }

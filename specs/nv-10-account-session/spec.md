@@ -4,23 +4,23 @@
 | --- | --- |
 | ID | NV-10 |
 | Documento | `spec.md` |
-| Versión | 1.1.0-borrador |
+| Versión | 1.1.0 |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-06 («Apruebo y EJECUTA»: NV-10 1.1.0, tasks T01–T11, rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/` y `specs/nv-10-account-session/`) |
+| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-02 (sesión persistente sin volver a iniciar sesión); requisito académico U2 (refresh y `/users/me`). RF-01, RF-04, RF-36 y RF-71 se cubrirán en la versión posterior de NV-10 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-09 |
-| Plan | `plan.md` 1.1.0-borrador |
-| Tasks | `task.md` 1.1.0-borrador |
+| Plan | `plan.md` 1.1.0 |
+| Tasks | `task.md` 1.1.0 |
 | Módulo | Identity |
 | Precondición | NV-04, NV-05 y NV-06 cerradas y desplegadas; NV-09 (CD) operativa |
 | Relación | Extiende NV-05 (login) y NV-06 (logout) con cambios aditivos; NV-04 (registro) sin cambios |
 
 Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
 
-**Cambio 1.1.0-borrador (2026-11-06):** el alcance se reduce a lo que la app móvil necesita para U2: `POST /auth/refresh`, `refreshToken` en el login, revocación de la sesión en el logout y `GET /users/me` con los campos reales. Recuperación de contraseña, verificación de correo, insignia de estudiante, eliminación de cuenta y nuevos datos de registro pasan a una versión posterior de NV-10 (el borrador 1.0.0 queda en el historial de Git). Alcance revisado con el responsable de Mobile: la app ya ignora campos desconocidos (`ignoreUnknownKeys = true`), declara `refreshToken` como opcional y lo guarda cifrado (AES-GCM + Android Keystore).
+**Cambio 1.1.0 (2026-11-06):** el alcance se reduce a lo que la app móvil necesita para U2: `POST /auth/refresh`, `refreshToken` en el login, revocación de la sesión en el logout y `GET /users/me` con los campos reales. Recuperación de contraseña, verificación de correo, insignia de estudiante, eliminación de cuenta y nuevos datos de registro pasan a una versión posterior de NV-10 (el borrador 1.0.0 queda en el historial de Git). Alcance revisado con el responsable de Mobile: la app ya ignora campos desconocidos (`ignoreUnknownKeys = true`), declara `refreshToken` como opcional y lo guarda cifrado (AES-GCM + Android Keystore).
 
 ## 1. Contexto
 
@@ -195,10 +195,10 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Tasks completadas | 10 |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
 
-## 18. Aprobación pendiente
+## 18. Aprobación y ejecución
 
 Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

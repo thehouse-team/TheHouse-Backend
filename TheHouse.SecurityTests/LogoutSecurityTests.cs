@@ -52,7 +52,8 @@ public sealed class LogoutSecurityTests
     private sealed class StubJwt(string jti) : IJwtTokenService
     {
         public AccessToken CreateAccessToken(
-            Domain.Entities.User user) =>
+            Domain.Entities.User user,
+            string sessionId) =>
             throw new InvalidOperationException();
 
         public ClaimsPrincipal ValidateAccessToken(string token)

@@ -59,7 +59,9 @@ public sealed class LoginHttpTests
             {
                 "accessToken",
                 "tokenType",
-                "expiresIn"
+                "expiresIn",
+                // NV-10: campo aditivo al final; los tres anteriores no cambian.
+                "refreshToken"
             },
             document.RootElement
                 .EnumerateObject()

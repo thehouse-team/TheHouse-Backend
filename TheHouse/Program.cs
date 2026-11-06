@@ -8,6 +8,7 @@ builder.AddFoundationConfiguration();
 builder.AddRegistration();
 builder.AddLogin();
 builder.AddLogout();
+builder.AddSessions();
 builder.AddProperties();
 builder.AddUniversities();
 builder.AddObservability();
@@ -167,6 +168,8 @@ app.MapFoundationHealth();
 app.MapRegistration();
 app.MapLogin();
 app.MapLogout();
+app.MapRefresh();
+app.MapUsersMe();
 app.MapProperties();
 app.MapUniversities();
 

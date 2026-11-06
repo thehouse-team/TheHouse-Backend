@@ -13,7 +13,9 @@ namespace TheHouse.IntegrationTests;
 public sealed class LoginFactory(
     LoginTestStore? store = null,
     LoginTestRateLimitStore? rateLimit = null,
-    IReadOnlyDictionary<string, string?>? settings = null)
+    IReadOnlyDictionary<string, string?>? settings = null,
+    InMemoryRefreshTokenStore? refreshTokens = null,
+    InMemorySessionRevocationStore? sessionRevocation = null)
     : FoundationFactory(BuildSettings(settings))
 {
     public const string SigningKey =
@@ -27,6 +29,14 @@ public sealed class LoginFactory(
 
     public ConcurrentQueue<string> Logs { get; } = new();
 
+    // NV-10: almacenes de sesión compartibles entre fábricas para
+    // simular varias réplicas sobre el mismo MongoDB/Redis.
+    public InMemoryRefreshTokenStore RefreshTokens { get; } =
+        refreshTokens ?? new();
+
+    public InMemorySessionRevocationStore SessionRevocation { get; } =
+        sessionRevocation ?? new();
+
     protected override void ConfigureWebHost(
         IWebHostBuilder builder)
     {
@@ -39,6 +49,10 @@ public sealed class LoginFactory(
 
             services.AddSingleton<IUserRepository>(Store);
             services.AddSingleton<IRateLimitStore>(RateLimit);
+            services.RemoveAll<IRefreshTokenStore>();
+            services.RemoveAll<ISessionRevocationStore>();
+            services.AddSingleton<IRefreshTokenStore>(RefreshTokens);
+            services.AddSingleton<ISessionRevocationStore>(SessionRevocation);
 
             services.AddSingleton<ILoggerProvider>(
                 new CaptureProvider(Logs));
@@ -133,6 +147,19 @@ public sealed class LoginTestStore : IUserRepository
             User?.Email == normalizedEmail
                 ? User
                 : null);
+    }
+
+    public Task<User?> GetByIdAsync(
+        string id,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+    
+        return Task.FromResult(User?.Id == id ? User : null);
     }
 
     public Task<User> CreateAsync(
