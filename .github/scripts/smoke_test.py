@@ -32,7 +32,9 @@ class Client:
         hdrs = {"Accept": "application/json"}
         if self.forwarded_proto:
             # Entorno efímero: simula el ingress TLS (la API redirige HTTP a HTTPS).
+            # La API exige simetría: X-Forwarded-For y X-Forwarded-Proto juntos.
             hdrs["X-Forwarded-Proto"] = self.forwarded_proto
+            hdrs["X-Forwarded-For"] = "198.51.100.10"
         if body is not None:
             data = json.dumps(body).encode("utf-8")
             hdrs["Content-Type"] = "application/json"
