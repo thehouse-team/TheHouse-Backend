@@ -8,7 +8,7 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-06 («Apruebo y EJECUTA»: NV-10 1.1.0, tasks T01–T11, rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/` y `specs/nv-10-account-session/`) |
-| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
+| Estado de ejecución | **✅ COMPLETADA — DESPLEGADA EN AZURE (revisión `c55feed2-7-1`) Y VERIFICADA 13/13 (2026-11-06)** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0 |
 | Tasks | `task.md` 1.1.0 |

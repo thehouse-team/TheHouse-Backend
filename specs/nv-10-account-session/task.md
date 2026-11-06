@@ -8,12 +8,12 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-06 («Apruebo y EJECUTA»: NV-10 1.1.0, tasks T01–T11, rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/` y `specs/nv-10-account-session/`) |
-| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
+| Estado de ejecución | **✅ COMPLETADA — DESPLEGADA EN AZURE (revisión `c55feed2-7-1`) Y VERIFICADA 13/13 (2026-11-06)** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0 |
 | Plan | `plan.md` 1.1.0 |
 | Tasks totales | 11 |
-| Tasks completadas | 10 |
+| Tasks completadas | 11 |
 
 ## Reglas de esta lista
 
@@ -44,7 +44,7 @@
 
 - [x] **T09 · Pruebas unitarias y de integración** — Requisito: NV-10-R09 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
 - [x] **T10 · Pruebas de seguridad** — Requisito: NV-10-R09 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
-- [ ] **T11 · Evidencia y revisión final** — Requisito: NV-10-R09 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T09, T10.
+- [x] **T11 · Evidencia y revisión final** — Requisito: NV-10-R09 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T09, T10.
 
 ## Matriz task → requisito
 
@@ -60,7 +60,7 @@
 | T08 | R08 | F3 | COMPLETADA |
 | T09 | R09 | F4 | COMPLETADA |
 | T10 | R09 | F4 | COMPLETADA |
-| T11 | R09 | F4 | ABIERTA |
+| T11 | R09 | F4 | COMPLETADA |
 
 ## Cobertura requisito → task
 
@@ -82,11 +82,11 @@
 | --- | --- |
 | Requisitos | 9 |
 | Tasks | 11 |
-| Tasks abiertas | 1 |
-| Tasks completadas | 10 |
+| Tasks abiertas | 0 |
+| Tasks completadas | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 T01–T10 COMPLETADAS EN LOCAL (480/480 pruebas); T11 PENDIENTE DEL DESPLIEGUE EN AZURE** |
+| Estado de ejecución | **✅ COMPLETADA — DESPLEGADA EN AZURE (revisión `c55feed2-7-1`) Y VERIFICADA 13/13 (2026-11-06)** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

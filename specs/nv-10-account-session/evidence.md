@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-06 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-06: NV-10 1.1.0, tasks T01–T11, rutas de los siete proyectos y `specs/nv-10-account-session/` (M-BE-058) |
-| Rama | `docs/nv-10-refresh-me` (PR #10) |
-| Resultado | **🟡 PASS WITH WARNINGS (local)**: T01–T10 completas con pruebas; T11 abierta hasta la prueba HTTP real en Azure después del despliegue por el CD |
+| Rama | `docs/nv-10-refresh-me` (PR #10, mezclado por IsaiAxel el 2026-11-06) |
+| Resultado | **✅ PASS WITH WARNINGS**: 11/11 tasks completas; desplegada en Azure y verificada con prueba HTTP real (13/13) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. Ningún token, hash ni `sid` real aparece en esta evidencia.
 
@@ -84,9 +84,41 @@ Pruebas nuevas (51):
 
 Hallazgos: ninguno Critical, High ni Medium. Advertencia (Accepted Risk, decisión documentada en la spec): un reintento simultáneo del mismo refresh token se trata como reuso y obliga a iniciar sesión; Mobile debe serializar las renovaciones.
 
-## 5. Pendiente para cerrar T11
+## 5. Despliegue y prueba HTTP real en Azure (T11)
 
-1. CI del PR #10 en verde y merge.
-2. Despliegue por el CD con aprobación en `production`.
-3. Prueba HTTP real en Azure: login → `/users/me` → refresh → reuso (401) → logout → refresh (401).
-4. Avisar a Mobile: "NV-10 desplegada".
+- CI del PR #10: run `42191624040`, los 7 checks obligatorios en verde.
+- PR #10 aprobado y mezclado por `IsaiAxel` (commit `55feed2`).
+- CD: run `42192269362` (https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42192269362), aprobado por `vicmanujo`; `publish`, `verify-ephemeral`, `deploy`, `dast-baseline` y `cd-summary` en verde.
+- Azure: revisión `ca-thehouse-u2--c55feed2-7-1`, imagen `sha256:4af4456d…`.
+
+Prueba HTTP real contra `https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io` (2026-11-06), con una cuenta de prueba nueva de dominio reservado (`nv10-azure-…@example.com`). El script solo registró códigos y nombres de campos, nunca tokens:
+
+| Paso | Esperado | Resultado |
+| --- | --- | --- |
+| 1. `POST /auth/register` (sin cambios) | 201 | ✅ 201 |
+| 2. `POST /auth/login` | 200 con `accessToken`, `tokenType`, `expiresIn`, `refreshToken` | ✅ 200, campos exactos |
+| 3. `GET /users/me` | 200 con `id`, `email`, `createdAt` | ✅ 200, campos exactos, email correcto |
+| 4. `POST /auth/refresh` | 200 con token rotado | ✅ 200, token distinto |
+| 5. `/users/me` con el access token renovado | 200 | ✅ 200 |
+| 6. Reuso del refresh token viejo | 401 | ✅ 401 |
+| 7. Access token de la sesión revocada por reuso | 401 | ✅ 401 |
+| 8. Refresh token nuevo de esa sesión | 401 | ✅ 401 |
+| 9. Login de una sesión nueva | 200 | ✅ 200 |
+| 10. `POST /auth/logout` (sin cambios) | 204 | ✅ 204 |
+| 11. Refresh después del logout | 401 | ✅ 401 |
+| 12. `/users/me` después del logout | 401 | ✅ 401 |
+| 13. `/users/me` sin token | 401 | ✅ 401 |
+
+**13/13 PASS.** Encabezados verificados con una segunda cuenta de prueba: `cache-control: no-store` en login, `/users/me` (200 y 401) y refresh (401), y `pragma: no-cache` en `/users/me`; esa sesión se cerró con logout (204).
+
+Quedan en producción dos cuentas de prueba con prefijo `nv10-azure-` y dominio `example.com`, sin datos personales; se eliminarán cuando exista la eliminación de cuenta (versión posterior de NV-10).
+
+## 6. Resultado final
+
+| Revisión | Resultado |
+| --- | --- |
+| SDD (spec → plan → task → evidencia, constitution 1.1.0, AGENTS 1.1.0) | PASS |
+| Seguridad | PASS WITH WARNINGS — un refresh simultáneo con el mismo token se trata como reuso (Accepted Risk documentado; la app serializa las renovaciones) |
+| Contratos existentes | Sin cambios incompatibles: register 201, login 200 (campo aditivo), logout 204 |
+
+Mobile puede conectar `POST /auth/refresh` y `GET /users/me` ("NV-10 desplegada").

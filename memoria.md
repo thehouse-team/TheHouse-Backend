@@ -522,4 +522,5 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** solicitud del responsable de Mobile tras revisar el backend; el borrador 1.0.0 rompía el registro (`acceptedTermsVersion` obligatorio), prometía campos inexistentes en `/users/me` y dependía de un proveedor de correo sin opción $0. Mobile confirmó compatibilidad: `ignoreUnknownKeys = true`, `refreshToken` opcional y almacenamiento cifrado con Android Keystore.
 - **Impacto:** al desplegarse, Mobile conectará la renovación y `/users/me` tras pruebas HTTP reales en Azure. Decisiones propuestas: 30 días por refresh token y 90 por sesión; sin periodo de gracia ante refresh simultáneos (la app serializa las renovaciones).
+- **Actualización 2026-11-06 (M-BE-058):** NV-10 1.1.0 completada: PR #10 mezclado, desplegada por el CD (run `42192269362`, revisión `c55feed2-7-1`) y verificada en Azure 13/13. Mobile puede conectar refresh y `/users/me`.
 
