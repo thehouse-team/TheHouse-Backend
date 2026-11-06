@@ -6,9 +6,9 @@
 | Documento | `task.md` |
 | Versión | 1.0.0-u2 |
 | Fecha | 2026-11-05 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T14 autorizadas; T15–T19 sin autorizar** |
 | Spec | `spec.md` 1.0.0-u2 |
 | Plan | `plan.md` 1.0.0-u2 |
 | Tasks totales | 19 |
@@ -115,7 +115,7 @@
 | Tasks completadas | 0 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN (T01–T14)** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

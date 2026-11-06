@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.0.0-u2 |
 | Fecha | 2026-11-05 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T14 autorizadas; T15–T19 sin autorizar** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0-u2 |
 | Tasks | `task.md` 1.0.0-u2 |
@@ -110,16 +110,16 @@ Reglas comunes:
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Dueño de la imagen | El CD es dueño de `image`: se agrega `template[0].container[0].image` a `ignore_changes`; `var.image` queda como bootstrap y conserva su validación de digest | PROPUESTO |
-| Identidad hacia Azure | Identidad administrada asignada por el usuario `id-thehouse-u2-deploy`, con credencial federada para `repo:thehouse-team/TheHouse-Backend:environment:production`, creada en Terraform | PROPUESTO |
-| Rol de la identidad | Mínimo privilegio con alcance al recurso `ca-thehouse-u2`: rol integrado de Container Apps si cubre la actualización, o rol personalizado con lectura y escritura de `Microsoft.App/containerApps`, lectura de revisiones y `Microsoft.App/managedEnvironments/join/action`. Nunca `Contributor` a nivel de grupo o suscripción | PROPUESTO |
-| Aprobación | Environment `production` con Victor e Isai como revisores, "Prevent self-review" y despliegue solo desde `main` | PROPUESTO |
-| Firma | Cosign keyless (Sigstore público, gratuito); la identidad del certificado es `cd.yml` en `main` | PROPUESTO |
-| Smoke en producción | Sin escrituras persistentes: GET de universidades y propiedades, registro con cuerpo inválido (400), login con credenciales inexistentes (401) y logout sin token (401). El flujo completo (registro, login, logout y reuso del token) corre solo en el entorno efímero | PROPUESTO |
-| DAST | Activo (API scan con OpenAPI) solo en el entorno efímero; pasivo (baseline) en producción | PROPUESTO |
+| Dueño de la imagen | El CD es dueño de `image`: se agrega `template[0].container[0].image` a `ignore_changes`; `var.image` queda como bootstrap y conserva su validación de digest | APROBADO (M-BE-051) |
+| Identidad hacia Azure | Identidad administrada asignada por el usuario `id-thehouse-u2-deploy`, con credencial federada para `repo:thehouse-team/TheHouse-Backend:environment:production`, creada en Terraform | APROBADO (M-BE-051) |
+| Rol de la identidad | Mínimo privilegio con alcance al recurso `ca-thehouse-u2`: rol integrado de Container Apps si cubre la actualización, o rol personalizado con lectura y escritura de `Microsoft.App/containerApps`, lectura de revisiones y `Microsoft.App/managedEnvironments/join/action`. Nunca `Contributor` a nivel de grupo o suscripción | APROBADO (M-BE-051) |
+| Aprobación | Environment `production` con Victor e Isai como revisores, "Prevent self-review" y despliegue solo desde `main` | APROBADO (M-BE-051) |
+| Firma | Cosign keyless (Sigstore público, gratuito); la identidad del certificado es `cd.yml` en `main` | APROBADO (M-BE-051) |
+| Smoke en producción | Sin escrituras persistentes: GET de universidades y propiedades, registro con cuerpo inválido (400), login con credenciales inexistentes (401) y logout sin token (401). El flujo completo (registro, login, logout y reuso del token) corre solo en el entorno efímero | APROBADO (M-BE-051) |
+| DAST | Activo (API scan con OpenAPI) solo en el entorno efímero; pasivo (baseline) en producción | APROBADO (M-BE-051) |
 | Performance | NBomber (constitución) solo si se confirma que el uso académico no requiere licencia; si no, BLOCKED y se propone k6 (AGPL-3.0, gratuito) con cambio formal de la constitución | PENDIENTE DE VERIFICAR |
-| Seed en producción | Operación humana única, fuera del pipeline, con `--allow-production-seed` y autorización explícita (M-BE-043) | PROPUESTO |
-| `VERSIONING.md` | El CD no escribe en `main` (lo impide el ruleset); el registro de cada despliegue se agrega con un pull request | PROPUESTO |
+| Seed en producción | Operación humana única, fuera del pipeline, con `--allow-production-seed` y autorización explícita (M-BE-043) | APROBADO (M-BE-051) |
+| `VERSIONING.md` | El CD no escribe en `main` (lo impide el ruleset); el registro de cada despliegue se agrega con un pull request | APROBADO (M-BE-051) |
 
 ## 8. Requisitos verificables
 
@@ -209,8 +209,8 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN (T01–T14)** |
 
 ## 14. Aprobación pendiente
 

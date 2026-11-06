@@ -6,9 +6,9 @@
 | Documento | `plan.md` |
 | Versión | 1.0.0-u2 |
 | Fecha | 2026-11-05 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T14 autorizadas; T15–T19 sin autorizar** |
 | Spec | `spec.md` 1.0.0-u2 |
 | Tasks | `task.md` 1.0.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -218,4 +218,4 @@ F6 Primer despliegue, seed y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza crear workflows, identidades ni roles, ejecutar `terraform apply`, configurar GitHub, publicar, desplegar ni ejecutar seeds. Estado de ejecución: **⛔ NO EJECUTAR HASTA «EJECUTA»**.
+Este plan no autoriza crear workflows, identidades ni roles, ejecutar `terraform apply`, configurar GitHub, publicar, desplegar ni ejecutar seeds. Estado de ejecución: T01–T14 autorizadas con «EJECUTA» el 2026-11-05; `terraform apply` sigue requiriendo «OK PARA APPLY»; avance en `task.md` y `evidence.md`.
