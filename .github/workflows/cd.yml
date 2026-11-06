@@ -428,21 +428,7 @@ jobs:
         shell: bash
         env:
           REVISION: ${{ steps.update.outputs.revision }}
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 60); do
-            state="$(az containerapp revision show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --revision "$REVISION" \
-              --query 'properties.provisioningState' -o tsv 2>/dev/null || echo Pending)"
-            echo "Intento $i: provisioningState=$state"
-            case "$state" in
-              Provisioned) break ;;
-              Failed) echo "::error::La revisión $REVISION falló al aprovisionarse."; exit 1 ;;
-            esac
-            sleep 5
-          done
-          [ "$state" = "Provisioned" ] || { echo "::error::Tiempo agotado esperando $REVISION."; exit 1; }
-          latest="$(az containerapp show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --query 'properties.latestReadyRevisionName' -o tsv)"
-          echo "latestReadyRevisionName=$latest"
+        run: bash .github/scripts/wait_revision.sh "$REVISION"
 
       - name: Smoke tests en producción (T12)
         id: smoke
@@ -459,8 +445,12 @@ jobs:
           REVISION: ${{ steps.update.outputs.revision }}
         run: |
           set -euo pipefail
-          read -r health running < <(az containerapp revision show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --revision "$REVISION" \
-            --query '[properties.healthState, properties.runningState]' -o tsv | tr '\n' ' ')
+          # Una consulta por campo: `read` con entrada sin salto de línea final
+          # devuelve 1 y, con `set -e`, cortaba el paso (run 42178536348).
+          health="$(az containerapp revision show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --revision "$REVISION" \
+            --query 'properties.healthState' -o tsv)"
+          running="$(az containerapp revision show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --revision "$REVISION" \
+            --query 'properties.runningState' -o tsv)"
           echo "healthState=$health runningState=$running"
           case "$health:$running" in
             Unhealthy:*|*:Failed|*:Degraded)
@@ -487,13 +477,7 @@ jobs:
           suffix="rb-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
           az containerapp update -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" \
             --image "$PREVIOUS" --revision-suffix "$suffix" --only-show-errors -o none
-          for i in $(seq 1 60); do
-            state="$(az containerapp revision show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --revision "$CONTAINER_APP--$suffix" \
-              --query 'properties.provisioningState' -o tsv 2>/dev/null || echo Pending)"
-            [ "$state" = "Provisioned" ] && break
-            [ "$state" = "Failed" ] && { echo "::error::El rollback también falló."; exit 1; }
-            sleep 5
-          done
+          bash .github/scripts/wait_revision.sh "$CONTAINER_APP--$suffix"
           python3 .github/scripts/smoke_test.py --base-url "$BASE_URL" --mode readonly --report smoke-rollback.md
           {
             echo "### ⚠️ Rollback ejecutado"

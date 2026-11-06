@@ -173,3 +173,25 @@ URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42174853458 
 - **Corrección** (rama `fix/nv-09-oidc-subject`): variable `github_oidc_subject_prefix` con validación del formato inmutable. Plan `0 to add, 1 to change, 0 to destroy` (update in-place del subject), aplicado con «OK PARA APPLY» de Victor (2026-11-06); `plan` posterior sin cambios; `az identity federated-credential list` muestra el subject nuevo.
 - El formato inmutable es más seguro: un repositorio borrado y recreado con el mismo nombre no hereda el acceso a Azure.
 
+## 10. Segundo run de `cd.yml` — `42178536348` (commit `ddc552a`, merge del PR #5)
+
+URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42178536348 — aprobado por `vicmanujo`.
+
+| Paso de `deploy` | Resultado |
+| --- | --- |
+| Verificar firma | ✅ |
+| Login a Azure (OIDC) | ✅ con el subject inmutable corregido (§9) |
+| Estado actual | ✅ imagen anterior `sha256:15f196af…` |
+| Desplegar por digest | ✅ revisión `ca-thehouse-u2--cddc552a-2-1` |
+| Esperar la revisión | ✅ `Provisioned` |
+| Smoke en producción | ✅ health, catálogos con `Cache-Control: public, max-age=60` y **304**, 404, HSTS, registro inválido 400, login 401, logout 401. WARN: catálogos vacíos (seed pendiente, T18) y H-01 |
+| Confirmar revisión activa y sana | ❌ **bug del workflow** |
+| Rollback | ✅ restauró `sha256:15f196af…` en `ca-thehouse-u2--rb-2-1` |
+
+- **Causa**: el paso leía dos campos con `read -r health running < <(… | tr '
+' ' ')`. Sin salto de línea final, `read` devuelve 1 y `set -e` cortó el paso aunque la revisión estaba sana. Eso disparó el rollback.
+- **Segundo defecto**: la espera solo comprobaba `provisioningState`. El smoke posterior al rollback mostró caché HTTP, que la imagen vieja no tiene; el tráfico seguía en la revisión nueva. Ninguno de los dos smoke garantizaba qué revisión respondía.
+- **Estado de producción tras el run** (verificado con `az`): una sola revisión activa, `ca-thehouse-u2--rb-2-1`, imagen `sha256:15f196af…`, `Healthy`/`Running`, 100 % del tráfico. Sin caída del servicio.
+- **Corrección** (rama `fix/nv-09-revision-wait`): `.github/scripts/wait_revision.sh` espera `Provisioned` **y** que la revisión sea `latestReadyRevisionName` (la que recibe el 100 % en modo `Single`); se usa en el despliegue y en el rollback. El chequeo de salud consulta cada campo por separado. Ambos probados en local contra Azure (solo lectura) sobre `rb-2-1`: `exit 0`, `healthState=Healthy runningState=Running`.
+- **Lo que sí quedó demostrado**: login OIDC, rol mínimo suficiente para `az containerapp update` (sin `listSecrets`), despliegue por digest firmado y el camino de rollback hasta restaurar la imagen anterior. T13 sigue abierta hasta la prueba controlada con la espera corregida.
+
