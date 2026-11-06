@@ -146,6 +146,17 @@ variable "github_repository" {
   }
 }
 
+variable "github_oidc_subject_prefix" {
+  description = "Immutable GitHub OIDC subject prefix (repo:<owner>@<owner_id>/<repo>@<repo_id>), from GET /repos/{owner}/{repo}/actions/oidc/customization/sub."
+  type        = string
+  default     = "repo:thehouse-team@350926140/TheHouse-Backend@1441437464"
+
+  validation {
+    condition     = can(regex("^repo:[A-Za-z0-9-]+@[0-9]+/[A-Za-z0-9._-]+@[0-9]+$", var.github_oidc_subject_prefix))
+    error_message = "github_oidc_subject_prefix must use the immutable format repo:<owner>@<id>/<repo>@<id>."
+  }
+}
+
 variable "github_environment" {
   description = "GitHub Environment whose OIDC tokens are trusted (NV-09-R08)."
   type        = string

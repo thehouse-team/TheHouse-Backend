@@ -21,7 +21,11 @@ resource "azurerm_federated_identity_credential" "github_production" {
   user_assigned_identity_id = azurerm_user_assigned_identity.cd.id
   issuer                    = "https://token.actions.githubusercontent.com"
   audience                  = ["api://AzureADTokenExchange"]
-  subject                   = "repo:${var.github_repository}:environment:${var.github_environment}"
+  # El repositorio usa el subject inmutable de GitHub OIDC
+  # (`use_immutable_subject: true`): incluye los IDs numéricos de la
+  # organización y del repositorio, así que un repositorio borrado y
+  # recreado con el mismo nombre no hereda el acceso a Azure.
+  subject = "${var.github_oidc_subject_prefix}:environment:${var.github_environment}"
 }
 
 resource "azurerm_role_definition" "cd_deployer" {

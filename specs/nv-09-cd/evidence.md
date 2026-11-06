@@ -154,3 +154,22 @@ Límite del escaneo: los límites por endpoint de propiedades y universidades (6
 | T11–T14 | Implementadas | Run real con aprobación y prueba controlada de rollback (T13) |
 
 Ninguna task se marca como completada hasta tener evidencia del run real.
+
+## 9. Primer run real de `cd.yml` — `42174853458` (commit `84c526e`, merge del PR #4)
+
+URL: https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42174853458 — disparado por `workflow_run` tras el CI `42174576417` en verde.
+
+| Job | Resultado | Detalle |
+| --- | --- | --- |
+| `resolve` | ✅ | `mode=publish` |
+| `publish` | ✅ | `ghcr.io/thehouse-team/thehouse-backend@sha256:57f3a6407bfdb2be6981ec9b9b160c49e6bfee13806a604b7867db67e8740644`; Trivy sin Critical/High corregibles; SBOM CycloneDX con 146 componentes; firma y atestación verificadas con la identidad de `cd.yml` en `main` |
+| `verify-ephemeral` | ✅ | Smoke `full` en verde (WARN H-01); ZAP API scan 0 High |
+| `deploy` | ❌ | Aprobado por `vicmanujo` (Prevent self-review impidió que `IsaiAxel`, quien hizo el merge, lo aprobara). Firma verificada; **falló el login OIDC**: `AADSTS700213 No matching federated identity record found for presented assertion subject 'repo:thehouse-team@350926140/TheHouse-Backend@1441437464:environment:production'` |
+| `dast-baseline` | ⏭️ | Omitido porque `deploy` falló |
+| `cd-summary` | ❌ | BLOCKED, como corresponde |
+
+- **Producción no cambió**: el login falló antes de leer o actualizar la Container App; no hizo falta rollback.
+- **Causa**: el repositorio usa el *subject* inmutable de GitHub OIDC (`GET /repos/thehouse-team/TheHouse-Backend/actions/oidc/customization/sub` → `use_immutable_subject: true`, prefijo `repo:thehouse-team@350926140/TheHouse-Backend@1441437464`), que incluye los IDs numéricos de la organización y del repositorio; la credencial federada se había creado con el formato corto.
+- **Corrección** (rama `fix/nv-09-oidc-subject`): variable `github_oidc_subject_prefix` con validación del formato inmutable. Plan `0 to add, 1 to change, 0 to destroy` (update in-place del subject), aplicado con «OK PARA APPLY» de Victor (2026-11-06); `plan` posterior sin cambios; `az identity federated-credential list` muestra el subject nuevo.
+- El formato inmutable es más seguro: un repositorio borrado y recreado con el mismo nombre no hereda el acceso a Azure.
+
