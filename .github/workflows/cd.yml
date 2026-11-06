@@ -1,0 +1,625 @@
+# NV-09 1.0.0-u2 — Entrega continua (M-BE-049).
+#
+# Corre cuando el workflow CI termina en éxito por un push a main, o a mano
+# desde main para redesplegar o revertir a un digest firmado. Publica la
+# imagen por digest, la firma con Cosign keyless, la verifica en un entorno
+# efímero y la despliega a Azure Container Apps solo con la aprobación del
+# Environment `production`. Sin secretos de larga duración: GHCR con
+# GITHUB_TOKEN y Azure con OIDC.
+name: CD
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: "Digest sha256 ya firmado por este workflow para redesplegar o revertir (vacío = publicar main)"
+        type: string
+        default: ""
+      simulate_smoke_failure:
+        description: "Forzar un fallo del smoke en producción para probar el rollback (T13)"
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
+env:
+  IMAGE: "ghcr.io/thehouse-team/thehouse-backend"
+  TRIVY_IMAGE: "aquasec/trivy:0.76.2"
+  ZAP_IMAGE: "ghcr.io/zaproxy/zaproxy:2.17.0"
+  COSIGN_VERSION: "v3.1.4"
+  CERT_IDENTITY: "https://github.com/thehouse-team/TheHouse-Backend/.github/workflows/cd.yml@refs/heads/main"
+  CERT_ISSUER: "https://token.actions.githubusercontent.com"
+  RESOURCE_GROUP: "rg-thehouse-u2"
+  CONTAINER_APP: "ca-thehouse-u2"
+
+jobs:
+  resolve:
+    name: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    # workflow_run: solo un CI exitoso por push a main de este repositorio.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    outputs:
+      mode: ${{ steps.resolve.outputs.mode }}
+      sha: ${{ steps.resolve.outputs.sha }}
+      digest: ${{ steps.resolve.outputs.digest }}
+    steps:
+      - name: Resolver qué se publica y despliega
+        id: resolve
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          CURRENT_SHA: ${{ github.sha }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          INPUT_DIGEST: ${{ inputs.image_digest }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$REF" != "refs/heads/main" ]; then
+              echo "::error::La ejecución manual solo se permite desde main."
+              exit 1
+            fi
+            if [ -n "$INPUT_DIGEST" ]; then
+              if ! printf '%s' "$INPUT_DIGEST" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+                echo "::error::image_digest debe tener el formato sha256:<64 hex>."
+                exit 1
+              fi
+              echo "mode=redeploy" >> "$GITHUB_OUTPUT"
+              echo "digest=$INPUT_DIGEST" >> "$GITHUB_OUTPUT"
+              echo "sha=$CURRENT_SHA" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "mode=publish" >> "$GITHUB_OUTPUT"
+            echo "sha=$CURRENT_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=publish" >> "$GITHUB_OUTPUT"
+            echo "sha=$RUN_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    name: publish
+    needs: resolve
+    if: needs.resolve.outputs.mode == 'publish'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    outputs:
+      digest: ${{ steps.digest.outputs.digest }}
+    steps:
+      - name: Checkout del commit validado por la CI
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Login a GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build y push inmutable (sha-<commit>)
+        id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          pull: true
+          tags: ${{ env.IMAGE }}:sha-${{ needs.resolve.outputs.sha }}
+          labels: |
+            org.opencontainers.image.title=TheHouse Backend
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ needs.resolve.outputs.sha }}
+            org.opencontainers.image.version=sha-${{ needs.resolve.outputs.sha }}
+          provenance: false
+          sbom: false
+
+      - name: Validar digest
+        id: digest
+        shell: bash
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$DIGEST" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+            echo "::error::Digest OCI inválido: '$DIGEST'"
+            exit 1
+          fi
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+          docker buildx imagetools inspect "$IMAGE@$DIGEST"
+
+      - name: Trivy sobre el digest publicado (T06)
+        shell: bash
+        env:
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          set +e
+          docker run --rm -v "$PWD:/out" "$TRIVY_IMAGE" image --no-progress --ignore-unfixed \
+            --severity CRITICAL,HIGH --exit-code 1 --format table --output /out/trivy-published.txt \
+            "$IMAGE@$DIGEST"
+          code=$?
+          cat trivy-published.txt
+          exit $code
+
+      - name: SBOM CycloneDX de la imagen
+        shell: bash
+        env:
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/out" "$TRIVY_IMAGE" image --no-progress \
+            --format cyclonedx --output /out/sbom-image.cdx.json "$IMAGE@$DIGEST"
+          python3 -c "import json;d=json.load(open('sbom-image.cdx.json'));print('SBOM componentes:',len(d.get('components',[])))"
+
+      - name: Instalar Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: ${{ env.COSIGN_VERSION }}
+
+      - name: Firmar y atestiguar el SBOM (T07)
+        shell: bash
+        env:
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          set -euo pipefail
+          cosign sign --yes "$IMAGE@$DIGEST"
+          cosign attest --yes --type cyclonedx --predicate sbom-image.cdx.json "$IMAGE@$DIGEST"
+
+      - name: Verificar firma y atestación
+        shell: bash
+        env:
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          set -euo pipefail
+          cosign verify "$IMAGE@$DIGEST" \
+            --certificate-identity "$CERT_IDENTITY" --certificate-oidc-issuer "$CERT_ISSUER" > /dev/null
+          cosign verify-attestation --type cyclonedx "$IMAGE@$DIGEST" \
+            --certificate-identity "$CERT_IDENTITY" --certificate-oidc-issuer "$CERT_ISSUER" > /dev/null
+          echo "Firma y atestación CycloneDX verificadas para $IMAGE@$DIGEST"
+
+      - name: Resumen de publicación
+        if: always()
+        shell: bash
+        env:
+          SHA: ${{ needs.resolve.outputs.sha }}
+          DIGEST: ${{ steps.digest.outputs.digest }}
+        run: |
+          {
+            echo "### Publicación"
+            echo
+            echo "| Campo | Valor |"
+            echo "| --- | --- |"
+            echo "| Commit | \`$SHA\` |"
+            echo "| Etiqueta | \`$IMAGE:sha-$SHA\` |"
+            echo "| Digest | \`${DIGEST:-—}\` |"
+            echo "| Identidad de firma | \`$CERT_IDENTITY\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Subir reportes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: publish
+          path: |
+            trivy-published.txt
+            sbom-image.cdx.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  verify-ephemeral:
+    name: verify-ephemeral
+    needs:
+      - resolve
+      - publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    services:
+      mongo:
+        image: mongo:8.0.34
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7.4.12
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      REF: ${{ format('{0}@{1}', 'ghcr.io/thehouse-team/thehouse-backend', needs.publish.outputs.digest) }}
+    steps:
+      - name: Checkout de scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+
+      - name: Llave JWT efímera
+        shell: bash
+        run: |
+          set -euo pipefail
+          key="$(openssl rand -base64 48 | tr -d '\n')"
+          echo "::add-mask::$key"
+          echo "Jwt__SigningKey=$key" >> "$GITHUB_ENV"
+
+      - name: Seed de catálogo (Testing)
+        run: bash .github/scripts/ephemeral_env.sh seed "$REF"
+
+      - name: Levantar API efímera
+        run: bash .github/scripts/ephemeral_env.sh start "$REF" smoke
+
+      - name: Smoke tests completos (T09)
+        run: python3 .github/scripts/smoke_test.py --base-url http://127.0.0.1:8080 --mode full --report smoke-ephemeral.md --ready-attempts 10 --ready-delay 2
+
+      - name: Reiniciar API para el escaneo activo
+        run: bash .github/scripts/ephemeral_env.sh start "$REF" scan
+
+      - name: ZAP API scan (T10)
+        shell: bash
+        run: |
+          set +e
+          mkdir -p zap && cp .zap/rules.tsv zap/ && chmod -R 777 zap
+          docker run --rm --network host -v "$PWD/zap:/zap/wrk:rw" "$ZAP_IMAGE" \
+            zap-api-scan.py -t http://127.0.0.1:8080/openapi/v1.json -f openapi \
+            -c rules.tsv -J zap-api.json -r zap-api.html -I
+          code=$?
+          if [ "$code" -ge 3 ]; then
+            echo "::error::ZAP no pudo completar el escaneo (código $code)."
+            exit 1
+          fi
+          python3 .github/scripts/zap_gate.py zap/zap-api.json "ZAP API scan (entorno efímero)"
+
+      - name: Logs de la API ante fallo
+        if: failure()
+        run: bash .github/scripts/ephemeral_env.sh logs
+
+      - name: Detener API
+        if: always()
+        run: bash .github/scripts/ephemeral_env.sh stop
+
+      - name: Subir reportes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verify-ephemeral
+          path: |
+            smoke-ephemeral.md
+            zap/zap-api.json
+            zap/zap-api.html
+          retention-days: 14
+          if-no-files-found: warn
+
+  # deploy concentra despliegue, smoke en producción y rollback: la
+  # credencial federada solo existe dentro del Environment production y un
+  # job separado de rollback pediría una segunda aprobación.
+  deploy:
+    name: deploy
+    needs:
+      - resolve
+      - publish
+      - verify-ephemeral
+    if: >-
+      !cancelled() &&
+      needs.resolve.result == 'success' &&
+      (needs.resolve.outputs.mode == 'redeploy' ||
+       (needs.publish.result == 'success' && needs.verify-ephemeral.result == 'success'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: ${{ steps.app.outputs.url }}
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      digest: ${{ steps.target.outputs.digest }}
+      previous_image: ${{ steps.app.outputs.previous_image }}
+      revision: ${{ steps.update.outputs.revision }}
+      url: ${{ steps.app.outputs.url }}
+      rolled_back: ${{ steps.rollback.outcome == 'success' }}
+    steps:
+      - name: Checkout de scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+
+      - name: Digest a desplegar
+        id: target
+        shell: bash
+        env:
+          MODE: ${{ needs.resolve.outputs.mode }}
+          PUBLISHED: ${{ needs.publish.outputs.digest }}
+          REQUESTED: ${{ needs.resolve.outputs.digest }}
+        run: |
+          set -euo pipefail
+          if [ "$MODE" = "redeploy" ]; then digest="$REQUESTED"; else digest="$PUBLISHED"; fi
+          if ! printf '%s' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+            echo "::error::Digest inválido: '$digest'"
+            exit 1
+          fi
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Instalar Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: ${{ env.COSIGN_VERSION }}
+
+      - name: Verificar firma antes de desplegar (T11)
+        shell: bash
+        env:
+          DIGEST: ${{ steps.target.outputs.digest }}
+        run: |
+          set -euo pipefail
+          cosign verify "$IMAGE@$DIGEST" \
+            --certificate-identity "$CERT_IDENTITY" --certificate-oidc-issuer "$CERT_ISSUER" > /dev/null
+          echo "Firma verificada: $IMAGE@$DIGEST"
+
+      - name: Login a Azure (OIDC)
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Estado actual de la Container App
+        id: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          az config set extension.use_dynamic_install=yes_without_prompt --only-show-errors
+          previous="$(az containerapp show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --query 'properties.template.containers[0].image' -o tsv)"
+          fqdn="$(az containerapp show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --query 'properties.configuration.ingress.fqdn' -o tsv)"
+          echo "previous_image=$previous" >> "$GITHUB_OUTPUT"
+          echo "url=https://$fqdn" >> "$GITHUB_OUTPUT"
+          echo "Imagen actual: $previous"
+
+      - name: Desplegar por digest
+        id: update
+        shell: bash
+        env:
+          DIGEST: ${{ steps.target.outputs.digest }}
+          SHA: ${{ needs.resolve.outputs.sha }}
+        run: |
+          set -euo pipefail
+          suffix="c${SHA:0:7}-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
+          revision="$CONTAINER_APP--$suffix"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+          az containerapp update -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" \
+            --image "$IMAGE@$DIGEST" --revision-suffix "$suffix" --only-show-errors -o none
+          echo "Revisión solicitada: $revision"
+
+      - name: Esperar la revisión
+        id: wait
+        shell: bash
+        env:
+          REVISION: ${{ steps.update.outputs.revision }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            state="$(az containerapp revision show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --revision "$REVISION" \
+              --query 'properties.provisioningState' -o tsv 2>/dev/null || echo Pending)"
+            echo "Intento $i: provisioningState=$state"
+            case "$state" in
+              Provisioned) break ;;
+              Failed) echo "::error::La revisión $REVISION falló al aprovisionarse."; exit 1 ;;
+            esac
+            sleep 5
+          done
+          [ "$state" = "Provisioned" ] || { echo "::error::Tiempo agotado esperando $REVISION."; exit 1; }
+          latest="$(az containerapp show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --query 'properties.latestReadyRevisionName' -o tsv)"
+          echo "latestReadyRevisionName=$latest"
+
+      - name: Smoke tests en producción (T12)
+        id: smoke
+        shell: bash
+        env:
+          BASE_URL: ${{ steps.app.outputs.url }}
+          SMOKE_SIMULATE_FAILURE: ${{ github.event_name == 'workflow_dispatch' && inputs.simulate_smoke_failure }}
+        run: python3 .github/scripts/smoke_test.py --base-url "$BASE_URL" --mode readonly --report smoke-production.md
+
+      - name: Confirmar revisión activa y sana
+        id: health
+        shell: bash
+        env:
+          REVISION: ${{ steps.update.outputs.revision }}
+        run: |
+          set -euo pipefail
+          read -r health running < <(az containerapp revision show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --revision "$REVISION" \
+            --query '[properties.healthState, properties.runningState]' -o tsv | tr '\n' ' ')
+          echo "healthState=$health runningState=$running"
+          case "$health:$running" in
+            Unhealthy:*|*:Failed|*:Degraded)
+              echo "::error::La revisión no quedó sana ($health / $running)."
+              exit 1 ;;
+            Healthy:*) ;;
+            *) echo "::warning::Estado no concluyente ($health / $running); el smoke en producción ya pasó." ;;
+          esac
+
+      - name: Rollback a la imagen anterior (T13)
+        id: rollback
+        if: >-
+          always() &&
+          steps.app.outputs.previous_image != '' &&
+          (steps.update.outcome == 'failure' || steps.wait.outcome == 'failure' ||
+           steps.smoke.outcome == 'failure' || steps.health.outcome == 'failure')
+        shell: bash
+        env:
+          PREVIOUS: ${{ steps.app.outputs.previous_image }}
+          BASE_URL: ${{ steps.app.outputs.url }}
+        run: |
+          set -euo pipefail
+          echo "::warning::Fallo en el despliegue o en el smoke: se restaura $PREVIOUS"
+          suffix="rb-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}"
+          az containerapp update -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" \
+            --image "$PREVIOUS" --revision-suffix "$suffix" --only-show-errors -o none
+          for i in $(seq 1 60); do
+            state="$(az containerapp revision show -n "$CONTAINER_APP" -g "$RESOURCE_GROUP" --revision "$CONTAINER_APP--$suffix" \
+              --query 'properties.provisioningState' -o tsv 2>/dev/null || echo Pending)"
+            [ "$state" = "Provisioned" ] && break
+            [ "$state" = "Failed" ] && { echo "::error::El rollback también falló."; exit 1; }
+            sleep 5
+          done
+          python3 .github/scripts/smoke_test.py --base-url "$BASE_URL" --mode readonly --report smoke-rollback.md
+          {
+            echo "### ⚠️ Rollback ejecutado"
+            echo
+            echo "Imagen restaurada: \`$PREVIOUS\` (revisión \`$CONTAINER_APP--$suffix\`). El run termina en fallo."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Subir reportes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: deploy
+          path: |
+            smoke-production.md
+            smoke-rollback.md
+          retention-days: 14
+          if-no-files-found: warn
+
+  dast-baseline:
+    name: dast-baseline
+    needs: deploy
+    if: needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout de scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: ZAP baseline pasivo en producción (T14)
+        shell: bash
+        env:
+          BASE_URL: ${{ needs.deploy.outputs.url }}
+        run: |
+          set +e
+          mkdir -p zap && cp .zap/rules.tsv zap/ && chmod -R 777 zap
+          docker run --rm -v "$PWD/zap:/zap/wrk:rw" "$ZAP_IMAGE" \
+            zap-baseline.py -t "$BASE_URL/api/v1/universities?page=1&pageSize=5" \
+            -c rules.tsv -J zap-baseline.json -r zap-baseline.html -I
+          code=$?
+          if [ "$code" -ge 3 ]; then
+            echo "::error::ZAP no pudo completar el escaneo (código $code)."
+            exit 1
+          fi
+          python3 .github/scripts/zap_gate.py zap/zap-baseline.json "ZAP baseline (producción)"
+
+      - name: Subir reportes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dast-baseline
+          path: |
+            zap/zap-baseline.json
+            zap/zap-baseline.html
+          retention-days: 14
+          if-no-files-found: warn
+
+  cd-summary:
+    name: cd-summary
+    needs:
+      - resolve
+      - publish
+      - verify-ephemeral
+      - deploy
+      - dast-baseline
+    if: always() && needs.resolve.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+    steps:
+      - name: Registro del despliegue
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ needs.resolve.outputs.mode }}
+          SHA: ${{ needs.resolve.outputs.sha }}
+          PUBLISH: ${{ needs.publish.result }}
+          VERIFY: ${{ needs.verify-ephemeral.result }}
+          DEPLOY: ${{ needs.deploy.result }}
+          DAST: ${{ needs.dast-baseline.result }}
+          DIGEST: ${{ needs.deploy.outputs.digest }}
+          PREVIOUS: ${{ needs.deploy.outputs.previous_image }}
+          REVISION: ${{ needs.deploy.outputs.revision }}
+          URL: ${{ needs.deploy.outputs.url }}
+          ROLLED_BACK: ${{ needs.deploy.outputs.rolled_back }}
+        run: |
+          set -euo pipefail
+          approvals="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/approvals" \
+            --jq '[.[] | select(.state == "approved") | .user.login] | join(", ")' 2>/dev/null || echo "")"
+          export APPROVERS="${approvals:-—}"
+          python3 - <<'PY'
+          import json, os
+          e = os.environ
+          required = ["DEPLOY", "DAST"] if e["MODE"] == "redeploy" else ["PUBLISH", "VERIFY", "DEPLOY", "DAST"]
+          status = "PASS" if all(e[k] == "success" for k in required) else "BLOCKED"
+          record = {
+              "spec": "NV-09 1.0.0-u2",
+              "run_id": e["GITHUB_RUN_ID"],
+              "run_url": f"{e['GITHUB_SERVER_URL']}/{e['GITHUB_REPOSITORY']}/actions/runs/{e['GITHUB_RUN_ID']}",
+              "mode": e["MODE"],
+              "commit": e["SHA"],
+              "image": f"{e['IMAGE']}@{e['DIGEST']}" if e.get("DIGEST") else None,
+              "signature_identity": e["CERT_IDENTITY"],
+              "approvers": e["APPROVERS"],
+              "previous_image": e.get("PREVIOUS") or None,
+              "revision": e.get("REVISION") or None,
+              "url": e.get("URL") or None,
+              "rolled_back": e.get("ROLLED_BACK") == "true",
+              "jobs": {k.lower(): e[k] for k in ("PUBLISH", "VERIFY", "DEPLOY", "DAST")},
+              "result": status,
+          }
+          json.dump(record, open("deployment-record.json", "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+          rows = "\n".join(f"| {k} | `{v}` |" for k, v in record.items() if k != "jobs")
+          jobs = "\n".join(f"| {k} | {v} |" for k, v in record["jobs"].items())
+          with open(e["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as s:
+              s.write(f"## Registro del despliegue — {status}\n\n| Campo | Valor |\n| --- | --- |\n{rows}\n\n| Job | Resultado |\n| --- | --- |\n{jobs}\n")
+          print(json.dumps(record, indent=2, ensure_ascii=False))
+          raise SystemExit(0 if status == "PASS" else 1)
+          PY
+
+      - name: Subir registro
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: deployment-record
+          path: deployment-record.json
+          retention-days: 14
+          if-no-files-found: warn

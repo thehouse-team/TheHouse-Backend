@@ -1,0 +1,4 @@
+# NV-09 T10/T14 — Configuración de reglas de OWASP ZAP (formato: id<TAB>IGNORE|WARN|FAIL<TAB>comentario).
+# El gate (`.github/scripts/zap_gate.py`) bloquea toda alerta High.
+# Una regla solo pasa a IGNORE con justificación, responsable y fecha de vencimiento en el comentario,
+# y con su registro en specs/nv-09-cd/evidence.md. Sin excepciones al 2026-11-05.

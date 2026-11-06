@@ -127,3 +127,32 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# NV-09 (CD): identidad federada para GitHub Actions.
+variable "cd_identity_name" {
+  description = "User-assigned managed identity used by the CD workflow."
+  type        = string
+  default     = "id-thehouse-u2-deploy"
+}
+
+variable "github_repository" {
+  description = "GitHub repository (owner/name) allowed to deploy through OIDC."
+  type        = string
+  default     = "thehouse-team/TheHouse-Backend"
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$", var.github_repository))
+    error_message = "github_repository must be owner/name."
+  }
+}
+
+variable "github_environment" {
+  description = "GitHub Environment whose OIDC tokens are trusted (NV-09-R08)."
+  type        = string
+  default     = "production"
+
+  validation {
+    condition     = var.github_environment == "production"
+    error_message = "Only the protected production Environment may deploy (NV-09)."
+  }
+}

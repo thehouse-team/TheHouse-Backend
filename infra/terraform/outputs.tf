@@ -45,3 +45,20 @@ output "log_analytics_workspace_name" {
   description = "Log Analytics workspace receiving Container Apps logs."
   value       = azurerm_log_analytics_workspace.this.name
 }
+
+# NV-09 T03: valores no sensibles para las variables del Environment
+# `production` de GitHub (AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID).
+output "cd_azure_client_id" {
+  description = "Client ID of the CD managed identity (not a secret)."
+  value       = azurerm_user_assigned_identity.cd.client_id
+}
+
+output "cd_azure_tenant_id" {
+  description = "Tenant ID for azure/login (not a secret)."
+  value       = data.azurerm_client_config.current.tenant_id
+}
+
+output "cd_azure_subscription_id" {
+  description = "Subscription ID for azure/login (not a secret)."
+  value       = data.azurerm_client_config.current.subscription_id
+}

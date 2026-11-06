@@ -178,9 +178,14 @@ resource "azurerm_container_app" "this" {
     # Secretos y variables runtime son administrados fuera de Terraform.
     # CREATE usa el bootstrap sin secretos; actualizaciones posteriores
     # no deben revertir la configuracion runtime validada en Azure.
+    #
+    # NV-09 T02 (M-BE-051): el CD es dueño de la imagen. `var.image` solo
+    # se usa en CREATE (bootstrap) y conserva su validación de digest; un
+    # apply posterior no revierte el digest desplegado por cd.yml.
     ignore_changes = [
       secret,
-      template[0].container[0].env
+      template[0].container[0].env,
+      template[0].container[0].image
     ]
     precondition {
       condition     = var.min_replicas <= var.max_replicas
