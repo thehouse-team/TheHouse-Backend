@@ -513,3 +513,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** hallazgos H1 a H6 de `specs/README.md` §6.2 (M-BE-056); constitution §35 exige revisión humana explícita, registro de decisión y análisis de impacto.
 - **Impacto:** sin cambios de código ni de infraestructura. Al aprobarse, M-BE-011 (proveedor pendiente) queda sustituida por M-BE-028 y constitution §30; la convención Git Flow con `develop` se reemplaza por la práctica con ruleset; los agentes pueden hacer commit y push solo a petición humana y nunca directo a `main`. COST-001, SDD-001/002, seguridad y rutas protegidas se mantienen.
 
+## M-BE-058 — NV-10 1.1.0: alcance reducido a refresh token y /users/me
+
+- **ID:** M-BE-058
+- **Decisión:** reemitir NV-10 como `1.1.0-borrador` con solo `POST /auth/refresh` (rotación, detección de reuso y revocación de la sesión), `refreshToken` aditivo en el login, `sid` aditivo en el access token, revocación de la sesión en el logout y `GET /users/me` con `id`, `email` y `createdAt`. Register (201), login (200) y logout (204) no cambian de forma incompatible. Recuperación de contraseña, verificación de correo, insignia, eliminación de cuenta y nuevos datos de registro pasan a una versión posterior.
+- **Estado:** PROPUESTO — pendiente de aprobación documental y de «EJECUTA».
+- **Fecha:** 2026-11-06.
+- **Aprobador:** pendiente (Victor Manuel Jose Jose).
+- **Justificación:** solicitud del responsable de Mobile tras revisar el backend; el borrador 1.0.0 rompía el registro (`acceptedTermsVersion` obligatorio), prometía campos inexistentes en `/users/me` y dependía de un proveedor de correo sin opción $0. Mobile confirmó compatibilidad: `ignoreUnknownKeys = true`, `refreshToken` opcional y almacenamiento cifrado con Android Keystore.
+- **Impacto:** al desplegarse, Mobile conectará la renovación y `/users/me` tras pruebas HTTP reales en Azure. Decisiones propuestas: 30 días por refresh token y 90 por sesión; sin periodo de gracia ante refresh simultáneos (la app serializa las renovaciones).
+

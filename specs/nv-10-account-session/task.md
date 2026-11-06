@@ -1,17 +1,17 @@
-# NV-10 — Sesión y cuenta — Task list
+# NV-10 — Sesión: refresh token y cuenta propia — Task list
 
 | Campo | Valor |
 | --- | --- |
 | ID | NV-10 |
 | Documento | `task.md` |
-| Versión | 1.0.0-borrador |
+| Versión | 1.1.0-borrador |
 | Fecha | 2026-11-06 |
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Aprobación humana | Pendiente |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.0.0-borrador |
-| Plan | `plan.md` 1.0.0-borrador |
+| Spec | `spec.md` 1.1.0-borrador |
+| Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 11 |
 | Tasks completadas | 0 |
 
@@ -25,20 +25,20 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Refresh token con rotación** — Requisito: NV-10-R01 · Fase: F1 · Aceptación: `POST /auth/refresh` emite access y refresh nuevos; el refresh anterior deja de servir; reuso de uno rotado revoca la familia y responde 401; expiración a 30 días. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Login y registro extendidos** — Requisito: NV-10-R02 · Fase: F1 · Aceptación: Login devuelve `refreshToken` sin romper el contrato NV-05; registro acepta `name` (1–80) y `acceptedTermsVersion` obligatorio; clientes antiguos siguen funcionando. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Consulta de la cuenta propia** — Requisito: NV-10-R03 · Fase: F1 · Aceptación: `GET /users/me` devuelve solo campos públicos de la cuenta del `sub`; nunca hash de contraseña ni tokens. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [ ] **T01 · Refresh token en el login** — Requisito: NV-10-R01 · Fase: F1 · Aceptación: Login 200 devuelve `refreshToken` además de los campos actuales sin cambiar su forma; el access token incluye `sid`; en la base solo queda el hash; prueba de contrato que compara la respuesta con la de NV-05. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [ ] **T02 · Renovación con rotación** — Requisito: NV-10-R02 · Fase: F1 · Aceptación: `POST /auth/refresh` con token válido devuelve access y refresh nuevos y el anterior deja de servir; token desconocido, vencido o revocado 401 uniforme; cuerpo inválido 400; vencimiento de 30 días por token y 90 por sesión. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [ ] **T03 · Cuenta propia** — Requisito: NV-10-R03 · Fase: F1 · Aceptación: `GET /users/me` con Bearer válido devuelve exactamente `id`, `email` y `createdAt` del `sub`; sin token o con token revocado 401; `Cache-Control: no-store`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T04 · Eliminación de cuenta** — Requisito: NV-10-R04 · Fase: F2 · Aceptación: `DELETE /users/me` con contraseña correcta anonimiza, revoca sesiones y limpia datos dependientes; 409 con renta activa; la cuenta eliminada no puede iniciar sesión. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T05 · Recuperación de contraseña** — Requisito: NV-10-R05 · Fase: F2 · Aceptación: `forgot` siempre 202 y envía un enlace solo si la cuenta existe; `reset` con token válido cambia la contraseña, revoca sesiones y consume el token; token vencido o usado 400. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T06 · Verificación de correo e insignia** — Requisito: NV-10-R06 · Fase: F2 · Aceptación: Token de 24 h de un solo uso; al verificar se fija `emailVerifiedAt`; `studentBadge` es true solo con correo verificado y dominio del catálogo. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T07 · Persistencia y expiración** — Requisito: NV-10-R07 · Fase: F2 · Aceptación: Colecciones con índices únicos y TTL; sin datos personales en tokens; consultas con proyección explícita. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [ ] **T04 · Persistencia e índices** — Requisito: NV-10-R04 · Fase: F2 · Aceptación: `refresh_tokens` con índice único en `tokenHash`, índice por `sessionId` e índice TTL; búsqueda de usuario por id con proyección explícita. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [ ] **T05 · Detección de reuso y concurrencia** — Requisito: NV-10-R05 · Fase: F2 · Aceptación: Reusar un token rotado revoca toda la sesión y responde 401; dos refresh simultáneos con el mismo token producen una sola emisión; pruebas de ambos casos. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [ ] **T06 · Logout integrado** — Requisito: NV-10-R06 · Fase: F2 · Aceptación: Logout sigue respondiendo 204 y revoca el `jti` como hoy; con `sid` revoca también la sesión y su refresh token deja de servir; un access token sin `sid` sigue funcionando hasta su expiración. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T08 · Límites y anti-enumeración** — Requisito: NV-10-R08 · Fase: F3 · Aceptación: Rate limits de la §9 con 429 y `Retry-After`; respuestas indistinguibles para cuentas existentes e inexistentes. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06, T07.
+- [ ] **T07 · Rechazo inmediato de sesiones revocadas** — Requisito: NV-10-R07 · Fase: F3 · Aceptación: Tras el logout o un reuso, cualquier access token de esa sesión recibe 401 en la siguiente solicitud, en cualquier réplica (estado en Redis). · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
+- [ ] **T08 · Límites y no regresión** — Requisito: NV-10-R08 · Fase: F3 · Aceptación: Rate limit de refresh con 429 y `Retry-After`; fallo de Redis 503; pruebas de regresión de register 201, login 200 y logout 204 con los contratos actuales. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 
 ## F4 — Pruebas y evidencia
 
@@ -56,7 +56,7 @@
 | T04 | R04 | F2 | ABIERTA |
 | T05 | R05 | F2 | ABIERTA |
 | T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F2 | ABIERTA |
+| T07 | R07 | F3 | ABIERTA |
 | T08 | R08 | F3 | ABIERTA |
 | T09 | R09 | F4 | ABIERTA |
 | T10 | R09 | F4 | ABIERTA |
