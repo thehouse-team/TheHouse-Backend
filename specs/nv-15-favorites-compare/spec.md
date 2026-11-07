@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.2.0-borrador |
 | Fecha | 2026-11-07 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-15-favorites-compare/`; la migración `--migrate-to-rooms` en Production requiere autorización aparte) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0, T01–T10 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-31, RF-32 (RF-33, comparación, en versión posterior) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-09 |
@@ -198,11 +198,11 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Identificador | `roomId`; el id de propiedad se acepta como alias durante la transición | PROPUESTO |
-| Respuestas de transición | Incluyen `propertyId`/`propertyIds` hasta 1.3.0 | PROPUESTO |
-| Cuartos no publicados | Se omiten sin borrarse | PROPUESTO |
-| Migración | Comando `--migrate-to-rooms` autorizado, idempotente y con reporte | PROPUESTO |
-| `/properties` | Encabezados de obsolescencia; se retira en 1.3.0 de acuerdo con Mobile | PROPUESTO |
+| Identificador | `roomId`; el id de propiedad se acepta como alias durante la transición | APROBADO (M-BE-067) |
+| Respuestas de transición | Incluyen `propertyId`/`propertyIds` hasta 1.3.0 | APROBADO (M-BE-067) |
+| Cuartos no publicados | Se omiten sin borrarse | APROBADO (M-BE-067) |
+| Migración | Comando `--migrate-to-rooms` autorizado, idempotente y con reporte | APROBADO (M-BE-067) |
+| `/properties` | Encabezados de obsolescencia; se retira en 1.3.0 de acuerdo con Mobile | APROBADO (M-BE-067) |
 
 ## 14. Costo — COST-001
 
@@ -236,8 +236,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0, T01–T10 autorizadas** |
 
 ## 18. Aprobación pendiente
 
