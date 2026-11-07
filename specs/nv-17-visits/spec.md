@@ -8,7 +8,7 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió»: aprobación de 1.1.0 y «EJECUTA» de T01–T12; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T12 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — T01–T12 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-80 (parte del estudiante; la del arrendador en versión posterior) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09 |
@@ -64,7 +64,7 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 | POST | `/api/v1/visits/{id}/cancel` | Autenticado (dueño de la visita) | Cancela una visita `requested` futura | 200, 400, 401, 404, 409, 429, 503 |
 
 - Visita: `{ id, property: { id, title, city }, scheduledAt, timeZone: "America/Mexico_City", status, message, createdAt, updatedAt, cancelledAt }`.
-- `scheduledAt` se recibe en ISO 8601 **con desplazamiento** (por ejemplo `2026-11-20T17:00:00-06:00`) y se devuelve en UTC (`...Z`); sin desplazamiento → 400.
+- `scheduledAt` se recibe en ISO 8601 **con desplazamiento** (por ejemplo `2026-11-20T17:00:00-06:00`) y se devuelve en UTC (`+00:00`, como el resto de la API; M-BE-061); sin desplazamiento → 400.
 - Reglas de horario (validación de negocio → 422): al menos 2 horas en el futuro, como máximo 60 días, entre 08:00 y 20:00 hora de `America/Mexico_City`, en múltiplos de 15 minutos.
 - `Idempotency-Key`: UUID obligatorio. La misma llave con el mismo cuerpo dentro de 24 h devuelve la visita original (200 y `Idempotent-Replayed: true`); con un cuerpo distinto → 409.
 - Conflictos → 409: ya existe una visita `requested` del usuario para esa propiedad; el usuario ya tiene otra visita `requested` a menos de 60 minutos; el usuario tiene 5 visitas `requested`.
@@ -138,7 +138,7 @@ Los eventos se procesan en el mismo proceso y de forma idempotente; si una répl
 
 ## 8. Modelo de datos
 
-- `visits`: `userId`, `propertyId`, `scheduledAt` (UTC), `status`, `message`, `cancelReason`, `createdAt`, `updatedAt`, `cancelledAt`, `history[]`; índice único parcial `{ userId, propertyId }` cuando `status = requested`; índices `{ userId, scheduledAt }` y `{ userId, status }`.
+- `visits`: `userId`, `propertyId`, `scheduledAt` (UTC), `status`, `message`, `cancelReason`, `createdAt`, `updatedAt`, `cancelledAt`, `history[]`; índices `{ userId, scheduledAt }` y `{ userId, status }`.
 - `visit_idempotency`: `userId`, `key`, `requestHash`, `visitId`, `createdAt` con índice único `{ userId, key }` e índice TTL de 24 h.
 
 ## 9. Reglas de negocio
@@ -146,7 +146,7 @@ Los eventos se procesan en el mismo proceso y de forma idempotente; si una répl
 1. Estados en v1: `requested` (creada por el estudiante) → `cancelled` (por el estudiante, antes del horario). Reservados para NV-12: `confirmed`, `rejected`, `rescheduled`, `completed`; no se emiten en v1.
 2. Cualquier transición no listada responde 409; cada cambio se registra en `history` con fecha y actor.
 3. La creación se serializa por usuario con un lock distribuido en Redis (5 s), de modo que dos solicitudes simultáneas con llaves distintas no eludan las reglas de conflicto (constitution §14).
-4. El índice único parcial impide dos visitas `requested` del mismo usuario para la misma propiedad aun ante concurrencia.
+4. El lock por usuario y la verificación de visitas activas impiden dos visitas `requested` futuras del mismo usuario para la misma propiedad aun ante concurrencia; no se usa índice único parcial, porque una visita pasada que siguiera en `requested` bloquearía la propiedad para siempre (M-BE-061).
 5. Las horas se validan en `America/Mexico_City` y se guardan en UTC.
 6. No se revela dirección exacta ni datos de contacto en ninguna respuesta.
 
@@ -170,7 +170,7 @@ Específicas de esta spec:
 
 ## 11. Errores
 
-Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
+Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`; en 409 y 422 se agrega `code` con el motivo estable (por ejemplo `schedule_overlap`, `outside_hours`) (M-BE-061).
 
 | Caso | Status | `title` |
 | --- | --- | --- |
@@ -193,7 +193,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-17-R04 | Consultar y listar | `GET /visits/{id}` (solo propias, ajena 404) y `GET /users/me/visits` paginado, filtrable por estado, orden `scheduledAt` asc. | F1 | T04 |
 | NV-17-R05 | Cancelar | `POST /visits/{id}/cancel` cancela una visita `requested` futura (200); repetir responde 200; visita pasada 409. | F1 | T05 |
 | NV-17-R06 | Idempotencia | Misma `Idempotency-Key` y mismo cuerpo dentro de 24 h devuelven la visita original (200, `Idempotent-Replayed`); cuerpo distinto 409; sin llave 400; prueba de reintentos y doble toque. | F2 | T06 |
-| NV-17-R07 | Conflictos y concurrencia | Visita `requested` duplicada para la misma propiedad, otra visita a menos de 60 min o más de 5 activas → 409; pruebas concurrentes con el lock por usuario y el índice único parcial. | F2 | T07 |
+| NV-17-R07 | Conflictos y concurrencia | Visita `requested` duplicada para la misma propiedad, otra visita a menos de 60 min o más de 5 activas → 409; pruebas concurrentes con el lock por usuario. | F2 | T07 |
 | NV-17-R08 | Autorización y límites | Sin `userId` del cliente; pruebas con dos usuarios; rate limits con 429 y `Retry-After`; Redis caído 503; `no-store`. | F3 | T08 |
 | NV-17-R09 | Contrato para Mobile y despliegue | Contrato de la §6.1 entregado a Mobile con URL desplegada, pruebas y prueba HTTP real en Azure (crear, repetir con la misma llave, conflicto, listar, consultar, cancelar). | F4 | T09 |
 | NV-17-R10 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T10, T11, T12 |
@@ -223,7 +223,7 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
-| NV-17-RK01 | Doble toque o reintento de red | Visitas duplicadas | `Idempotency-Key`, lock por usuario e índice único parcial |
+| NV-17-RK01 | Doble toque o reintento de red | Visitas duplicadas | `Idempotency-Key` y lock por usuario (M-BE-061) |
 | NV-17-RK02 | Errores de zona horaria | Visitas a la hora equivocada | Desplazamiento obligatorio, UTC en servidor y pruebas en el límite de horario |
 | NV-17-RK03 | Expectativa de confirmación | El estudiante espera respuesta del arrendador | La app muestra el estado `requested` como "Solicitud enviada"; confirmación con NV-12 |
 | NV-17-RK04 | Spam de solicitudes | Datos basura | Límite de 5 activas y 10 creaciones por día |
@@ -246,7 +246,7 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T12 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — T01–T12 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 
 ## 18. Aprobación y ejecución
 

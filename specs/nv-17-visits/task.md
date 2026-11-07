@@ -8,12 +8,12 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió»: aprobación de 1.1.0 y «EJECUTA» de T01–T12; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T08 completas (2026-11-07, ver `evidence.md`); T09–T12 esperan CI, CD y prueba en Azure** |
+| Estado de ejecución | **✅ COMPLETA — T01–T12 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0 |
 | Plan | `plan.md` 1.1.0 |
 | Tasks totales | 12 |
-| Tasks completadas | 8 |
+| Tasks completadas | 12 |
 
 ## Reglas de esta lista
 
@@ -34,7 +34,7 @@
 ## F2 — Persistencia e integración
 
 - [x] **T06 · Idempotencia** — Requisito: NV-17-R06 · Fase: F2 · Aceptación: Misma `Idempotency-Key` y mismo cuerpo dentro de 24 h devuelven la visita original (200, `Idempotent-Replayed`); cuerpo distinto 409; sin llave 400; prueba de reintentos y doble toque. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
-- [x] **T07 · Conflictos y concurrencia** — Requisito: NV-17-R07 · Fase: F2 · Aceptación: Visita `requested` duplicada para la misma propiedad, otra visita a menos de 60 min o más de 5 activas → 409; pruebas concurrentes con el lock por usuario y el índice único parcial. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T07 · Conflictos y concurrencia** — Requisito: NV-17-R07 · Fase: F2 · Aceptación: Visita `requested` duplicada para la misma propiedad, otra visita a menos de 60 min o más de 5 activas → 409; pruebas concurrentes con el lock por usuario. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
 
 ## F3 — Seguridad, autorización y límites
 
@@ -42,10 +42,10 @@
 
 ## F4 — Pruebas y evidencia
 
-- [ ] **T09 · Contrato para Mobile y despliegue** — Requisito: NV-17-R09 · Fase: F4 · Aceptación: Contrato de la §6.1 entregado a Mobile con URL desplegada, pruebas y prueba HTTP real en Azure (crear, repetir con la misma llave, conflicto, listar, consultar, cancelar). · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
-- [ ] **T10 · Pruebas unitarias y de integración** — Requisito: NV-17-R10 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08, T09.
-- [ ] **T11 · Pruebas de seguridad** — Requisito: NV-17-R10 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08, T09.
-- [ ] **T12 · Evidencia y revisión final** — Requisito: NV-17-R10 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T10, T11.
+- [x] **T09 · Contrato para Mobile y despliegue** — Requisito: NV-17-R09 · Fase: F4 · Aceptación: Contrato de la §6.1 entregado a Mobile con URL desplegada, pruebas y prueba HTTP real en Azure (crear, repetir con la misma llave, conflicto, listar, consultar, cancelar). · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
+- [x] **T10 · Pruebas unitarias y de integración** — Requisito: NV-17-R10 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08, T09.
+- [x] **T11 · Pruebas de seguridad** — Requisito: NV-17-R10 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08, T09.
+- [x] **T12 · Evidencia y revisión final** — Requisito: NV-17-R10 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T10, T11.
 
 ## Matriz task → requisito
 
@@ -59,10 +59,10 @@
 | T06 | R06 | F2 | COMPLETA |
 | T07 | R07 | F2 | COMPLETA |
 | T08 | R08 | F3 | COMPLETA |
-| T09 | R09 | F4 | ABIERTA |
-| T10 | R10 | F4 | ABIERTA |
-| T11 | R10 | F4 | ABIERTA |
-| T12 | R10 | F4 | ABIERTA |
+| T09 | R09 | F4 | COMPLETA |
+| T10 | R10 | F4 | COMPLETA |
+| T11 | R10 | F4 | COMPLETA |
+| T12 | R10 | F4 | COMPLETA |
 
 ## Cobertura requisito → task
 
@@ -85,11 +85,11 @@
 | --- | --- |
 | Requisitos | 10 |
 | Tasks | 12 |
-| Tasks abiertas | 4 |
-| Tasks completadas | 8 |
+| Tasks abiertas | 0 |
+| Tasks completadas | 12 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T08 completas (2026-11-07, ver `evidence.md`); T09–T12 esperan CI, CD y prueba en Azure** |
+| Estado de ejecución | **✅ COMPLETA — T01–T12 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

@@ -8,7 +8,7 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió»: aprobación de 1.1.0 y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-15-favorites-compare/`) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T10 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — T01–T10 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-31, RF-32 (RF-33, comparación, en versión posterior) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-09 |
@@ -164,7 +164,7 @@ Específicas de esta spec:
 
 ## 11. Errores
 
-Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
+Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`; en 409 se agrega `code` (`favorites_limit`) (M-BE-061).
 
 | Caso | Status | `title` |
 | --- | --- | --- |
@@ -232,7 +232,7 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T10 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — T01–T10 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 
 ## 18. Aprobación y ejecución
 
