@@ -4,17 +4,19 @@
 | --- | --- |
 | ID | NV-07 |
 | Documento | `spec.md` |
-| Versión | 1.1.0-u2 |
-| Fecha | 2026-11-05 |
+| Versión | 1.2.0-u2 |
+| Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-23 y RF-24 (parcial: listado y detalle públicos; filtros, mapa y sesión en NV-14) (`Requerimientos_TheHouse_v2`) |
-| Plan | `plan.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Plan | `plan.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Precondición | NV-01 U2 para el contrato; NV-03 U2 para la verificación desplegada; M-BE-027; M-BE-029 |
 | Relación | Spec funcional independiente; no autoriza CRUD ni otros módulos |
+
+**Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-07-R09 (seed regional de doce propiedades vinculadas al catálogo de NV-08 1.2.0-u2) y la task T13. Las tasks 1.1.0-u2 siguen cerradas.
 
 Este documento está aprobado documentalmente para U2. No autoriza implementación: la ejecución requiere autorización humana de Fase B.
 
@@ -33,7 +35,7 @@ Definir el contrato verificable de `GET /api/v1/properties` y `GET /api/v1/prope
 1. NV-01 U2 provee Problem Details, validación, paginación y configuración.
 2. NV-03 U2 aprobada documentalmente para la verificación desplegada; las pruebas locales pueden usar MongoDB y Redis aislados.
 3. Existe autorización de Fase B.
-4. Existe una colección `properties` con datos de prueba o seed controlado. El seed idempotente de seis propiedades de demostración se activa solo por configuración (`PropertySeed__Enabled=true` y `--seed-properties`), requiere el seed de universidades NV-08 y en `Production` solo se permite con `--allow-production-seed`, registrado en el log; no crea contenido masivo.
+4. Existe una colección `properties` con datos de prueba o seed controlado. El seed idempotente de doce propiedades de demostración (1.2.0-u2; antes seis) se activa solo por configuración (`PropertySeed__Enabled=true` y `--seed-properties`), requiere el seed de universidades NV-08 y en `Production` solo se permite con `--allow-production-seed`, registrado en el log; no crea contenido masivo.
 
 ## 4. Alcance
 
@@ -43,7 +45,7 @@ Definir el contrato verificable de `GET /api/v1/properties` y `GET /api/v1/prope
 4. Proyección de campos públicos.
 5. Índice MongoDB para el orden del listado.
 6. Problem Details.
-7. Seed idempotente de seis propiedades de demostración vinculadas a las universidades del seed NV-08.
+7. Seed idempotente de doce propiedades de demostración (1.2.0-u2; antes seis) vinculadas a las universidades del seed NV-08.
 8. Pruebas unitarias, de integración y de seguridad.
 9. Caché HTTP condicional (`ETag`, `Cache-Control`, 304) en listado y detalle.
 
@@ -207,6 +209,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-07-R06 | Problem Details y límites | 400/404/429/503/500 usan Problem Details; rate limit 60/60 s por IP en Redis; fallo de Redis 503. | F3 | T04, T05, T06, T08, T09 |
 | NV-07-R07 | Pruebas y evidencia | Unitarias, integración y seguridad; evidencia de comandos, resultados y hallazgos. | F4 | T09, T10, T12 |
 | NV-07-R08 | Caché HTTP condicional | GET 200 de listado y detalle devuelven `ETag` débil por contenido y `Cache-Control: public, max-age=60`; `If-None-Match` coincidente devuelve 304 sin cuerpo; los errores mantienen `no-store` sin `ETag`; no se cachean respuestas autenticadas. | F3 | T11, T12 |
+| NV-07-R09 | Seed regional de propiedades | Doce propiedades de demostración en la región Tula–Tepeji–Jilotepec, vinculadas por `code` a las universidades de NV-08 1.2.0-u2; precios en MXN realistas para estudiantes; sin direcciones exactas, coordenadas, contactos ni datos personales; upsert idempotente por `id`. | F2 | T13 |
 
 ## 11. Testing
 
@@ -239,10 +242,10 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 8 |
+| Requisitos | 9 |
 | Fases del plan | 4 |
-| Tasks | 12 |
-| Tasks U2 | 12 |
+| Tasks | 13 |
+| Tasks U2 | 13 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 12 |

@@ -4,15 +4,17 @@
 | --- | --- |
 | ID | NV-01 |
 | Documento | `plan.md` |
-| Versión | 1.1.0-u2 |
+| Versión | 1.2.0-u2 |
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
-| Spec | `spec.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Spec | `spec.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
+
+**Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-01-R14 (encabezados de seguridad HTTP; hallazgo H-01 de NV-09: falta `X-Content-Type-Options: nosniff`) y la task T19. Las tasks 1.1.0-u2 no cambian.
 
 Este plan está aprobado documentalmente para U2. No se ejecuta ahora, no se marca ninguna task y no se modifica ningún proyecto. Cualquier inicio requiere autorización humana de Fase B y autorización explícita de rutas.
 
@@ -293,6 +295,7 @@ Si aparece un costo incierto, la fase se detiene y se reporta BLOCKED. No se sus
 | R11 | F5 | T11, T16, T18 |
 | R12 | F2 | T12, T17, T18 |
 | R13 | F5 | T13 |
+| R14 | F6 | T19 |
 
 ## 11. No ejecución
 

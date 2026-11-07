@@ -4,14 +4,16 @@
 | --- | --- |
 | ID | NV-07 |
 | Documento | `plan.md` |
-| Versión | 1.1.0-u2 |
-| Fecha | 2026-11-05 |
+| Versión | 1.2.0-u2 |
+| Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
-| Spec | `spec.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Spec | `spec.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
+
+**Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-07-R09 (seed regional de doce propiedades vinculadas al catálogo de NV-08 1.2.0-u2) y la task T13. Las tasks 1.1.0-u2 siguen cerradas.
 
 Plan aprobado documentalmente para U2. No se implementa código en esta fase.
 
@@ -190,6 +192,7 @@ Property Core no requiere servicios pagos. MongoDB/Redis deben caber en COST-001
 | R06 | F3 | T04, T05, T06, T08, T09 |
 | R07 | F4 | T09, T10, T12 |
 | R08 | F3 | T11, T12 |
+| R09 | F2 | T13 |
 
 ## 10. No ejecución
 

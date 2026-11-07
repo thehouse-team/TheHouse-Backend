@@ -4,16 +4,18 @@
 | --- | --- |
 | ID | NV-07 |
 | Documento | `task.md` |
-| Versión | 1.1.0-u2 |
-| Fecha | 2026-11-05 |
+| Versión | 1.2.0-u2 |
+| Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
-| Spec | `spec.md` 1.1.0-u2 |
-| Plan | `plan.md` 1.1.0-u2 |
-| Tasks totales | 12 |
-| Tasks U2 | 12 |
+| Spec | `spec.md` 1.2.0-u2 |
+| Plan | `plan.md` 1.2.0-u2 |
+| Tasks totales | 13 |
+| Tasks U2 | 13 |
 | Tasks completadas | 12 |
+
+**Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-07-R09 (seed regional de doce propiedades vinculadas al catálogo de NV-08 1.2.0-u2) y la task T13. Las tasks 1.1.0-u2 siguen cerradas.
 
 ## Reglas
 
@@ -46,6 +48,7 @@
 - [x] **T09 · Pruebas de seguridad de propiedades** — Requisitos: NV-07-R05, NV-07-R06, NV-07-R07 · Fase: F4 · **Alcance: U2** · Aceptación: sin `ownerId`/dirección/coordenadas/contacto; errores sin stack trace; rate limit compartido. · Evidencia: informe de seguridad. · Depende de: T03, T05, T06.
 - [x] **T10 · Evidencia y revisión de propiedades** — Requisito: NV-07-R07 · Fase: F4 · **Alcance: U2** · Aceptación: cada requisito tiene evidencia o brecha declarada; revisión PASS/PASS WITH WARNINGS/BLOCKED. · Evidencia: matriz y acta. · Depende de: T07, T08, T09.
 - [x] **T12 · Pruebas y evidencia de caché HTTP de propiedades** — Requisitos: NV-07-R07, NV-07-R08 · Fase: F4 · **Alcance: U2 (1.1.0-u2)** · Aceptación: integración y seguridad cubren `ETag` estable, 304 (incluidos lista y `*`), 200 sin coincidencia, errores sin `ETag`, compresión y rate limit; `evidence.md` actualizado. · Evidencia: reporte de pruebas y acta. · Depende de: T09 y T11.
+- [ ] **T13 · Seed regional de propiedades** — Requisito: NV-07-R09 · Fase: F2 · **Alcance: U2 (1.2.0-u2)** · Aceptación: `PropertySeedData` con doce propiedades vinculadas a los `code` del catálogo regional; pruebas de seed actualizadas (doce registros, vínculo a universidades, segunda ejecución sin duplicados); sin datos sensibles. · Evidencia: diff, pruebas y acta. · Depende de: NV-08 T14.
 
 ## Matriz task → requisito
 
@@ -63,6 +66,7 @@
 | T10 | R07 | F4 | U2 | COMPLETADA |
 | T11 | R08 | F3 | U2 | COMPLETADA |
 | T12 | R07, R08 | F4 | U2 | COMPLETADA |
+| T13 | R09 | F2 | U2 | ABIERTA |
 
 ## Cobertura requisito → task
 
@@ -76,15 +80,16 @@
 | R06 | T04, T05, T06, T08, T09 |
 | R07 | T09, T10, T12 |
 | R08 | T11, T12 |
+| R09 | T13 |
 
 ## Resumen
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 8 |
-| Tasks | 12 |
-| Tasks U2 | 12 |
-| Tasks abiertas | 0 |
+| Requisitos | 9 |
+| Tasks | 13 |
+| Tasks U2 | 13 |
+| Tasks abiertas | 1 |
 | Tasks completadas | 12 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |

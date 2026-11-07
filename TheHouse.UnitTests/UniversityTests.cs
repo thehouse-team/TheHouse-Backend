@@ -224,12 +224,27 @@ public sealed class UniversityTests
 
     // --- Seed data ---------------------------------------------------
 
+    // NV-08 1.2.0-u2: catálogo regional Tula–Tepeji–Jilotepec (spec §7.1).
+    private static readonly (string Code, string Name, string City)[] RegionalSeed =
+    [
+        ("UTTT", "Universidad Tecnológica de Tula-Tepeji", "Tula de Allende"),
+        ("UAEH-ESTE", "Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Tepeji del Río", "Tepeji del Río de Ocampo"),
+        ("UAEH-ESTL", "Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Tlahuelilpan", "Tlahuelilpan"),
+        ("UAEH-ESAT", "Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Atotonilco de Tula", "Atotonilco de Tula"),
+        ("ITSOEH", "Instituto Tecnológico Superior del Occidente del Estado de Hidalgo", "Mixquiahuala de Juárez"),
+        ("TESJI", "Tecnológico de Estudios Superiores de Jilotepec", "Jilotepec"),
+        ("UMB-JILO", "Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Jilotepec", "Jilotepec"),
+        ("UMB-VDC", "Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Villa del Carbón", "Villa del Carbón"),
+        ("UCAN", "Universidad Canadiense", "Tula de Allende"),
+        ("UNE-TULA", "Universidad del Nuevo México", "Tula de Allende"),
+    ];
+
     [Fact]
-    public void Seed_contains_exactly_three_universities()
+    public void Seed_contains_exactly_ten_regional_universities()
     {
         var seed = UniversitySeedData.Create();
 
-        Assert.Equal(3, seed.Count);
+        Assert.Equal(10, seed.Count);
     }
 
     [Fact]
@@ -238,12 +253,11 @@ public sealed class UniversityTests
         var seed = UniversitySeedData.Create();
 
         Assert.Equal(
-            new[] { "ITSOEH", "UAEH", "UTTT" },
-            seed.Select(item => item.Code).Order().ToArray());
+            RegionalSeed.Select(item => item.Code).Order(StringComparer.Ordinal).ToArray(),
+            seed.Select(item => item.Code).Order(StringComparer.Ordinal).ToArray());
 
-        // Códigos únicos.
         Assert.Equal(
-            3,
+            seed.Count,
             seed.Select(item => item.Code)
                 .Distinct(StringComparer.Ordinal)
                 .Count());
@@ -252,32 +266,17 @@ public sealed class UniversityTests
     [Fact]
     public void Seed_matches_specification()
     {
-        var seed = UniversitySeedData.Create();
+        var seed = UniversitySeedData.Create()
+            .ToDictionary(item => item.Code, StringComparer.Ordinal);
 
-        var uttt = seed.First(item => item.Code == "UTTT");
-        var uaeh = seed.First(item => item.Code == "UAEH");
-        var itsoeh = seed.First(item => item.Code == "ITSOEH");
+        foreach (var (code, name, city) in RegionalSeed)
+        {
+            Assert.Equal(name, seed[code].Name);
+            Assert.Equal(city, seed[code].City);
+        }
 
-        Assert.Equal(
-            "Universidad Tecnológica de Tula-Tepeji",
-            uttt.Name);
-        Assert.Equal(
-            "Tula de Allende",
-            uttt.City);
-
-        Assert.Equal(
-            "Universidad Autónoma del Estado de Hidalgo",
-            uaeh.Name);
-        Assert.Equal(
-            "Pachuca de Soto",
-            uaeh.City);
-
-        Assert.Equal(
-            "Instituto Tecnológico Superior del Occidente del Estado de Hidalgo",
-            itsoeh.Name);
-        Assert.Equal(
-            "Mixquiahuala de Juárez",
-            itsoeh.City);
+        // La sede de Pachuca (fuera de la región) ya no forma parte del seed.
+        Assert.DoesNotContain(seed.Values, item => item.City == "Pachuca de Soto");
     }
 
     [Fact]

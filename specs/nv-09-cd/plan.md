@@ -4,14 +4,16 @@
 | --- | --- |
 | ID | NV-09 |
 | Documento | `plan.md` |
-| Versión | 1.0.0-u2 |
-| Fecha | 2026-11-05 |
+| Versión | 1.1.0-u2 |
+| Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
 | Estado de ejecución | **🟡 CD EN PRODUCCIÓN (run `42180858665`) — falta T13; T15–T19 sin autorizar** |
-| Spec | `spec.md` 1.0.0-u2 |
-| Tasks | `task.md` 1.0.0-u2 |
+| Spec | `spec.md` 1.1.0-u2 |
+| Tasks | `task.md` 1.1.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
+
+**Cambio 1.1.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-09-R17 (no desplegar cambios que solo tocan documentación) y la task T20. T13 y T18 se ejecutan en este ciclo (T13 ya autorizada; T18 requiere su autorización propia).
 
 Plan preparado para revisión. No crea workflows, identidades ni roles, no cambia Terraform ni la configuración de GitHub, y no publica ni despliega hasta la autorización «EJECUTA».
 
@@ -215,6 +217,7 @@ F6 Primer despliegue, seed y evidencia
 | R14 | F6 | T18 |
 | R15 | F6 | T17, T19 |
 | R16 | F6 | T19 |
+| R17 | F2 | T20 |
 
 ## 10. No ejecución
 

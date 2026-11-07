@@ -4,16 +4,18 @@
 | --- | --- |
 | ID | NV-08 |
 | Documento | `task.md` |
-| Versión | 1.1.0-u2 |
-| Fecha | 2026-11-05 |
+| Versión | 1.2.0-u2 |
+| Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
-| Spec | `spec.md` 1.1.0-u2 |
-| Plan | `plan.md` 1.1.0-u2 |
-| Tasks totales | 13 |
-| Tasks U2 | 13 |
+| Spec | `spec.md` 1.2.0-u2 |
+| Plan | `plan.md` 1.2.0-u2 |
+| Tasks totales | 14 |
+| Tasks U2 | 14 |
 | Tasks completadas | 13 |
+
+**Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** el seed pasa a un catálogo regional de diez universidades de Tula–Tepeji–Jilotepec (NV-08-R04, task T14) y se corrige el comando de seed documentado, que eludía M-BE-043. Las tasks 1.1.0-u2 siguen cerradas.
 
 ## Reglas
 
@@ -47,6 +49,7 @@
 - [x] **T10 · Pruebas de seguridad y seed** — Requisitos: NV-08-R02, NV-08-R04, NV-08-R07 · Fase: F4 · **Alcance: U2** · Aceptación: sin datos personales, errores sin stack trace, rate limit compartido y seed sin duplicados. · Evidencia: informe de seguridad. · Depende de: T04, T06, T07.
 - [x] **T11 · Evidencia y revisión de universidades** — Requisito: NV-08-R07 · Fase: F4 · **Alcance: U2** · Aceptación: cada requisito tiene evidencia o brecha declarada; revisión PASS/PASS WITH WARNINGS/BLOCKED. · Evidencia: matriz y acta. · Depende de: T08, T09, T10.
 - [x] **T13 · Pruebas y evidencia de caché HTTP de universidades** — Requisitos: NV-08-R07, NV-08-R08 · Fase: F4 · **Alcance: U2 (1.1.0-u2)** · Aceptación: integración y seguridad cubren `ETag` estable, 304 (incluidos lista y `*`), 200 sin coincidencia, errores sin `ETag`, compresión y rate limit; `evidence.md` actualizado. · Evidencia: reporte de pruebas y acta. · Depende de: T10 y T12.
+- [ ] **T14 · Catálogo regional en el seed** — Requisito: NV-08-R04 · Fase: F2 · **Alcance: U2 (1.2.0-u2)** · Aceptación: `UniversitySeedData` con las diez instituciones de la §7.1 de la spec; upsert idempotente por `code`; pruebas de seed actualizadas (diez registros y segunda ejecución sin duplicados); fuentes registradas en `evidence.md`. · Evidencia: diff, pruebas y acta. · Depende de: «EJECUTA».
 
 ## Matriz task → requisito
 
@@ -65,6 +68,7 @@
 | T11 | R07 | F4 | U2 | COMPLETADA |
 | T12 | R08 | F3 | U2 | COMPLETADA |
 | T13 | R07, R08 | F4 | U2 | COMPLETADA |
+| T14 | R04 | F2 | U2 | ABIERTA |
 
 ## Cobertura requisito → task
 
@@ -73,7 +77,7 @@
 | R01 | T01, T02, T05, T09 |
 | R02 | T01, T02, T06, T10 |
 | R03 | T02, T06, T08 |
-| R04 | T04, T08, T09, T10 |
+| R04 | T04, T08, T09, T10, T14 |
 | R05 | T03, T05, T06, T09 |
 | R06 | T05, T06, T07, T09 |
 | R07 | T10, T11, T13 |
@@ -84,9 +88,9 @@
 | Métrica | Valor |
 | --- | --- |
 | Requisitos | 8 |
-| Tasks | 13 |
-| Tasks U2 | 13 |
-| Tasks abiertas | 0 |
+| Tasks | 14 |
+| Tasks U2 | 14 |
+| Tasks abiertas | 1 |
 | Tasks completadas | 13 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |

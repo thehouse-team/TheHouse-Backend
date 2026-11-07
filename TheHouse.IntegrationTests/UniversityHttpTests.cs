@@ -29,13 +29,13 @@ public sealed class UniversityHttpTests
 
         // Orden estable: name ASC, luego id ASC.
         Assert.Equal(
-            new[] { "AAA", "ITSOEH", "UAEH", "UTTT" },
+            new[] { "AAA", "ITSOEH", "TESJI", "UAEH-ESAT", "UAEH-ESTE", "UAEH-ESTL", "UCAN", "UMB-JILO", "UMB-VDC", "UTTT", "UNE-TULA" },
             root.GetProperty("items")
                 .EnumerateArray()
                 .Select(item => item.GetProperty("code").GetString())
                 .ToArray());
 
-        Assert.Equal(4, root.GetProperty("totalItems").GetInt64());
+        Assert.Equal(11, root.GetProperty("totalItems").GetInt64());
         Assert.Equal(1, root.GetProperty("totalPages").GetInt32());
     }
 
@@ -98,7 +98,7 @@ public sealed class UniversityHttpTests
 
         Assert.Equal(1, root.GetProperty("page").GetInt32());
         Assert.Equal(20, root.GetProperty("pageSize").GetInt32());
-        Assert.Equal(4, root.GetProperty("items").GetArrayLength());
+        Assert.Equal(11, root.GetProperty("items").GetArrayLength());
     }
 
     [Fact]
@@ -120,8 +120,8 @@ public sealed class UniversityHttpTests
 
         Assert.Equal(2, root.GetProperty("page").GetInt32());
         Assert.Equal(2, root.GetProperty("pageSize").GetInt32());
-        Assert.Equal(4, root.GetProperty("totalItems").GetInt64());
-        Assert.Equal(2, root.GetProperty("totalPages").GetInt32());
+        Assert.Equal(11, root.GetProperty("totalItems").GetInt64());
+        Assert.Equal(6, root.GetProperty("totalPages").GetInt32());
 
         var items = root.GetProperty("items");
 
@@ -133,7 +133,7 @@ public sealed class UniversityHttpTests
             .ToArray();
 
         Assert.Equal(
-            new[] { "Universidad Autónoma del Estado de Hidalgo", "Universidad Tecnológica de Tula-Tepeji" },
+            new[] { "Tecnológico de Estudios Superiores de Jilotepec", "Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Atotonilco de Tula" },
             names);
     }
 
@@ -343,15 +343,16 @@ public sealed class UniversityHttpTests
     internal static Dictionary<string, string> Seed(
         UniversityTestStore store)
     {
-        // Exactamente el conjunto del seed real (UTTT/UAEH/ITSOEH).
+        // Exactamente el conjunto del seed real (catálogo regional NV-08 1.2.0-u2).
         var seed = UniversitySeedData.Create();
+        var index = 0;
 
         foreach (var university in seed)
         {
             store.Universities.Add(
                 new University
                 {
-                    Id = $"012345678987654321{university.Code.Length:D6}",
+                    Id = $"0123456789876543{index++:D8}",
                     Code = university.Code,
                     Name = university.Name,
                     City = university.City,
