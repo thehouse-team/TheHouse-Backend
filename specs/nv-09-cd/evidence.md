@@ -218,3 +218,28 @@ Smoke `readonly` en producción (versión nueva): health live/ready, catálogos 
 
 **Producción ahora ejecuta la versión de `main`** con caché HTTP (NV-07/NV-08 1.1.0-u2), errores con `no-store`, seed controlado y observabilidad (NV-03 1.2.0-u2). El despliegue anterior (`c651886`) queda sustituido.
 
+## 12. Ciclo 1.1.0-u2 (2026-11-07): rollback controlado (T13), seed en producción (T18) y despliegues de documentación (T20)
+
+### T13 — Rollback controlado ✅
+
+Run `42349310343` (`workflow_dispatch` desde `main` con `simulate_smoke_failure=true`, lanzado por `vicmanujo` y aprobado por `IsaiAxel` por *Prevent self-review*):
+
+| Paso | Resultado |
+| --- | --- |
+| Firma, OIDC y despliegue | ✅ revisión `ca-thehouse-u2--c0c8b477-10-1` lista y activa |
+| Smoke en producción | ❌ falla controlada «simulate_smoke_failure» |
+| Rollback | ✅ restaura `sha256:506208c5…` en `ca-thehouse-u2--rb-10-1`, lista y activa (`wait_revision.sh`), smoke posterior en verde |
+| Run | `failure`, como corresponde a un despliegue revertido |
+
+Estado posterior: `rb-10-1` Healthy/Running con la imagen previa; el catálogo (10 universidades) intacto.
+
+### T18 — Seed de catálogo en producción ✅
+
+Autorizado por Victor el 2026-11-07 (M-BE-059). Ejecución única con `--allow-production-seed` mediante `az containerapp exec` y `env` (las banderas existen solo en ese proceso). Resultado verificado por la API pública: 10 universidades y 12 propiedades vinculadas; detalle en las evidencias de NV-08 y NV-07.
+
+### T20 — Omitir despliegues de solo documentación (en curso)
+
+- Implementado en `resolve` (PR #12): compara el commit con su padre; solo `specs/`, `*.md`, `.opencode/` o `docs/` → modo `skip`, sin publicar, desplegar ni pedir aprobación; `cd-summary` no corre.
+- Lógica probada en local con tres commits (solo documentación → `skip`; documentación + código → `publish`; archivo fuera de esas rutas → `publish`).
+- Run con código: CD `42348699940` (merge del PR #12) siguió el flujo completo.
+- Falta el run de un merge de solo documentación (este PR) para cerrar T20.

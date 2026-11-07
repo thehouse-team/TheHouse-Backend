@@ -16,7 +16,7 @@
 | Tasks totales | 19 |
 | Tasks U2 | 18 |
 | Tasks futuras (no U2) | 1 |
-| Tasks completadas | 17 |
+| Tasks completadas | 18 |
 
 **Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-01-R14 (encabezados de seguridad HTTP; hallazgo H-01 de NV-09: falta `X-Content-Type-Options: nosniff`) y la task T19. Las tasks 1.1.0-u2 no cambian.
 
@@ -65,7 +65,7 @@
 - [x] **T16 · Pruebas negativas de validación y paginación** — Requisitos: NV-01-R04, NV-01-R11 · Fase: F6 · **Alcance: U2** · Aceptación: entradas inválidas, tamaños excesivos y páginas fuera de límite producen errores controlados. · Evidencia: casos negativos y reporte. · Depende de: T04, T11.
 - [x] **T17 · Revisión de seguridad de configuración, errores, cabeceras y límites** — Requisitos: NV-01-R02, NV-01-R03, NV-01-R08, NV-01-R10, NV-01-R12 · Fase: F6 · **Alcance: U2** · Aceptación: no hay secretos, fugas internas, confianza indebida en cabeceras ni límites eludibles trivialmente. · Evidencia: informe de revisión con hallazgos. · Depende de: T02, T03, T08, T10, T12.
 - [x] **T18 · Paquete de evidencia y revisión final** — Requisitos: NV-01-R01, NV-01-R02, NV-01-R03, NV-01-R04, NV-01-R05, NV-01-R06, NV-01-R07, NV-01-R08, NV-01-R09, NV-01-R10, NV-01-R11, NV-01-R12 · Fase: F6 · **Alcance: U2** · Aceptación: cada requisito U2 tiene evidencia o brecha declarada y la revisión emite PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: matriz de cobertura y acta. · Depende de: T01 a T12 y T14 a T17.
-- [ ] **T19 · Encabezado `nosniff` en todas las respuestas** — Requisito: NV-01-R14 · Fase: F6 · **Alcance: U2 (1.2.0-u2)** · Aceptación: middleware único que agrega `X-Content-Type-Options: nosniff`; pruebas en 200, 4xx, 304 y health; ZAP (NV-09) deja de reportar la alerta 10021. · Evidencia: pruebas, reporte de ZAP y acta. · Depende de: «EJECUTA».
+- [x] **T19 · Encabezado `nosniff` en todas las respuestas** — Requisito: NV-01-R14 · Fase: F6 · **Alcance: U2 (1.2.0-u2)** · Aceptación: middleware único que agrega `X-Content-Type-Options: nosniff`; pruebas en 200, 4xx, 304 y health; ZAP (NV-09) deja de reportar la alerta 10021. · Evidencia: pruebas, reporte de ZAP y acta. · Depende de: «EJECUTA».
 
 ## Matriz task → requisito
 
@@ -89,7 +89,7 @@
 | T16 | R04, R11 | F6 | U2 | COMPLETADA |
 | T17 | R02, R03, R08, R10, R12 | F6 | U2 | COMPLETADA |
 | T18 | R01, R02, R03, R04, R05, R06, R07, R08, R09, R10, R11, R12 | F6 | U2 | COMPLETADA |
-| T19 | R14 | F6 | U2 | ABIERTA |
+| T19 | R14 | F6 | U2 | COMPLETADA |
 
 ## Cobertura requisito → task
 
@@ -118,8 +118,8 @@
 | Tasks | 19 |
 | Tasks U2 | 18 |
 | Tasks futuras (no U2) | 1 |
-| Tasks abiertas | 2 (T13, futura; T19, 1.2.0-u2) |
-| Tasks completadas | 17 |
+| Tasks abiertas | 1 (T13, futura; 0 pendientes U2) |
+| Tasks completadas | 18 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |

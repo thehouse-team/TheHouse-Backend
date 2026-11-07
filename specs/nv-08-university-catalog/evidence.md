@@ -409,3 +409,11 @@ Ejecutado el 2026-11-05 en la rama `fix/u2-review` con la autorización humana �
 - Pruebas (`HttpCachingTests`, `ConfigurationTests`): `ETag` débil y `Cache-Control` en 200, mismo `ETag` para el mismo contenido, 304 sin cuerpo con `If-None-Match`, lista y `*`, comparación débil, `ETag` nuevo cuando cambia el contenido, 200 sin coincidencia, errores sin `ETag` y con `no-store`, el 304 cuenta para el rate limit, `ETag` independiente de `Accept-Encoding` y rechazo de `max-age` fuera de rango.
 - Resultado local: `dotnet build` 0 errores y 0 advertencias; `dotnet test` 429 aprobadas, 0 fallidas (130 unitarias, 47 de seguridad, 252 de integración), con `appsettings.Development.json` presente.
 - Pendiente: la verificación contra Azure requiere publicar y desplegar una imagen nueva; la imagen actual (`c651886`) no incluye este cambio.
+
+## Addendum 1.2.0-u2 — Catálogo regional (T14) y seed en producción (2026-11-07)
+
+- PR #12 (mezclado por IsaiAxel): `UniversitySeedData` con las diez instituciones de la §7.1; pruebas actualizadas (diez registros, segunda ejecución sin duplicados, nombres y ciudades exactos, sin la sede de Pachuca). Build sin advertencias; 486/486 pruebas; CI run `42348390888` en verde.
+- CD run `42348699940` (aprobado por `vicmanujo`) desplegó la revisión `ca-thehouse-u2--c0c8b477-9-1`.
+- Seed en producción (NV-09 T18), autorizado por Victor el 2026-11-07, con `env UniversitySeed__Enabled=true PropertySeed__Enabled=true dotnet TheHouse.dll --seed-universities --seed-properties --allow-production-seed` vía `az containerapp exec`. Log: «Seed autorizado en Production mediante --allow-production-seed: universidades=True, propiedades=True»; «University seed completed»; «Property seed completed».
+- Verificación por la API pública: antes 0 universidades; después **10** (ITSOEH, TESJI, UAEH-ESAT, UAEH-ESTE, UAEH-ESTL, UCAN, UMB-JILO, UMB-VDC, UTTT, UNE-TULA). Ninguna variable `*Seed__Enabled` quedó persistida en la Container App.
+- Fuentes de los datos: §7.1 de la spec (consultadas el 2026-11-07). Pendiente para el equipo: confirmar la vigencia de las dos instituciones privadas antes de la evaluación.

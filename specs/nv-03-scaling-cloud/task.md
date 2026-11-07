@@ -8,13 +8,13 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 4 de 25 tasks (T13, T15, T23, T24); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 5 de 25 tasks (T13, T15, T23, T24, T25); ver `evidence.md`** |
 | Spec | `spec.md` 1.2.0-u2 |
 | Plan | `plan.md` 1.2.0-u2 |
 | Tasks totales | 25 |
 | Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
-| Tasks completadas | 4 (T13, T15, T23, T24; ver `evidence.md`) |
+| Tasks completadas | 5 (T13, T15, T23, T24, T25; ver `evidence.md`) |
 
 ## Reglas de esta lista
 
@@ -55,7 +55,7 @@
 - [ ] **T14 · Handoff de imagen a NV-02** — Requisito: NV-03-R08 · Fase: F4 · **Alcance: Futuro (no U2)** · Aceptación: digest, SBOM y contexto entregados para Trivy, Dockle y Cosign. · Evidencia: registro de handoff. · Depende de: T13 y NV-02.
 - [ ] **T22 · Publicación GHCR y VERSIONING.md** — Requisitos: NV-03-R08, NV-03-R14 · Fase: F4 · **Alcance: U2** · Aceptación: imagen publicada en `ghcr.io` con tag/commit, sin token impreso; `VERSIONING.md` registra versión, fecha, imagen, tag, commit, entorno, URL y estado. · Evidencia: digest, tag, registro y revisión. · Depende de: T13.
 - [x] **T24 · Log Analytics con tope diario en Terraform** — Requisitos: NV-03-R15, NV-03-R07, NV-03-R13 · Fase: F4 · **Alcance: U2 (1.2.0-u2)** · Aceptación: `azurerm_log_analytics_workspace` con SKU `PerGB2018`, `daily_quota_gb = 0.1`, `retention_in_days = 30` y etiquetas; el entorno de Container Apps envía sus logs a ese workspace; `terraform plan` sin reemplazo del entorno ni de la app (si lo propone: BLOCKED y opción B); apply solo con `OK PARA APPLY`. · Evidencia: diff, plan revisado y salida del apply. · Depende de: T15, T16 y autorización «EJECUTA».
-- [ ] **T25 · Evidencia de observabilidad y costo** — Requisitos: NV-03-R15, NV-03-R13 · Fase: F4 · **Alcance: U2 (1.2.0-u2)** · Aceptación: consulta KQL de errores y eventos con registros reales del backend; logs sin PII, tokens ni cadenas de conexión; uso de ingestión y Cost Management registrados con fecha; `evidence.md` actualizado. · Evidencia: consulta, salida sanitizada y costo. · Depende de: T24.
+- [x] **T25 · Evidencia de observabilidad y costo** — Requisitos: NV-03-R15, NV-03-R13 · Fase: F4 · **Alcance: U2 (1.2.0-u2)** · Aceptación: consulta KQL de errores y eventos con registros reales del backend; logs sin PII, tokens ni cadenas de conexión; uso de ingestión y Cost Management registrados con fecha; `evidence.md` actualizado. · Evidencia: consulta, salida sanitizada y costo. · Depende de: T24.
 
 ## F5 — Terraform y costo Azure
 
@@ -99,7 +99,7 @@
 | T22 | R08, R14 | F4 | U2 | ABIERTA |
 | T23 | R12, R13 | F6 | U2 | COMPLETADA |
 | T24 | R15, R07, R13 | F4 | U2 | COMPLETADA |
-| T25 | R15, R13 | F4 | U2 | ABIERTA |
+| T25 | R15, R13 | F4 | U2 | COMPLETADA |
 
 ## Cobertura requisito → task
 
@@ -129,11 +129,11 @@
 | Tasks | 25 |
 | Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
-| Tasks abiertas | 21 |
-| Tasks completadas | 4 |
+| Tasks abiertas | 20 |
+| Tasks completadas | 5 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 4 de 25 tasks (T13, T15, T23, T24); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 5 de 25 tasks (T13, T15, T23, T24, T25); ver `evidence.md`** |
 
 Ninguna task puede ejecutarse hasta la aprobación de Fase B con versiones, IDs, rutas, proveedor, servicios y restricciones explícitas. `terraform apply` y `terraform destroy` requieren confirmación humana separada.

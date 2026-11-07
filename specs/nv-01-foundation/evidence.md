@@ -249,3 +249,10 @@ Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `f
 - Nota de entorno: `TheHouse/appsettings.Development.json` es un archivo local ignorado por Git, no forma parte del repositorio y habilita JWT sin `JWT_SIGNING_KEY`; para ejecutar la suite se excluyó temporalmente y se restauró byte a byte sin incorporarlo al commit. Esta limitación se declara para no atribuir a la suite una ejecución que dependa de configuración no versionada.
 - Seguridad: revisión de OWASP API Security Top 10, secretos, autenticación, autorización, validación de entrada, exposición de datos, errores, logging, rate limiting y mass assignment. Sin hallazgos Critical/High ni secretos confirmados en el alcance revisado. Resultado: PASS WITH WARNINGS. No se ejecutaron SAST, SCA, SBOM, DAST, fuzzing, mutación ni performance.
 - SDD: la revisión no crea tasks, no reabre el cierre U2 y no autoriza implementación adicional. Resultado: PASS WITH WARNINGS.
+
+## Addendum 1.2.0-u2 — Encabezado `nosniff` (T19), 2026-11-07
+
+- `TheHouse/Http/SecurityHeadersMiddleware.cs`, registrado primero en el pipeline; agrega `X-Content-Type-Options: nosniff` en `OnStarting`, por lo que sobrevive a los manejadores de error.
+- `SecurityHeadersTests` (6 casos): health 200, listado 200, 400, 404, 304 con `If-None-Match` y Problem Details 400/401. Suite completa 486/486.
+- Producción (revisión `c0c8b477-9-1`): `x-content-type-options: nosniff` en `/health/ready`.
+- ZAP baseline del CD run `42348699940`: «PASS: X-Content-Type-Options Header Missing [10021]»; 0 High, 0 Medium. Hallazgo H-01 de NV-09 cerrado.

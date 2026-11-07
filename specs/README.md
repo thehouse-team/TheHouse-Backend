@@ -8,15 +8,15 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 
 | ID | Spec | Estado documental | Estado de ejecución | Tasks |
 | --- | --- | --- | --- | --- |
-| NV-01 | [Foundation (U2)](nv-01-foundation/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) | 17/19 |
+| NV-01 | [Foundation (U2)](nv-01-foundation/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) | 18/19 |
 | NV-02 | [CI y DevSecOps (U2)](nv-02-devsecops/spec.md) | **✅ APROBADA** | **✅ COMPLETADA — PASS WITH WARNINGS (2026-11-05)** | 15/15 |
-| NV-03 | [Scaling Cloud U2](nv-03-scaling-cloud/spec.md) | **✅ APROBADA PARA U2** | **🟡 EJECUCIÓN PARCIAL — 4 de 25 tasks (T13, T15, T23, T24); ver `evidence.md`** | 4/25 |
+| NV-03 | [Scaling Cloud U2](nv-03-scaling-cloud/spec.md) | **✅ APROBADA PARA U2** | **🟡 EJECUCIÓN PARCIAL — 5 de 25 tasks (T13, T15, T23, T24, T25); ver `evidence.md`** | 5/25 |
 | NV-04 | [User Registration (U2)](nv-04-registration/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 11/11 |
 | NV-05 | [Login (U2)](nv-05-login/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 11/11 |
 | NV-06 | [Logout (U2)](nv-06-logout/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 10/10 |
-| NV-07 | [Property Core (U2)](nv-07-property-core/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 12/13 |
-| NV-08 | [University Catalog (U2)](nv-08-university-catalog/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 13/14 |
-| NV-09 | [Entrega continua (CD) U2](nv-09-cd/spec.md) | **✅ APROBADA** | **🟡 CD EN PRODUCCIÓN (run `42180858665`) — falta T13; T15–T19 sin autorizar** | 13/20 |
+| NV-07 | [Property Core (U2)](nv-07-property-core/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 13/13 |
+| NV-08 | [University Catalog (U2)](nv-08-university-catalog/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 14/14 |
+| NV-09 | [Entrega continua (CD) U2](nv-09-cd/spec.md) | **✅ APROBADA** | **🟡 CD EN PRODUCCIÓN — 15 de 20 tasks; T20 se cierra con el primer merge de solo documentación; T15–T17 y T19 pendientes** | 15/20 |
 | NV-10 | [Sesión: refresh token y cuenta propia](nv-10-account-session/spec.md) | **✅ APROBADA** | **✅ COMPLETADA — DESPLEGADA EN AZURE (revisión `c55feed2-7-1`) Y VERIFICADA 13/13 (2026-11-06)** | 11/11 |
 | NV-11 | [Perfil, universidad y preferencias](nv-11-profile-preferences/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 | NV-12 | [Arrendador, edificios y cuartos](nv-12-landlord-buildings-rooms/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/11 |

@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 4 de 25 tasks (T13, T15, T23, T24); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 5 de 25 tasks (T13, T15, T23, T24, T25); ver `evidence.md`** |
 | Spec | `spec.md` 1.2.0-u2 |
 | Tasks | `task.md` 1.2.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |

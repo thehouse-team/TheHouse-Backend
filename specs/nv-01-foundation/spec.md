@@ -178,7 +178,7 @@ La evidencia futura debe incluir comando reproducible, versión, resultado y art
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 17 |
+| Tasks completadas | 18 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
 

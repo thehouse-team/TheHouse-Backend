@@ -324,3 +324,8 @@ Ejecutado el 2026-11-05 en la rama `fix/u2-review` con la autorización humana �
 - Pruebas (`HttpCachingTests`, `ConfigurationTests`): `ETag` débil y `Cache-Control` en 200, mismo `ETag` para el mismo contenido, 304 sin cuerpo con `If-None-Match`, lista y `*`, comparación débil, `ETag` nuevo cuando cambia el contenido, 200 sin coincidencia, errores sin `ETag` y con `no-store`, el 304 cuenta para el rate limit, `ETag` independiente de `Accept-Encoding` y rechazo de `max-age` fuera de rango.
 - Resultado local: `dotnet build` 0 errores y 0 advertencias; `dotnet test` 429 aprobadas, 0 fallidas (130 unitarias, 47 de seguridad, 252 de integración), con `appsettings.Development.json` presente.
 - Pendiente: la verificación contra Azure requiere publicar y desplegar una imagen nueva; la imagen actual (`c651886`) no incluye este cambio.
+
+## Addendum 1.2.0-u2 — Propiedades regionales (T13), 2026-11-07
+
+- PR #12: `PropertySeedData` con doce propiedades vinculadas por `code` al catálogo regional; pruebas actualizadas (doce registros, vínculo a universidades existentes, segunda ejecución sin duplicados, propiedades ajenas conservadas).
+- Seed en producción (ver NV-08 evidence): la API pública devuelve **12 propiedades**, todas con `universityId` de una universidad del catálogo; precios de 1,800 a 6,500 MXN; sin direcciones exactas, coordenadas, contactos ni datos personales.

@@ -8,11 +8,11 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN (run `42180858665`) — falta T13; T15–T19 sin autorizar** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 15 de 20 tasks; T20 se cierra con el primer merge de solo documentación; T15–T17 y T19 pendientes** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks totales | 20 |
-| Tasks completadas | 13 |
+| Tasks completadas | 15 |
 
 **Cambio 1.1.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-09-R17 (no desplegar cambios que solo tocan documentación) y la task T20. T13 y T18 se ejecutan en este ciclo (T13 ya autorizada; T18 requiere su autorización propia).
 
@@ -48,7 +48,7 @@
 
 - [x] **T11 · Job `deploy`** — Requisito: NV-09-R09 · Fase: F4 · Aceptación: `environment: production`; `cosign verify` antes de desplegar; OIDC; imagen anterior registrada; `az containerapp update` por digest con sufijo de revisión; revisión `Running` y `Healthy` dentro del tiempo límite. · Evidencia: run con aprobación y revisión. · Depende de: T01, T02, T03, T07, T10.
 - [x] **T12 · Smoke tests en producción** — Requisito: NV-09-R10 · Fase: F4 · Aceptación: `smoke_test.py --mode readonly`: health, GET de universidades y propiedades (lista y detalle), registro inválido 400, login inexistente 401, logout sin token 401, HSTS, `nosniff` y ETag; reintentos acotados por arranque en frío; sin escrituras persistentes. · Evidencia: reporte. · Depende de: T11.
-- [ ] **T13 · Rollback automático** — Requisito: NV-09-R11 · Fase: F4 · Aceptación: si `deploy` o `smoke-production` fallan se restaura la imagen anterior, se repite el smoke y el run falla; probado una vez con `simulate_smoke_failure`. · Evidencia: run de la prueba controlada. · Depende de: T11, T12.
+- [x] **T13 · Rollback automático** — Requisito: NV-09-R11 · Fase: F4 · Aceptación: si `deploy` o `smoke-production` fallan se restaura la imagen anterior, se repite el smoke y el run falla; probado una vez con `simulate_smoke_failure`. · Evidencia: run de la prueba controlada. · Depende de: T11, T12.
 - [x] **T14 · ZAP baseline en producción** — Requisito: NV-09-R12 · Fase: F4 · Aceptación: escaneo pasivo contra la URL pública después del smoke; High bloquea salvo excepción justificada. · Evidencia: reporte. · Depende de: T12.
 
 ## F5 — Pruebas extendidas
@@ -59,7 +59,7 @@
 ## F6 — Primer despliegue, seed y evidencia
 
 - [ ] **T17 · Primer despliegue real y registro** — Requisitos: NV-09-R09, NV-09-R15 · Fase: F6 · Aceptación: `main` con el PR #3 integrado desplegado por el pipeline con aprobación registrada; `deployment-record.json`; `VERSIONING.md` actualizado por pull request. · Evidencia: run, registro y pull request. · Depende de: T11, T12, T13, T14 e integración del PR #3.
-- [ ] **T18 · Seed de catálogo en producción** — Requisito: NV-09-R14 · Fase: F6 · Aceptación: autorización explícita; ejecución única con `--seed-universities --seed-properties --allow-production-seed`; banderas de seed desactivadas al terminar; conteos verificados por la API pública. · Evidencia: log sanitizado y respuesta de la API. · Depende de: T17.
+- [x] **T18 · Seed de catálogo en producción** — Requisito: NV-09-R14 · Fase: F6 · Aceptación: autorización explícita; ejecución única con `--seed-universities --seed-properties --allow-production-seed`; banderas de seed desactivadas al terminar; conteos verificados por la API pública. · Evidencia: log sanitizado y respuesta de la API. · Depende de: T17.
 - [ ] **T19 · Evidencia, costo y revisión final** — Requisitos: NV-09-R15, NV-09-R16 · Fase: F6 · Aceptación: `evidence.md` con runs, hallazgos, excepciones, duración y costo; evidencia enlazada a NV-03 T14, T19, T22 y T25; revisión de seguridad y coherencia con resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md` y acta. · Depende de: T17, T18.
 - [ ] **T20 · Omitir despliegues de solo documentación** — Requisito: NV-09-R17 · Fase: F2 · Aceptación: el job `resolve` compara los archivos del commit con su padre en `main`; solo documentación → modo `skip` sin publicar ni pedir aprobación; código o configuración → flujo completo; prueba con un commit de solo documentación y otro de código. · Evidencia: dos runs del CD. · Depende de: T04.
 
@@ -79,12 +79,12 @@
 | T10 | R06 | F3 | COMPLETADA |
 | T11 | R09 | F4 | COMPLETADA |
 | T12 | R10 | F4 | COMPLETADA |
-| T13 | R11 | F4 | ABIERTA |
+| T13 | R11 | F4 | COMPLETADA |
 | T14 | R12 | F4 | COMPLETADA |
 | T15 | R13 | F5 | ABIERTA |
 | T16 | R13 | F5 | ABIERTA |
 | T17 | R09, R15 | F6 | ABIERTA |
-| T18 | R14 | F6 | ABIERTA |
+| T18 | R14 | F6 | COMPLETADA |
 | T19 | R15, R16 | F6 | ABIERTA |
 | T20 | R17 | F2 | ABIERTA |
 
@@ -116,11 +116,11 @@
 | --- | --- |
 | Requisitos | 17 |
 | Tasks | 20 |
-| Tasks abiertas | 7 |
-| Tasks completadas | 13 |
+| Tasks abiertas | 5 |
+| Tasks completadas | 15 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — falta T13** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 15 de 20 tasks; T20 se cierra con el primer merge de solo documentación; T15–T17 y T19 pendientes** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

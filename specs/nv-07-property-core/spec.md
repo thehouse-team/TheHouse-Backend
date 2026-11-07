@@ -248,7 +248,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Tasks U2 | 13 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 12 |
+| Tasks completadas | 13 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
 
