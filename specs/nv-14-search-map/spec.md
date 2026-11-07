@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-07 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T13; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-14-search-map/`; los seeds de colonias y de demostración en Production requieren autorización aparte) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-08 (conteo), RF-23 a RF-30, RF-41 (ubicación aproximada), RF-47 (filtro compartido), RF-68, RF-73 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-05, RNF-08 |
@@ -221,15 +221,15 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Catálogo público | Solo cuartos `available` de edificios `verified` | PROPUESTO |
-| Consulta | Dos pasos sobre `buildings` y `rooms`, sin modelo de lectura en v1 | PROPUESTO |
-| Ubicación aproximada | Centro de celda de 0.003° y distancias desde la celda, sin secretos | PROPUESTO |
-| Detalle con sesión | `/rooms/{id}` exige sesión (RF-24); `/properties` sin cambios | PROPUESTO |
-| Migración de favoritos y visitas | Fuera de NV-14: NV-15 1.2.0 y NV-17 1.2.0 con Mobile, usando el mapeo del seed de demostración | PROPUESTO |
-| Datos de demostración | Seed autorizado que convierte las 12 propiedades en cuartos verificados `demo` | PROPUESTO |
-| Colonias | Seed curado desde OpenStreetMap (ODbL) para los municipios de las 10 universidades | PROPUESTO |
-| Filtros | Los de la §6 con los catálogos de NV-11/NV-12 | PROPUESTO |
-| Fotos y eventos | `thumbnailUrl` nulo hasta NV-13; `RoomViewed` con NV-25 | PROPUESTO |
+| Catálogo público | Solo cuartos `available` de edificios `verified` | APROBADO (M-BE-066) |
+| Consulta | Dos pasos sobre `buildings` y `rooms`, sin modelo de lectura en v1 | APROBADO (M-BE-066) |
+| Ubicación aproximada | Centro de celda de 0.003° y distancias desde la celda, sin secretos | APROBADO (M-BE-066) |
+| Detalle con sesión | `/rooms/{id}` exige sesión (RF-24); `/properties` sin cambios | APROBADO (M-BE-066) |
+| Migración de favoritos y visitas | Fuera de NV-14: NV-15 1.2.0 y NV-17 1.2.0 con Mobile, usando el mapeo del seed de demostración | APROBADO (M-BE-066) |
+| Datos de demostración | Seed autorizado que convierte las 12 propiedades en cuartos verificados `demo` | APROBADO (M-BE-066) |
+| Colonias | Seed curado desde OpenStreetMap (ODbL) para los municipios de las 10 universidades | APROBADO (M-BE-066) |
+| Filtros | Los de la §6 con los catálogos de NV-11/NV-12 | APROBADO (M-BE-066) |
+| Fotos y eventos | `thumbnailUrl` nulo hasta NV-13; `RoomViewed` con NV-25 | APROBADO (M-BE-066) |
 
 ## 14. Costo — COST-001
 
@@ -266,8 +266,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
 
 ## 18. Aprobación pendiente
 
