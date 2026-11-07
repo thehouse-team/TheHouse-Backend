@@ -164,7 +164,7 @@ Específicas de esta spec:
 
 ## 11. Errores
 
-Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`.
+Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `instance` y `traceId`; en 409 se agrega `code` (`favorites_limit`) (M-BE-061).
 
 | Caso | Status | `title` |
 | --- | --- | --- |

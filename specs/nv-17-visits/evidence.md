@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Autorización | «te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió» — Victor Manuel Jose Jose, 2026-11-07: NV-17 1.1.0, tasks T01–T12 (M-BE-060) |
 | Rama | `feat/nv-15-nv-17` → PR #15, mezclado en `main` (`32f9ea0`) |
-| Resultado | **✅ PASS WITH WARNINGS**: 12/12 tasks completas; desplegada en Azure y verificada con prueba HTTP real (26/26). Advertencias: ajustes A1–A4 de la §4 pendientes de visto bueno; adaptadores Mongo/Redis sin cobertura automatizada (verificados en Azure) |
+| Resultado | **✅ PASS WITH WARNINGS**: 12/12 tasks completas; desplegada en Azure y verificada con prueba HTTP real (26/26). Ajustes A1–A4 aprobados (M-BE-061). Advertencia: adaptadores Mongo/Redis sin cobertura automatizada (verificados en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. No se registran mensajes de visitas, tokens ni ids de usuario en logs.
 
@@ -53,7 +53,7 @@ Pruebas nuevas de NV-17: `TheHouse.UnitTests/FavoriteVisitTests.cs` (política d
 | R07 | `Conflicts_return_409_with_specific_codes`, `Visit_create_enforces_conflicts_and_active_limit`, `Concurrent_requests_with_different_keys_create_only_one_visit`, `Visit_create_fails_when_the_user_lock_is_held` |
 | R08 | `Other_users_visit_is_404_for_get_and_cancel`, `Create_rejects_bad_input_with_400` (`userId`/`status` en el cuerpo → 400), `Daily_create_limit_returns_429_with_retry_after`, `Fails_closed_when_lock_or_storage_are_down`, `Requires_a_valid_bearer_token`, `Message_is_not_written_to_logs` |
 
-## 4. Ajustes de implementación (requieren visto bueno)
+## 4. Ajustes de implementación (aprobados: «Apruebo A1–A4» — Victor Manuel Jose Jose, 2026-11-07 (M-BE-061))
 
 | # | Spec dice | Implementación | Motivo |
 | --- | --- | --- | --- |

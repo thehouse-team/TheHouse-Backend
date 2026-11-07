@@ -545,3 +545,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** pedido del responsable de Mobile del 2026-11-07 (favoritos, visitas y chat con contratos reales, compatibilidad con lo existente y convenciones uniformes). Las propiedades actuales no tienen arrendador: la confirmación de visitas y el chat no pueden existir antes de NV-12.
 - **Impacto:** Mobile usaba otra numeración (favoritos "NV-09", visitas "NV-10"); la equivalencia es favoritos = NV-15, visitas = NV-17, chat = NV-16. Los favoritos y visitas v1 se migrarán a cuartos cuando NV-12/NV-14 los publiquen.
 
+## M-BE-061 — Ajustes de implementación de NV-17 (y NV-15) aprobados
+
+- **ID:** M-BE-061
+- **Decisión:** aceptar los ajustes A1–A4 de `specs/nv-17-visits/evidence.md` §4: (A1) la unicidad de visitas `requested` por usuario y propiedad se garantiza con el lock por usuario en Redis y la verificación de visitas activas, no con un índice único parcial; (A2) las fechas UTC se devuelven como `+00:00`, igual que el resto de la API; (A3) los Problem Details de 409 y 422 de favoritos y visitas agregan `code` estable; (A4) las pruebas de seguridad que necesitan el host HTTP viven en `TheHouse.IntegrationTests`.
+- **Estado:** APROBADO — Victor, 2026-11-07 («Apruebo A1–A4»).
+- **Fecha:** 2026-11-07.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** el índice parcial bloquearía para siempre una propiedad si una visita pasada queda en `requested`; el formato `+00:00` y el campo `code` mantienen la API uniforme y dan a Mobile errores distinguibles; A4 sigue el precedente de NV-07 y NV-08.
+- **Impacto:** `specs/nv-17-visits/spec.md` (§6, §8, §9, §11, riesgos) y `specs/nv-15-favorites-compare/spec.md` §11 quedan alineadas; las evidencias de NV-15 y NV-17 pasan a PASS sin advertencias de ajustes. A3 es aditivo y aplicará a las specs futuras con errores de negocio.

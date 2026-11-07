@@ -34,7 +34,7 @@
 ## F2 — Persistencia e integración
 
 - [x] **T06 · Idempotencia** — Requisito: NV-17-R06 · Fase: F2 · Aceptación: Misma `Idempotency-Key` y mismo cuerpo dentro de 24 h devuelven la visita original (200, `Idempotent-Replayed`); cuerpo distinto 409; sin llave 400; prueba de reintentos y doble toque. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
-- [x] **T07 · Conflictos y concurrencia** — Requisito: NV-17-R07 · Fase: F2 · Aceptación: Visita `requested` duplicada para la misma propiedad, otra visita a menos de 60 min o más de 5 activas → 409; pruebas concurrentes con el lock por usuario y el índice único parcial. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T07 · Conflictos y concurrencia** — Requisito: NV-17-R07 · Fase: F2 · Aceptación: Visita `requested` duplicada para la misma propiedad, otra visita a menos de 60 min o más de 5 activas → 409; pruebas concurrentes con el lock por usuario. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
 
 ## F3 — Seguridad, autorización y límites
 

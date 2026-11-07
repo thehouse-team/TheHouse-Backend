@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Autorización | «te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió» — Victor Manuel Jose Jose, 2026-11-07: NV-15 1.1.0, tasks T01–T10 (M-BE-060) |
 | Rama | `feat/nv-15-nv-17` → PR #15, mezclado en `main` (`32f9ea0`) |
-| Resultado | **✅ PASS WITH WARNINGS**: 10/10 tasks completas; desplegada en Azure y verificada con prueba HTTP real (26/26). Advertencias: ajustes A2–A3 de `specs/nv-17-visits/evidence.md` §4 pendientes de visto bueno; adaptador Mongo sin cobertura automatizada (verificado en Azure) |
+| Resultado | **✅ PASS WITH WARNINGS**: 10/10 tasks completas; desplegada en Azure y verificada con prueba HTTP real (26/26). Ajustes A2–A3 aprobados (M-BE-061). Advertencia: adaptador Mongo sin cobertura automatizada (verificado en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -49,7 +49,7 @@ Las piezas compartidas con NV-17 (`UserEndpointSupport`, `UserResourceProblems`,
 - El usuario sale del `sub`; no hay `userId` en ninguna entrada. Borrar el favorito de otro usuario no es posible: la operación solo toca los del `sub`.
 - El listado expone solo campos públicos de NV-07; no incluye la descripción.
 - Redis o MongoDB caídos → 503.
-- Ajustes A2 (`+00:00`) y A3 (`code` en 409) de `specs/nv-17-visits/evidence.md` §4 aplican igual aquí.
+- Ajustes A2 (`+00:00`) y A3 (`code` en 409) de `specs/nv-17-visits/evidence.md` §4 aplican igual aquí; aprobados en M-BE-061.
 
 ## 5. Despliegue y CI
 
