@@ -533,4 +533,5 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** prioridades acordadas para la evaluación del 3 y 4 de diciembre: catálogo útil para la demostración, CD con rollback probado, demostración de dos instancias (constitution §15) y cierre de hallazgos de seguridad.
 - **Impacto:** NV-03 T25 se verificó el 2026-11-07 (logs de consola en Log Analytics, sin datos sensibles, costo del mes $0.00). La rotación de credenciales expuestas sigue pendiente como riesgo aceptado temporalmente.
+- **Actualización 2026-11-07 (M-BE-059):** ejecutado. Catálogo regional desplegado y cargado en producción (10 universidades, 12 propiedades); `nosniff` en producción (ZAP 10021 PASS); rollback controlado probado (run `42349310343`); NV-03 T25 cerrada. Por decisión de Victor (opción B), la ventana de dos réplicas (NV-03 T08, T18 y T19) se ejecuta en la evaluación del 3 y 4 de diciembre. NV-09 T20 se cierra con el primer merge de solo documentación.
 

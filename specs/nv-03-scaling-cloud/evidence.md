@@ -181,3 +181,15 @@ Ejecutado el 2026-11-05 en la rama `fix/u2-review` con la autorización humana �
 - Consulta usada (API de Log Analytics vía `az rest`, sin extensiones):
   `union isfuzzy=true ContainerAppConsoleLogs_CL, ContainerAppSystemLogs_CL | where TimeGenerated > ago(60m) | summarize registros=count() by Type`
 - Pendiente para cerrar T25: logs de consola con registros reales del backend, revisión de PII/secretos en ellos y registro del uso de ingestión y del costo en Cost Management.
+
+### T25 — completada (2026-11-07)
+
+- KQL sobre `log-thehouse-u2` (últimos 3 días): `ContainerAppConsoleLogs_CL` con 264 registros de 8 revisiones y `ContainerAppSystemLogs_CL` con 319 registros de 17 revisiones; los logs de consola de la aplicación llegan.
+- Búsqueda de datos sensibles en los logs de consola (JWT `eyJ…`, `mongodb://`, `redis://`, correos, `password`, `refreshToken`, `JWT_SIGNING_KEY`): **0 coincidencias**.
+- Niveles: 115 `info`, 10 `warn` (`ForwardedHeadersMiddleware[1]`, encabezados reenviados no simétricos enviados por clientes externos; informativo) y 139 líneas de continuación.
+- Ingestión (`Usage`): ~0.0001 GB/día, frente al tope de 0.1 GB/día.
+- Cost Management (Month to date, 2026-11-07): **0.00 USD** (servicio facturable listado: Log Analytics).
+
+### T08, T18 y T19 — diferidas a la ventana de evaluación (decisión de Victor, 2026-11-07)
+
+El plan de Terraform para la ventana de dos réplicas está revisado (`min_replicas` 0 → 2; `0 to add, 1 to change, 0 to destroy`; imagen, secretos y variables sin cambios por `ignore_changes`). Por decisión de Victor (opción B), la ventana 2–2, el smoke con dos instancias y su evidencia se ejecutan el 3 y 4 de diciembre (M-BE-039), con «OK PARA APPLY» para subir y para regresar a 0–2. Las fallas de Redis y MongoDB de T19 se demuestran con las pruebas automatizadas y el entorno efímero, no en producción.

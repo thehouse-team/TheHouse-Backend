@@ -178,10 +178,10 @@ El seed está deshabilitado por defecto en `appsettings.json` y solo se activa p
 - En `Production` ambos comandos se rechazan salvo con la bandera explícita `--allow-production-seed`, registrada en el log (M-BE-043).
 - El seed de propiedades requiere que el seed de universidades se haya ejecutado primero.
 
-Comando documentado para una ejecución autorizada, sin credenciales embebidas. En 1.2.0-u2 se retira `ASPNETCORE_ENVIRONMENT=Staging` del comando anterior, porque eludía la protección de `Production` (M-BE-043):
+Comando documentado para una ejecución autorizada, sin credenciales embebidas. En 1.2.0-u2 se retira `ASPNETCORE_ENVIRONMENT=Staging` del comando anterior, porque eludía la protección de `Production` (M-BE-043). Se usa `env` porque `az containerapp exec` separa el comando por espacios y no respeta las comillas de `sh -c` (verificado el 2026-11-07):
 
 ```text
-az containerapp exec -n ca-thehouse-u2 -g rg-thehouse-u2 --container thehouse-backend --command "/bin/sh -c 'UniversitySeed__Enabled=true PropertySeed__Enabled=true dotnet TheHouse.dll --seed-universities --seed-properties --allow-production-seed'"
+az containerapp exec -n ca-thehouse-u2 -g rg-thehouse-u2 --container thehouse-backend --command "env UniversitySeed__Enabled=true PropertySeed__Enabled=true dotnet TheHouse.dll --seed-universities --seed-properties --allow-production-seed"
 ```
 
 Requiere que el contenedor ya tenga `MongoDB__ConnectionString` como secreto de Azure Container Apps. La ejecución real debe coordinarse con NV-03, no debe ejecutarse contra una base con datos productivos y sus conteos antes/después quedan como evidencia pendiente; no se realiza en esta revisión.
@@ -259,7 +259,7 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Tasks U2 | 14 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 13 |
+| Tasks completadas | 14 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
 

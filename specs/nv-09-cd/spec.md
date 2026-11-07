@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN (run `42180858665`) — falta T13; T15–T19 sin autorizar** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 15 de 20 tasks; T20 se cierra con el primer merge de solo documentación; T15–T17 y T19 pendientes** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
@@ -211,9 +211,9 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Tasks | 20 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 13 |
+| Tasks completadas | 15 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — falta T13** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 15 de 20 tasks; T20 se cierra con el primer merge de solo documentación; T15–T17 y T19 pendientes** |
 
 ## 14. Aprobación pendiente
 
