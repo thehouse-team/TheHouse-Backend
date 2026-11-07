@@ -28,6 +28,28 @@ public static class UserResourceProblems
         context.Request.Path.StartsWithSegments(VisitsEndpoint.BasePath, StringComparison.OrdinalIgnoreCase) ||
         context.Request.Path.StartsWithSegments(VisitsEndpoint.MinePath, StringComparison.OrdinalIgnoreCase);
 
+    public static bool IsProfile(HttpContext context) =>
+        context.Request.Path.StartsWithSegments(ProfileEndpoint.ProfilePath, StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.StartsWithSegments(ProfileEndpoint.UniversityPath, StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.StartsWithSegments(ProfileEndpoint.PreferencesPath, StringComparison.OrdinalIgnoreCase);
+
+    public static void NormalizeProfile(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los datos del perfil o de las preferencias no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            404 => "La universidad no existe.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de solicitudes del perfil.",
+            503 => "El perfil no está disponible temporalmente.",
+            504 => "El perfil no respondió a tiempo.",
+            _ => "No fue posible procesar el perfil.",
+        };
+    }
+
     public static void NormalizeFavorites(ProblemDetails problem, int status)
     {
         problem.Title = ProblemResponses.TitleFor(status);

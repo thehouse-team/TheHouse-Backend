@@ -9,6 +9,11 @@ public sealed class UserRateLimitOptions
 
     public int VisitCreatesPerDay { get; init; } = 10;
 
+    // NV-11: perfil y preferencias por usuario; búsqueda pública por IP.
+    public int ProfilePerWindow { get; init; } = 60;
+
+    public int UniversitySearchPerWindow { get; init; } = 60;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

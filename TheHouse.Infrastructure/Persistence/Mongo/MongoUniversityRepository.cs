@@ -1,4 +1,7 @@
+using System.Text.RegularExpressions;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.GeoJsonObjectModel;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
 using TheHouse.Domain.Entities;
@@ -17,6 +20,9 @@ public sealed class MongoUniversityRepository(
     private const string OrderIndexName =
         "ix_universities_name_id_asc";
 
+    private const string LocationIndexName =
+        "ix_universities_location_2dsphere";
+
     private static readonly
         ProjectionDefinition<UniversityDocument>
         PublicProjection =
@@ -26,7 +32,8 @@ public sealed class MongoUniversityRepository(
                 .Include(university => university.Name)
                 .Include(university => university.City)
                 .Include(university => university.Country)
-                .Include(university => university.CreatedAt);
+                .Include(university => university.CreatedAt)
+                .Include(university => university.Location);
 
     private readonly SemaphoreSlim indexGate =
         new(1, 1);
@@ -153,6 +160,98 @@ public sealed class MongoUniversityRepository(
         }
     }
 
+    public async Task<IReadOnlyList<University>> SearchByTextAsync(
+        string normalizedQuery,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await EnsureIndexesAsync(
+                cancellationToken);
+
+            // El texto del usuario se escapa: nunca se interpreta como patrón.
+            var pattern =
+                new BsonRegularExpression(
+                    Regex.Escape(normalizedQuery));
+
+            var documents =
+                await Collection
+                    .Find(
+                        Builders<UniversityDocument>.Filter.Regex(
+                            university => university.SearchKey,
+                            pattern))
+                    .Sort(
+                        Builders<UniversityDocument>.Sort
+                            .Ascending(university => university.Name)
+                            .Ascending(university => university.Id))
+                    .Limit(limit)
+                    .Project<UniversityDocument>(
+                        PublicProjection)
+                    .ToListAsync(
+                        cancellationToken);
+
+            return documents
+                .Select(Map)
+                .ToArray();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+            when (exception is
+                  MongoException or
+                  TimeoutException)
+        {
+            throw MongoFailure.Unavailable();
+        }
+    }
+
+    public async Task<IReadOnlyList<University>> SearchNearAsync(
+        double latitude,
+        double longitude,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await EnsureIndexesAsync(
+                cancellationToken);
+
+            // $nearSphere devuelve los documentos ya ordenados por distancia.
+            var documents =
+                await Collection
+                    .Find(
+                        Builders<UniversityDocument>.Filter.NearSphere(
+                            university => university.Location,
+                            GeoJson.Point(
+                                GeoJson.Geographic(
+                                    longitude,
+                                    latitude))))
+                    .Limit(limit)
+                    .Project<UniversityDocument>(
+                        PublicProjection)
+                    .ToListAsync(
+                        cancellationToken);
+
+            return documents
+                .Select(Map)
+                .ToArray();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+            when (exception is
+                  MongoException or
+                  TimeoutException)
+        {
+            throw MongoFailure.Unavailable();
+        }
+    }
+
     public async Task UpsertSeedAsync(
         IReadOnlyCollection<University> universities,
         CancellationToken cancellationToken)
@@ -184,6 +283,19 @@ public sealed class MongoUniversityRepository(
                         .Set(
                             document => document.Country,
                             university.Country)
+                        .Set(
+                            document => document.SearchKey,
+                            SearchText.UniversityKey(
+                                university.Code,
+                                university.Name,
+                                university.City))
+                        .Set(
+                            document => document.Location,
+                            university.Latitude is { } lat &&
+                            university.Longitude is { } lng
+                                ? GeoJson.Point(
+                                    GeoJson.Geographic(lng, lat))
+                                : null)
                         .SetOnInsert(
                             document => document.CreatedAt,
                             MongoDates.ToUtc(
@@ -264,6 +376,21 @@ public sealed class MongoUniversityRepository(
                 cancellationToken:
                     cancellationToken);
 
+            // NV-11: índice geoespacial para la búsqueda por cercanía.
+            await Collection.Indexes.CreateOneAsync(
+                new CreateIndexModel<UniversityDocument>(
+                    Builders<UniversityDocument>
+                        .IndexKeys
+                        .Geo2DSphere(
+                            university =>
+                                university.Location),
+                    new CreateIndexOptions
+                    {
+                        Name = LocationIndexName
+                    }),
+                cancellationToken:
+                    cancellationToken);
+
             indexesReady = true;
         }
         finally
@@ -283,7 +410,11 @@ public sealed class MongoUniversityRepository(
             Country = document.Country,
             CreatedAt =
                 MongoDates.FromUtc(
-                    document.CreatedAt)
+                    document.CreatedAt),
+            Latitude =
+                document.Location?.Coordinates.Latitude,
+            Longitude =
+                document.Location?.Coordinates.Longitude
         };
 
     public void Dispose()

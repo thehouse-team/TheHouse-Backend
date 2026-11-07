@@ -11,6 +11,7 @@ builder.AddLogout();
 builder.AddSessions();
 builder.AddProperties();
 builder.AddFavoritesAndVisits();
+builder.AddProfile();
 builder.AddUniversities();
 builder.AddObservability();
 
@@ -176,6 +177,8 @@ app.MapUsersMe();
 app.MapProperties();
 app.MapFavorites();
 app.MapVisits();
+app.MapProfile();
+app.MapUniversitySearch();
 app.MapUniversities();
 
 app.Run();

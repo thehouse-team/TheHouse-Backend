@@ -6,14 +6,14 @@
 | Documento | `task.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-07 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-11-profile-preferences/`; el seed de coordenadas en Production requiere autorización aparte, M-BE-043) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T04, T06 y T07 completas (2026-11-07, ver `evidence.md`); T05 espera el seed autorizado; T08–T11 esperan CI, CD y prueba en Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 11 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
@@ -25,19 +25,19 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Perfil propio** — Requisito: NV-11-R01 · Fase: F1 · Aceptación: `GET`/`PATCH /users/me/profile`; `name` de 1 a 80 caracteres; campos no permitidos 400; perfil inexistente responde 200 con valores vacíos. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Selección de universidad** — Requisito: NV-11-R02 · Fase: F1 · Aceptación: `PUT /users/me/university` valida que el id exista (404 si no; 400 si el formato es inválido), es idempotente y se refleja en `GET /users/me/profile`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Preferencias de búsqueda** — Requisito: NV-11-R03 · Fase: F1 · Aceptación: `PUT` valida rangos, catálogos y repetidos; rechaza `quickSetupCompleted` y `version` del cliente; incrementa `version`; deriva `quickSetupCompleted`; `GET` sin datos devuelve los valores por defecto. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Perfil propio** — Requisito: NV-11-R01 · Fase: F1 · Aceptación: `GET`/`PATCH /users/me/profile`; `name` de 1 a 80 caracteres; campos no permitidos 400; perfil inexistente responde 200 con valores vacíos. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Selección de universidad** — Requisito: NV-11-R02 · Fase: F1 · Aceptación: `PUT /users/me/university` valida que el id exista (404 si no; 400 si el formato es inválido), es idempotente y se refleja en `GET /users/me/profile`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Preferencias de búsqueda** — Requisito: NV-11-R03 · Fase: F1 · Aceptación: `PUT` valida rangos, catálogos y repetidos; rechaza `quickSetupCompleted` y `version` del cliente; incrementa `version`; deriva `quickSetupCompleted`; `GET` sin datos devuelve los valores por defecto. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T04 · Búsqueda de universidades por texto** — Requisito: NV-11-R04 · Fase: F2 · Aceptación: Encuentra por siglas, nombre o ciudad, parcial y sin distinguir acentos ni mayúsculas (`tula`, `UAEH`, `tepeji`); máximo 20; `q` fuera de 2–60 o combinado con coordenadas 400. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T04 · Búsqueda de universidades por texto** — Requisito: NV-11-R04 · Fase: F2 · Aceptación: Encuentra por siglas, nombre o ciudad, parcial y sin distinguir acentos ni mayúsculas (`tula`, `UAEH`, `tepeji`); máximo 20; `q` fuera de 2–60 o combinado con coordenadas 400. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 - [ ] **T05 · Búsqueda por cercanía** — Requisito: NV-11-R05 · Fase: F2 · Aceptación: Con `lat`/`lng` devuelve las universidades más cercanas con `distanceKm`, ordenadas; las 10 del seed tienen coordenadas verificadas y cargadas con seed autorizado. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T06 · Persistencia e índices** — Requisito: NV-11-R06 · Fase: F2 · Aceptación: Documento único por usuario en perfil y preferencias; índice `2dsphere` y `searchKey` en universidades; `GET /universities` y `/universities/{id}` sin cambios de contrato. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T06 · Persistencia e índices** — Requisito: NV-11-R06 · Fase: F2 · Aceptación: Documento único por usuario en perfil y preferencias; índice `2dsphere` y `searchKey` en universidades; `GET /universities` y `/universities/{id}` sin cambios de contrato. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T07 · Autorización, límites y privacidad** — Requisito: NV-11-R07 · Fase: F3 · Aceptación: Sin `userId` del cliente; pruebas con dos usuarios; rate limit 429 con `Retry-After`; Redis caído 503; `no-store`; las coordenadas y el nombre no aparecen en logs (prueba que lo verifica). · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
+- [x] **T07 · Autorización, límites y privacidad** — Requisito: NV-11-R07 · Fase: F3 · Aceptación: Sin `userId` del cliente; pruebas con dos usuarios; rate limit 429 con `Retry-After`; Redis caído 503; `no-store`; las coordenadas y el nombre no aparecen en logs (prueba que lo verifica). · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 
 ## F4 — Pruebas y evidencia
 
@@ -50,13 +50,13 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
 | T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F3 | ABIERTA |
+| T06 | R06 | F2 | COMPLETA |
+| T07 | R07 | F3 | COMPLETA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R09 | F4 | ABIERTA |
 | T10 | R09 | F4 | ABIERTA |
@@ -82,11 +82,11 @@
 | --- | --- |
 | Requisitos | 9 |
 | Tasks | 11 |
-| Tasks abiertas | 11 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 5 |
+| Tasks completadas | 6 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T04, T06 y T07 completas (2026-11-07, ver `evidence.md`); T05 espera el seed autorizado; T08–T11 esperan CI, CD y prueba en Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

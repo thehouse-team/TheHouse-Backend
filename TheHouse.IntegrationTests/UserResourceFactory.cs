@@ -56,6 +56,13 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
 
     public InMemoryUserLock Lock { get; } = new();
 
+    public InMemoryProfileRepository Profiles { get; } = new();
+
+    public InMemoryPreferencesRepository PreferencesStore { get; } = new();
+
+    // NV-11: el catálogo real del seed (10 universidades con coordenadas).
+    public UniversityTestStore Universities { get; } = SeededUniversities();
+
     public System.Collections.Concurrent.ConcurrentQueue<string> Logs { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -72,6 +79,9 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             services.RemoveAll<IFavoriteRepository>();
             services.RemoveAll<IVisitRepository>();
             services.RemoveAll<IUserLock>();
+            services.RemoveAll<IProfileRepository>();
+            services.RemoveAll<IPreferencesRepository>();
+            services.RemoveAll<IUniversityRepository>();
 
             services.AddSingleton<IUserRepository>(Users);
             services.AddSingleton<IRateLimitStore>(RateLimit);
@@ -82,6 +92,9 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             services.AddSingleton<IFavoriteRepository>(Favorites);
             services.AddSingleton<IVisitRepository>(Visits);
             services.AddSingleton<IUserLock>(Lock);
+            services.AddSingleton<IProfileRepository>(Profiles);
+            services.AddSingleton<IPreferencesRepository>(PreferencesStore);
+            services.AddSingleton<IUniversityRepository>(Universities);
             services.AddSingleton<ILoggerProvider>(new CaptureProvider(Logs));
 
             if (limits is not null)
@@ -122,6 +135,13 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
     {
         var localToday = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(-6)).Date;
         return $"{localToday.AddDays(days):yyyy-MM-dd}T{hour:00}:{minute:00}:00-06:00";
+    }
+
+    private static UniversityTestStore SeededUniversities()
+    {
+        var store = new UniversityTestStore();
+        store.UpsertSeedAsync(UniversitySeedData.Create(), CancellationToken.None).GetAwaiter().GetResult();
+        return store;
     }
 
     private static PropertyTestStore Seeded()

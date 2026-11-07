@@ -565,3 +565,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** el profesor pide proyectos separados para ML e IA generativa; un satélite sin despliegue cumple eso sin romper "monolito modular, no microservicios" (M-BE-004, M-BE-022) ni agregar costo (COST-001).
 - **Impacto:** NV-23 cambia de "ML.NET entrenado en una herramienta separada" a "carga ONNX de `TheHouse-ML` con `Microsoft.ML.OnnxRuntime`"; se actualiza junto con su aprobación. NV-11 1.1.0 define el esquema de preferencias que usa el modelo. La IA generativa (NV-24) no cambia por ahora.
 
+## M-BE-063 — NV-11 1.1.0 aprobada: perfil, universidad y preferencias
+
+- **ID:** M-BE-063
+- **Decisión:** aprobar NV-11 1.1.0 con sus decisiones: `code` como siglas; `location` y `searchKey` aditivos en `universities`; coordenadas de campus de OpenStreetMap verificadas y cargadas con seed autorizado; búsqueda por texto parcial sin acentos sobre `searchKey`; catálogos cerrados de preferencias de la §6; `quickSetupCompleted` y `version` calculados por el servidor; solo MXN; eventos de dominio fuera de v1.
+- **Estado:** APROBADO — Victor, 2026-11-07 («Apruebo y EJECUTA», T01–T11). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-07.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** sin preferencias, búsqueda (NV-14) y Smart Match (NV-23 y `TheHouse-ML`) no tienen con qué calcular.
+- **Impacto:** el seed de coordenadas en Production requiere autorización aparte (M-BE-043).
+

@@ -333,8 +333,9 @@ public sealed class UniversityTests
             Assert.Equal(
                 new[]
                 {
+                    // NV-11: coordenadas públicas del campus, no del usuario.
                     "City", "Code", "Country", "CreatedAt",
-                    "Id", "Name"
+                    "Id", "Latitude", "Longitude", "Name"
                 },
                 properties);
 
@@ -424,6 +425,24 @@ public sealed class UniversityTests
             Task.FromResult(
                 source.FirstOrDefault(
                     item => item.Id == id));
+
+        public Task<IReadOnlyList<University>> SearchByTextAsync(
+            string normalizedQuery,
+            int limit,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<University>>(
+                source
+                    .Where(item => SearchText.UniversityKey(item.Code, item.Name, item.City).Contains(normalizedQuery, StringComparison.Ordinal))
+                    .Take(limit)
+                    .ToList());
+
+        public Task<IReadOnlyList<University>> SearchNearAsync(
+            double latitude,
+            double longitude,
+            int limit,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<University>>(
+                source.Where(item => item.Latitude is not null).Take(limit).ToList());
 
         public Task UpsertSeedAsync(
             IReadOnlyCollection<University> universities,

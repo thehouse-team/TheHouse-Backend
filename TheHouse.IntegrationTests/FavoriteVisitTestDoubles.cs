@@ -233,6 +233,114 @@ public sealed class InMemoryVisitRepository : IVisitRepository
     }
 }
 
+// NV-11: perfil y preferencias en memoria (un documento por usuario;
+// `Version` se incrementa en cada reemplazo, como el $inc de Mongo).
+public sealed class InMemoryProfileRepository : IProfileRepository
+{
+    private readonly object gate = new();
+
+    public Dictionary<string, UserProfile> Profiles { get; } = new(StringComparer.Ordinal);
+
+    public bool Unavailable { get; set; }
+
+    public Task<UserProfile?> GetAsync(string userId, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult(Profiles.GetValueOrDefault(userId));
+        }
+    }
+
+    public Task SaveNameAsync(string userId, string name, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            var current = Profiles.GetValueOrDefault(userId);
+            Profiles[userId] = new UserProfile { UserId = userId, Name = name, UniversityId = current?.UniversityId, UpdatedAt = now };
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task SaveUniversityAsync(string userId, string universityId, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            var current = Profiles.GetValueOrDefault(userId);
+            Profiles[userId] = new UserProfile { UserId = userId, Name = current?.Name, UniversityId = universityId, UpdatedAt = now };
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void Guard(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+    }
+}
+
+public sealed class InMemoryPreferencesRepository : IPreferencesRepository
+{
+    private readonly object gate = new();
+
+    public Dictionary<string, UserPreferences> Preferences { get; } = new(StringComparer.Ordinal);
+
+    public bool Unavailable { get; set; }
+
+    public Task<UserPreferences?> GetAsync(string userId, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult(Preferences.GetValueOrDefault(userId));
+        }
+    }
+
+    public Task<UserPreferences> ReplaceAsync(UserPreferences preferences, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            var version = (Preferences.GetValueOrDefault(preferences.UserId)?.Version ?? 0) + 1;
+            var stored = new UserPreferences
+            {
+                UserId = preferences.UserId,
+                BudgetMin = preferences.BudgetMin,
+                BudgetMax = preferences.BudgetMax,
+                Currency = preferences.Currency,
+                MaxDistanceKm = preferences.MaxDistanceKm,
+                EssentialServices = preferences.EssentialServices,
+                LivingWith = preferences.LivingWith,
+                PlaceType = preferences.PlaceType,
+                Pets = preferences.Pets,
+                Transport = preferences.Transport,
+                PropertyTypes = preferences.PropertyTypes,
+                QuickSetupCompleted = preferences.QuickSetupCompleted,
+                Version = version,
+                UpdatedAt = preferences.UpdatedAt,
+            };
+            Preferences[preferences.UserId] = stored;
+            return Task.FromResult(stored);
+        }
+    }
+
+    private void Guard(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+    }
+}
+
 // Lock con semántica `SET NX`: compartir la instancia simula réplicas.
 public sealed class InMemoryUserLock : IUserLock
 {

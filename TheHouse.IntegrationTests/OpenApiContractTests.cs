@@ -64,7 +64,11 @@ public sealed class OpenApiContractTests
                 path.Name == VisitsEndpoint.MinePath ||
                 path.Name == VisitsEndpoint.BasePath ||
                 path.Name == VisitsEndpoint.DetailPath ||
-                path.Name == VisitsEndpoint.CancelPath,
+                path.Name == VisitsEndpoint.CancelPath ||
+                path.Name == ProfileEndpoint.ProfilePath ||
+                path.Name == ProfileEndpoint.UniversityPath ||
+                path.Name == ProfileEndpoint.PreferencesPath ||
+                path.Name == UniversitySearchEndpoint.Path,
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 

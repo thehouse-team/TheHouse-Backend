@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace TheHouse.Infrastructure.Persistence.Mongo.Documents;
 
@@ -22,4 +23,14 @@ public sealed class UniversityDocument
 
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; }
+
+    // NV-11: punto del campus (índice 2dsphere) y texto normalizado para
+    // búsqueda parcial. Ausentes hasta que corre el seed con coordenadas.
+    [BsonElement("location")]
+    [BsonIgnoreIfNull]
+    public GeoJsonPoint<GeoJson2DGeographicCoordinates>? Location { get; set; }
+
+    [BsonElement("searchKey")]
+    [BsonIgnoreIfNull]
+    public string? SearchKey { get; set; }
 }
