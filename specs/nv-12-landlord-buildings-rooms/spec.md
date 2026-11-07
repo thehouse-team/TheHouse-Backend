@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-07 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T13; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-12-landlord-buildings-rooms/`) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-06, RF-13, RF-14, RF-16 a RF-22, RF-45, RF-76, RF-77, RF-78 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-08, RNF-09, RNF-10 |
@@ -305,15 +305,15 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Rutas de acciones | Sub-recursos (`/rooms/generate`, `/rooms/{id}/pause`, `/buildings/{id}/publish`) en lugar de `:accion` | PROPUESTO |
-| Rol de arrendador | Existencia del perfil en `landlord_profiles`, consultada en cada solicitud (sin claim nuevo en el JWT) | PROPUESTO |
-| Concurrencia | `version` obligatoria en el cuerpo de `PATCH` y en la query de `DELETE` | PROPUESTO |
-| Publicación en v1 | Envía a `in_review` con datos completos y un cuarto `ready`; documentos con NV-13; aprobación con NV-21 | PROPUESTO |
-| Migración de NV-07 | NV-12 no toca `properties`, favoritos ni visitas; la migración se decide en NV-14 | PROPUESTO |
-| Catálogos | Servicios iguales a NV-11; tipos, baños, muebles y contrato mínimo de la §6, a confirmar con Mobile | PROPUESTO |
-| Límites | 20 edificios, 200 cuartos, 30 pisos y 30 cuartos por piso | PROPUESTO |
-| Términos del arrendador | Versión vigente configurable (`LandlordTerms:Version`); el texto lo publica la app | PROPUESTO |
-| Eventos de dominio | Fuera de v1 hasta que exista un consumidor | PROPUESTO |
+| Rutas de acciones | Sub-recursos (`/rooms/generate`, `/rooms/{id}/pause`, `/buildings/{id}/publish`) en lugar de `:accion` | APROBADO (M-BE-064) |
+| Rol de arrendador | Existencia del perfil en `landlord_profiles`, consultada en cada solicitud (sin claim nuevo en el JWT) | APROBADO (M-BE-064) |
+| Concurrencia | `version` obligatoria en el cuerpo de `PATCH` y en la query de `DELETE` | APROBADO (M-BE-064) |
+| Publicación en v1 | Envía a `in_review` con datos completos y un cuarto `ready`; documentos con NV-13; aprobación con NV-21 | APROBADO (M-BE-064) |
+| Migración de NV-07 | NV-12 no toca `properties`, favoritos ni visitas; la migración se decide en NV-14 | APROBADO (M-BE-064) |
+| Catálogos | Servicios iguales a NV-11; tipos, baños, muebles y contrato mínimo de la §6, a confirmar con Mobile | APROBADO (M-BE-064) |
+| Límites | 20 edificios, 200 cuartos, 30 pisos y 30 cuartos por piso | APROBADO (M-BE-064) |
+| Términos del arrendador | Versión vigente configurable (`LandlordTerms:Version`); el texto lo publica la app | APROBADO (M-BE-064) |
+| Eventos de dominio | Fuera de v1 hasta que exista un consumidor | APROBADO (M-BE-064) |
 
 ## 14. Costo — COST-001
 
@@ -351,8 +351,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
 
 ## 18. Aprobación pendiente
 
