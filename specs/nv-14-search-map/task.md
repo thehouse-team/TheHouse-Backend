@@ -8,12 +8,12 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T13; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-14-search-map/`; los seeds de colonias y de demostración en Production requieren autorización aparte) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T07 y T09 completas (2026-11-07, ver `evidence.md`); T08 y T10–T13 esperan CI, CD, seeds y prueba en Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 13 |
-| Tasks completadas | 0 |
+| Tasks completadas | 8 |
 
 ## Reglas de esta lista
 
@@ -25,21 +25,21 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Búsqueda con filtros** — Requisito: NV-14-R01 · Fase: F1 · Aceptación: Combina precio, tipo de cuarto, baño, tipo de edificio, con quién vivir, servicios y distancia; orden `distance`, `price` o `newest` estable con id; paginación máximo 50; solo cuartos publicables. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Mapa de rentas** — Requisito: NV-14-R02 · Fase: F1 · Aceptación: Marcadores dentro de un `bbox` válido (máximo 0.3° por lado), máximo 300, con precio y distancia; `bbox` inválido 400. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Conteo por presupuesto** — Requisito: NV-14-R03 · Fase: F1 · Aceptación: `rooms/count` devuelve el total con los mismos criterios que la búsqueda. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T04 · Detalle con sesión** — Requisito: NV-14-R04 · Fase: F1 · Aceptación: Invitado 401; con sesión devuelve el detalle sin dirección, coordenadas reales ni dueño; cuarto no publicado 404. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Búsqueda con filtros** — Requisito: NV-14-R01 · Fase: F1 · Aceptación: Combina precio, tipo de cuarto, baño, tipo de edificio, con quién vivir, servicios y distancia; orden `distance`, `price` o `newest` estable con id; paginación máximo 50; solo cuartos publicables. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Mapa de rentas** — Requisito: NV-14-R02 · Fase: F1 · Aceptación: Marcadores dentro de un `bbox` válido (máximo 0.3° por lado), máximo 300, con precio y distancia; `bbox` inválido 400. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Conteo por presupuesto** — Requisito: NV-14-R03 · Fase: F1 · Aceptación: `rooms/count` devuelve el total con los mismos criterios que la búsqueda. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T04 · Detalle con sesión** — Requisito: NV-14-R04 · Fase: F1 · Aceptación: Invitado 401; con sesión devuelve el detalle sin dirección, coordenadas reales ni dueño; cuarto no publicado 404. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T05 · Colonias y ciudades** — Requisito: NV-14-R05 · Fase: F2 · Aceptación: Coincidencia parcial sin acentos ni mayúsculas, máximo 10, lista vacía con 200; seed autorizado desde OpenStreetMap. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
-- [ ] **T06 · Ubicación aproximada** — Requisito: NV-14-R06 · Fase: F2 · Aceptación: Centro de celda estable para el mismo edificio y a menos de 250 m de la ubicación real; distancias calculadas desde la celda; prueba de que dos universidades no permiten triangular más allá de la celda. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
-- [ ] **T07 · Datos de demostración** — Requisito: NV-14-R07 · Fase: F2 · Aceptación: `--seed-demo-rooms` crea los 12 cuartos `demo` verificados, idempotente, con arrendador de sistema sin acceso y mapeo propiedad → cuarto. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
+- [x] **T05 · Colonias y ciudades** — Requisito: NV-14-R05 · Fase: F2 · Aceptación: Coincidencia parcial sin acentos ni mayúsculas, máximo 10, lista vacía con 200; seed autorizado desde OpenStreetMap. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
+- [x] **T06 · Ubicación aproximada** — Requisito: NV-14-R06 · Fase: F2 · Aceptación: Centro de celda estable para el mismo edificio y a menos de 250 m de la ubicación real; distancias calculadas desde la celda; prueba de que dos universidades no permiten triangular más allá de la celda. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
+- [x] **T07 · Datos de demostración** — Requisito: NV-14-R07 · Fase: F2 · Aceptación: `--seed-demo-rooms` crea los 12 cuartos `demo` verificados, idempotente, con arrendador de sistema sin acceso y mapeo propiedad → cuarto. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
 
 ## F3 — Seguridad, autorización y límites
 
 - [ ] **T08 · Índices y rendimiento** — Requisito: NV-14-R08 · Fase: F3 · Aceptación: Índices geoespaciales y compuestos; prueba de carga básica con p95 < 500 ms en Azure con los datos de demostración. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06, T07.
-- [ ] **T09 · Anti-extracción y límites** — Requisito: NV-14-R09 · Fase: F3 · Aceptación: Límites de `pageSize`, `bbox` y marcadores; rate limits con 429; Redis caído 503; ningún campo privado en respuestas públicas. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06, T07.
+- [x] **T09 · Anti-extracción y límites** — Requisito: NV-14-R09 · Fase: F3 · Aceptación: Límites de `pageSize`, `bbox` y marcadores; rate limits con 429; Redis caído 503; ningún campo privado en respuestas públicas. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06, T07.
 
 ## F4 — Pruebas y evidencia
 
@@ -52,15 +52,15 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F1 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F2 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F1 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F2 | COMPLETA |
+| T07 | R07 | F2 | COMPLETA |
 | T08 | R08 | F3 | ABIERTA |
-| T09 | R09 | F3 | ABIERTA |
+| T09 | R09 | F3 | COMPLETA |
 | T10 | R10 | F4 | ABIERTA |
 | T11 | R11 | F4 | ABIERTA |
 | T12 | R11 | F4 | ABIERTA |
@@ -88,11 +88,11 @@
 | --- | --- |
 | Requisitos | 11 |
 | Tasks | 13 |
-| Tasks abiertas | 13 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 5 |
+| Tasks completadas | 8 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T07 y T09 completas (2026-11-07, ver `evidence.md`); T08 y T10–T13 esperan CI, CD, seeds y prueba en Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

@@ -65,6 +65,8 @@ public static class ProblemResponses
             PropertyProblems.Normalize(problem, status);
         else if (UniversityProblems.IsUniversity(context))
             UniversityProblems.Normalize(problem, status);
+        else if (SearchEndpoint.IsSearch(context))
+            SearchEndpoint.Normalize(problem, status);
 
         // Código estable (M-BE-061) en cualquier ruta que lo haya indicado.
         UserResourceProblems.ApplyCode(context, problem, status);

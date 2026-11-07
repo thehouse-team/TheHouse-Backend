@@ -108,6 +108,15 @@ public sealed class BuildingDocument
 
     [BsonElement("updatedAt")]
     public DateTime UpdatedAt { get; set; }
+
+    // NV-14: seed de demostración.
+    [BsonElement("demo")]
+    [BsonIgnoreIfDefault]
+    public bool Demo { get; set; }
+
+    [BsonElement("demoSourceId")]
+    [BsonIgnoreIfNull]
+    public string? DemoSourceId { get; set; }
 }
 
 // NV-12: `rooms` con número único por edificio.

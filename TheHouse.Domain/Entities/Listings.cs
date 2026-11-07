@@ -89,6 +89,11 @@ public sealed record Building
 
     public DateTimeOffset UpdatedAt { get; init; }
 
+    // NV-14: edificio del seed de demostración y propiedad de NV-07 de origen.
+    public bool Demo { get; init; }
+
+    public string? DemoSourceId { get; init; }
+
     public bool AcceptsChanges => Status is BuildingStatus.Draft or BuildingStatus.Verified;
 
     // Solo `draft` y `verified` admiten cambios del dueño; en revisión → 409

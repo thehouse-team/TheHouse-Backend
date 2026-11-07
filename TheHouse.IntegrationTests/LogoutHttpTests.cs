@@ -378,7 +378,12 @@ public sealed class LogoutHttpTests
                     or "/api/v1/admin/users/{id}/unsuspend"
                     or "/api/v1/admin/reports"
                     or "/api/v1/admin/reports/{id}/resolve"
-                    or "/api/v1/admin/audit",
+                    or "/api/v1/admin/audit"
+                    or "/api/v1/rooms/search"
+                    or "/api/v1/rooms/map"
+                    or "/api/v1/rooms/count"
+                    or "/api/v1/rooms/{id}"
+                    or "/api/v1/places/search",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

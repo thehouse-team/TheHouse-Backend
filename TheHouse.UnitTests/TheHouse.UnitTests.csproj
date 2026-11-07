@@ -24,6 +24,7 @@
     <Compile Include="..\TheHouse.IntegrationTests\FavoriteVisitTestDoubles.cs" Link="Shared\FavoriteVisitTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\ListingTestDoubles.cs" Link="Shared\ListingTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\ModerationTestDoubles.cs" Link="Shared\ModerationTestDoubles.cs" />
+    <Compile Include="..\TheHouse.IntegrationTests\SearchTestDoubles.cs" Link="Shared\SearchTestDoubles.cs" />
   </ItemGroup>
 
   <ItemGroup>
