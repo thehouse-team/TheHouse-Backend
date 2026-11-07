@@ -12,7 +12,7 @@ namespace TheHouse.IntegrationTests;
 public sealed class PropertySeedTests
 {
     [Fact]
-    public async Task Seed_on_empty_store_creates_six_linked_properties()
+    public async Task Seed_on_empty_store_creates_twelve_linked_properties()
     {
         var universities = new UniversityTestStore();
         await new UniversitySeedService(universities)
@@ -25,9 +25,9 @@ public sealed class PropertySeedTests
 
         await service.SeedAsync(default);
 
-        Assert.Equal(6, properties.Properties.Count);
+        Assert.Equal(12, properties.Properties.Count);
         Assert.Equal(
-            6,
+            12,
             properties.Properties
                 .Select(property => property.Id)
                 .Distinct(StringComparer.Ordinal)
@@ -65,7 +65,7 @@ public sealed class PropertySeedTests
         await service.SeedAsync(default);
         await service.SeedAsync(default);
 
-        Assert.Equal(6, properties.Properties.Count);
+        Assert.Equal(12, properties.Properties.Count);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public sealed class PropertySeedTests
 
         await service.SeedAsync(default);
 
-        Assert.Equal(7, properties.Properties.Count);
+        Assert.Equal(13, properties.Properties.Count);
         Assert.Contains(
             properties.Properties,
             property => property.Title == "Propiedad ajena al seed");

@@ -16,7 +16,7 @@
 | Precondición | NV-01 U2 para el contrato; NV-03 U2 para la verificación desplegada; M-BE-027; M-BE-029 |
 | Relación | Spec funcional independiente; no autoriza búsqueda avanzada ni otros módulos |
 
-**Cambio 1.2.0-u2 (2026-11-07) — PENDIENTE DE APROBACIÓN Y «EJECUTA»:** el seed pasa a un catálogo regional de diez universidades de Tula–Tepeji–Jilotepec (NV-08-R04, task T14) y se corrige el comando de seed documentado, que eludía M-BE-043. Las tasks 1.1.0-u2 siguen cerradas.
+**Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** el seed pasa a un catálogo regional de diez universidades de Tula–Tepeji–Jilotepec (NV-08-R04, task T14) y se corrige el comando de seed documentado, que eludía M-BE-043. Las tasks 1.1.0-u2 siguen cerradas.
 
 Este documento está aprobado documentalmente para U2. No autoriza implementación: la ejecución requiere autorización humana de Fase B.
 

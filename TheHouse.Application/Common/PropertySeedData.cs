@@ -12,101 +12,189 @@ public static class PropertySeedData
             0,
             TimeSpan.Zero);
 
+    // NV-07 1.2.0-u2: doce propiedades de demostración en la región
+    // Tula–Tepeji–Jilotepec, vinculadas por código al catálogo de NV-08.
+    // Sin direcciones exactas, coordenadas, contactos ni datos personales.
     public static IReadOnlyCollection<PropertySeedRecord> Create() =>
     [
         new PropertySeedRecord
         {
             Id = "000000000000000000000001",
-            Title = "Departamento cerca de UTTT",
-            Description = "Departamento de dos recámaras con estacionamiento y servicios incluidos.",
-            Price = 8500.0m,
+            Title = "Cuarto amueblado cerca de la UTTT",
+            Description = "Cuarto individual amueblado a distancia caminable de la universidad, con internet incluido.",
+            Price = 2200.0m,
+            Currency = "MXN",
+            City = "Tula de Allende",
+            UniversityCode = "UTTT",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 16,
+            Amenities = ["wifi", "amueblado"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000002",
+            Title = "Departamento de 2 recámaras en El Carmen",
+            Description = "Departamento para compartir entre dos estudiantes, con cocina y estacionamiento.",
+            Price = 6500.0m,
             Currency = "MXN",
             City = "Tula de Allende",
             UniversityCode = "UTTT",
             Bedrooms = 2,
             Bathrooms = 1,
-            AreaM2 = 68,
-            Amenities = ["wifi", "estacionamiento", "amueblado"],
+            AreaM2 = 62,
+            Amenities = ["wifi", "estacionamiento", "cocina equipada"],
             CreatedAt = SeedCreatedAt
         },
-
-        new PropertySeedRecord
-        {
-            Id = "000000000000000000000002",
-            Title = "Cuarto para estudiante UTTT",
-            Description = "Cuarto individual amueblado a distancia caminable de la universidad.",
-            Price = 4200.0m,
-            Currency = "MXN",
-            City = "Tula de Allende",
-            UniversityCode = "UTTT",
-            Bedrooms = 1,
-            Bathrooms = 1,
-            AreaM2 = 24,
-            Amenities = ["wifi", "amueblado"],
-            CreatedAt = SeedCreatedAt
-        },
-
         new PropertySeedRecord
         {
             Id = "000000000000000000000003",
-            Title = "Departamento en Pachuca centro",
-            Description = "Departamento amplio con cocina equipada y estacionamiento.",
-            Price = 14500.0m,
+            Title = "Cuarto con baño propio en Tula centro",
+            Description = "Cuarto con baño privado y servicios incluidos, cerca del transporte público.",
+            Price = 2800.0m,
             Currency = "MXN",
-            City = "Pachuca de Soto",
-            UniversityCode = "UAEH",
-            Bedrooms = 3,
-            Bathrooms = 2,
-            AreaM2 = 95,
-            Amenities = ["wifi", "cocina equipada", "estacionamiento"],
-            CreatedAt = SeedCreatedAt
-        },
-
-        new PropertySeedRecord
-        {
-            Id = "000000000000000000000004",
-            Title = "Estudio cerca de UAEH",
-            Description = "Estudio compacto ideal para una persona, con servicios incluidos.",
-            Price = 6200.0m,
-            Currency = "MXN",
-            City = "Pachuca de Soto",
-            UniversityCode = "UAEH",
-            Bedrooms = 1,
-            Bathrooms = 1,
-            AreaM2 = 32,
-            Amenities = ["wifi", "amueblado"],
-            CreatedAt = SeedCreatedAt
-        },
-
-        new PropertySeedRecord
-        {
-            Id = "000000000000000000000005",
-            Title = "Casa compartida en Mixquiahuala",
-            Description = "Casa compartida con áreas comunes amplias y estacionamiento.",
-            Price = 9800.0m,
-            Currency = "MXN",
-            City = "Mixquiahuala de Juárez",
-            UniversityCode = "ITSOEH",
-            Bedrooms = 3,
-            Bathrooms = 2,
-            AreaM2 = 110,
-            Amenities = ["amueblado", "estacionamiento", "cocina equipada"],
-            CreatedAt = SeedCreatedAt
-        },
-
-        new PropertySeedRecord
-        {
-            Id = "000000000000000000000006",
-            Title = "Cuarto económico cerca de ITSOEH",
-            Description = "Cuarto sencillo con acceso a internet y servicios básicos.",
-            Price = 3500.0m,
-            Currency = "MXN",
-            City = "Mixquiahuala de Juárez",
-            UniversityCode = "ITSOEH",
+            City = "Tula de Allende",
+            UniversityCode = "UCAN",
             Bedrooms = 1,
             Bathrooms = 1,
             AreaM2 = 20,
+            Amenities = ["wifi", "baño privado", "servicios incluidos"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000004",
+            Title = "Estudio para estudiante en Tula",
+            Description = "Estudio compacto con cocineta, ideal para una persona.",
+            Price = 3500.0m,
+            Currency = "MXN",
+            City = "Tula de Allende",
+            UniversityCode = "UNE-TULA",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 28,
+            Amenities = ["wifi", "amueblado", "cocina equipada"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000005",
+            Title = "Cuarto en casa compartida en Tepeji",
+            Description = "Cuarto en casa compartida con áreas comunes y lavadora.",
+            Price = 1900.0m,
+            Currency = "MXN",
+            City = "Tepeji del Río de Ocampo",
+            UniversityCode = "UAEH-ESTE",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 14,
+            Amenities = ["wifi", "lavadora"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000006",
+            Title = "Departamento pequeño en Tepeji centro",
+            Description = "Departamento de una recámara con cocina y servicios básicos.",
+            Price = 5200.0m,
+            Currency = "MXN",
+            City = "Tepeji del Río de Ocampo",
+            UniversityCode = "UAEH-ESTE",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 40,
+            Amenities = ["wifi", "cocina equipada"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000007",
+            Title = "Cuarto cerca de la Escuela Superior de Tlahuelilpan",
+            Description = "Cuarto sencillo con internet, a pocos minutos de la escuela.",
+            Price = 1800.0m,
+            Currency = "MXN",
+            City = "Tlahuelilpan",
+            UniversityCode = "UAEH-ESTL",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 14,
             Amenities = ["wifi"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000008",
+            Title = "Cuarto amueblado en Atotonilco de Tula",
+            Description = "Cuarto amueblado con servicios incluidos y acceso a cocina compartida.",
+            Price = 2000.0m,
+            Currency = "MXN",
+            City = "Atotonilco de Tula",
+            UniversityCode = "UAEH-ESAT",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 15,
+            Amenities = ["wifi", "amueblado", "servicios incluidos"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000009",
+            Title = "Casa compartida en Mixquiahuala",
+            Description = "Cuarto en casa compartida con patio y estacionamiento.",
+            Price = 2300.0m,
+            Currency = "MXN",
+            City = "Mixquiahuala de Juárez",
+            UniversityCode = "ITSOEH",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 16,
+            Amenities = ["wifi", "estacionamiento"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000010",
+            Title = "Cuarto cerca del TESJI",
+            Description = "Cuarto individual con internet y escritorio para estudiar.",
+            Price = 2100.0m,
+            Currency = "MXN",
+            City = "Jilotepec",
+            UniversityCode = "TESJI",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 15,
+            Amenities = ["wifi", "amueblado"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000011",
+            Title = "Departamento de 1 recámara en Jilotepec",
+            Description = "Departamento independiente con cocina, cerca de la unidad de la UMB.",
+            Price = 4800.0m,
+            Currency = "MXN",
+            City = "Jilotepec",
+            UniversityCode = "UMB-JILO",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 38,
+            Amenities = ["wifi", "cocina equipada", "estacionamiento"],
+            CreatedAt = SeedCreatedAt
+        },
+        new PropertySeedRecord
+        {
+            Id = "000000000000000000000012",
+            Title = "Cuarto con servicios incluidos en Villa del Carbón",
+            Description = "Cuarto con agua, luz e internet incluidos en la renta.",
+            Price = 1900.0m,
+            Currency = "MXN",
+            City = "Villa del Carbón",
+            UniversityCode = "UMB-VDC",
+            Bedrooms = 1,
+            Bathrooms = 1,
+            AreaM2 = 14,
+            Amenities = ["wifi", "servicios incluidos"],
             CreatedAt = SeedCreatedAt
         }
     ];

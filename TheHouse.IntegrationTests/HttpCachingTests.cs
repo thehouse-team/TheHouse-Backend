@@ -18,7 +18,7 @@ public sealed class HttpCachingTests
         $"{PropertiesPath}/{PropertyId}",
         UniversitiesPath,
         // UTTT en UniversityHttpTests.Seed: id derivado de la longitud del código.
-        $"{UniversitiesPath}/012345678987654321000004"
+        $"{UniversitiesPath}/012345678987654300000000"
     };
 
     [Theory]

@@ -13,7 +13,7 @@ namespace TheHouse.IntegrationTests;
 public sealed class UniversitySeedTests
 {
     [Fact]
-    public async Task Seed_on_empty_store_creates_exactly_three()
+    public async Task Seed_on_empty_store_creates_exactly_ten_regional()
     {
         var store = new UniversityTestStore();
         var service = new UniversitySeedService(store);
@@ -22,11 +22,12 @@ public sealed class UniversitySeedTests
 
         await service.SeedAsync(default);
 
+        // NV-08 1.2.0-u2: catálogo regional Tula–Tepeji–Jilotepec.
         Assert.Equal(
-            new[] { "ITSOEH", "UAEH", "UTTT" },
+            new[] { "ITSOEH", "TESJI", "UAEH-ESAT", "UAEH-ESTE", "UAEH-ESTL", "UCAN", "UMB-JILO", "UMB-VDC", "UNE-TULA", "UTTT" },
             store.Universities
                 .Select(item => item.Code)
-                .Order()
+                .Order(StringComparer.Ordinal)
                 .ToArray());
     }
 
@@ -39,7 +40,7 @@ public sealed class UniversitySeedTests
         await service.SeedAsync(default);
         await service.SeedAsync(default);
 
-        Assert.Equal(3, store.Universities.Count);
+        Assert.Equal(10, store.Universities.Count);
     }
 
     [Fact]
@@ -62,7 +63,7 @@ public sealed class UniversitySeedTests
 
         await service.SeedAsync(default);
 
-        Assert.Equal(4, store.Universities.Count);
+        Assert.Equal(11, store.Universities.Count);
         Assert.Contains(
             store.Universities,
             item => item.Code == "AAA");
@@ -81,7 +82,7 @@ public sealed class UniversitySeedTests
 
         await service.SeedAsync(default);
 
-        Assert.Equal(3, store.Universities.Count);
+        Assert.Equal(10, store.Universities.Count);
 
         // El segundo seed actualiza por `code` en lugar de insertar:
         // los identificadores no cambian.
@@ -136,7 +137,7 @@ public sealed class UniversitySeedTests
 
         await service.SeedAsync(default);
 
-        Assert.Equal(3, store.Universities.Count);
+        Assert.Equal(10, store.Universities.Count);
 
         var uttt = store.Universities
             .First(item => item.Code == "UTTT");

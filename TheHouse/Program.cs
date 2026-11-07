@@ -134,6 +134,8 @@ if (seedUniversities || seedProperties)
     return;
 }
 
+// NV-01-R14: primero, para cubrir todas las respuestas.
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<FoundationExceptionMiddleware>();
 app.UseForwardedHeaders();
