@@ -575,3 +575,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** sin preferencias, búsqueda (NV-14) y Smart Match (NV-23 y `TheHouse-ML`) no tienen con qué calcular.
 - **Impacto:** el seed de coordenadas en Production requiere autorización aparte (M-BE-043).
 
+## M-BE-064 — NV-12 1.1.0 aprobada: arrendador, edificios y cuartos
+
+- **ID:** M-BE-064
+- **Decisión:** aprobar NV-12 1.1.0 con sus decisiones: acciones como sub-recursos; rol de arrendador por existencia del perfil (sin claim nuevo); concurrencia optimista con `version`; publicación de v1 hasta `in_review` (documentos con NV-13, aprobación con NV-21); sin migrar `properties`, favoritos ni visitas (NV-14); servicios con el catálogo de NV-11 y catálogos cerrados de la §6; límites de 20 edificios, 200 cuartos, 30 pisos y 30 cuartos por piso; versión de términos configurable; eventos de dominio fuera de v1.
+- **Estado:** APROBADO — Victor, 2026-11-07 («Apruebo y EJECUTA», T01–T13). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-07.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** sin arrendadores ni cuartos con dueño no pueden existir la confirmación de visitas, el chat ni la búsqueda real.
+- **Impacto:** los cuartos no serán públicos hasta NV-13, NV-21 y NV-14; la app sigue usando las propiedades de NV-07 mientras tanto.
+
