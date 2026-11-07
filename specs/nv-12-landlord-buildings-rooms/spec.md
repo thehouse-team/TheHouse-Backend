@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T13; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-12-landlord-buildings-rooms/`) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — T01–T13 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-06, RF-13, RF-14, RF-16 a RF-22, RF-45, RF-76, RF-77, RF-78 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-08, RNF-09, RNF-10 |
@@ -352,7 +352,7 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — T01–T13 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 
 ## 18. Aprobación pendiente
 
