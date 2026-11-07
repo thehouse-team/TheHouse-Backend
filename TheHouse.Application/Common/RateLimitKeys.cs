@@ -20,6 +20,18 @@ public static class RateLimitKeys
     public static string RefreshIp(string ipAddress) =>
         "thehouse:u2:refresh:ip:v1:" + Hash(ipAddress);
 
+    public static string FavoritesUser(string userId) =>
+        "thehouse:u2:favorites:user:v1:" + Hash(userId);
+
+    public static string VisitsUser(string userId) =>
+        "thehouse:u2:visits:user:v1:" + Hash(userId);
+
+    public static string VisitCreatesUser(string userId) =>
+        "thehouse:u2:visits:create:v1:" + Hash(userId);
+
+    public static string VisitLock(string userId) =>
+        "thehouse:u2:visits:lock:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

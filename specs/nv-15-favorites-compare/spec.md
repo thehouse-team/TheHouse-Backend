@@ -4,23 +4,23 @@
 | --- | --- |
 | ID | NV-15 |
 | Documento | `spec.md` |
-| Versión | 1.1.0-borrador |
+| Versión | 1.1.0 |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió»: aprobación de 1.1.0 y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-15-favorites-compare/`) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T10 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-31, RF-32 (RF-33, comparación, en versión posterior) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-09 |
-| Plan | `plan.md` 1.1.0-borrador |
-| Tasks | `task.md` 1.1.0-borrador |
+| Plan | `plan.md` 1.1.0 |
+| Tasks | `task.md` 1.1.0 |
 | Módulo | Favorites |
 | Precondición | NV-07 (propiedades) y NV-10 (sesión) desplegadas |
 | Relación | Usa las propiedades de NV-07; cuando NV-12/NV-14 publiquen cuartos, los favoritos se migran según la decisión de NV-14 |
 
 Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
 
-**Cambio 1.1.0-borrador (2026-11-07):** se adapta al catálogo que ya existe: los favoritos apuntan a `propertyId` de NV-07 (las propiedades del seed), porque los cuartos de NV-12 todavía no existen. Se agrega `GET /users/me/favorites/ids` para marcar favoritos en listados sin una consulta por propiedad. La comparación (RF-33) pasa a una versión posterior. Alcance pedido por el responsable de Mobile el 2026-11-07, que ya tiene la UX lista.
+**Cambio 1.1.0 (2026-11-07):** se adapta al catálogo que ya existe: los favoritos apuntan a `propertyId` de NV-07 (las propiedades del seed), porque los cuartos de NV-12 todavía no existen. Se agrega `GET /users/me/favorites/ids` para marcar favoritos en listados sin una consulta por propiedad. La comparación (RF-33) pasa a una versión posterior. Alcance pedido por el responsable de Mobile el 2026-11-07, que ya tiene la UX lista.
 
 ## 1. Contexto
 
@@ -193,11 +193,11 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
-| Tema | Propuesta | Estado |
+|  | Propuesta | Estado |
 | --- | --- | --- |
-| Base de los favoritos | `propertyId` de NV-07 mientras no existan cuartos de NV-12 | PROPUESTO |
-| Límite | 200 favoritos por usuario | PROPUESTO |
-| Consulta de favoritos para listados | `GET /users/me/favorites/ids` en lugar de una consulta por propiedad | PROPUESTO |
+| Base de los favoritos | `propertyId` de NV-07 mientras no existan cuartos de NV-12 | APROBADO (M-BE-060) |
+| Límite | 200 favoritos por usuario | APROBADO (M-BE-060) |
+| Consulta de favoritos para listados | `GET /users/me/favorites/ids` en lugar de una consulta por propiedad | APROBADO (M-BE-060) |
 | Migración a cuartos (NV-12/NV-14) | Se decide junto con la migración de NV-07 en NV-14 | PENDIENTE |
 
 ## 14. Costo — COST-001
@@ -231,9 +231,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T10 autorizadas** |
 
-## 18. Aprobación pendiente
+## 18. Aprobación y ejecución
 
 Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

@@ -539,9 +539,9 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 
 - **ID:** M-BE-060
 - **Decisión:** reordenar P3 según lo que Mobile ya tiene listo: NV-15 1.1.0 (favoritos sobre `propertyId` de NV-07) y NV-17 1.1.0 (visitas v1: solicitud, consulta y cancelación del estudiante, con `Idempotency-Key`, reglas de horario en `America/Mexico_City` y conflictos) primero; después NV-11, el bloque de arrendadores (NV-12, NV-13, NV-21) y el chat (NV-16), que requiere arrendadores. Toda spec con endpoints para la app incluye la sección "Contrato para Mobile" y se entrega con URL desplegada y pruebas.
-- **Estado:** PROPUESTO — borradores pendientes de revisión de Mobile y de aprobación de Victor.
+- **Estado:** APROBADO — Victor, 2026-11-07: aprobación de NV-15 1.1.0 y NV-17 1.1.0 y «EJECUTA» de sus tasks.
 - **Fecha:** 2026-11-07.
-- **Aprobador:** pendiente (Victor Manuel Jose Jose).
+- **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** pedido del responsable de Mobile del 2026-11-07 (favoritos, visitas y chat con contratos reales, compatibilidad con lo existente y convenciones uniformes). Las propiedades actuales no tienen arrendador: la confirmación de visitas y el chat no pueden existir antes de NV-12.
 - **Impacto:** Mobile usaba otra numeración (favoritos "NV-09", visitas "NV-10"); la equivalencia es favoritos = NV-15, visitas = NV-17, chat = NV-16. Los favoritos y visitas v1 se migrarán a cuartos cuando NV-12/NV-14 los publiquen.
 

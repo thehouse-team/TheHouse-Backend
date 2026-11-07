@@ -4,23 +4,23 @@
 | --- | --- |
 | ID | NV-17 |
 | Documento | `spec.md` |
-| Versión | 1.1.0-borrador |
+| Versión | 1.1.0 |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió»: aprobación de 1.1.0 y «EJECUTA» de T01–T12; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T12 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-80 (parte del estudiante; la del arrendador en versión posterior) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09 |
-| Plan | `plan.md` 1.1.0-borrador |
-| Tasks | `task.md` 1.1.0-borrador |
+| Plan | `plan.md` 1.1.0 |
+| Tasks | `task.md` 1.1.0 |
 | Módulo | Visits |
 | Precondición | NV-07 (propiedades) y NV-10 (sesión) desplegadas |
 | Relación | Usa las propiedades de NV-07; NV-12 agregará la confirmación del arrendador; NV-19 usará las visitas completadas |
 
 Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
 
-**Cambio 1.1.0-borrador (2026-11-07):** versión 1 basada en el catálogo actual. Las propiedades de NV-07 no tienen arrendador, así que nadie puede confirmar una visita todavía: esta versión cubre la **solicitud de visita del estudiante** (crear, listar, consultar y cancelar) con idempotencia y reglas de conflicto. La confirmación, reprogramación y el calendario del arrendador, junto con la dirección exacta (RF-41), llegan con NV-12. Alcance pedido por el responsable de Mobile el 2026-11-07.
+**Cambio 1.1.0 (2026-11-07):** versión 1 basada en el catálogo actual. Las propiedades de NV-07 no tienen arrendador, así que nadie puede confirmar una visita todavía: esta versión cubre la **solicitud de visita del estudiante** (crear, listar, consultar y cancelar) con idempotencia y reglas de conflicto. La confirmación, reprogramación y el calendario del arrendador, junto con la dirección exacta (RF-41), llegan con NV-12. Alcance pedido por el responsable de Mobile el 2026-11-07.
 
 ## 1. Contexto
 
@@ -202,13 +202,13 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks que dependen de ellas quedan BLOCKED.
 
-| Tema | Propuesta | Estado |
+|  | Propuesta | Estado |
 | --- | --- | --- |
-| Alcance v1 | Solo solicitudes del estudiante; el arrendador confirma en la versión con NV-12 | PROPUESTO |
-| Ventana horaria | 08:00–20:00 en `America/Mexico_City`, múltiplos de 15 min, de 2 h a 60 días | PROPUESTO |
-| Idempotencia | `Idempotency-Key` UUID obligatorio con vigencia de 24 h | PROPUESTO |
-| Conflictos | Una activa por propiedad, separación de 60 min, máximo 5 activas | PROPUESTO |
-| Disponibilidad del arrendador | No se administra en v1 | PROPUESTO |
+| Alcance v1 | Solo solicitudes del estudiante; el arrendador confirma en la versión con NV-12 | APROBADO (M-BE-060) |
+| Ventana horaria | 08:00–20:00 en `America/Mexico_City`, múltiplos de 15 min, de 2 h a 60 días | APROBADO (M-BE-060) |
+| Idempotencia | `Idempotency-Key` UUID obligatorio con vigencia de 24 h | APROBADO (M-BE-060) |
+| Conflictos | Una activa por propiedad, separación de 60 min, máximo 5 activas | APROBADO (M-BE-060) |
+| Disponibilidad del arrendador | No se administra en v1 | APROBADO (M-BE-060) |
 | Estados con arrendador | `confirmed`, `rejected`, `rescheduled`, `completed` con NV-12 | PENDIENTE |
 
 ## 14. Costo — COST-001
@@ -245,9 +245,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T12 autorizadas** |
 
-## 18. Aprobación pendiente
+## 18. Aprobación y ejecución
 
 Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §13. Para ejecutar se requiere además «EJECUTA» con versión, tasks autorizadas y rutas permitidas. Antes de cada iteración de desarrollo se revisa la coherencia con `constitution.md`, `AGENTS.md` y `memoria.md` y se buscan brechas de seguridad.

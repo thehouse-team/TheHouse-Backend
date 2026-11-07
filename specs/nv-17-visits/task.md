@@ -4,16 +4,16 @@
 | --- | --- |
 | ID | NV-17 |
 | Documento | `task.md` |
-| Versión | 1.1.0-borrador |
+| Versión | 1.1.0 |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió»: aprobación de 1.1.0 y «EJECUTA» de T01–T12; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T08 completas (2026-11-07, ver `evidence.md`); T09–T12 esperan CI, CD y prueba en Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.1.0-borrador |
-| Plan | `plan.md` 1.1.0-borrador |
+| Spec | `spec.md` 1.1.0 |
+| Plan | `plan.md` 1.1.0 |
 | Tasks totales | 12 |
-| Tasks completadas | 0 |
+| Tasks completadas | 8 |
 
 ## Reglas de esta lista
 
@@ -25,20 +25,20 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Solicitar visita** — Requisito: NV-17-R01 · Fase: F1 · Aceptación: `POST /visits` con propiedad existente y horario válido crea una visita `requested` (201); propiedad inexistente 404; formato inválido o fecha sin desplazamiento 400. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Reglas de horario y zona** — Requisito: NV-17-R02 · Fase: F1 · Aceptación: Rechaza con 422 horarios a menos de 2 h, a más de 60 días, fuera de 08:00–20:00 en `America/Mexico_City` o no múltiplos de 15 min; respuestas en UTC con `timeZone`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Estados y transiciones** — Requisito: NV-17-R03 · Fase: F1 · Aceptación: Máquina de estados con `requested` → `cancelled`; estados futuros reservados; transiciones inválidas 409; `history` registrado. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T04 · Consultar y listar** — Requisito: NV-17-R04 · Fase: F1 · Aceptación: `GET /visits/{id}` (solo propias, ajena 404) y `GET /users/me/visits` paginado, filtrable por estado, orden `scheduledAt` asc. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T05 · Cancelar** — Requisito: NV-17-R05 · Fase: F1 · Aceptación: `POST /visits/{id}/cancel` cancela una visita `requested` futura (200); repetir responde 200; visita pasada 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Solicitar visita** — Requisito: NV-17-R01 · Fase: F1 · Aceptación: `POST /visits` con propiedad existente y horario válido crea una visita `requested` (201); propiedad inexistente 404; formato inválido o fecha sin desplazamiento 400. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Reglas de horario y zona** — Requisito: NV-17-R02 · Fase: F1 · Aceptación: Rechaza con 422 horarios a menos de 2 h, a más de 60 días, fuera de 08:00–20:00 en `America/Mexico_City` o no múltiplos de 15 min; respuestas en UTC con `timeZone`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Estados y transiciones** — Requisito: NV-17-R03 · Fase: F1 · Aceptación: Máquina de estados con `requested` → `cancelled`; estados futuros reservados; transiciones inválidas 409; `history` registrado. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T04 · Consultar y listar** — Requisito: NV-17-R04 · Fase: F1 · Aceptación: `GET /visits/{id}` (solo propias, ajena 404) y `GET /users/me/visits` paginado, filtrable por estado, orden `scheduledAt` asc. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T05 · Cancelar** — Requisito: NV-17-R05 · Fase: F1 · Aceptación: `POST /visits/{id}/cancel` cancela una visita `requested` futura (200); repetir responde 200; visita pasada 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T06 · Idempotencia** — Requisito: NV-17-R06 · Fase: F2 · Aceptación: Misma `Idempotency-Key` y mismo cuerpo dentro de 24 h devuelven la visita original (200, `Idempotent-Replayed`); cuerpo distinto 409; sin llave 400; prueba de reintentos y doble toque. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
-- [ ] **T07 · Conflictos y concurrencia** — Requisito: NV-17-R07 · Fase: F2 · Aceptación: Visita `requested` duplicada para la misma propiedad, otra visita a menos de 60 min o más de 5 activas → 409; pruebas concurrentes con el lock por usuario y el índice único parcial. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T06 · Idempotencia** — Requisito: NV-17-R06 · Fase: F2 · Aceptación: Misma `Idempotency-Key` y mismo cuerpo dentro de 24 h devuelven la visita original (200, `Idempotent-Replayed`); cuerpo distinto 409; sin llave 400; prueba de reintentos y doble toque. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T07 · Conflictos y concurrencia** — Requisito: NV-17-R07 · Fase: F2 · Aceptación: Visita `requested` duplicada para la misma propiedad, otra visita a menos de 60 min o más de 5 activas → 409; pruebas concurrentes con el lock por usuario y el índice único parcial. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T08 · Autorización y límites** — Requisito: NV-17-R08 · Fase: F3 · Aceptación: Sin `userId` del cliente; pruebas con dos usuarios; rate limits con 429 y `Retry-After`; Redis caído 503; `no-store`. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06, T07.
+- [x] **T08 · Autorización y límites** — Requisito: NV-17-R08 · Fase: F3 · Aceptación: Sin `userId` del cliente; pruebas con dos usuarios; rate limits con 429 y `Retry-After`; Redis caído 503; `no-store`. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06, T07.
 
 ## F4 — Pruebas y evidencia
 
@@ -51,14 +51,14 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F1 | ABIERTA |
-| T05 | R05 | F1 | ABIERTA |
-| T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F2 | ABIERTA |
-| T08 | R08 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F1 | COMPLETA |
+| T05 | R05 | F1 | COMPLETA |
+| T06 | R06 | F2 | COMPLETA |
+| T07 | R07 | F2 | COMPLETA |
+| T08 | R08 | F3 | COMPLETA |
 | T09 | R09 | F4 | ABIERTA |
 | T10 | R10 | F4 | ABIERTA |
 | T11 | R10 | F4 | ABIERTA |
@@ -85,11 +85,11 @@
 | --- | --- |
 | Requisitos | 10 |
 | Tasks | 12 |
-| Tasks abiertas | 12 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 8 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T08 completas (2026-11-07, ver `evidence.md`); T09–T12 esperan CI, CD y prueba en Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

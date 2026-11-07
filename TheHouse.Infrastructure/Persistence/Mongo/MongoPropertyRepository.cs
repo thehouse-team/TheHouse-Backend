@@ -108,6 +108,49 @@ public sealed class MongoPropertyRepository(
         }
     }
 
+    // NV-15/NV-17: lectura por lotes con la misma proyección pública.
+    public async Task<IReadOnlyList<Property>> GetByIdsAsync(
+        IReadOnlyCollection<string> ids,
+        CancellationToken cancellationToken)
+    {
+        var objectIds = ids
+            .Where(PropertyQueryValidation.IsObjectId)
+            .Select(id => MongoDB.Bson.ObjectId.Parse(id))
+            .Distinct()
+            .ToArray();
+
+        if (objectIds.Length == 0)
+        {
+            return Array.Empty<Property>();
+        }
+
+        try
+        {
+            var documents =
+                await Collection
+                    .Find(Builders<PropertyDocument>.Filter.In(
+                        property => property.Id,
+                        objectIds))
+                    .Project<PropertyDocument>(
+                        PublicProjection)
+                    .ToListAsync(
+                        cancellationToken);
+
+            return documents.Select(Map).ToArray();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+            when (exception is
+                  MongoException or
+                  TimeoutException)
+        {
+            throw MongoFailure.Unavailable();
+        }
+    }
+
     public async Task<Property?> GetByIdAsync(
         string id,
         CancellationToken cancellationToken)

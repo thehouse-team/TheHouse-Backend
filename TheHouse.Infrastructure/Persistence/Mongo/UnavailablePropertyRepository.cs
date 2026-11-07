@@ -26,6 +26,14 @@ public sealed class UnavailablePropertyRepository :
         throw new DependencyUnavailableException();
     }
 
+    public Task<IReadOnlyList<Property>> GetByIdsAsync(
+        IReadOnlyCollection<string> ids,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        throw new DependencyUnavailableException();
+    }
+
     public Task UpsertSeedAsync(
         IReadOnlyCollection<Property> properties,
         CancellationToken cancellationToken)
