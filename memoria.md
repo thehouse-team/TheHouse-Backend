@@ -554,3 +554,14 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Justificación:** el índice parcial bloquearía para siempre una propiedad si una visita pasada queda en `requested`; el formato `+00:00` y el campo `code` mantienen la API uniforme y dan a Mobile errores distinguibles; A4 sigue el precedente de NV-07 y NV-08.
 - **Impacto:** `specs/nv-17-visits/spec.md` (§6, §8, §9, §11, riesgos) y `specs/nv-15-favorites-compare/spec.md` §11 quedan alineadas; las evidencias de NV-15 y NV-17 pasan a PASS sin advertencias de ajustes. A3 es aditivo y aplicará a las specs futuras con errores de negocio.
+
+## M-BE-062 — Repositorios satélite sin despliegue (TheHouse-ML)
+
+- **ID:** M-BE-062
+- **Decisión propuesta:** permitir repositorios satélite del proyecto que **no se despliegan** y entregan artefactos versionados al backend. El primero es `TheHouse-ML` (Smart Match), que produce un modelo ONNX que el backend carga dentro del monolito detrás de `ICompatibilityModel` (NV-23). No se agrega ningún servicio en producción.
+- **Estado:** PROPUESTO — pedido de Victor del 2026-11-07 de hacer Smart Match como proyecto separado en Python con la misma estructura SDD. Requiere «Apruebo 1.2.0» de la constitution.
+- **Fecha:** 2026-11-07.
+- **Cambio propuesto a la constitution (1.2.0):** agregar a §6 (Modular Monolith): "Un repositorio satélite puede producir artefactos (por ejemplo, modelos ONNX) que el backend carga en proceso detrás de un puerto de Application. El satélite no se despliega ni expone servicios; el contrato es un esquema versionado y casos dorados verificados en el backend." Sin otros cambios de fondo.
+- **Justificación:** el profesor pide proyectos separados para ML e IA generativa; un satélite sin despliegue cumple eso sin romper "monolito modular, no microservicios" (M-BE-004, M-BE-022) ni agregar costo (COST-001).
+- **Impacto:** NV-23 cambia de "ML.NET entrenado en una herramienta separada" a "carga ONNX de `TheHouse-ML` con `Microsoft.ML.OnnxRuntime`"; se actualiza junto con su aprobación. NV-11 1.1.0 define el esquema de preferencias que usa el modelo. La IA generativa (NV-24) no cambia por ahora.
+
