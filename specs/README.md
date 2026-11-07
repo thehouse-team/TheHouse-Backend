@@ -28,7 +28,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-18 | [Cierre de trato con QR y renta](nv-18-deal-closing-rental/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 | NV-19 | [Reseñas y calificaciones](nv-19-reviews/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
 | NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/8 |
-| NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T14 autorizadas** | 10/14 |
+| NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T14 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 14/14 |
 | NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
 | NV-23 | [Smart Match — compatibilidad con Machine Learning](nv-23-smart-match-ml/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/10 |
 | NV-24 | [Smart Match — explicaciones con IA generativa](nv-24-smart-match-genai/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/8 |
