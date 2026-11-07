@@ -348,7 +348,11 @@ public sealed class LogoutHttpTests
                     or "/api/v1/users/me/visits"
                     or "/api/v1/visits"
                     or "/api/v1/visits/{id}"
-                    or "/api/v1/visits/{id}/cancel",
+                    or "/api/v1/visits/{id}/cancel"
+                    or "/api/v1/users/me/profile"
+                    or "/api/v1/users/me/university"
+                    or "/api/v1/users/me/preferences"
+                    or "/api/v1/universities/search",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

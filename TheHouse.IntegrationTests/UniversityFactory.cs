@@ -106,6 +106,50 @@ public sealed class UniversityTestStore : IUniversityRepository
                 item => item.Id == id));
     }
 
+    // NV-11: misma semántica que Mongo: `searchKey` contiene el texto y
+    // $nearSphere ordena por distancia y omite universidades sin ubicación.
+    public Task<IReadOnlyList<University>> SearchByTextAsync(
+        string normalizedQuery,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+
+        return Task.FromResult<IReadOnlyList<University>>(
+            Universities
+                .Where(item => SearchText.UniversityKey(item.Code, item.Name, item.City).Contains(normalizedQuery, StringComparison.Ordinal))
+                .OrderBy(item => item.Name, StringComparer.Ordinal)
+                .ThenBy(item => item.Id, StringComparer.Ordinal)
+                .Take(limit)
+                .ToList());
+    }
+
+    public Task<IReadOnlyList<University>> SearchNearAsync(
+        double latitude,
+        double longitude,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+
+        return Task.FromResult<IReadOnlyList<University>>(
+            Universities
+                .Where(item => item.Latitude is not null && item.Longitude is not null)
+                .OrderBy(item => TheHouse.Application.UseCases.UniversitySearchService.DistanceKm(latitude, longitude, item.Latitude!.Value, item.Longitude!.Value))
+                .Take(limit)
+                .ToList());
+    }
+
     public Task UpsertSeedAsync(
         IReadOnlyCollection<University> universities,
         CancellationToken cancellationToken)
@@ -132,7 +176,9 @@ public sealed class UniversityTestStore : IUniversityRepository
                         Name = university.Name,
                         City = university.City,
                         Country = university.Country,
-                        CreatedAt = university.CreatedAt
+                        CreatedAt = university.CreatedAt,
+                        Latitude = university.Latitude,
+                        Longitude = university.Longitude
                     });
 
                 continue;
@@ -149,7 +195,9 @@ public sealed class UniversityTestStore : IUniversityRepository
                     Name = university.Name,
                     City = university.City,
                     Country = university.Country,
-                    CreatedAt = existing.CreatedAt
+                    CreatedAt = existing.CreatedAt,
+                    Latitude = university.Latitude,
+                    Longitude = university.Longitude
                 });
         }
 

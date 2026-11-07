@@ -32,6 +32,12 @@ public static class RateLimitKeys
     public static string VisitLock(string userId) =>
         "thehouse:u2:visits:lock:v1:" + Hash(userId);
 
+    public static string ProfileUser(string userId) =>
+        "thehouse:u2:profile:user:v1:" + Hash(userId);
+
+    public static string UniversitySearchIp(string ipAddress) =>
+        "thehouse:u2:universities:search:ip:v1:" + Hash(ipAddress);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

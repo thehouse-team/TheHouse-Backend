@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-07 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-11-profile-preferences/`; el seed de coordenadas en Production requiere autorización aparte, M-BE-043) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-05, RF-07 (búsqueda y selección), RF-08 a RF-12, RF-72; base del perfil de RF-48 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-04, RNF-09, RNF-10, RNF-11 |
@@ -235,14 +235,14 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Siglas de universidad | Reutilizar `code` de NV-08; no agregar `acronym` | PROPUESTO |
-| Extensión de `universities` | Agregar `location` y `searchKey` de forma aditiva; respuestas de NV-08 sin cambios | PROPUESTO |
-| Coordenadas del seed | Punto del campus tomado de OpenStreetMap y verificado; carga con seed autorizado (M-BE-043) | PROPUESTO |
-| Búsqueda por texto | `searchKey` normalizado con coincidencia parcial en lugar de índice de texto (catálogo pequeño) | PROPUESTO |
-| Catálogos de preferencias | Valores de la §6, a confirmar con Mobile | PROPUESTO |
-| `quickSetupCompleted` | Derivado en el servidor | PROPUESTO |
-| Moneda | MXN única en la primera versión | PROPUESTO |
-| Eventos de dominio | Fuera de v1 hasta que exista un consumidor | PROPUESTO |
+| Siglas de universidad | Reutilizar `code` de NV-08; no agregar `acronym` | APROBADO (M-BE-063) |
+| Extensión de `universities` | Agregar `location` y `searchKey` de forma aditiva; respuestas de NV-08 sin cambios | APROBADO (M-BE-063) |
+| Coordenadas del seed | Punto del campus tomado de OpenStreetMap y verificado; carga con seed autorizado (M-BE-043) | APROBADO (M-BE-063) |
+| Búsqueda por texto | `searchKey` normalizado con coincidencia parcial en lugar de índice de texto (catálogo pequeño) | APROBADO (M-BE-063) |
+| Catálogos de preferencias | Valores de la §6, a confirmar con Mobile | APROBADO (M-BE-063) |
+| `quickSetupCompleted` | Derivado en el servidor | APROBADO (M-BE-063) |
+| Moneda | MXN única en la primera versión | APROBADO (M-BE-063) |
+| Eventos de dominio | Fuera de v1 hasta que exista un consumidor | APROBADO (M-BE-063) |
 
 ## 14. Costo — COST-001
 
@@ -277,8 +277,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
 
 ## 18. Aprobación pendiente
 

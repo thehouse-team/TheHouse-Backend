@@ -28,6 +28,27 @@ public sealed class UnavailableUniversityRepository :
         throw new DependencyUnavailableException();
     }
 
+    public Task<IReadOnlyList<University>> SearchByTextAsync(
+        string normalizedQuery,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        throw new DependencyUnavailableException();
+    }
+
+    public Task<IReadOnlyList<University>> SearchNearAsync(
+        double latitude,
+        double longitude,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        throw new DependencyUnavailableException();
+    }
+
     public Task UpsertSeedAsync(
         IReadOnlyCollection<University> universities,
         CancellationToken cancellationToken)
