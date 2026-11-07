@@ -23,6 +23,13 @@ public sealed class UserRateLimitOptions
 
     public TimeSpan GenerateWindow { get; init; } = TimeSpan.FromHours(1);
 
+    // NV-21: panel interno por usuario; reportes 60/min y 10 por día.
+    public int AdminPerWindow { get; init; } = 120;
+
+    public int ReportsPerWindow { get; init; } = 60;
+
+    public int ReportCreatesPerDay { get; init; } = 10;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

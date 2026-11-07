@@ -16,6 +16,9 @@ public sealed class UnavailableRefreshTokenStore : IRefreshTokenStore
     public Task<RefreshToken?> FindAsync(string tokenHash, CancellationToken cancellationToken) =>
         Fail<RefreshToken?>(cancellationToken);
 
+    public Task<IReadOnlyList<string>> ListActiveSessionIdsAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken) =>
+        throw new DependencyUnavailableException();
+
     public Task RevokeSessionAsync(string sessionId, string reason, DateTimeOffset now, CancellationToken cancellationToken) =>
         Fail<object?>(cancellationToken);
 

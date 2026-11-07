@@ -126,6 +126,19 @@ public sealed class MongoBuildingRepository(IMongoDatabase database) : IBuilding
     public Task<long> CountByOwnerAsync(string ownerId, CancellationToken cancellationToken) =>
         MongoCalls.Run(() => Collection.CountDocumentsAsync(building => building.OwnerId == ownerId, cancellationToken: cancellationToken));
 
+    public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByStatusAsync(BuildingStatus status, int page, int pageSize, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            var filter = Builders<BuildingDocument>.Filter.Eq(building => building.Status, status.ToString());
+            var total = await Collection.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
+            var documents = await Collection.Find(filter)
+                .Sort(Builders<BuildingDocument>.Sort.Ascending(building => building.UpdatedAt).Ascending(building => building.Id))
+                .Skip((page - 1) * pageSize)
+                .Limit(pageSize)
+                .ToListAsync(cancellationToken);
+            return ((IReadOnlyList<Building>)documents.Select(Map).ToArray(), total);
+        });
+
     public Task<bool> ReplaceAsync(Building building, long expectedVersion, CancellationToken cancellationToken) =>
         MongoCalls.Run(async () =>
         {
@@ -452,6 +465,8 @@ public sealed class UnavailableBuildingRepository : IBuildingRepository
     public Task<IReadOnlyList<Building>> ListAllByOwnerAsync(string ownerId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<long> CountByOwnerAsync(string ownerId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByStatusAsync(BuildingStatus status, int page, int pageSize, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<bool> ReplaceAsync(Building building, long expectedVersion, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 

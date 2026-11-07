@@ -27,6 +27,8 @@ public static class LandlordEndpoint
 
     public const string PublishPath = BuildingPath + "/publish";
 
+    public const string VerificationPath = BuildingPath + "/verification";
+
     public const string RoomPath = BasePath + "/rooms/{id}";
 
     public const string DuplicatePath = RoomPath + "/duplicate";
@@ -58,6 +60,7 @@ public static class LandlordEndpoint
         Write(app.MapPost(ResumePath, ResumeRoomAsync), "ResumeRoom", "Resume a paused room", 200);
         Read(app.MapGet(PublicationPath, PublicationAsync), "GetPublicationSteps", "List the steps pending to submit for review", 400, 404);
         Write(app.MapPost(PublishPath, PublishAsync), "SubmitBuildingForReview", "Submit a building for review", 202);
+        Read(app.MapGet(VerificationPath, VerificationAsync), "GetBuildingVerification", "Review status and last decision", 400, 404);
     }
 
     private static void Read(RouteHandlerBuilder builder, string name, string summary, params int[] extra)
@@ -200,6 +203,10 @@ public static class LandlordEndpoint
     private static Task<IResult> PublishAsync(string id, HttpContext context, BuildingService buildings, IRateLimitStore store, UserRateLimitOptions limits) =>
         Writing(context, store, limits, async userId =>
             Results.Json(await buildings.PublishAsync(userId, id, context.RequestAborted), statusCode: 202));
+
+    private static Task<IResult> VerificationAsync(string id, HttpContext context, ReviewService reviews, IRateLimitStore store, UserRateLimitOptions limits) =>
+        Reading(context, store, limits, async userId =>
+            Results.Json(await reviews.OwnerVerificationAsync(userId, id, context.RequestAborted), statusCode: 200));
 
     private static Task<IResult> Reading(HttpContext context, IRateLimitStore store, UserRateLimitOptions limits, Func<string, Task<IResult>> action) =>
         UserEndpointSupport.RunAsync(context, async userId =>

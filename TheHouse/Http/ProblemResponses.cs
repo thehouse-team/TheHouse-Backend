@@ -41,7 +41,9 @@ public static class ProblemResponses
         problem.Instance = null;
         problem.Extensions.Clear();
         problem.Extensions["traceId"] = context.TraceIdentifier;
-        if (RegistrationProblems.IsRegistration(context))
+        if (UserResourceProblems.IsAdmin(context))
+            UserResourceProblems.NormalizeAdmin(problem, status);
+        else if (RegistrationProblems.IsRegistration(context))
             RegistrationProblems.Normalize(problem, status);
         else if (LoginProblems.IsLogin(context))
             LoginProblems.Normalize(problem, status);
@@ -52,26 +54,20 @@ public static class ProblemResponses
         else if (SessionProblems.IsMe(context))
             SessionProblems.NormalizeMe(problem, status);
         else if (UserResourceProblems.IsLandlord(context))
-        {
             UserResourceProblems.NormalizeLandlord(problem, status);
-            UserResourceProblems.ApplyCode(context, problem, status);
-        }
         else if (UserResourceProblems.IsProfile(context))
             UserResourceProblems.NormalizeProfile(problem, status);
         else if (UserResourceProblems.IsFavorites(context))
-        {
             UserResourceProblems.NormalizeFavorites(problem, status);
-            UserResourceProblems.ApplyCode(context, problem, status);
-        }
         else if (UserResourceProblems.IsVisits(context))
-        {
             UserResourceProblems.NormalizeVisits(problem, status);
-            UserResourceProblems.ApplyCode(context, problem, status);
-        }
         else if (PropertyProblems.IsProperty(context))
             PropertyProblems.Normalize(problem, status);
         else if (UniversityProblems.IsUniversity(context))
             UniversityProblems.Normalize(problem, status);
+
+        // Código estable (M-BE-061) en cualquier ruta que lo haya indicado.
+        UserResourceProblems.ApplyCode(context, problem, status);
     }
 
     public static async Task WriteAsync(HttpContext context, int status, bool validation = false)

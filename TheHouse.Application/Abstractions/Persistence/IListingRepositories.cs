@@ -23,6 +23,9 @@ public interface IBuildingRepository
 
     Task<IReadOnlyList<Building>> ListAllByOwnerAsync(string ownerId, CancellationToken cancellationToken);
 
+    // NV-21: cola de revisión (más antiguos primero).
+    Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByStatusAsync(BuildingStatus status, int page, int pageSize, CancellationToken cancellationToken);
+
     Task<long> CountByOwnerAsync(string ownerId, CancellationToken cancellationToken);
 
     Task<bool> ReplaceAsync(Building building, long expectedVersion, CancellationToken cancellationToken);

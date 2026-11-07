@@ -102,10 +102,7 @@ public sealed class BuildingService(
             throw new ConflictException("version_conflict");
         }
 
-        if (!current.AcceptsChanges)
-        {
-            throw new ConflictException("building_in_review");
-        }
+        current.EnsureEditable();
 
         var updated = current;
         if (request.Type is not null)
@@ -177,7 +174,8 @@ public sealed class BuildingService(
             throw new ConflictException("version_conflict");
         }
 
-        if (!building.AcceptsChanges)
+        // Se puede borrar en cualquier estado salvo en revisión (incluido `rejected`).
+        if (building.Status == BuildingStatus.InReview)
         {
             throw new ConflictException("building_in_review");
         }

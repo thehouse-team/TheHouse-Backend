@@ -101,6 +101,28 @@ public sealed class MongoRefreshTokenStore(IMongoDatabase database) : IRefreshTo
         }
     }
 
+    public async Task<IReadOnlyList<string>> ListActiveSessionIdsAsync(
+        string userId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var utcNow = MongoDates.ToUtc(now);
+            var sessions = await Collection
+                .Distinct(
+                    token => token.SessionId,
+                    token => token.UserId == userId && token.RevokedAt == null && token.SessionExpiresAt > utcNow,
+                    cancellationToken: cancellationToken)
+                .ToListAsync(cancellationToken);
+            return sessions;
+        }
+        catch (Exception exception) when (exception is MongoException or TimeoutException)
+        {
+            throw MongoFailure.Unavailable();
+        }
+    }
+
     public async Task RevokeSessionAsync(
         string sessionId,
         string reason,

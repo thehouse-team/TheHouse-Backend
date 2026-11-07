@@ -13,6 +13,7 @@ builder.AddProperties();
 builder.AddFavoritesAndVisits();
 builder.AddProfile();
 builder.AddLandlord();
+builder.AddModeration();
 builder.AddUniversities();
 builder.AddObservability();
 
@@ -37,6 +38,21 @@ builder.Services.AddResponseCompression(options =>
 });
 
 var app = builder.Build();
+
+// NV-21: asignación de roles por línea de comandos (nunca por la API).
+var roleCommand = RoleCommand.Parse(args);
+if (roleCommand is not null)
+{
+    if (!RoleCommand.Allowed(args, app.Environment.IsProduction()))
+    {
+        Console.Error.WriteLine($"Role changes are not allowed in Production without {RoleCommand.AllowProductionRoleChange}.");
+        Environment.ExitCode = 2;
+        return;
+    }
+
+    Environment.ExitCode = await roleCommand.RunAsync(app.Services, app.Logger);
+    return;
+}
 
 var seedUniversities =
     args.Contains(
@@ -181,6 +197,7 @@ app.MapVisits();
 app.MapProfile();
 app.MapUniversitySearch();
 app.MapLandlord();
+app.MapAdmin();
 app.MapUniversities();
 
 app.Run();

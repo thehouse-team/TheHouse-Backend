@@ -32,6 +32,29 @@ public static class UserResourceProblems
         context.Request.Path.StartsWithSegments(VisitsEndpoint.BasePath, StringComparison.OrdinalIgnoreCase) ||
         context.Request.Path.StartsWithSegments(VisitsEndpoint.MinePath, StringComparison.OrdinalIgnoreCase);
 
+    public static bool IsAdmin(HttpContext context) =>
+        context.Request.Path.StartsWithSegments(AdminEndpoint.BasePath, StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.StartsWithSegments(AdminEndpoint.ReportsPath, StringComparison.OrdinalIgnoreCase);
+
+    public static void NormalizeAdmin(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los datos de la solicitud no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            403 => "Esta acción requiere un rol administrativo.",
+            404 => "El recurso no existe.",
+            409 => "La solicitud entra en conflicto con el estado actual.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de solicitudes.",
+            503 => "El servicio no está disponible temporalmente.",
+            504 => "El servicio no respondió a tiempo.",
+            _ => "No fue posible procesar la solicitud.",
+        };
+    }
+
     public static bool IsLandlord(HttpContext context) =>
         context.Request.Path.StartsWithSegments(LandlordEndpoint.BasePath, StringComparison.OrdinalIgnoreCase);
 
@@ -126,6 +149,13 @@ public static class UserResourceProblems
         "not_quarter_hour" => "La hora debe ser múltiplo de 15 minutos.",
         "outside_hours" => "La visita debe estar entre 08:00 y 20:00 (hora de Ciudad de México).",
         "landlord_exists" => "La cuenta ya tiene el modo arrendador activo.",
+        "account_suspended" => "La cuenta está suspendida.",
+        "role_required" => "Esta acción requiere un rol administrativo.",
+        "own_building" => "No puedes revisar un edificio propio.",
+        "report_exists" => "Ya tienes un reporte abierto sobre ese objetivo.",
+        "report_state" => "El reporte ya fue resuelto.",
+        "user_state" => "La cuenta no se puede cambiar en su estado actual.",
+        "role_not_granted" => "La cuenta no tenía ese rol.",
         "landlord_required" => "Esta acción requiere activar el modo arrendador.",
         "buildings_limit" => "Se alcanzó el máximo de 20 edificios.",
         "rooms_limit" => "Se alcanzó el máximo de cuartos (200 por edificio y 30 por piso).",

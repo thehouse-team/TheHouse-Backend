@@ -47,6 +47,15 @@ public static class RateLimitKeys
     public static string RoomGenerate(string userId) =>
         "thehouse:u2:landlord:generate:v1:" + Hash(userId);
 
+    public static string AdminUser(string userId) =>
+        "thehouse:u2:admin:user:v1:" + Hash(userId);
+
+    public static string ReportsUser(string userId) =>
+        "thehouse:u2:reports:user:v1:" + Hash(userId);
+
+    public static string ReportCreatesUser(string userId) =>
+        "thehouse:u2:reports:create:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

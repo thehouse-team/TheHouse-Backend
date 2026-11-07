@@ -4,6 +4,8 @@ using TheHouse.Application.Common;
 using TheHouse.Application.Contracts.Auth;
 using TheHouse.Domain.Entities;
 
+using TheHouse.Domain.Exceptions;
+
 namespace TheHouse.Application.UseCases;
 
 // NV-10: ciclo de vida de la sesión (refresh token rotativo).
@@ -18,7 +20,8 @@ public sealed class SessionService(
     IUserRepository users,
     IJwtTokenService jwtTokenService,
     RefreshTokenOptions options,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IAccountSuspensionQuery? suspensions = null)
 {
     public const string ReasonLogout = "logout";
 
@@ -31,6 +34,10 @@ public sealed class SessionService(
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        // NV-21: solo después de verificar la contraseña, para no revelar
+        // el estado de una cuenta a quien no conoce sus credenciales.
+        await EnsureNotSuspendedAsync(user.Id, cancellationToken);
 
         var now = timeProvider.GetUtcNow();
         var sessionId = SessionTokens.NewSessionId();
@@ -118,6 +125,12 @@ public sealed class SessionService(
             throw new InvalidCredentialsException();
         }
 
+        if (suspensions is not null && await suspensions.IsSuspendedAsync(user.Id, cancellationToken))
+        {
+            await RevokeSessionAsync(rotated.SessionId, "suspended", cancellationToken);
+            throw new ForbiddenException("account_suspended");
+        }
+
         var newRefreshToken = await IssueRefreshTokenAsync(
             user.Id,
             rotated.SessionId,
@@ -155,6 +168,14 @@ public sealed class SessionService(
             reason,
             timeProvider.GetUtcNow(),
             cancellationToken);
+    }
+
+    private async Task EnsureNotSuspendedAsync(string userId, CancellationToken cancellationToken)
+    {
+        if (suspensions is not null && await suspensions.IsSuspendedAsync(userId, cancellationToken))
+        {
+            throw new ForbiddenException("account_suspended");
+        }
     }
 
     public Task<bool> IsSessionRevokedAsync(
