@@ -23,6 +23,12 @@ public interface IRefreshTokenStore
         string tokenHash,
         CancellationToken cancellationToken);
 
+    // NV-21: sesiones con algún token sin revocar y aún vigentes del usuario.
+    Task<IReadOnlyList<string>> ListActiveSessionIdsAsync(
+        string userId,
+        DateTimeOffset now,
+        CancellationToken cancellationToken);
+
     // Revoca todos los tokens aún no revocados de la sesión.
     Task RevokeSessionAsync(
         string sessionId,

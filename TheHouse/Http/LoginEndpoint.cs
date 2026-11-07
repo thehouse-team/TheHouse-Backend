@@ -157,6 +157,12 @@ public static class LoginEndpoint
         {
             return Error(context, 401);
         }
+        catch (TheHouse.Domain.Exceptions.ForbiddenException exception)
+        {
+            // NV-21: cuenta suspendida.
+            context.Items[UserResourceProblems.CodeItem] = exception.Reason;
+            return Error(context, 403);
+        }
         catch (RateLimitExceededException exception)
         {
             context.Response.Headers.RetryAfter =

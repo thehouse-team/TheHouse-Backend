@@ -23,6 +23,7 @@
     <!-- NV-15/NV-17: dobles en memoria compartidos con las pruebas de integración. -->
     <Compile Include="..\TheHouse.IntegrationTests\FavoriteVisitTestDoubles.cs" Link="Shared\FavoriteVisitTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\ListingTestDoubles.cs" Link="Shared\ListingTestDoubles.cs" />
+    <Compile Include="..\TheHouse.IntegrationTests\ModerationTestDoubles.cs" Link="Shared\ModerationTestDoubles.cs" />
   </ItemGroup>
 
   <ItemGroup>

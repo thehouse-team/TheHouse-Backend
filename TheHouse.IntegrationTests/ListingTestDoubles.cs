@@ -98,6 +98,21 @@ public sealed class InMemoryBuildingRepository : IBuildingRepository
         }
     }
 
+    public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByStatusAsync(BuildingStatus status, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);
+        lock (gate)
+        {
+            var matching = Buildings.Values
+                .Where(building => building.Status == status)
+                .OrderBy(building => building.UpdatedAt)
+                .ThenBy(building => building.Id, StringComparer.Ordinal)
+                .ToList();
+            IReadOnlyList<Building> slice = matching.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            return Task.FromResult((slice, (long)matching.Count));
+        }
+    }
+
     public Task<long> CountByOwnerAsync(string ownerId, CancellationToken cancellationToken)
     {
         InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);

@@ -27,6 +27,10 @@ public enum BuildingStatus
     Draft,
     InReview,
     Verified,
+
+    // NV-21: rechazo terminal y suspensión por moderación.
+    Rejected,
+    Suspended,
 }
 
 public enum RoomStatus
@@ -85,11 +89,36 @@ public sealed record Building
 
     public DateTimeOffset UpdatedAt { get; init; }
 
-    public bool AcceptsChanges => Status != BuildingStatus.InReview;
+    public bool AcceptsChanges => Status is BuildingStatus.Draft or BuildingStatus.Verified;
+
+    // Solo `draft` y `verified` admiten cambios del dueño; en revisión → 409
+    // `building_in_review`; rechazado o suspendido → 409 `building_state`.
+    public Building EnsureEditable() => Status switch
+    {
+        BuildingStatus.Draft or BuildingStatus.Verified => this,
+        BuildingStatus.InReview => throw new ConflictException("building_in_review"),
+        _ => throw new ConflictException("building_state"),
+    };
 
     public Building SubmitForReview(DateTimeOffset now) =>
         Status == BuildingStatus.Draft
             ? this with { Status = BuildingStatus.InReview, UpdatedAt = now }
+            : throw new ConflictException("building_state");
+
+    // NV-21: decisiones de revisión y moderación.
+    public Building Approve(DateTimeOffset now) => Move(BuildingStatus.InReview, BuildingStatus.Verified, now);
+
+    public Building RequestChanges(DateTimeOffset now) => Move(BuildingStatus.InReview, BuildingStatus.Draft, now);
+
+    public Building Reject(DateTimeOffset now) => Move(BuildingStatus.InReview, BuildingStatus.Rejected, now);
+
+    public Building Suspend(DateTimeOffset now) => Move(BuildingStatus.Verified, BuildingStatus.Suspended, now);
+
+    public Building Unsuspend(DateTimeOffset now) => Move(BuildingStatus.Suspended, BuildingStatus.Verified, now);
+
+    private Building Move(BuildingStatus from, BuildingStatus to, DateTimeOffset now) =>
+        Status == from
+            ? this with { Status = to, UpdatedAt = now }
             : throw new ConflictException("building_state");
 }
 

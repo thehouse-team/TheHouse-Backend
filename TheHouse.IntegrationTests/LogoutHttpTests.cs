@@ -364,7 +364,21 @@ public sealed class LogoutHttpTests
                     or "/api/v1/landlord/rooms/{id}/duplicate"
                     or "/api/v1/landlord/rooms/{id}/copy-from"
                     or "/api/v1/landlord/rooms/{id}/pause"
-                    or "/api/v1/landlord/rooms/{id}/resume",
+                    or "/api/v1/landlord/rooms/{id}/resume"
+                    or "/api/v1/landlord/buildings/{id}/verification"
+                    or "/api/v1/reports"
+                    or "/api/v1/admin/buildings"
+                    or "/api/v1/admin/buildings/{id}"
+                    or "/api/v1/admin/buildings/{id}/approve"
+                    or "/api/v1/admin/buildings/{id}/request-changes"
+                    or "/api/v1/admin/buildings/{id}/reject"
+                    or "/api/v1/admin/buildings/{id}/suspend"
+                    or "/api/v1/admin/buildings/{id}/unsuspend"
+                    or "/api/v1/admin/users/{id}/suspend"
+                    or "/api/v1/admin/users/{id}/unsuspend"
+                    or "/api/v1/admin/reports"
+                    or "/api/v1/admin/reports/{id}/resolve"
+                    or "/api/v1/admin/audit",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

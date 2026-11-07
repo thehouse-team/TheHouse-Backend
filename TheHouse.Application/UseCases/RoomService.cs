@@ -18,10 +18,7 @@ public sealed class RoomService(
     public async Task<GeneratedRoomsResponse> GenerateAsync(string userId, string? buildingId, GenerateRoomsRequest request, CancellationToken cancellationToken)
     {
         var building = await buildingsService.LoadOwnedAsync(userId, buildingId, cancellationToken);
-        if (!building.AcceptsChanges)
-        {
-            throw new ConflictException("building_in_review");
-        }
+        building.EnsureEditable();
 
         if (request.Floors is not { } floors || floors is < 1 or > ListingRules.MaximumFloors)
         {
@@ -139,10 +136,7 @@ public sealed class RoomService(
         }
 
         var building = await buildingsService.LoadOwnedAsync(userId, room.BuildingId, cancellationToken);
-        if (!building.AcceptsChanges)
-        {
-            throw new ConflictException("building_in_review");
-        }
+        building.EnsureEditable();
 
         if (!await rooms.DeleteAsync(room.Id, expected, cancellationToken))
         {
@@ -154,10 +148,7 @@ public sealed class RoomService(
     {
         var source = await LoadOwnedAsync(userId, roomId, cancellationToken);
         var building = await buildingsService.LoadOwnedAsync(userId, source.BuildingId, cancellationToken);
-        if (!building.AcceptsChanges)
-        {
-            throw new ConflictException("building_in_review");
-        }
+        building.EnsureEditable();
 
         var existing = await rooms.ListAllByBuildingAsync(building.Id, cancellationToken);
         var sameFloor = existing.Where(room => room.Floor == source.Floor).ToArray();

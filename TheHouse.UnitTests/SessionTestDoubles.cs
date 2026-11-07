@@ -51,6 +51,20 @@ internal sealed class InMemoryRefreshTokenStore : IRefreshTokenStore
         }
     }
 
+    public Task<IReadOnlyList<string>> ListActiveSessionIdsAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            IReadOnlyList<string> sessions = Tokens.Values
+                .Where(t => t.UserId == userId && t.RevokedAt is null && t.SessionExpiresAt > now)
+                .Select(t => t.SessionId)
+                .Distinct()
+                .ToList();
+            return Task.FromResult(sessions);
+        }
+    }
+
     public Task RevokeSessionAsync(string sessionId, string reason, DateTimeOffset now, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
