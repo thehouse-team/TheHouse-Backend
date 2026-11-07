@@ -352,7 +352,19 @@ public sealed class LogoutHttpTests
                     or "/api/v1/users/me/profile"
                     or "/api/v1/users/me/university"
                     or "/api/v1/users/me/preferences"
-                    or "/api/v1/universities/search",
+                    or "/api/v1/universities/search"
+                    or "/api/v1/landlord/profile"
+                    or "/api/v1/landlord/buildings"
+                    or "/api/v1/landlord/buildings/{id}"
+                    or "/api/v1/landlord/buildings/{id}/rooms/generate"
+                    or "/api/v1/landlord/buildings/{id}/rooms"
+                    or "/api/v1/landlord/buildings/{id}/publication"
+                    or "/api/v1/landlord/buildings/{id}/publish"
+                    or "/api/v1/landlord/rooms/{id}"
+                    or "/api/v1/landlord/rooms/{id}/duplicate"
+                    or "/api/v1/landlord/rooms/{id}/copy-from"
+                    or "/api/v1/landlord/rooms/{id}/pause"
+                    or "/api/v1/landlord/rooms/{id}/resume",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

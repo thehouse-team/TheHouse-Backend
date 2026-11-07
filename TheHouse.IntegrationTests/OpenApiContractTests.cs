@@ -68,7 +68,8 @@ public sealed class OpenApiContractTests
                 path.Name == ProfileEndpoint.ProfilePath ||
                 path.Name == ProfileEndpoint.UniversityPath ||
                 path.Name == ProfileEndpoint.PreferencesPath ||
-                path.Name == UniversitySearchEndpoint.Path,
+                path.Name == UniversitySearchEndpoint.Path ||
+                path.Name.StartsWith(LandlordEndpoint.BasePath + "/", StringComparison.Ordinal),
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 

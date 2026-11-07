@@ -12,6 +12,7 @@ builder.AddSessions();
 builder.AddProperties();
 builder.AddFavoritesAndVisits();
 builder.AddProfile();
+builder.AddLandlord();
 builder.AddUniversities();
 builder.AddObservability();
 
@@ -179,6 +180,7 @@ app.MapFavorites();
 app.MapVisits();
 app.MapProfile();
 app.MapUniversitySearch();
+app.MapLandlord();
 app.MapUniversities();
 
 app.Run();

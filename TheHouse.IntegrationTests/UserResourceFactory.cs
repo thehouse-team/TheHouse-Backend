@@ -22,6 +22,7 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
     public const string Password = "Correct-Horse-Battery-9";
     public const string AliceId = "665f1c2a9b1e4a00000a11ce";
     public const string BobId = "665f1c2a9b1e4a0000000b0b";
+    public const string CarolId = "665f1c2a9b1e4a0000000ca1";
     public const string PropertyA = "0123456789876543000000a1";
     public const string PropertyB = "0123456789876543000000b2";
     public const string PropertyC = "0123456789876543000000c3";
@@ -60,6 +61,12 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
 
     public InMemoryPreferencesRepository PreferencesStore { get; } = new();
 
+    public InMemoryLandlordProfileRepository Landlords { get; } = new();
+
+    public InMemoryBuildingRepository Buildings { get; } = new();
+
+    public InMemoryRoomRepository Rooms { get; } = new();
+
     // NV-11: el catálogo real del seed (10 universidades con coordenadas).
     public UniversityTestStore Universities { get; } = SeededUniversities();
 
@@ -82,6 +89,9 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             services.RemoveAll<IProfileRepository>();
             services.RemoveAll<IPreferencesRepository>();
             services.RemoveAll<IUniversityRepository>();
+            services.RemoveAll<ILandlordProfileRepository>();
+            services.RemoveAll<IBuildingRepository>();
+            services.RemoveAll<IRoomRepository>();
 
             services.AddSingleton<IUserRepository>(Users);
             services.AddSingleton<IRateLimitStore>(RateLimit);
@@ -95,6 +105,9 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             services.AddSingleton<IProfileRepository>(Profiles);
             services.AddSingleton<IPreferencesRepository>(PreferencesStore);
             services.AddSingleton<IUniversityRepository>(Universities);
+            services.AddSingleton<ILandlordProfileRepository>(Landlords);
+            services.AddSingleton<IBuildingRepository>(Buildings);
+            services.AddSingleton<IRoomRepository>(Rooms);
             services.AddSingleton<ILoggerProvider>(new CaptureProvider(Logs));
 
             if (limits is not null)
@@ -109,7 +122,12 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
     public async Task<HttpClient> ClientForAsync(string userId)
     {
         var hasher = Services.GetRequiredService<IPasswordHasher>();
-        var email = userId == AliceId ? "alice@example.com" : "bob@example.com";
+        var email = userId switch
+        {
+            AliceId => "alice@example.com",
+            BobId => "bob@example.com",
+            _ => "carol@example.com",
+        };
         Users.Add(new User
         {
             Id = userId,
