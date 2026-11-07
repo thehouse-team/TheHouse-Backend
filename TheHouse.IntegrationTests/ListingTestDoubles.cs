@@ -98,6 +98,27 @@ public sealed class InMemoryBuildingRepository : IBuildingRepository
         }
     }
 
+    public Task<IReadOnlyList<Building>> ListVerifiedNearAsync(double latitude, double longitude, double maxKm, CancellationToken cancellationToken)
+    {
+        InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult<IReadOnlyList<Building>>(Buildings.Values
+                .Where(building => building.Status == BuildingStatus.Verified &&
+                                   ListingRules.DistanceKm(latitude, longitude, building.Latitude, building.Longitude) <= maxKm)
+                .ToList());
+        }
+    }
+
+    public Task<IReadOnlyList<Building>> ListDemoAsync(CancellationToken cancellationToken)
+    {
+        InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult<IReadOnlyList<Building>>(Buildings.Values.Where(building => building.Demo).ToList());
+        }
+    }
+
     public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByStatusAsync(BuildingStatus status, int page, int pageSize, CancellationToken cancellationToken)
     {
         InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);
@@ -242,6 +263,22 @@ public sealed class InMemoryRoomRepository : IRoomRepository
         lock (gate)
         {
             return Task.FromResult(Rooms.TryGetValue(id, out var current) && current.Version == expectedVersion && Rooms.Remove(id));
+        }
+    }
+
+    public Task<IReadOnlyList<Room>> ListAvailableByBuildingsAsync(IReadOnlyCollection<string> buildingIds, RoomFilter filter, CancellationToken cancellationToken)
+    {
+        InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult<IReadOnlyList<Room>>(Rooms.Values
+                .Where(room => buildingIds.Contains(room.BuildingId) &&
+                               room.Status == RoomStatus.Available &&
+                               (filter.MinPrice is null || room.Price >= filter.MinPrice) &&
+                               (filter.MaxPrice is null || room.Price <= filter.MaxPrice) &&
+                               (filter.RoomType is null || room.Type == filter.RoomType) &&
+                               (filter.Bathroom is null || room.Bathroom == filter.Bathroom))
+                .ToList());
         }
     }
 

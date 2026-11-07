@@ -30,6 +30,11 @@ public sealed class UserRateLimitOptions
 
     public int ReportCreatesPerDay { get; init; } = 10;
 
+    // NV-14: búsqueda pública por IP y detalle por usuario.
+    public int SearchPerWindow { get; init; } = 60;
+
+    public int RoomDetailPerWindow { get; init; } = 60;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

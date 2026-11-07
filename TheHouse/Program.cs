@@ -14,6 +14,7 @@ builder.AddFavoritesAndVisits();
 builder.AddProfile();
 builder.AddLandlord();
 builder.AddModeration();
+builder.AddSearch();
 builder.AddUniversities();
 builder.AddObservability();
 
@@ -51,6 +52,47 @@ if (roleCommand is not null)
     }
 
     Environment.ExitCode = await roleCommand.RunAsync(app.Services, app.Logger);
+    return;
+}
+
+// NV-14: seeds autorizados de colonias y de cuartos de demostración.
+var seedPlaces = args.Contains(SearchConfiguration.SeedPlaces, StringComparer.Ordinal);
+var seedDemoRooms = args.Contains(SearchConfiguration.SeedDemoRooms, StringComparer.Ordinal);
+if (seedPlaces || seedDemoRooms)
+{
+    var rejection = SearchConfiguration.Reject(
+        args,
+        app.Services.GetRequiredService<TheHouse.Application.UseCases.PlaceSeedOptions>().Enabled,
+        app.Services.GetRequiredService<TheHouse.Application.UseCases.DemoRoomSeedOptions>().Enabled,
+        app.Environment.IsProduction());
+    if (rejection is not null)
+    {
+        Console.Error.WriteLine(rejection);
+        Environment.ExitCode = 2;
+        return;
+    }
+
+    app.Logger.LogWarning("Seed autorizado: colonias={Places}, cuartos de demostración={Demo}.", seedPlaces, seedDemoRooms);
+    try
+    {
+        if (seedPlaces)
+        {
+            var places = await app.Services.GetRequiredService<TheHouse.Application.UseCases.PlaceSeedService>().SeedAsync(CancellationToken.None);
+            Console.WriteLine($"Place seed completed ({places}).");
+        }
+
+        if (seedDemoRooms)
+        {
+            var rooms = await app.Services.GetRequiredService<TheHouse.Application.UseCases.DemoRoomSeedService>().SeedAsync(CancellationToken.None);
+            Console.WriteLine($"Demo room seed completed ({rooms} created).");
+        }
+    }
+    catch (InvalidOperationException exception)
+    {
+        Console.Error.WriteLine(exception.Message);
+        Environment.ExitCode = 2;
+    }
+
     return;
 }
 
@@ -198,6 +240,7 @@ app.MapProfile();
 app.MapUniversitySearch();
 app.MapLandlord();
 app.MapAdmin();
+app.MapSearch();
 app.MapUniversities();
 
 app.Run();

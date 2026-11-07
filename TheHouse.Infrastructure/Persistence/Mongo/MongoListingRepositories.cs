@@ -126,6 +126,27 @@ public sealed class MongoBuildingRepository(IMongoDatabase database) : IBuilding
     public Task<long> CountByOwnerAsync(string ownerId, CancellationToken cancellationToken) =>
         MongoCalls.Run(() => Collection.CountDocumentsAsync(building => building.OwnerId == ownerId, cancellationToken: cancellationToken));
 
+    public Task<IReadOnlyList<Building>> ListVerifiedNearAsync(double latitude, double longitude, double maxKm, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            await EnsureIndexesAsync(cancellationToken);
+            var filter = Builders<BuildingDocument>.Filter.And(
+                Builders<BuildingDocument>.Filter.Eq(building => building.Status, BuildingStatus.Verified.ToString()),
+                Builders<BuildingDocument>.Filter.NearSphere(
+                    building => building.Location,
+                    GeoJson.Point(GeoJson.Geographic(longitude, latitude)),
+                    maxDistance: maxKm * 1000));
+            var documents = await Collection.Find(filter).Limit(5000).ToListAsync(cancellationToken);
+            return (IReadOnlyList<Building>)documents.Select(Map).ToArray();
+        });
+
+    public Task<IReadOnlyList<Building>> ListDemoAsync(CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            var documents = await Collection.Find(building => building.Demo).ToListAsync(cancellationToken);
+            return (IReadOnlyList<Building>)documents.Select(Map).ToArray();
+        });
+
     public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByStatusAsync(BuildingStatus status, int page, int pageSize, CancellationToken cancellationToken) =>
         MongoCalls.Run(async () =>
         {
@@ -219,6 +240,8 @@ public sealed class MongoBuildingRepository(IMongoDatabase database) : IBuilding
             Version = building.Version,
             CreatedAt = MongoDates.ToUtc(building.CreatedAt),
             UpdatedAt = MongoDates.ToUtc(building.UpdatedAt),
+            Demo = building.Demo,
+            DemoSourceId = building.DemoSourceId,
         };
 
     private static Building Map(BuildingDocument document) =>
@@ -241,6 +264,8 @@ public sealed class MongoBuildingRepository(IMongoDatabase database) : IBuilding
             Version = document.Version,
             CreatedAt = MongoDates.FromUtc(document.CreatedAt),
             UpdatedAt = MongoDates.FromUtc(document.UpdatedAt),
+            Demo = document.Demo,
+            DemoSourceId = document.DemoSourceId,
         };
 
     public void Dispose() => gate.Dispose();
@@ -357,6 +382,39 @@ public sealed class MongoRoomRepository(IMongoDatabase database) : IRoomReposito
     public Task DeleteByBuildingAsync(string buildingId, CancellationToken cancellationToken) =>
         MongoCalls.Run(() => Collection.DeleteManyAsync(room => room.BuildingId == buildingId, cancellationToken));
 
+    public Task<IReadOnlyList<Room>> ListAvailableByBuildingsAsync(IReadOnlyCollection<string> buildingIds, RoomFilter filter, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            var builder = Builders<RoomDocument>.Filter;
+            var conditions = new List<FilterDefinition<RoomDocument>>
+            {
+                builder.In(room => room.BuildingId, buildingIds),
+                builder.Eq(room => room.Status, RoomStatus.Available.ToString()),
+            };
+            if (filter.MinPrice is { } min)
+            {
+                conditions.Add(builder.Gte(room => room.Price, min));
+            }
+
+            if (filter.MaxPrice is { } max)
+            {
+                conditions.Add(builder.Lte(room => room.Price, max));
+            }
+
+            if (filter.RoomType is { } type)
+            {
+                conditions.Add(builder.Eq(room => room.Type, type));
+            }
+
+            if (filter.Bathroom is { } bathroom)
+            {
+                conditions.Add(builder.Eq(room => room.Bathroom, bathroom));
+            }
+
+            var documents = await Collection.Find(builder.And(conditions)).Limit(5000).ToListAsync(cancellationToken);
+            return (IReadOnlyList<Room>)documents.Select(Map).ToArray();
+        });
+
     public Task SetStatusByBuildingAsync(string buildingId, RoomStatus from, RoomStatus to, DateTimeOffset now, CancellationToken cancellationToken) =>
         MongoCalls.Run(() => Collection.UpdateManyAsync(
             room => room.BuildingId == buildingId && room.Status == from.ToString(),
@@ -468,6 +526,10 @@ public sealed class UnavailableBuildingRepository : IBuildingRepository
 
     public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByStatusAsync(BuildingStatus status, int page, int pageSize, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
+    public Task<IReadOnlyList<Building>> ListVerifiedNearAsync(double latitude, double longitude, double maxKm, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task<IReadOnlyList<Building>> ListDemoAsync(CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
     public Task<bool> ReplaceAsync(Building building, long expectedVersion, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<bool> DeleteAsync(string id, long expectedVersion, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
@@ -490,6 +552,8 @@ public sealed class UnavailableRoomRepository : IRoomRepository
     public Task<bool> DeleteAsync(string id, long expectedVersion, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task DeleteByBuildingAsync(string buildingId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task<IReadOnlyList<Room>> ListAvailableByBuildingsAsync(IReadOnlyCollection<string> buildingIds, RoomFilter filter, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task SetStatusByBuildingAsync(string buildingId, RoomStatus from, RoomStatus to, DateTimeOffset now, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 }

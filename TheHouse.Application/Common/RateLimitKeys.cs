@@ -56,6 +56,12 @@ public static class RateLimitKeys
     public static string ReportCreatesUser(string userId) =>
         "thehouse:u2:reports:create:v1:" + Hash(userId);
 
+    public static string SearchIp(string ipAddress) =>
+        "thehouse:u2:search:ip:v1:" + Hash(ipAddress);
+
+    public static string RoomDetailUser(string userId) =>
+        "thehouse:u2:search:detail:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

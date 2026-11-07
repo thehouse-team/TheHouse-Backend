@@ -23,6 +23,12 @@ public interface IBuildingRepository
 
     Task<IReadOnlyList<Building>> ListAllByOwnerAsync(string ownerId, CancellationToken cancellationToken);
 
+    // NV-14: edificios `verified` a menos de `maxKm` del punto (paso 1 de la búsqueda).
+    Task<IReadOnlyList<Building>> ListVerifiedNearAsync(double latitude, double longitude, double maxKm, CancellationToken cancellationToken);
+
+    // NV-14: edificios del seed de demostración.
+    Task<IReadOnlyList<Building>> ListDemoAsync(CancellationToken cancellationToken);
+
     // NV-21: cola de revisión (más antiguos primero).
     Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByStatusAsync(BuildingStatus status, int page, int pageSize, CancellationToken cancellationToken);
 
@@ -54,6 +60,21 @@ public interface IRoomRepository
 
     Task DeleteByBuildingAsync(string buildingId, CancellationToken cancellationToken);
 
+    // NV-14: cuartos `available` de esos edificios con filtros de cuarto (paso 2).
+    Task<IReadOnlyList<Room>> ListAvailableByBuildingsAsync(IReadOnlyCollection<string> buildingIds, RoomFilter filter, CancellationToken cancellationToken);
+
     // Pasa a `to` (versión + 1) los cuartos del edificio en `from`.
     Task SetStatusByBuildingAsync(string buildingId, RoomStatus from, RoomStatus to, DateTimeOffset now, CancellationToken cancellationToken);
 }
+
+// NV-14: filtros que se aplican sobre `rooms`.
+public sealed record RoomFilter(int? MinPrice, int? MaxPrice, string? RoomType, string? Bathroom);
+
+// NV-14: `places` (colonias y localidades).
+public interface IPlaceRepository
+{
+    Task<IReadOnlyList<Place>> SearchAsync(string normalizedQuery, int limit, CancellationToken cancellationToken);
+
+    Task UpsertSeedAsync(IReadOnlyCollection<TheHouse.Application.Common.PlaceSeedRecord> places, CancellationToken cancellationToken);
+}
+
