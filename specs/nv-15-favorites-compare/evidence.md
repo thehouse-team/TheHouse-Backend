@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-07 |
 | Autorización | «te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió» — Victor Manuel Jose Jose, 2026-11-07: NV-15 1.1.0, tasks T01–T10 (M-BE-060) |
-| Rama | `feat/nv-15-nv-17` (junto con NV-17; base `main` 546f506) |
-| Resultado | **🟡 EN CURSO**: T01–T06 completas con pruebas locales; T07–T10 esperan CI, despliegue por CD y prueba HTTP real en Azure |
+| Rama | `feat/nv-15-nv-17` → PR #15, mezclado en `main` (`32f9ea0`) |
+| Resultado | **✅ PASS WITH WARNINGS**: 10/10 tasks completas; desplegada en Azure y verificada con prueba HTTP real (26/26). Advertencias: ajustes A2–A3 de `specs/nv-17-visits/evidence.md` §4 pendientes de visto bueno; adaptador Mongo sin cobertura automatizada (verificado en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -51,8 +51,41 @@ Las piezas compartidas con NV-17 (`UserEndpointSupport`, `UserResourceProblems`,
 - Redis o MongoDB caídos → 503.
 - Ajustes A2 (`+00:00`) y A3 (`code` en 409) de `specs/nv-17-visits/evidence.md` §4 aplican igual aquí.
 
-## 5. Pendiente
+## 5. Despliegue y CI
 
-- T07: CI verde, merge, CD aprobado y prueba HTTP real en Azure (agregar, repetir, listar, ids, quitar, repetir); entregar el contrato §6.1 con `DEPLOYED URL` y `TESTS`.
-- T08/T09: TRX y cobertura del run de CI.
-- T10: cierre de esta evidencia con commit del merge y resultado final.
+| Paso | Resultado |
+| --- | --- |
+| PR | [#15](https://github.com/thehouse-team/TheHouse-Backend/pull/15), mezclado el 2026-11-07 (commit `32f9ea0`); aprobación registrada por la cuenta `thehouserent26` |
+| CI del PR (`33c8126`) y de `main` (`32f9ea0`) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI (`main`, run 42354786972) | 553/553: unitarias 190, integración 311, seguridad 52; 34 pruebas de NV-15/NV-17 en integración y 33 en unitarias |
+| Cobertura de líneas (CI) | 70.3 % total. Los adaptadores `MongoFavoriteRepository`, `MongoVisitRepository` y `RedisUserLock` quedan en 0 %, como los adaptadores Mongo/Redis existentes: se verifican con la prueba real en Azure |
+| CD (run 42354881476) | resolve, publish, verify-ephemeral (Mongo 7.0.45, Redis 7.4.12, smoke, ZAP), deploy aprobado por Victor, DAST: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c32f9ea0-13-1`, imagen `sha256:27b71e88…` |
+
+## 6. Prueba HTTP real en Azure
+
+Prueba HTTP real contra `https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io` (2026-11-07), con dos cuentas nuevas de dominio reservado (`nv15-17-azure-a-3a9876f4@example.com` y `nv15-17-azure-b-cabd2770@example.com`). El script (`nv15_17_azure_check.py`, fuera del repo) solo imprime códigos y nombres de campos; nunca tokens ni contraseñas. **26/26 PASS**: favoritos 10, visitas 14, compatibilidad 2 (`/users/me` y detalle de propiedad sin cambios).
+
+Una corrida anterior dio 25/26: el script usaba como id inexistente `000000000000000000000001`, que es la propiedad 1 del seed regional, así que el 204 era correcto. Se corrigió el script para usar un id que antes comprueba con `GET /properties/{id}` → 404. Esa corrida dejó un favorito de la propiedad 1 en la cuenta de prueba `nv15-17-azure-a-ccbfd189@example.com`.
+
+Quedan en producción cuatro cuentas de prueba con prefijo `nv15-17-azure-` y dominio `example.com`, sin datos personales; sus sesiones se cerraron con logout. Se eliminarán cuando exista la eliminación de cuenta.
+
+| Caso | Resultado |
+| --- | --- |
+| F1–F2 agregar y repetir | 204 y 204; `no-store` |
+| F3 ids | 200; la propiedad aparece una vez |
+| F4 listado | 200; sobre `items, page, pageSize, totalItems, totalPages`; item con los 10 campos del contrato |
+| F5 otro usuario | 200 con `propertyIds` vacío |
+| F6 propiedad inexistente | 404 |
+| F7 id inválido | 400 |
+| F8 sin token | 401 |
+| F9–F10 quitar y repetir | 204 y 204 |
+
+## 7. Contrato entregable a Mobile
+
+El contrato de `spec.md` §6.1 queda vigente sin cambios de forma, con estos dos campos completos:
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        unitarias 190, integración 311, seguridad 52 en CI (553/553); prueba HTTP real en Azure 26/26 (2026-11-07)
+```

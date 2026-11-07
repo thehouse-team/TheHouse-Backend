@@ -8,7 +8,7 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió»: aprobación de 1.1.0 y «EJECUTA» de T01–T12; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T12 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — T01–T12 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0 |
 | Tasks | `task.md` 1.1.0 |
