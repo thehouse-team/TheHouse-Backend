@@ -22,9 +22,9 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-12 | [Arrendador, edificios y cuartos](nv-12-landlord-buildings-rooms/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/11 |
 | NV-13 | [Fotografías y documentos](nv-13-media-documents/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 | NV-14 | [Búsqueda, filtros y mapa](nv-14-search-map/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/10 |
-| NV-15 | [Favoritos y comparación](nv-15-favorites-compare/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
+| NV-15 | [Favoritos](nv-15-favorites-compare/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/10 |
 | NV-16 | [Contacto, solicitudes y chat](nv-16-contact-chat-requests/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
-| NV-17 | [Agenda de visitas](nv-17-visits/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/8 |
+| NV-17 | [Visitas: solicitudes (v1)](nv-17-visits/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/12 |
 | NV-18 | [Cierre de trato con QR y renta](nv-18-deal-closing-rental/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 | NV-19 | [Reseñas y calificaciones](nv-19-reviews/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
 | NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/8 |
@@ -80,7 +80,7 @@ Cada RF del documento de requerimientos tiene al menos una spec responsable, sal
 | RF-38 | NV-21 |
 | RF-39 | NV-21 |
 | RF-40 | NV-21 |
-| RF-41 | NV-14, NV-17 |
+| RF-41 | NV-14 |
 | RF-42 | NV-21 |
 | RF-43 | NV-21 |
 | RF-44 | NV-21 |
@@ -131,10 +131,10 @@ Cada RF del documento de requerimientos tiene al menos una spec responsable, sal
 
 | Prioridad | Specs | Motivo |
 | --- | --- | --- |
-| 1 | NV-10, NV-11 | Sesión estable (refresh) y perfil; las usan todas las demás |
-| 2 | NV-12, NV-13, NV-21 | Sin edificios, fotos y verificación no hay cuartos publicables |
-| 3 | NV-14, NV-15 | Búsqueda y favoritos sobre cuartos reales |
-| 4 | NV-16, NV-17, NV-18 | Flujo de renta: contacto, visita y cierre con QR |
+| 1 | NV-10 ✅, NV-15 (favoritos v1) y NV-17 (visitas v1) | Lo que Mobile ya tiene listo en UX (acordado el 2026-11-07); funcionan sobre las propiedades actuales de NV-07 |
+| 2 | NV-11 | Perfil, universidad y preferencias |
+| 3 | NV-12, NV-13, NV-21 | Arrendadores, fotos y verificación: desbloquean la confirmación de visitas y el chat |
+| 4 | NV-16, NV-14, NV-18 | Chat (requiere arrendadores), búsqueda y mapa, cierre con QR |
 | 5 | NV-19, NV-20, NV-22 | Confianza y comunicación |
 | 6 | NV-23, NV-24, NV-25 | Smart Match y métricas (requieren datos de las anteriores) |
 
@@ -153,6 +153,7 @@ Cada spec debe cumplir, y se revisa en cada iteración:
 9. **Costo $0 (COST-001)**: cada spec tiene tabla de costo; lo que no se demuestre en $0 queda BLOCKED.
 10. **Evidencia honesta**: un control no ejecutado no se reporta como PASS; las evidencias son registros fechados y no se reescriben.
 11. **Versionado**: los cambios aprobados suben la versión y dejan una nota de cambio en la spec; el historial vive en Git.
+12. **Contrato para Mobile**: toda spec que exponga endpoints a la app incluye la sección "Contrato para Mobile" (ENDPOINT, METHOD, AUTH, HEADERS, REQUEST, RESPONSE, STATUS CODES, PAGINATION) y, al desplegar, se entrega a Mobile con DEPLOYED URL y TESTS reales (acuerdo con Mobile del 2026-11-07).
 
 ## 5. Auditoría SDD del 2026-11-06
 

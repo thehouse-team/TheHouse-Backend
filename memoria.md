@@ -535,3 +535,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Impacto:** NV-03 T25 se verificó el 2026-11-07 (logs de consola en Log Analytics, sin datos sensibles, costo del mes $0.00). La rotación de credenciales expuestas sigue pendiente como riesgo aceptado temporalmente.
 - **Actualización 2026-11-07 (M-BE-059):** ejecutado. Catálogo regional desplegado y cargado en producción (10 universidades, 12 propiedades); `nosniff` en producción (ZAP 10021 PASS); rollback controlado probado (run `42349310343`); NV-03 T25 cerrada. Por decisión de Victor (opción B), la ventana de dos réplicas (NV-03 T08, T18 y T19) se ejecuta en la evaluación del 3 y 4 de diciembre. NV-09 T20 se cierra con el primer merge de solo documentación.
 
+## M-BE-060 — P3 guiada por Mobile: favoritos y visitas v1 sobre `properties`, contrato para Mobile
+
+- **ID:** M-BE-060
+- **Decisión:** reordenar P3 según lo que Mobile ya tiene listo: NV-15 1.1.0 (favoritos sobre `propertyId` de NV-07) y NV-17 1.1.0 (visitas v1: solicitud, consulta y cancelación del estudiante, con `Idempotency-Key`, reglas de horario en `America/Mexico_City` y conflictos) primero; después NV-11, el bloque de arrendadores (NV-12, NV-13, NV-21) y el chat (NV-16), que requiere arrendadores. Toda spec con endpoints para la app incluye la sección "Contrato para Mobile" y se entrega con URL desplegada y pruebas.
+- **Estado:** PROPUESTO — borradores pendientes de revisión de Mobile y de aprobación de Victor.
+- **Fecha:** 2026-11-07.
+- **Aprobador:** pendiente (Victor Manuel Jose Jose).
+- **Justificación:** pedido del responsable de Mobile del 2026-11-07 (favoritos, visitas y chat con contratos reales, compatibilidad con lo existente y convenciones uniformes). Las propiedades actuales no tienen arrendador: la confirmación de visitas y el chat no pueden existir antes de NV-12.
+- **Impacto:** Mobile usaba otra numeración (favoritos "NV-09", visitas "NV-10"); la equivalencia es favoritos = NV-15, visitas = NV-17, chat = NV-16. Los favoritos y visitas v1 se migrarán a cuartos cuando NV-12/NV-14 los publiquen.
+
