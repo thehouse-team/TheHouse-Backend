@@ -595,3 +595,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** sin revisión, ningún edificio de NV-12 llega a `verified` ni sus cuartos a `available`; la app necesita reportes y moderación.
 - **Impacto:** asignar roles en Production requiere autorización aparte; el primer uso será resolver el edificio de prueba de NV-12. Login y refresh agregan 403 `account_suspended`.
 
+## M-BE-066 — NV-14 1.1.0 aprobada: búsqueda, filtros y mapa
+
+- **ID:** M-BE-066
+- **Decisión:** aprobar NV-14 1.1.0 con sus decisiones: catálogo público solo con cuartos `available` de edificios `verified`; consulta en dos pasos sin modelo de lectura en v1; ubicación aproximada por celda de 0.003° con distancias calculadas desde la celda; detalle con sesión (RF-24) y `/properties` sin cambios; migración de favoritos y visitas en NV-15/NV-17 1.2.0; seed de demostración con las 12 propiedades como cuartos `demo`; seed de colonias desde OpenStreetMap; filtros de la §6; fotos con NV-13 y eventos con NV-25.
+- **Estado:** APROBADO — Victor, 2026-11-07 («Apruebo y EJECUTA», T01–T13). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-07.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** con NV-12 y NV-21 ya hay cuartos aprobados, pero ningún endpoint público los muestra.
+- **Impacto:** los seeds de colonias y de demostración en Production requieren autorización aparte (M-BE-043); la migración de favoritos y visitas queda como siguiente paso.
+
