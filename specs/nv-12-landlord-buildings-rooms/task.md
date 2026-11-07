@@ -8,12 +8,12 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T13; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-12-landlord-buildings-rooms/`) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T09 completas (2026-11-07, ver `evidence.md`); T10–T13 esperan CI, CD y prueba en Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 13 |
-| Tasks completadas | 0 |
+| Tasks completadas | 9 |
 
 ## Reglas de esta lista
 
@@ -25,21 +25,21 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Alta de arrendador** — Requisito: NV-12-R01 · Fase: F1 · Aceptación: `POST /landlord/profile` activa el modo una sola vez (409 `landlord_exists`); valida teléfono, RFC si es `agency` y la versión de términos vigente; `GET` devuelve el perfil o 404. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Gestión de edificios** — Requisito: NV-12-R02 · Fase: F1 · Aceptación: Crear, consultar, editar y borrar edificios propios con validación de dirección, ubicación, tipo, catálogo de servicios y universidad existente; límite de 20; borrado bloqueado con cuartos `rented`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Generación de cuartos** — Requisito: NV-12-R03 · Fase: F1 · Aceptación: `rooms/generate` crea cuartos numerados por piso (101, 102, 201…) con datos base; respeta 200 por edificio y no duplica números. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T04 · Edición y acciones de cuartos** — Requisito: NV-12-R04 · Fase: F1 · Aceptación: Editar, duplicar (siguiente número del piso), copiar datos de otro cuarto del mismo edificio, pausar, reanudar y borrar respetan estados y versiones. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T05 · Máquinas de estados** — Requisito: NV-12-R05 · Fase: F1 · Aceptación: Transiciones válidas de edificio y cuarto en el dominio, `setup` → `ready` automático al completar datos; transiciones inválidas 409 con `code`; prueba de cada transición. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Alta de arrendador** — Requisito: NV-12-R01 · Fase: F1 · Aceptación: `POST /landlord/profile` activa el modo una sola vez (409 `landlord_exists`); valida teléfono, RFC si es `agency` y la versión de términos vigente; `GET` devuelve el perfil o 404. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Gestión de edificios** — Requisito: NV-12-R02 · Fase: F1 · Aceptación: Crear, consultar, editar y borrar edificios propios con validación de dirección, ubicación, tipo, catálogo de servicios y universidad existente; límite de 20; borrado bloqueado con cuartos `rented`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Generación de cuartos** — Requisito: NV-12-R03 · Fase: F1 · Aceptación: `rooms/generate` crea cuartos numerados por piso (101, 102, 201…) con datos base; respeta 200 por edificio y no duplica números. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T04 · Edición y acciones de cuartos** — Requisito: NV-12-R04 · Fase: F1 · Aceptación: Editar, duplicar (siguiente número del piso), copiar datos de otro cuarto del mismo edificio, pausar, reanudar y borrar respetan estados y versiones. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T05 · Máquinas de estados** — Requisito: NV-12-R05 · Fase: F1 · Aceptación: Transiciones válidas de edificio y cuarto en el dominio, `setup` → `ready` automático al completar datos; transiciones inválidas 409 con `code`; prueba de cada transición. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T06 · Cálculo de distancia** — Requisito: NV-12-R06 · Fase: F2 · Aceptación: Distancia (1 decimal) y minutos a pie (5 km/h) a la universidad elegida, recalculados al cambiar ubicación o universidad; pruebas con coordenadas del seed. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
-- [ ] **T07 · Persistencia y concurrencia** — Requisito: NV-12-R07 · Fase: F2 · Aceptación: Índices únicos y geoespacial; `version` incrementada en cada escritura; dos ediciones simultáneas con la misma versión: una gana y la otra recibe 409. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
-- [ ] **T08 · Publicación y tablero** — Requisito: NV-12-R08 · Fase: F2 · Aceptación: `publication` lista pasos; `publish` pasa a `in_review` solo si se cumplen (409 `publication_incomplete` si no); el tablero devuelve edificios, cuartos, disponibles, ocupación e ingreso mensual de cuartos `rented`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T06 · Cálculo de distancia** — Requisito: NV-12-R06 · Fase: F2 · Aceptación: Distancia (1 decimal) y minutos a pie (5 km/h) a la universidad elegida, recalculados al cambiar ubicación o universidad; pruebas con coordenadas del seed. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T07 · Persistencia y concurrencia** — Requisito: NV-12-R07 · Fase: F2 · Aceptación: Índices únicos y geoespacial; `version` incrementada en cada escritura; dos ediciones simultáneas con la misma versión: una gana y la otra recibe 409. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T08 · Publicación y tablero** — Requisito: NV-12-R08 · Fase: F2 · Aceptación: `publication` lista pasos; `publish` pasa a `in_review` solo si se cumplen (409 `publication_incomplete` si no); el tablero devuelve edificios, cuartos, disponibles, ocupación e ingreso mensual de cuartos `rented`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04, T05.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T09 · Autorización y límites** — Requisito: NV-12-R09 · Fase: F3 · Aceptación: Pruebas con dos arrendadores y un usuario sin perfil (404 ajeno, 403 sin perfil); asignación masiva 400; rate limits con 429 y `Retry-After`; Redis caído 503; `no-store`; teléfono, RFC y dirección fuera de logs. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
+- [x] **T09 · Autorización y límites** — Requisito: NV-12-R09 · Fase: F3 · Aceptación: Pruebas con dos arrendadores y un usuario sin perfil (404 ajeno, 403 sin perfil); asignación masiva 400; rate limits con 429 y `Retry-After`; Redis caído 503; `no-store`; teléfono, RFC y dirección fuera de logs. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
 
 ## F4 — Pruebas y evidencia
 
@@ -52,15 +52,15 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F1 | ABIERTA |
-| T05 | R05 | F1 | ABIERTA |
-| T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F2 | ABIERTA |
-| T08 | R08 | F2 | ABIERTA |
-| T09 | R09 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F1 | COMPLETA |
+| T05 | R05 | F1 | COMPLETA |
+| T06 | R06 | F2 | COMPLETA |
+| T07 | R07 | F2 | COMPLETA |
+| T08 | R08 | F2 | COMPLETA |
+| T09 | R09 | F3 | COMPLETA |
 | T10 | R10 | F4 | ABIERTA |
 | T11 | R11 | F4 | ABIERTA |
 | T12 | R11 | F4 | ABIERTA |
@@ -88,11 +88,11 @@
 | --- | --- |
 | Requisitos | 11 |
 | Tasks | 13 |
-| Tasks abiertas | 13 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 9 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T09 completas (2026-11-07, ver `evidence.md`); T10–T13 esperan CI, CD y prueba en Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

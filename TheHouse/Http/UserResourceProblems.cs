@@ -8,16 +8,20 @@ public static class UserResourceProblems
 {
     public const string CodeItem = "thehouse.problem.code";
 
+    public const string DetailItem = "thehouse.problem.detail";
+
     // Agrega `code` y su `detail` si el endpoint lo indicó para este status.
     public static void ApplyCode(HttpContext context, ProblemDetails problem, int status)
     {
-        if (status is 409 or 422 &&
+        if (status is 403 or 409 or 422 &&
             context.Items.TryGetValue(CodeItem, out var value) &&
             value is string code &&
             DetailFor(code) is { } detail)
         {
             problem.Extensions["code"] = code;
-            problem.Detail = detail;
+            problem.Detail = context.Items.TryGetValue(DetailItem, out var specific) && specific is string text
+                ? text
+                : detail;
         }
     }
 
@@ -27,6 +31,28 @@ public static class UserResourceProblems
     public static bool IsVisits(HttpContext context) =>
         context.Request.Path.StartsWithSegments(VisitsEndpoint.BasePath, StringComparison.OrdinalIgnoreCase) ||
         context.Request.Path.StartsWithSegments(VisitsEndpoint.MinePath, StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsLandlord(HttpContext context) =>
+        context.Request.Path.StartsWithSegments(LandlordEndpoint.BasePath, StringComparison.OrdinalIgnoreCase);
+
+    public static void NormalizeLandlord(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los datos del arrendador, del edificio o del cuarto no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            403 => "Esta acción requiere activar el modo arrendador.",
+            404 => "El recurso no existe.",
+            409 => "La solicitud entra en conflicto con el estado actual.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de solicitudes del modo arrendador.",
+            503 => "El modo arrendador no está disponible temporalmente.",
+            504 => "El modo arrendador no respondió a tiempo.",
+            _ => "No fue posible procesar la solicitud.",
+        };
+    }
 
     public static bool IsProfile(HttpContext context) =>
         context.Request.Path.StartsWithSegments(ProfileEndpoint.ProfilePath, StringComparison.OrdinalIgnoreCase) ||
@@ -99,6 +125,18 @@ public static class UserResourceProblems
         "too_far" => "La visita no puede programarse a más de 60 días.",
         "not_quarter_hour" => "La hora debe ser múltiplo de 15 minutos.",
         "outside_hours" => "La visita debe estar entre 08:00 y 20:00 (hora de Ciudad de México).",
+        "landlord_exists" => "La cuenta ya tiene el modo arrendador activo.",
+        "landlord_required" => "Esta acción requiere activar el modo arrendador.",
+        "buildings_limit" => "Se alcanzó el máximo de 20 edificios.",
+        "rooms_limit" => "Se alcanzó el máximo de cuartos (200 por edificio y 30 por piso).",
+        "room_number_taken" => "Ya existe un cuarto con ese número en el edificio.",
+        "building_in_review" => "El edificio está en revisión y no admite cambios.",
+        "building_state" => "El edificio no se puede enviar a revisión en su estado actual.",
+        "building_has_rented_rooms" => "No se puede borrar un edificio con cuartos rentados.",
+        "room_rented" => "No se puede borrar un cuarto rentado.",
+        "room_state" => "La acción no es válida en el estado actual del cuarto.",
+        "version_conflict" => "Los datos cambiaron desde la última lectura; vuelve a cargarlos.",
+        "publication_incomplete" => "Faltan pasos para enviar el edificio a revisión.",
         _ => null,
     };
 }

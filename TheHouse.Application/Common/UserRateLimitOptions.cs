@@ -14,6 +14,15 @@ public sealed class UserRateLimitOptions
 
     public int UniversitySearchPerWindow { get; init; } = 60;
 
+    // NV-12: arrendador por usuario; generar cuartos 10 por hora.
+    public int LandlordReadsPerWindow { get; init; } = 60;
+
+    public int LandlordWritesPerWindow { get; init; } = 30;
+
+    public int RoomGeneratesPerHour { get; init; } = 10;
+
+    public TimeSpan GenerateWindow { get; init; } = TimeSpan.FromHours(1);
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

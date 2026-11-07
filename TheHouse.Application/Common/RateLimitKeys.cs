@@ -38,6 +38,15 @@ public static class RateLimitKeys
     public static string UniversitySearchIp(string ipAddress) =>
         "thehouse:u2:universities:search:ip:v1:" + Hash(ipAddress);
 
+    public static string LandlordRead(string userId) =>
+        "thehouse:u2:landlord:read:v1:" + Hash(userId);
+
+    public static string LandlordWrite(string userId) =>
+        "thehouse:u2:landlord:write:v1:" + Hash(userId);
+
+    public static string RoomGenerate(string userId) =>
+        "thehouse:u2:landlord:generate:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

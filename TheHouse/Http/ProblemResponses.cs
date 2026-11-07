@@ -51,6 +51,11 @@ public static class ProblemResponses
             SessionProblems.NormalizeRefresh(problem, status);
         else if (SessionProblems.IsMe(context))
             SessionProblems.NormalizeMe(problem, status);
+        else if (UserResourceProblems.IsLandlord(context))
+        {
+            UserResourceProblems.NormalizeLandlord(problem, status);
+            UserResourceProblems.ApplyCode(context, problem, status);
+        }
         else if (UserResourceProblems.IsProfile(context))
             UserResourceProblems.NormalizeProfile(problem, status);
         else if (UserResourceProblems.IsFavorites(context))

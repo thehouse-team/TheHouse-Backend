@@ -50,9 +50,13 @@ public static class UserEndpointSupport
         {
             return Error(context, 404);
         }
+        catch (ForbiddenException exception)
+        {
+            return Error(context, 403, exception.Reason);
+        }
         catch (ConflictException exception)
         {
-            return Error(context, 409, exception.Reason);
+            return Error(context, 409, exception.Reason, exception.Detail);
         }
         catch (BusinessRuleException exception)
         {
@@ -119,7 +123,7 @@ public static class UserEndpointSupport
 
     // Lee un cuerpo JSON acotado. Con `optional`, un cuerpo vacío (sin
     // Content-Type) devuelve null; si hay cuerpo debe ser application/json.
-    public static async Task<T?> ReadJsonAsync<T>(HttpContext context, bool optional)
+    public static async Task<T?> ReadJsonAsync<T>(HttpContext context, bool optional, int maximumBytes = MaximumBodyBytes)
         where T : class
     {
         var hasBody = context.Request.ContentLength is > 0 ||
@@ -138,7 +142,7 @@ public static class UserEndpointSupport
             throw new UnsupportedBodyException(415);
         }
 
-        if (context.Request.ContentLength > MaximumBodyBytes)
+        if (context.Request.ContentLength > maximumBytes)
         {
             throw new UnsupportedBodyException(413);
         }
@@ -153,7 +157,7 @@ public static class UserEndpointSupport
                 break;
             }
 
-            if (body.Length + read > MaximumBodyBytes)
+            if (body.Length + read > maximumBytes)
             {
                 throw new UnsupportedBodyException(413);
             }
@@ -170,9 +174,14 @@ public static class UserEndpointSupport
             ?? throw new RequestValidationException("body", "A JSON object is required.");
     }
 
-    public static IResult Error(HttpContext context, int status, string? code = null)
+    public static IResult Error(HttpContext context, int status, string? code = null, string? detail = null)
     {
         context.Response.Headers.CacheControl = "no-store";
+        if (detail is not null)
+        {
+            context.Items[UserResourceProblems.DetailItem] = detail;
+        }
+
         if (code is not null)
         {
             // Código estable para que Mobile distinga el motivo del 409/422;
