@@ -524,3 +524,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Impacto:** al desplegarse, Mobile conectará la renovación y `/users/me` tras pruebas HTTP reales en Azure. Decisiones propuestas: 30 días por refresh token y 90 por sesión; sin periodo de gracia ante refresh simultáneos (la app serializa las renovaciones).
 - **Actualización 2026-11-06 (M-BE-058):** NV-10 1.1.0 completada: PR #10 mezclado, desplegada por el CD (run `42192269362`, revisión `c55feed2-7-1`) y verificada en Azure 13/13. Mobile puede conectar refresh y `/users/me`.
 
+## M-BE-059 — Paquete P1/P2 previo a la evaluación: seed regional, rollback, réplicas y endurecimiento
+
+- **ID:** M-BE-059
+- **Decisión:** preparar, para aprobación, NV-08 1.2.0-u2 (catálogo regional de diez universidades de Tula–Tepeji–Jilotepec y comando de seed sin el atajo `ASPNETCORE_ENVIRONMENT=Staging`), NV-07 1.2.0-u2 (doce propiedades regionales), NV-01 1.2.0-u2 (`X-Content-Type-Options: nosniff`, hallazgo H-01) y NV-09 1.1.0-u2 (sin despliegue en cambios solo de documentación); ejecutar NV-09 T13 (rollback controlado) y T18 (seed en producción) y NV-03 T08, T18 y T19 (ventana de dos réplicas con smoke completo). La rotación de credenciales queda diferida por decisión de Victor.
+- **Estado:** PROPUESTO — pendiente de aprobación documental, «EJECUTA», autorización del seed en producción y «OK PARA APPLY» para la ventana de réplicas.
+- **Fecha:** 2026-11-07.
+- **Aprobador:** pendiente (Victor Manuel Jose Jose).
+- **Justificación:** prioridades acordadas para la evaluación del 3 y 4 de diciembre: catálogo útil para la demostración, CD con rollback probado, demostración de dos instancias (constitution §15) y cierre de hallazgos de seguridad.
+- **Impacto:** NV-03 T25 se verificó el 2026-11-07 (logs de consola en Log Analytics, sin datos sensibles, costo del mes $0.00). La rotación de credenciales expuestas sigue pendiente como riesgo aceptado temporalmente.
+

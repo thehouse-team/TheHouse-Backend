@@ -4,18 +4,20 @@
 | --- | --- |
 | ID | NV-01 |
 | Documento | `spec.md` |
-| Versión | 1.1.0-u2 |
+| Versión | 1.2.0-u2 |
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RNF-01, RNF-05, RNF-06, RNF-08, RNF-10 (transversales) (`Requerimientos_TheHouse_v2`) |
-| Plan | `plan.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Plan | `plan.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Precondición | Bootstrap técnico existente (M-BE-001); M-BE-027; M-BE-028 |
 | Relación | Habilita NV-04 a NV-08 y NV-03 U2, sin autorización transitiva |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
+
+**Cambio 1.2.0-u2 (2026-11-07) — PENDIENTE DE APROBACIÓN Y «EJECUTA»:** agrega NV-01-R14 (encabezados de seguridad HTTP; hallazgo H-01 de NV-09: falta `X-Content-Type-Options: nosniff`) y la task T19. Las tasks 1.1.0-u2 no cambian.
 
 Este documento está aprobado documentalmente para la Entrega Unidad 2. La aprobación documental **no autoriza implementación**: conforme a M-BE-027, la ejecución requiere una autorización humana posterior de Fase B con SPEC ACTIVA, PLAN ACTIVO, TASK ACTIVA y ESTADO AUTORIZADO. NV-01 sigue siendo Foundation y no contiene endpoints de negocio.
 
@@ -88,6 +90,7 @@ NV-01 puede preparar infraestructura técnica. NV-01 **no implementa** Register,
 | NV-01-R11 | Paginación acotada y estable | Toda colección futura declara estrategia, orden estable, tamaño máximo, metadatos y límites; no existen respuestas ilimitadas ni páginas sin criterio de continuación. | F5 | T11, T16, T18 |
 | NV-01-R12 | Manejo global de excepciones | Un middleware o mecanismo único clasifica errores conocidos y desconocidos, respeta cancelación y timeouts, registra con correlación y no filtra detalles internos al cliente. | F2 | T12, T17, T18 |
 | NV-01-R13 | Límites del monolito modular | Los módulos declaran contratos públicos, no acceden a internals de otro módulo y no crean ciclos; las reglas de dependencia son comprobables mediante pruebas de arquitectura y documentación. | F5 | T13 |
+| NV-01-R14 | Encabezados de seguridad HTTP | Toda respuesta, incluidos errores, health y 304, incluye `X-Content-Type-Options: nosniff`; se agrega en un único middleware al inicio del pipeline sin alterar contratos ni encabezados existentes; prueba de integración que lo verifica en respuestas 200, 4xx y 304. | F6 | T19 |
 
 ## 7. Decisiones y restricciones aplicables
 
@@ -168,10 +171,10 @@ La evidencia futura debe incluir comando reproducible, versión, resultado y art
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 13 |
+| Requisitos | 14 |
 | Fases del plan | 6 |
-| Tasks | 18 |
-| Tasks U2 | 17 |
+| Tasks | 19 |
+| Tasks U2 | 18 |
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |

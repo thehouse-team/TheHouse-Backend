@@ -4,14 +4,16 @@
 | --- | --- |
 | ID | NV-08 |
 | Documento | `plan.md` |
-| Versión | 1.1.0-u2 |
-| Fecha | 2026-11-05 |
+| Versión | 1.2.0-u2 |
+| Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
 | Estado de ejecución | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** |
-| Spec | `spec.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Spec | `spec.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
+
+**Cambio 1.2.0-u2 (2026-11-07) — PENDIENTE DE APROBACIÓN Y «EJECUTA»:** el seed pasa a un catálogo regional de diez universidades de Tula–Tepeji–Jilotepec (NV-08-R04, task T14) y se corrige el comando de seed documentado, que eludía M-BE-043. Las tasks 1.1.0-u2 siguen cerradas.
 
 Plan aprobado documentalmente para U2. No se implementa código en esta fase.
 
@@ -186,7 +188,7 @@ University Catalog no requiere servicios pagos. MongoDB/Redis deben caber en COS
 | R01 | F1 | T01, T02, T05, T09 |
 | R02 | F1 | T01, T02, T06, T10 |
 | R03 | F1 | T02, T06, T08 |
-| R04 | F2 | T04, T08, T09, T10 |
+| R04 | F2 | T04, T08, T09, T10, T14 |
 | R05 | F2 | T03, T05, T06, T09 |
 | R06 | F3 | T05, T06, T07, T09 |
 | R07 | F4 | T10, T11, T13 |
