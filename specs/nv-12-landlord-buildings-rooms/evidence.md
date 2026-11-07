@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-07 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-12 1.1.0, decisiones de la §13 y tasks T01–T13 (M-BE-064). Contrato §6.1 validado antes por el responsable de Mobile |
-| Rama | `feat/nv-12-landlord` (sobre `docs/nv-12-1.1.0`, PR #20) |
-| Resultado | **🟡 EN CURSO**: T01–T09 completas con pruebas locales; T10–T13 esperan CI, CD y prueba HTTP real en Azure |
+| Rama | `feat/nv-12-landlord` → PR #21, mezclado en `main` (`13db0e6`); spec y aprobación en PR #20 (`ca75a2b`) |
+| Resultado | **✅ PASS WITH WARNINGS**: 13/13 tasks completas; desplegada en Azure y verificada con prueba HTTP real 24/24. Advertencias: adaptadores Mongo sin cobertura automatizada (verificados en Azure); edificio de prueba en revisión en producción (§6) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. Nombre, teléfono, RFC y dirección no aparecen en logs.
 
@@ -61,8 +61,35 @@ Pruebas nuevas: `TheHouse.UnitTests/ListingTests.cs` (19) y `TheHouse.Integratio
 - NV-12 no toca `properties`, favoritos ni visitas (M-BE-064); la app sigue igual.
 - Costo: sin servicios nuevos; tres colecciones pequeñas en Atlas M0.
 
-## 5. Pendiente
+## 5. Despliegue y CI
 
-- T10: CI verde, merge, CD aprobado y prueba HTTP real en Azure; entregar el contrato §6.1 con `DEPLOYED URL` y `TESTS`.
-- T11/T12: TRX y cobertura del run de CI.
-- T13: cierre de esta evidencia.
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#20](https://github.com/thehouse-team/TheHouse-Backend/pull/20) (spec y aprobación) y [#21](https://github.com/thehouse-team/TheHouse-Backend/pull/21) (código), mezclados el 2026-11-07; aprobaciones registradas por la cuenta `thehouserent26` |
+| CI de `main` (run 42400342826, `13db0e6`) | 7/7 checks en verde; 671/671 pruebas (unitarias 230, integración 389, seguridad 52); 47 pruebas de NV-12 |
+| Cobertura de líneas (CI) | 69.4 % total. `MongoListingRepositories` y `ListingDocuments` en 0 %, como los demás adaptadores Mongo: verificados con la prueba real en Azure |
+| CD (run 42400488050) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c13db0e6-19-1`, imagen `sha256:9d55034f…` |
+
+## 6. Prueba HTTP real en Azure
+
+Contra `https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io` (2026-11-07), con tres cuentas nuevas de dominio reservado (`nv12-azure-a-44f49ecf`, `nv12-azure-b-7a6617fd` y `nv12-azure-c-43a05c2b`, todas `@example.com`). El script (`nv12_azure_check.py`, fuera del repo) solo imprime códigos y nombres de campos. **24/24 PASS**:
+
+| Bloque | Casos | Resultado |
+| --- | --- | --- |
+| Perfil de arrendador | sin perfil → 403 `landlord_required`; alta 201 con `no-store`; segunda alta 409 `landlord_exists`; RFC con dígito incorrecto 400; inmobiliaria con RFC válido 201 | 5/5 |
+| Edificios | alta en `draft` a 0.7 km y 9 min a pie de la UTTT; `status` en el cuerpo 400; otro arrendador 404; versión vieja 409 `version_conflict`; versión vigente 200 (`version` 2) | 5/5 |
+| Cuartos | generar 101, 102, 201 en `ready`; número repetido 409; editar 200; otro arrendador 404; duplicar → 103; pausar sin estar disponible 409 `room_state` | 6/6 |
+| Publicación y tablero | `canPublish` true; enviar a revisión 202 `in_review`; generar en revisión 409 `building_in_review`; tablero con 1 edificio y 4 cuartos; borrar edificio en borrador 204 | 5/5 |
+| Seguridad y compatibilidad | sin token 401; `/users/me` y `/properties` (12) sin cambios | 3/3 |
+
+Queda en producción el edificio "PRUEBA AUTOMATIZADA NV-12" en `in_review` con 4 cuartos, que no se puede borrar mientras está en revisión; NV-21 debe rechazarlo o borrarlo. También quedan las tres cuentas de prueba (sin datos personales reales) y sus perfiles de arrendador; las sesiones se cerraron con logout.
+
+## 7. Contrato entregable a Mobile
+
+El contrato de `spec.md` §6.1 queda vigente sin cambios, con estos dos campos completos:
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        unitarias 230, integración 389, seguridad 52 en CI (671/671); prueba HTTP real en Azure 24/24 (2026-11-07)
+```
