@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-07 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-11 1.1.0, decisiones de la §13 y tasks T01–T11 (M-BE-063). Contrato §6.1 validado antes por el responsable de Mobile |
-| Rama | `feat/nv-11-profile-preferences` (base `main` 20e42ae) |
-| Resultado | **🟡 EN CURSO**: T01–T04, T06 y T07 completas con pruebas locales; T05 espera el seed autorizado de coordenadas en Production; T08–T11 esperan CI, CD y prueba HTTP real en Azure |
+| Rama | `feat/nv-11-profile-preferences` → PR #18, mezclado en `main` (`88599c2`) |
+| Resultado | **✅ PASS WITH WARNINGS**: 11/11 tasks completas; desplegada en Azure, seed autorizado de coordenadas aplicado y prueba HTTP real 24/24. Advertencias: 3 de 10 coordenadas aproximadas al centro de la localidad (§4); adaptadores Mongo sin cobertura automatizada (verificados en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. No se registran nombres, preferencias ni coordenadas en logs.
 
@@ -81,9 +81,35 @@ Hallazgo: 3 de 10 son aproximadas al centro de la localidad (error esperado de p
 - Rate limit y repositorios fallan cerrados con 503.
 - Costo: sin servicios nuevos; dos colecciones pequeñas y un índice 2dsphere en Atlas M0.
 
-## 6. Pendiente
+## 6. Despliegue, seed y CI
 
-- T05: seed de coordenadas en Production con autorización explícita (M-BE-043). Hasta entonces, en producción la búsqueda devuelve listas vacías.
-- T08: CI verde, merge, CD aprobado y prueba HTTP real en Azure; entregar el contrato §6.1 con `DEPLOYED URL` y `TESTS`.
-- T09/T10: TRX y cobertura del run de CI.
-- T11: cierre de esta evidencia.
+| Paso | Resultado |
+| --- | --- |
+| PR | [#18](https://github.com/thehouse-team/TheHouse-Backend/pull/18), mezclado el 2026-11-07 (`88599c2`); aprobación registrada por la cuenta `thehouserent26` |
+| CI de `main` (run 42393690681) | 7/7 checks en verde; 624/624 pruebas (unitarias 211, integración 361, seguridad 52); 71 pruebas de NV-11 |
+| Cobertura de líneas (CI) | 69.6 % total. `MongoProfileRepositories` y `ProfileDocuments` en 0 %, como los demás adaptadores Mongo: verificados con la prueba real en Azure |
+| CD (run 42393781540) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c88599c2-16-1` (100 % del tráfico, sana), imagen `sha256:660118cf…` |
+| Seed de coordenadas (T05) | Autorizado por Victor el 2026-11-07 («Autorizo el seed», M-BE-043). Una ejecución con `env UniversitySeed__Enabled=true dotnet TheHouse.dll --seed-universities --allow-production-seed` vía `az containerapp exec` en esa revisión. Log: «universidades=True, propiedades=False» y «University seed completed». Solo se actualizaron las 10 universidades por `code` |
+
+## 7. Prueba HTTP real en Azure
+
+Contra `https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io` (2026-11-07), con dos cuentas nuevas de dominio reservado (`nv11-azure-a-3318c15b@example.com` y `nv11-azure-b-3ce6dbfe@example.com`). El script (`nv11_azure_check.py`, fuera del repo) solo imprime códigos y nombres de campos. **24/24 PASS**:
+
+| Bloque | Casos | Resultado |
+| --- | --- | --- |
+| Búsqueda pública | `TÉPEJI` → UTTT y UAEH-ESTE con caché público; `uaeh` → 3 escuelas; cercanía desde la UTTT → UTTT a 0 km, 10 resultados ordenados y `no-store`; `q` corta y modos combinados → 400 | 7/7 |
+| Perfil y universidad | perfil vacío con `no-store`; nombre; `userId` en el cuerpo → 400; universidad 204; inexistente 404; perfil con `UTTT` | 6/6 |
+| Preferencias | valores por defecto (`version` 0); guardar (`version` 1, `quickSetupCompleted` true); campo del servidor → 400; catálogo → 400; 415; otro usuario con `version` 0; sin token 401 | 7/7 |
+| Compatibilidad | `/users/me`; `/universities` con sus 6 campos y sin ubicación; `/properties` | 4/4 |
+
+Quedan en producción dos cuentas de prueba `nv11-azure-*@example.com`, sin datos personales y con sesión cerrada.
+
+## 8. Contrato entregable a Mobile
+
+El contrato de `spec.md` §6.1 queda vigente sin cambios, con estos dos campos completos:
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        unitarias 211, integración 361, seguridad 52 en CI (624/624); prueba HTTP real en Azure 24/24 (2026-11-07)
+```
