@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-07 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-21 1.1.0, decisiones de la §13 y tasks T01–T14 (M-BE-065). Contrato §6.1 validado antes por el responsable de Mobile |
-| Rama | `feat/nv-21-moderation` (sobre `docs/nv-21-1.1.0`, PR #23) |
-| Resultado | **🟡 EN CURSO**: T01–T10 completas con pruebas locales; T11–T14 esperan CI, CD, asignación autorizada de roles en Production y prueba HTTP real en Azure |
+| Rama | `feat/nv-21-moderation` → PR #24, mezclado en `main` (`7310ab0`); spec y aprobación en PR #23 (`c770b1c`) |
+| Resultado | **✅ PASS WITH WARNINGS**: 14/14 tasks completas; desplegada en Azure y verificada con prueba HTTP real 23/23. Advertencia: adaptadores Mongo sin cobertura automatizada (verificados en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. Motivos y detalles de reportes, teléfonos y correos no aparecen en logs.
 
@@ -68,8 +68,39 @@ La spec dice que, al suspender una cuenta, el access token vigente expira en 15 
 - Rate limit y repositorios fallan cerrados con 503.
 - Costo: sin servicios nuevos; cinco colecciones pequeñas en Atlas M0.
 
-## 6. Pendiente
+## 6. Despliegue y CI
 
-- T11: CI verde, merge, CD aprobado; asignar roles en Production con autorización; prueba HTTP real en Azure, incluido resolver el edificio de prueba de NV-12; entregar el contrato §6.1 con `DEPLOYED URL` y `TESTS`.
-- T12/T13: TRX y cobertura del run de CI.
-- T14: cierre de esta evidencia.
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#23](https://github.com/thehouse-team/TheHouse-Backend/pull/23) (spec y aprobación) y [#24](https://github.com/thehouse-team/TheHouse-Backend/pull/24) (código), mezclados el 2026-11-07 |
+| CI de `main` (run 42403322329, `7310ab0`) | 7/7 checks en verde; 696/696 pruebas (unitarias 243, integración 399, seguridad 54); 25 pruebas de NV-21 |
+| Cobertura de líneas (CI) | 68.5 % total. `MongoModerationRepositories` en 0 %, como los demás adaptadores Mongo: verificado con la prueba real en Azure |
+| CD (run 42403433110) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c7310ab0-22-1`, imagen `sha256:f37ff11f…` |
+
+Una primera corrida del script expiró (timeout de 30 s en el registro) porque coincidió con el cambio de revisión del CD (revisión creada 18:55:58 UTC, despliegue terminado 18:57:00 UTC); al terminar, la API respondía en 0.25 s y la segunda corrida funcionó.
+
+## 7. Roles en Production y prueba HTTP real
+
+Autorizado por Victor el 2026-11-07 («Autorizo el rol»): `--grant-role` con `--allow-production-role-change` dio `admin` a la cuenta de prueba `nv21-azure-admin-f696c8aa@example.com` (usuario `6aef750e…`) para la prueba, y al terminar `--revoke-role` lo retiró. Ambos cambios quedaron en la bitácora con actor `cli`; los logs solo muestran el id del usuario. El archivo local con las credenciales de prueba se borró.
+
+Prueba contra `https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io` (2026-11-07) con tres cuentas de prueba (`nv21-azure-landlord-2266f406`, `nv21-azure-reporter-9c0efd39` y `nv21-azure-admin-f696c8aa`, todas `@example.com`). **23/23 PASS**:
+
+| Bloque | Casos | Resultado |
+| --- | --- | --- |
+| Roles | sin rol 403 `role_required`; cola con rol admin 200 | 2/2 |
+| Edificio de prueba de NV-12 | "PRUEBA AUTOMATIZADA NV-12" rechazado (`rejected`) | 1/1 |
+| Revisión | envío a revisión 202; detalle con `building, rooms, landlord, lastDecision` y arrendador sin teléfono; correcciones sin motivo 400; correcciones 200 (`draft`); el dueño ve `changes_requested`; aprobar 200 (`verified`, 2 disponibles); aprobar de nuevo 409 `building_state` | 8/8 |
+| Reportes y suspensión | reporte 201; repetido 409 `report_exists`; resolver con suspensión del edificio; reactivar; suspender la cuenta; su sesión actual 401; login 403 `account_suspended`; reactivar; login 200 | 9/9 |
+| Bitácora y compatibilidad | bitácora con las 9 acciones probadas; `DELETE` 405; `/properties` sin cambios | 3/3 |
+
+Quedan en producción el edificio "PRUEBA AUTOMATIZADA NV-12" en `rejected` (su dueño de prueba puede borrarlo), el edificio "PRUEBA AUTOMATIZADA NV-21" en `suspended` (al suspender la cuenta de prueba se suspendieron sus edificios; reactivar la cuenta no los reactiva, según la regla) y las tres cuentas de prueba, la de admin ya sin rol. Sus sesiones se cerraron.
+
+## 8. Contrato entregable a Mobile
+
+El contrato de `spec.md` §6.1 queda vigente sin cambios, con estos dos campos completos:
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        unitarias 243, integración 399, seguridad 54 en CI (696/696); prueba HTTP real en Azure 23/23 (2026-11-07)
+```
