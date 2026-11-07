@@ -2,29 +2,24 @@ using TheHouse.Domain.Entities;
 
 namespace TheHouse.Application.Abstractions.Persistence;
 
-// NV-15: favoritos por usuario. Agregar y quitar son idempotentes.
+// NV-15 1.2.0: favoritos por cuarto. `legacyPropertyId` alcanza también los
+// favoritos de 1.1.0 que aún no se migran.
 public interface IFavoriteRepository
 {
-    // Devuelve false si ya existía (índice único {userId, propertyId}).
+    // false si ya existía (índice único {userId, roomId}).
     Task<bool> AddAsync(Favorite favorite, CancellationToken cancellationToken);
 
-    Task RemoveAsync(string userId, string propertyId, CancellationToken cancellationToken);
+    Task RemoveAsync(string userId, string roomId, string? legacyPropertyId, CancellationToken cancellationToken);
 
-    Task RemoveManyAsync(string userId, IReadOnlyCollection<string> propertyIds, CancellationToken cancellationToken);
-
-    Task<bool> ExistsAsync(string userId, string propertyId, CancellationToken cancellationToken);
+    Task<bool> ExistsAsync(string userId, string roomId, string? legacyPropertyId, CancellationToken cancellationToken);
 
     Task<long> CountAsync(string userId, CancellationToken cancellationToken);
 
-    // Orden: createdAt desc, propertyId desc.
-    Task<(IReadOnlyList<Favorite> Items, long TotalItems)> ListAsync(
-        string userId,
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken);
+    // Todos los favoritos del usuario (máximo 200), más recientes primero.
+    Task<IReadOnlyList<Favorite>> ListAllAsync(string userId, CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<string>> ListPropertyIdsAsync(
-        string userId,
-        int limit,
-        CancellationToken cancellationToken);
+    // Migración: asigna `roomId` a los favoritos que solo tienen `propertyId`.
+    Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken);
 }
+
+public sealed record MigrationCounts(int Migrated, int DuplicatesRemoved, int Unmapped);

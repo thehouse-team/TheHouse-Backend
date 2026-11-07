@@ -55,6 +55,41 @@ if (roleCommand is not null)
     return;
 }
 
+// NV-15/NV-17 1.2.0: migración autorizada de favoritos y visitas a cuartos.
+if (args.Contains(SearchConfiguration.MigrateToRooms, StringComparer.Ordinal))
+{
+    var migrationRejection = SearchConfiguration.RejectMigration(
+        args,
+        app.Services.GetRequiredService<TheHouse.Application.UseCases.RoomMigrationOptions>().Enabled,
+        app.Environment.IsProduction());
+    if (migrationRejection is not null)
+    {
+        Console.Error.WriteLine(migrationRejection);
+        Environment.ExitCode = 2;
+        return;
+    }
+
+    try
+    {
+        var (favoriteCounts, visitCounts) = await app.Services.GetRequiredService<TheHouse.Application.UseCases.RoomMigrationService>().MigrateAsync(CancellationToken.None);
+        app.Logger.LogWarning(
+            "Migración a cuartos: favoritos migrados={Favorites}, duplicados eliminados={Duplicates}, sin mapeo={FavoritesUnmapped}; visitas migradas={Visits}, sin mapeo={VisitsUnmapped}.",
+            favoriteCounts.Migrated,
+            favoriteCounts.DuplicatesRemoved,
+            favoriteCounts.Unmapped,
+            visitCounts.Migrated,
+            visitCounts.Unmapped);
+        Console.WriteLine("Room migration completed.");
+    }
+    catch (InvalidOperationException exception)
+    {
+        Console.Error.WriteLine(exception.Message);
+        Environment.ExitCode = 2;
+    }
+
+    return;
+}
+
 // NV-14: seeds autorizados de colonias y de cuartos de demostración.
 var seedPlaces = args.Contains(SearchConfiguration.SeedPlaces, StringComparer.Ordinal);
 var seedDemoRooms = args.Contains(SearchConfiguration.SeedDemoRooms, StringComparer.Ordinal);

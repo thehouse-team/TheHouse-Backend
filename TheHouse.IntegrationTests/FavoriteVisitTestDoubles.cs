@@ -6,9 +6,9 @@ using TheHouse.Domain.Entities;
 
 namespace TheHouse.TestDoubles;
 
-// NV-15/NV-17: dobles en memoria con la semántica de MongoDB/Redis
-// (unicidad {userId, propertyId}, orden de listados, lock con NX y fallas
-// de dependencia). Se comparten entre pruebas unitarias e integración.
+// NV-15/NV-17 1.2.0: dobles en memoria con la semántica de MongoDB/Redis
+// (unicidad {userId, roomId}, orden de listados, lock con NX y fallas de
+// dependencia). Se comparten entre pruebas unitarias e integración.
 public sealed class InMemoryFavoriteRepository : IFavoriteRepository
 {
     private readonly object gate = new();
@@ -22,7 +22,7 @@ public sealed class InMemoryFavoriteRepository : IFavoriteRepository
         Guard(cancellationToken);
         lock (gate)
         {
-            if (Items.Any(item => item.UserId == favorite.UserId && item.PropertyId == favorite.PropertyId))
+            if (Items.Any(item => item.UserId == favorite.UserId && item.RoomId.Length > 0 && item.RoomId == favorite.RoomId))
             {
                 return Task.FromResult(false);
             }
@@ -32,34 +32,23 @@ public sealed class InMemoryFavoriteRepository : IFavoriteRepository
         }
     }
 
-    public Task RemoveAsync(string userId, string propertyId, CancellationToken cancellationToken)
+    public Task RemoveAsync(string userId, string roomId, string? legacyPropertyId, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
         lock (gate)
         {
-            Items.RemoveAll(item => item.UserId == userId && item.PropertyId == propertyId);
+            Items.RemoveAll(item => Matches(item, userId, roomId, legacyPropertyId));
         }
 
         return Task.CompletedTask;
     }
 
-    public Task RemoveManyAsync(string userId, IReadOnlyCollection<string> propertyIds, CancellationToken cancellationToken)
+    public Task<bool> ExistsAsync(string userId, string roomId, string? legacyPropertyId, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
         lock (gate)
         {
-            Items.RemoveAll(item => item.UserId == userId && propertyIds.Contains(item.PropertyId));
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public Task<bool> ExistsAsync(string userId, string propertyId, CancellationToken cancellationToken)
-    {
-        Guard(cancellationToken);
-        lock (gate)
-        {
-            return Task.FromResult(Items.Any(item => item.UserId == userId && item.PropertyId == propertyId));
+            return Task.FromResult(Items.Any(item => Matches(item, userId, roomId, legacyPropertyId)));
         }
     }
 
@@ -72,36 +61,50 @@ public sealed class InMemoryFavoriteRepository : IFavoriteRepository
         }
     }
 
-    public Task<(IReadOnlyList<Favorite> Items, long TotalItems)> ListAsync(
-        string userId,
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public Task<IReadOnlyList<Favorite>> ListAllAsync(string userId, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
         lock (gate)
         {
-            var mine = Ordered(userId).ToList();
-            IReadOnlyList<Favorite> slice = mine.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            return Task.FromResult((slice, (long)mine.Count));
+            return Task.FromResult<IReadOnlyList<Favorite>>(Items
+                .Where(item => item.UserId == userId)
+                .OrderByDescending(item => item.CreatedAt)
+                .ToList());
         }
     }
 
-    public Task<IReadOnlyList<string>> ListPropertyIdsAsync(string userId, int limit, CancellationToken cancellationToken)
+    public Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
         lock (gate)
         {
-            IReadOnlyList<string> ids = Ordered(userId).Take(limit).Select(item => item.PropertyId).ToList();
-            return Task.FromResult(ids);
+            int migrated = 0, duplicates = 0, unmapped = 0;
+            foreach (var item in Items.Where(item => item.RoomId.Length == 0 && item.LegacyPropertyId is not null).ToList())
+            {
+                if (!roomByProperty.TryGetValue(item.LegacyPropertyId!, out var roomId))
+                {
+                    unmapped++;
+                    continue;
+                }
+
+                Items.Remove(item);
+                if (Items.Any(other => other.UserId == item.UserId && other.RoomId == roomId))
+                {
+                    duplicates++;
+                    continue;
+                }
+
+                Items.Add(new Favorite { UserId = item.UserId, RoomId = roomId, CreatedAt = item.CreatedAt });
+                migrated++;
+            }
+
+            return Task.FromResult(new MigrationCounts(migrated, duplicates, unmapped));
         }
     }
 
-    private IEnumerable<Favorite> Ordered(string userId) =>
-        Items
-            .Where(item => item.UserId == userId)
-            .OrderByDescending(item => item.CreatedAt)
-            .ThenByDescending(item => item.PropertyId, StringComparer.Ordinal);
+    private static bool Matches(Favorite item, string userId, string roomId, string? legacyPropertyId) =>
+        item.UserId == userId &&
+        ((item.RoomId.Length > 0 && item.RoomId == roomId) || (legacyPropertyId is not null && item.LegacyPropertyId == legacyPropertyId));
 
     private void Guard(CancellationToken cancellationToken)
     {
@@ -196,6 +199,40 @@ public sealed class InMemoryVisitRepository : IVisitRepository
         }
     }
 
+    public Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            int migrated = 0, unmapped = 0;
+            foreach (var visit in Visits.Values.Where(visit => visit.RoomId.Length == 0 && visit.LegacyPropertyId is not null).ToList())
+            {
+                if (!roomByProperty.TryGetValue(visit.LegacyPropertyId!, out var roomId))
+                {
+                    unmapped++;
+                    continue;
+                }
+
+                Visits[visit.Id] = Copy(new Visit
+                {
+                    UserId = visit.UserId,
+                    RoomId = roomId,
+                    ScheduledAt = visit.ScheduledAt,
+                    Status = visit.Status,
+                    Message = visit.Message,
+                    CancelReason = visit.CancelReason,
+                    CreatedAt = visit.CreatedAt,
+                    UpdatedAt = visit.UpdatedAt,
+                    CancelledAt = visit.CancelledAt,
+                    History = visit.History,
+                }, visit.Id);
+                migrated++;
+            }
+
+            return Task.FromResult(new MigrationCounts(migrated, 0, unmapped));
+        }
+    }
+
     public Task SaveIdempotencyAsync(VisitIdempotencyRecord record, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
@@ -212,7 +249,8 @@ public sealed class InMemoryVisitRepository : IVisitRepository
         {
             Id = id,
             UserId = visit.UserId,
-            PropertyId = visit.PropertyId,
+            RoomId = visit.RoomId,
+            LegacyPropertyId = visit.LegacyPropertyId,
             ScheduledAt = visit.ScheduledAt,
             Status = visit.Status,
             Message = visit.Message,

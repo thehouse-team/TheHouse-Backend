@@ -9,19 +9,15 @@ public sealed class UnavailableFavoriteRepository : IFavoriteRepository
 {
     public Task<bool> AddAsync(Favorite favorite, CancellationToken cancellationToken) => Fail<bool>();
 
-    public Task RemoveAsync(string userId, string propertyId, CancellationToken cancellationToken) => Fail<bool>();
+    public Task RemoveAsync(string userId, string roomId, string? legacyPropertyId, CancellationToken cancellationToken) => Fail<bool>();
 
-    public Task RemoveManyAsync(string userId, IReadOnlyCollection<string> propertyIds, CancellationToken cancellationToken) => Fail<bool>();
-
-    public Task<bool> ExistsAsync(string userId, string propertyId, CancellationToken cancellationToken) => Fail<bool>();
+    public Task<bool> ExistsAsync(string userId, string roomId, string? legacyPropertyId, CancellationToken cancellationToken) => Fail<bool>();
 
     public Task<long> CountAsync(string userId, CancellationToken cancellationToken) => Fail<long>();
 
-    public Task<(IReadOnlyList<Favorite> Items, long TotalItems)> ListAsync(string userId, int page, int pageSize, CancellationToken cancellationToken) =>
-        Fail<(IReadOnlyList<Favorite>, long)>();
+    public Task<IReadOnlyList<Favorite>> ListAllAsync(string userId, CancellationToken cancellationToken) => Fail<IReadOnlyList<Favorite>>();
 
-    public Task<IReadOnlyList<string>> ListPropertyIdsAsync(string userId, int limit, CancellationToken cancellationToken) =>
-        Fail<IReadOnlyList<string>>();
+    public Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken) => Fail<MigrationCounts>();
 
     private static Task<T> Fail<T>() => throw new DependencyUnavailableException();
 }
@@ -44,6 +40,8 @@ public sealed class UnavailableVisitRepository : IVisitRepository
         Fail<VisitIdempotencyRecord?>();
 
     public Task SaveIdempotencyAsync(VisitIdempotencyRecord record, CancellationToken cancellationToken) => Fail<bool>();
+
+    public Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken) => Fail<MigrationCounts>();
 
     private static Task<T> Fail<T>() => throw new DependencyUnavailableException();
 }

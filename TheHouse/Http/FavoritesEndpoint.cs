@@ -5,13 +5,13 @@ using TheHouse.Application.UseCases;
 
 namespace TheHouse.Http;
 
-// NV-15: favoritos del usuario autenticado. Agregar y quitar son
+// NV-15 1.2.0: favoritos del usuario autenticado sobre cuartos publicados. Agregar y quitar son
 // idempotentes (204); rate limit por usuario en Redis (fallo cerrado).
 public static class FavoritesEndpoint
 {
     public const string BasePath = ApiConventions.Prefix + "/users/me/favorites";
 
-    public const string ItemPath = BasePath + "/{propertyId}";
+    public const string ItemPath = BasePath + "/{roomId}";
 
     public const string IdsPath = BasePath + "/ids";
 
@@ -76,7 +76,7 @@ public static class FavoritesEndpoint
     }
 
     private static Task<IResult> AddAsync(
-        string propertyId,
+        string roomId,
         HttpContext context,
         FavoriteService favorites,
         IRateLimitStore store,
@@ -84,12 +84,12 @@ public static class FavoritesEndpoint
         UserEndpointSupport.RunAsync(context, async userId =>
         {
             await Enforce(context, store, limits, userId);
-            await favorites.AddAsync(userId, propertyId, context.RequestAborted);
+            await favorites.AddAsync(userId, roomId, context.RequestAborted);
             return Results.NoContent();
         });
 
     private static Task<IResult> RemoveAsync(
-        string propertyId,
+        string roomId,
         HttpContext context,
         FavoriteService favorites,
         IRateLimitStore store,
@@ -97,7 +97,7 @@ public static class FavoritesEndpoint
         UserEndpointSupport.RunAsync(context, async userId =>
         {
             await Enforce(context, store, limits, userId);
-            await favorites.RemoveAsync(userId, propertyId, context.RequestAborted);
+            await favorites.RemoveAsync(userId, roomId, context.RequestAborted);
             return Results.NoContent();
         });
 

@@ -74,6 +74,15 @@ public sealed class InMemoryBuildingRepository : IBuildingRepository
         }
     }
 
+    public Task<IReadOnlyList<Building>> GetManyAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken)
+    {
+        InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult<IReadOnlyList<Building>>(Buildings.Values.Where(building => ids.Contains(building.Id)).ToList());
+        }
+    }
+
     public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByOwnerAsync(string ownerId, int page, int pageSize, CancellationToken cancellationToken)
     {
         InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);
@@ -205,6 +214,15 @@ public sealed class InMemoryRoomRepository : IRoomRepository
         lock (gate)
         {
             return Task.FromResult(Rooms.GetValueOrDefault(id));
+        }
+    }
+
+    public Task<IReadOnlyList<Room>> GetManyAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken)
+    {
+        InMemoryLandlordProfileRepository.Guard(Unavailable, cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult<IReadOnlyList<Room>>(Rooms.Values.Where(room => ids.Contains(room.Id)).ToList());
         }
     }
 
