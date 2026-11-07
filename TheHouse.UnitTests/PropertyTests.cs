@@ -305,6 +305,12 @@ public sealed class PropertyTests
                 properties.FirstOrDefault(
                     property => property.Id == id));
 
+        public Task<IReadOnlyList<Property>> GetByIdsAsync(
+            IReadOnlyCollection<string> ids,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<Property>>(
+                properties.Where(property => ids.Contains(property.Id)).ToList());
+
         public Task UpsertSeedAsync(
             IReadOnlyCollection<Property> seeded,
             CancellationToken cancellationToken)

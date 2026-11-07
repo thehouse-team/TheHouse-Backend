@@ -96,6 +96,21 @@ public sealed class PropertyTestStore : IPropertyRepository
                 property => property.Id == id));
     }
 
+    public Task<IReadOnlyList<Property>> GetByIdsAsync(
+        IReadOnlyCollection<string> ids,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+
+        return Task.FromResult<IReadOnlyList<Property>>(
+            Properties.Where(property => ids.Contains(property.Id)).ToList());
+    }
+
     public Task UpsertSeedAsync(
         IReadOnlyCollection<Property> properties,
         CancellationToken cancellationToken)

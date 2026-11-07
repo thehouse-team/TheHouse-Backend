@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- NV-15/NV-17: dobles en memoria compartidos con las pruebas de integración. -->
+    <Compile Include="..\TheHouse.IntegrationTests\FavoriteVisitTestDoubles.cs" Link="Shared\FavoriteVisitTestDoubles.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TheHouse.Application\TheHouse.Application.csproj" />
     <ProjectReference Include="..\TheHouse.Domain\TheHouse.Domain.csproj" />
   </ItemGroup>

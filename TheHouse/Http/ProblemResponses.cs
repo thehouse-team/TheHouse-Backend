@@ -24,6 +24,7 @@ public static class ProblemResponses
         409 => "Conflicto",
         413 => "Solicitud demasiado grande",
         415 => "Tipo de contenido no admitido",
+        422 => "Solicitud no procesable",
         429 => "Demasiadas solicitudes",
         500 => "Error interno del servidor",
         503 => "Servicio no disponible",
@@ -50,6 +51,16 @@ public static class ProblemResponses
             SessionProblems.NormalizeRefresh(problem, status);
         else if (SessionProblems.IsMe(context))
             SessionProblems.NormalizeMe(problem, status);
+        else if (UserResourceProblems.IsFavorites(context))
+        {
+            UserResourceProblems.NormalizeFavorites(problem, status);
+            UserResourceProblems.ApplyCode(context, problem, status);
+        }
+        else if (UserResourceProblems.IsVisits(context))
+        {
+            UserResourceProblems.NormalizeVisits(problem, status);
+            UserResourceProblems.ApplyCode(context, problem, status);
+        }
         else if (PropertyProblems.IsProperty(context))
             PropertyProblems.Normalize(problem, status);
         else if (UniversityProblems.IsUniversity(context))
