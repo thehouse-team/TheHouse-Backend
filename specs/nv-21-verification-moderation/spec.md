@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-07 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T14; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-21-verification-moderation/`; asignar roles en Production requiere autorización aparte) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T14 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-37 (revisión), RF-38, RF-39, RF-40, RF-42, RF-43, RF-44, RF-79 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-02, RNF-03, RNF-19 |
@@ -228,15 +228,15 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Roles | Colección `staff_roles` consultada en cada solicitud, sin claim en el JWT | PROPUESTO |
-| Asignación de roles | Comando `--grant-role`/`--revoke-role` vía `az containerapp exec`, con `--allow-production-role-change` y autorización explícita; auditado | PROPUESTO |
-| Rutas de acciones | Sub-recursos (`/approve`, `/request-changes`, `/reject`, `/suspend`, `/resolve`) | PROPUESTO |
-| Rechazo | Estado `rejected` terminal; para reintentar se crea otro edificio | PROPUESTO |
-| Suspensión de cuentas | Bloquea login y refresh y revoca refresh tokens; el access token vigente expira en 15 minutos | PROPUESTO |
-| Objetivos de reporte en v1 | `building`, `room` y `user`; mensajes y reseñas con NV-16 y NV-19 | PROPUESTO |
-| Documentos | La revisión de documentos y los enlaces temporales llegan con NV-13 | PROPUESTO |
-| Retención de reportes | 1 año; la limpieza automática llega en una versión posterior | PROPUESTO |
-| Eventos de dominio | Fuera de v1; Moderation llama a los puertos de Listings e Identity | PROPUESTO |
+| Roles | Colección `staff_roles` consultada en cada solicitud, sin claim en el JWT | APROBADO (M-BE-065) |
+| Asignación de roles | Comando `--grant-role`/`--revoke-role` vía `az containerapp exec`, con `--allow-production-role-change` y autorización explícita; auditado | APROBADO (M-BE-065) |
+| Rutas de acciones | Sub-recursos (`/approve`, `/request-changes`, `/reject`, `/suspend`, `/resolve`) | APROBADO (M-BE-065) |
+| Rechazo | Estado `rejected` terminal; para reintentar se crea otro edificio | APROBADO (M-BE-065) |
+| Suspensión de cuentas | Bloquea login y refresh y revoca refresh tokens; el access token vigente expira en 15 minutos | APROBADO (M-BE-065) |
+| Objetivos de reporte en v1 | `building`, `room` y `user`; mensajes y reseñas con NV-16 y NV-19 | APROBADO (M-BE-065) |
+| Documentos | La revisión de documentos y los enlaces temporales llegan con NV-13 | APROBADO (M-BE-065) |
+| Retención de reportes | 1 año; la limpieza automática llega en una versión posterior | APROBADO (M-BE-065) |
+| Eventos de dominio | Fuera de v1; Moderation llama a los puertos de Listings e Identity | APROBADO (M-BE-065) |
 
 ## 14. Costo — COST-001
 
@@ -273,8 +273,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T14 autorizadas** |
 
 ## 18. Aprobación pendiente
 

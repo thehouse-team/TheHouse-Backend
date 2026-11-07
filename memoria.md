@@ -585,3 +585,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** sin arrendadores ni cuartos con dueño no pueden existir la confirmación de visitas, el chat ni la búsqueda real.
 - **Impacto:** los cuartos no serán públicos hasta NV-13, NV-21 y NV-14; la app sigue usando las propiedades de NV-07 mientras tanto.
 
+## M-BE-065 — NV-21 1.1.0 aprobada: verificación, reportes y moderación
+
+- **ID:** M-BE-065
+- **Decisión:** aprobar NV-21 1.1.0 con sus decisiones: roles `reviewer` y `admin` en `staff_roles`, consultados en cada solicitud y asignados solo por `--grant-role`/`--revoke-role` auditado; acciones como sub-recursos; rechazo terminal (`rejected`); suspensión de cuentas que bloquea login y refresh y revoca refresh tokens (el access token vigente expira en 15 minutos); reportes de edificio, cuarto y cuenta; documentos con NV-13; retención de reportes de 1 año; eventos de dominio fuera de v1.
+- **Estado:** APROBADO — Victor, 2026-11-07 («Apruebo y EJECUTA», T01–T14). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-07.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** sin revisión, ningún edificio de NV-12 llega a `verified` ni sus cuartos a `available`; la app necesita reportes y moderación.
+- **Impacto:** asignar roles en Production requiere autorización aparte; el primer uso será resolver el edificio de prueba de NV-12. Login y refresh agregan 403 `account_suspended`.
+
