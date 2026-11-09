@@ -4,15 +4,81 @@
 | --- | --- |
 | ID | NV-17 |
 | Documento | `evidence.md` |
+| Versión | 1.2.0 |
+| Fecha | 2026-11-09 |
+| Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-17 1.2.0, tasks T01–T10 (M-BE-067); la migración `--migrate-to-rooms` en Production requiere autorización aparte |
+| Rama | `feat/nv-15-nv-17-rooms` (commit de implementación `a0de2d4`) → PR pendiente de revisión |
+| Resultado | **🟡 EN CURSO**: T01–T06 completas y verificadas en local; T07–T10 esperan CI, la migración autorizada en Production y la prueba HTTP real en Azure |
+
+No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
+
+## 1. Cambios por capa (1.2.0)
+
+| Capa | Archivo | Cambio |
+| --- | --- | --- |
+| Application | `Abstractions/Persistence/IVisitRepository.cs` | `MigrateLegacyAsync` |
+| Application | `Contracts/Visits/VisitContracts.cs` | `CreateVisitRequest` con `roomId` o (transición) `propertyId`, exactamente uno; `VisitResponse` con `room { id, buildingId, title, city }` y `property` o `null` |
+| Application | `UseCases/VisitService.cs` | Traduce el id al cuarto antes del hash de idempotencia (`{roomId}\n{ticks}\n{message}`); la repetición se resuelve antes de revisar si sigue publicado; conflictos por cuarto con el código `active_visit_for_property` de 1.1.0 |
+| Infrastructure | `Persistence/Mongo/MongoVisitRepository.cs`, `Documents/FavoriteVisitDocuments.cs` | `roomId` y `propertyId` opcionales (`BsonIgnoreIfNull`); migración `$set roomId` / `$unset propertyId`. Los índices de visitas no dependen de `propertyId` y no cambian |
+| Domain | `Entities/Favorite.cs`, `Entities/Visit.cs` | `RoomId` y, solo en datos de 1.1.0 sin migrar, `LegacyPropertyId` |
+| Application | `UseCases/RoomCatalog.cs` (nuevo) | Resuelve un cuarto publicado por id de cuarto o, en transición, por id de propiedad de NV-07 (`Building.DemoSourceId`); carga por lotes |
+| Application | `Abstractions/Persistence/IListingRepositories.cs` | `GetManyAsync` de edificios y cuartos (lectura por lotes) |
+| Application | `UseCases/FavoriteService.cs` | `RoomMigrationService` y `RoomMigrationOptions`: migración idempotente con conteos (migrados, duplicados eliminados, sin mapeo) |
+| Infrastructure | `Persistence/Mongo/MongoListingRepositories.cs` | `GetManyAsync` con `$in` por `_id` |
+| API | `Http/PropertyEndpoint.cs` | `/properties` responde `Deprecation: true` y `Link: </api/v1/rooms/search>; rel="successor-version"` |
+| API | `Configuration/SearchConfiguration.cs`, `Program.cs` | Comando `--migrate-to-rooms`: requiere `RoomMigration__Enabled=true` y, en Production, `--allow-production-migration` (M-BE-043); la bandera de seeds no lo autoriza |
+
+## 2. Comandos y resultados (local, 2026-11-07)
+
+| Comando | Resultado |
+| --- | --- |
+| `dotnet build TheHouse.slnx -warnaserror` | 0 advertencias, 0 errores |
+| `dotnet test TheHouse.slnx` (dos corridas seguidas) | 738/738 en ambas: unitarias 251, seguridad 61, integración 426 |
+
+## 3. Trazabilidad requisito → prueba (1.2.0)
+
+| Requisito | Pruebas |
+| --- | --- |
+| R01 | `Create_returns_201_with_contract_shape_in_utc`, `Create_rejects_bad_input_with_400` (ambos ids o ninguno), `Create_rejects_unsupported_media_type_and_missing_room`, `Unpublished_rooms_reject_new_visits_but_keep_existing_ones_readable`, `Visit_create_validates_input_before_side_effects` |
+| R02 | `Create_returns_201_with_contract_shape_in_utc`, `Unmigrated_visits_are_read_with_their_room_and_migrated_by_the_command`, `Visits_of_unpublished_rooms_can_still_be_read_and_cancelled_but_not_by_others` |
+| R03 | `Schedule_rules_return_422_with_code`, `Same_key_and_body_replays_and_different_body_conflicts`, `Conflicts_return_409_with_specific_codes`, `Concurrent_requests_with_different_keys_create_only_one_visit`, `Cancel_is_idempotent_and_list_filters_by_status`, `Visit_create_enforces_conflicts_per_room_and_active_limit`, `Visit_cancel_after_the_scheduled_time_is_a_conflict` |
+| R04 | `Legacy_property_id_creates_the_visit_on_its_room_and_replays_by_room`, `Visit_create_replays_same_key_with_room_or_legacy_id` |
+| R05 | `Unmigrated_visits_are_read_with_their_room_and_migrated_by_the_command`, `Migration_converts_legacy_favorites_and_visits_and_removes_duplicates`, `Migration_requires_configuration_and_explicit_production_flag` (seguridad) |
+| R06 | `Other_users_visit_is_404_for_get_and_cancel`, `Daily_create_limit_returns_429_with_retry_after`, `Fails_closed_when_lock_or_storage_are_down`, `Requires_a_valid_bearer_token`, `Message_is_not_written_to_logs`, `Visit_create_fails_when_the_user_lock_is_held` |
+| R07 | Pendiente: migración autorizada y prueba HTTP real en Azure |
+| R08 | Pendiente: TRX y cobertura del CI del PR |
+
+## 4. Seguridad y coherencia (1.2.0)
+
+- El usuario sale del `sub`; `userId` o `status` en el cuerpo → 400 (asignación masiva). Las visitas de otro usuario responden 404.
+- Un cuarto no publicado no admite visitas nuevas (404); las visitas existentes se pueden leer y cancelar.
+- El mensaje no se escribe en logs; la respuesta no incluye dirección ni dueño.
+- Lock de Redis o MongoDB caídos → 503.
+- **Advertencia W1:** el hash de idempotencia usa ahora el `roomId`. Durante las 24 h de vida de una llave, repetir después de la migración una petición de 1.1.0 con la misma llave responde 409 `idempotency_key_reused` en lugar de la visita original. El riesgo es bajo (ventana de 24 h, solo reintentos en ese momento) y se documenta para Mobile.
+
+## 5. Pendiente para cerrar 1.2.0
+
+| Paso | Responsable | Estado |
+| --- | --- | --- |
+| CI del PR en verde y merge | CI / Isai | Pendiente |
+| Aprobación del CD a Production | Victor | Pendiente |
+| Migración `--migrate-to-rooms --allow-production-migration` con `RoomMigration__Enabled=true` | Victor (autorización explícita) | Pendiente |
+| Prueba HTTP real en Azure (`.azure-check/nv15_17_v12_azure_check.py`) | Victor | Pendiente |
+| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+
+## Historial — evidencia de 1.1.0
+
+| Campo | Valor |
+| --- | --- |
+| ID | NV-17 |
+| Documento | `evidence.md` |
 | Versión | 1.1.0 |
 | Fecha | 2026-11-07 |
 | Autorización | «te apluebo o ejecuta para hacer el desarrollo de lo que nos pidió» — Victor Manuel Jose Jose, 2026-11-07: NV-17 1.1.0, tasks T01–T12 (M-BE-060) |
 | Rama | `feat/nv-15-nv-17` → PR #15, mezclado en `main` (`32f9ea0`) |
 | Resultado | **✅ PASS WITH WARNINGS**: 12/12 tasks completas; desplegada en Azure y verificada con prueba HTTP real (26/26). Ajustes A1–A4 aprobados (M-BE-061). Advertencia: adaptadores Mongo/Redis sin cobertura automatizada (verificados en Azure) |
 
-No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. No se registran mensajes de visitas, tokens ni ids de usuario en logs.
-
-## 1. Cambios por capa
+### 1. Cambios por capa
 
 | Capa | Archivo | Cambio |
 | --- | --- | --- |
@@ -31,7 +97,7 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | API | `Http/ProblemResponses.cs` | Título 422 «Solicitud no procesable»; normalización de favoritos y visitas |
 | API | `Configuration/FavoriteVisitConfiguration.cs`, `Program.cs` | Registro y mapeo |
 
-## 2. Comandos y resultados (local, 2026-11-07)
+### 2. Comandos y resultados (local, 2026-11-07)
 
 | Comando | Resultado |
 | --- | --- |
@@ -40,7 +106,7 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 
 Pruebas nuevas de NV-17: `TheHouse.UnitTests/FavoriteVisitTests.cs` (política de horario con límites exactos, `Visit.Cancel`, `VisitService`) y `TheHouse.IntegrationTests/VisitsHttpTests.cs` (HTTP de punta a punta con dos usuarios). Los dobles en memoria (`FavoriteVisitTestDoubles.cs`) se comparten entre ambos proyectos.
 
-## 3. Trazabilidad requisito → prueba
+### 3. Trazabilidad requisito → prueba
 
 | Requisito | Pruebas |
 | --- | --- |
@@ -53,7 +119,7 @@ Pruebas nuevas de NV-17: `TheHouse.UnitTests/FavoriteVisitTests.cs` (política d
 | R07 | `Conflicts_return_409_with_specific_codes`, `Visit_create_enforces_conflicts_and_active_limit`, `Concurrent_requests_with_different_keys_create_only_one_visit`, `Visit_create_fails_when_the_user_lock_is_held` |
 | R08 | `Other_users_visit_is_404_for_get_and_cancel`, `Create_rejects_bad_input_with_400` (`userId`/`status` en el cuerpo → 400), `Daily_create_limit_returns_429_with_retry_after`, `Fails_closed_when_lock_or_storage_are_down`, `Requires_a_valid_bearer_token`, `Message_is_not_written_to_logs` |
 
-## 4. Ajustes de implementación (aprobados: «Apruebo A1–A4» — Victor Manuel Jose Jose, 2026-11-07 (M-BE-061))
+### 4. Ajustes de implementación (aprobados: «Apruebo A1–A4» — Victor Manuel Jose Jose, 2026-11-07 (M-BE-061))
 
 | # | Spec dice | Implementación | Motivo |
 | --- | --- | --- | --- |
@@ -62,7 +128,7 @@ Pruebas nuevas de NV-17: `TheHouse.UnitTests/FavoriteVisitTests.cs` (política d
 | A3 | §11: `type`, `title`, `status`, `detail`, `instance`, `traceId` | Se agrega `code` en 409 y 422 (`schedule_overlap`, `too_soon`, …) | Mobile pidió errores consistentes; con `code` distingue el motivo sin analizar el texto. Es aditivo. |
 | A4 | T11: evidencia en `TheHouse.SecurityTests` | Casos de seguridad en `TheHouse.IntegrationTests` | Necesitan el host HTTP completo; mismo criterio que `PropertySecurityTests` y `UniversitySecurityTests`. |
 
-## 5. Seguridad y coherencia
+### 5. Seguridad y coherencia
 
 - El usuario sale del `sub` validado por `TokenRevocationMiddleware`; ninguna ruta, query ni cuerpo acepta `userId`.
 - Una visita ajena responde 404, igual que una inexistente.
@@ -73,7 +139,7 @@ Pruebas nuevas de NV-17: `TheHouse.UnitTests/FavoriteVisitTests.cs` (política d
 - Costo: sin servicios nuevos. Usa dos colecciones en Atlas M0 y llaves con TTL en Upstash.
 - Coherencia: constitution §6 (módulo dueño de sus colecciones), §14 (sin estado local; lock distribuido), AGENTS (TypeScript no aplica; estilo .NET existente).
 
-## 6. Despliegue y CI
+### 6. Despliegue y CI
 
 | Paso | Resultado |
 | --- | --- |
@@ -84,7 +150,7 @@ Pruebas nuevas de NV-17: `TheHouse.UnitTests/FavoriteVisitTests.cs` (política d
 | CD (run 42354881476) | resolve, publish, verify-ephemeral (Mongo 7.0.45, Redis 7.4.12, smoke, ZAP), deploy aprobado por Victor, DAST: todo en verde |
 | Azure | revisión `ca-thehouse-u2--c32f9ea0-13-1`, imagen `sha256:27b71e88…` |
 
-## 7. Prueba HTTP real en Azure
+### 7. Prueba HTTP real en Azure
 
 Prueba HTTP real contra `https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io` (2026-11-07), con dos cuentas nuevas de dominio reservado (`nv15-17-azure-a-3a9876f4@example.com` y `nv15-17-azure-b-cabd2770@example.com`). El script (`nv15_17_azure_check.py`, fuera del repo) solo imprime códigos y nombres de campos; nunca tokens ni contraseñas. **26/26 PASS**: favoritos 10, visitas 14, compatibilidad 2 (`/users/me` y detalle de propiedad sin cambios).
 
@@ -106,7 +172,7 @@ Quedan en producción cuatro cuentas de prueba con prefijo `nv15-17-azure-` y do
 | V12–V13 cancelar y repetir | 200, `cancelled`, `cancelledAt` presente |
 | V14 sin token | 401 |
 
-## 8. Contrato entregable a Mobile
+### 8. Contrato entregable a Mobile
 
 El contrato de `spec.md` §6.1 queda vigente sin cambios de forma, con estos dos campos completos:
 

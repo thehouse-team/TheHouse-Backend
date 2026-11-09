@@ -8,12 +8,12 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`; la migración `--migrate-to-rooms` en Production requiere autorización aparte) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0, T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas; T07–T10 esperan CI, migración y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Plan | `plan.md` 1.2.0-borrador |
 | Tasks totales | 10 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
@@ -25,18 +25,18 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Visitas a cuartos publicados** — Requisito: NV-17-R01 · Fase: F1 · Aceptación: `POST /visits` con `roomId` de un cuarto publicado crea la visita (201); cuarto no publicado o inexistente 404; ambos ids o ninguno 400. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Respuesta con cuarto** — Requisito: NV-17-R02 · Fase: F1 · Aceptación: Las respuestas incluyen `room { id, buildingId, title, city }` y, en transición, `property` o `null`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Reglas por cuarto** — Requisito: NV-17-R03 · Fase: F1 · Aceptación: Horario, idempotencia y conflictos de 1.1.0 aplicados por cuarto, con sus pruebas. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Visitas a cuartos publicados** — Requisito: NV-17-R01 · Fase: F1 · Aceptación: `POST /visits` con `roomId` de un cuarto publicado crea la visita (201); cuarto no publicado o inexistente 404; ambos ids o ninguno 400. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Respuesta con cuarto** — Requisito: NV-17-R02 · Fase: F1 · Aceptación: Las respuestas incluyen `room { id, buildingId, title, city }` y, en transición, `property` o `null`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Reglas por cuarto** — Requisito: NV-17-R03 · Fase: F1 · Aceptación: Horario, idempotencia y conflictos de 1.1.0 aplicados por cuarto, con sus pruebas. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T04 · Transición desde propiedades** — Requisito: NV-17-R04 · Fase: F2 · Aceptación: `propertyId` se traduce a su cuarto y produce la misma visita que con `roomId`; misma llave con el id de propiedad o de cuarto es el mismo cuerpo. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T05 · Migración de visitas** — Requisito: NV-17-R05 · Fase: F2 · Aceptación: `--migrate-to-rooms` convierte las visitas existentes, reporta las no mapeadas y es idempotente. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T04 · Transición desde propiedades** — Requisito: NV-17-R04 · Fase: F2 · Aceptación: `propertyId` se traduce a su cuarto y produce la misma visita que con `roomId`; misma llave con el id de propiedad o de cuarto es el mismo cuerpo. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T05 · Migración de visitas** — Requisito: NV-17-R05 · Fase: F2 · Aceptación: `--migrate-to-rooms` convierte las visitas existentes, reporta las no mapeadas y es idempotente. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T06 · Autorización y límites** — Requisito: NV-17-R06 · Fase: F3 · Aceptación: Pruebas con dos usuarios; rate limits 429; Redis caído 503; `no-store`. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T06 · Autorización y límites** — Requisito: NV-17-R06 · Fase: F3 · Aceptación: Pruebas con dos usuarios; rate limits 429; Redis caído 503; `no-store`. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
 
 ## F4 — Pruebas y evidencia
 
@@ -49,12 +49,12 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F3 | COMPLETA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R08 | F4 | ABIERTA |
@@ -79,11 +79,11 @@
 | --- | --- |
 | Requisitos | 8 |
 | Tasks | 10 |
-| Tasks abiertas | 10 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 6 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0, T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas; T07–T10 esperan CI, migración y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

@@ -8,12 +8,12 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-15-favorites-compare/`; la migración `--migrate-to-rooms` en Production requiere autorización aparte) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0, T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas; T07–T10 esperan CI, migración y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Plan | `plan.md` 1.2.0-borrador |
 | Tasks totales | 10 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
@@ -25,18 +25,18 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Favoritos de cuartos publicados** — Requisito: NV-15-R01 · Fase: F1 · Aceptación: `PUT` con un cuarto publicado responde 204 una sola vez; cuarto no publicado o inexistente 404; id inválido 400; límite 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Quitar favorito** — Requisito: NV-15-R02 · Fase: F1 · Aceptación: `DELETE` responde 204 exista o no; después el cuarto no aparece en el listado ni en `ids`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Listado e ids con datos de cuartos** — Requisito: NV-15-R03 · Fase: F1 · Aceptación: Listado con los campos del §6 y `ids` con `roomIds`; cuartos no publicados omitidos sin borrarse. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Favoritos de cuartos publicados** — Requisito: NV-15-R01 · Fase: F1 · Aceptación: `PUT` con un cuarto publicado responde 204 una sola vez; cuarto no publicado o inexistente 404; id inválido 400; límite 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Quitar favorito** — Requisito: NV-15-R02 · Fase: F1 · Aceptación: `DELETE` responde 204 exista o no; después el cuarto no aparece en el listado ni en `ids`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Listado e ids con datos de cuartos** — Requisito: NV-15-R03 · Fase: F1 · Aceptación: Listado con los campos del §6 y `ids` con `roomIds`; cuartos no publicados omitidos sin borrarse. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T04 · Transición desde propiedades** — Requisito: NV-15-R04 · Fase: F2 · Aceptación: Un id de propiedad se traduce a su cuarto en `PUT`/`DELETE`; las respuestas incluyen `propertyId`/`propertyIds`; `/properties` agrega `Deprecation` y `Link`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T05 · Migración de datos** — Requisito: NV-15-R05 · Fase: F2 · Aceptación: `--migrate-to-rooms` convierte favoritos existentes, elimina duplicados, reporta los no mapeados, cambia los índices y es idempotente. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T04 · Transición desde propiedades** — Requisito: NV-15-R04 · Fase: F2 · Aceptación: Un id de propiedad se traduce a su cuarto en `PUT`/`DELETE`; las respuestas incluyen `propertyId`/`propertyIds`; `/properties` agrega `Deprecation` y `Link`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T05 · Migración de datos** — Requisito: NV-15-R05 · Fase: F2 · Aceptación: `--migrate-to-rooms` convierte favoritos existentes, elimina duplicados, reporta los no mapeados, cambia los índices y es idempotente. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T06 · Autorización y límites** — Requisito: NV-15-R06 · Fase: F3 · Aceptación: Pruebas con dos usuarios; rate limit 429; Redis caído 503; `no-store`. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T06 · Autorización y límites** — Requisito: NV-15-R06 · Fase: F3 · Aceptación: Pruebas con dos usuarios; rate limit 429; Redis caído 503; `no-store`. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
 
 ## F4 — Pruebas y evidencia
 
@@ -49,12 +49,12 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F3 | COMPLETA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R08 | F4 | ABIERTA |
@@ -79,11 +79,11 @@
 | --- | --- |
 | Requisitos | 8 |
 | Tasks | 10 |
-| Tasks abiertas | 10 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 6 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0, T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas; T07–T10 esperan CI, migración y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
