@@ -103,6 +103,14 @@ public sealed class MongoBuildingRepository(IMongoDatabase database) : IBuilding
             return document is null ? null : Map(document);
         });
 
+    public Task<IReadOnlyList<Building>> GetManyAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            var objectIds = ids.Select(id => ObjectId.TryParse(id, out var parsed) ? parsed : ObjectId.Empty).Where(id => id != ObjectId.Empty).ToArray();
+            var documents = await Collection.Find(Builders<BuildingDocument>.Filter.In(building => building.Id, objectIds)).ToListAsync(cancellationToken);
+            return (IReadOnlyList<Building>)documents.Select(Map).ToArray();
+        });
+
     public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByOwnerAsync(string ownerId, int page, int pageSize, CancellationToken cancellationToken) =>
         MongoCalls.Run(async () =>
         {
@@ -319,6 +327,14 @@ public sealed class MongoRoomRepository(IMongoDatabase database) : IRoomReposito
             return document is null ? null : Map(document);
         });
 
+    public Task<IReadOnlyList<Room>> GetManyAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            var objectIds = ids.Select(id => ObjectId.TryParse(id, out var parsed) ? parsed : ObjectId.Empty).Where(id => id != ObjectId.Empty).ToArray();
+            var documents = await Collection.Find(Builders<RoomDocument>.Filter.In(room => room.Id, objectIds)).ToListAsync(cancellationToken);
+            return (IReadOnlyList<Room>)documents.Select(Map).ToArray();
+        });
+
     public Task<(IReadOnlyList<Room> Items, long TotalItems)> ListByBuildingAsync(string buildingId, int page, int pageSize, CancellationToken cancellationToken) =>
         MongoCalls.Run(async () =>
         {
@@ -518,6 +534,8 @@ public sealed class UnavailableBuildingRepository : IBuildingRepository
 
     public Task<Building?> GetAsync(string id, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
+    public Task<IReadOnlyList<Building>> GetManyAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
     public Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByOwnerAsync(string ownerId, int page, int pageSize, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<IReadOnlyList<Building>> ListAllByOwnerAsync(string ownerId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
@@ -540,6 +558,8 @@ public sealed class UnavailableRoomRepository : IRoomRepository
     public Task<IReadOnlyList<Room>> CreateManyAsync(IReadOnlyList<Room> rooms, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<Room?> GetAsync(string id, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task<IReadOnlyList<Room>> GetManyAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<(IReadOnlyList<Room> Items, long TotalItems)> ListByBuildingAsync(string buildingId, int page, int pageSize, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 

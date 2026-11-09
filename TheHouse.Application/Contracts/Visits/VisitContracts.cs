@@ -7,6 +7,9 @@ namespace TheHouse.Application.Contracts.Visits;
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed class CreateVisitRequest
 {
+    public string? RoomId { get; init; }
+
+    // Transición (NV-17 1.2.0): id de propiedad de NV-07; exactamente uno de los dos.
     public string? PropertyId { get; init; }
 
     public string? ScheduledAt { get; init; }
@@ -20,11 +23,15 @@ public sealed class CancelVisitRequest
     public string? Reason { get; init; }
 }
 
+public sealed record VisitRoomSummary(string Id, string BuildingId, string Title, string City);
+
+// Transición (NV-17 1.2.0): propiedad de NV-07 de la que salió el cuarto.
 public sealed record VisitPropertySummary(string Id, string Title, string City);
 
 public sealed record VisitResponse(
     string Id,
-    VisitPropertySummary Property,
+    VisitRoomSummary Room,
+    VisitPropertySummary? Property,
     DateTimeOffset ScheduledAt,
     string TimeZone,
     string Status,

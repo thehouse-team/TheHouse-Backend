@@ -1,17 +1,22 @@
+using TheHouse.Application.Contracts.Search;
+
 namespace TheHouse.Application.Contracts.Favorites;
 
-// NV-15 §6.1: elemento del listado de favoritos (datos públicos de NV-07).
+// NV-15 1.2.0 §6.1: favorito de un cuarto publicado (datos públicos de NV-14).
+// `PropertyId` es de transición: la propiedad de NV-07 de origen o null.
 public sealed record FavoriteItemResponse(
-    string PropertyId,
+    string RoomId,
+    string BuildingId,
     string Title,
-    decimal Price,
+    int Price,
     string Currency,
+    string? RoomType,
+    string? Bathroom,
     string City,
-    string? UniversityId,
-    int Bedrooms,
-    int Bathrooms,
-    double AreaM2,
-    DateTimeOffset FavoritedAt);
+    ApproxLocation ApproxLocation,
+    bool Demo,
+    DateTimeOffset FavoritedAt,
+    string? PropertyId);
 
 public sealed record FavoriteListResponse(
     IReadOnlyList<FavoriteItemResponse> Items,
@@ -20,4 +25,4 @@ public sealed record FavoriteListResponse(
     long TotalItems,
     int TotalPages);
 
-public sealed record FavoriteIdsResponse(IReadOnlyList<string> PropertyIds);
+public sealed record FavoriteIdsResponse(IReadOnlyList<string> RoomIds, IReadOnlyList<string> PropertyIds);

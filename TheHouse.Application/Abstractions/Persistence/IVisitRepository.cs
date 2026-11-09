@@ -30,6 +30,9 @@ public interface IVisitRepository
         string key,
         CancellationToken cancellationToken);
 
+    // Migración: asigna `roomId` a las visitas que solo tienen `propertyId`.
+    Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken);
+
     Task SaveIdempotencyAsync(
         VisitIdempotencyRecord record,
         CancellationToken cancellationToken);

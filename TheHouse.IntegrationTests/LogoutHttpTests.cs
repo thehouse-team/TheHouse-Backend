@@ -344,7 +344,7 @@ public sealed class LogoutHttpTests
                     or "/api/v1/universities/{id}"
                     or "/api/v1/users/me/favorites"
                     or "/api/v1/users/me/favorites/ids"
-                    or "/api/v1/users/me/favorites/{propertyId}"
+                    or "/api/v1/users/me/favorites/{roomId}"
                     or "/api/v1/users/me/visits"
                     or "/api/v1/visits"
                     or "/api/v1/visits/{id}"

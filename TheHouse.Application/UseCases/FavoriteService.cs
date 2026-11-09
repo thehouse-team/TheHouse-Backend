@@ -6,26 +6,26 @@ using TheHouse.Domain.Exceptions;
 
 namespace TheHouse.Application.UseCases;
 
-// NV-15: favoritos del usuario autenticado sobre las propiedades de NV-07.
-// El usuario siempre viene del token (`sub`); nunca del cliente.
+// NV-15 1.2.0: favoritos del usuario autenticado sobre cuartos publicados.
+// Transición: los ids de las 12 propiedades de NV-07 se traducen a su
+// cuarto. Los favoritos de cuartos no publicados se ocultan sin borrarse.
 public sealed class FavoriteService(
     IFavoriteRepository favorites,
-    IPropertyRepository properties,
+    RoomCatalog catalog,
     TimeProvider timeProvider)
 {
     public const int MaximumFavorites = 200;
 
-    public async Task AddAsync(string userId, string? propertyId, CancellationToken cancellationToken)
+    public async Task AddAsync(string userId, string? id, CancellationToken cancellationToken)
     {
-        var id = RequirePropertyId(propertyId);
-
-        if (await properties.GetByIdAsync(id, cancellationToken) is null)
+        var room = await catalog.FindAsync(RequireId(id), cancellationToken);
+        if (room is null || !room.IsPublished)
         {
-            throw new NotFoundException("property");
+            throw new NotFoundException("room");
         }
 
-        // Idempotente: si ya es favorita no se cuenta contra el límite.
-        if (await favorites.ExistsAsync(userId, id, cancellationToken))
+        // Idempotente: si ya es favorito no se cuenta contra el límite.
+        if (await favorites.ExistsAsync(userId, room.Room.Id, room.LegacyPropertyId, cancellationToken))
         {
             return;
         }
@@ -36,99 +36,104 @@ public sealed class FavoriteService(
         }
 
         await favorites.AddAsync(
-            new Favorite { UserId = userId, PropertyId = id, CreatedAt = timeProvider.GetUtcNow() },
+            new Favorite { UserId = userId, RoomId = room.Room.Id, CreatedAt = timeProvider.GetUtcNow() },
             cancellationToken);
     }
 
-    public Task RemoveAsync(string userId, string? propertyId, CancellationToken cancellationToken) =>
-        favorites.RemoveAsync(userId, RequirePropertyId(propertyId), cancellationToken);
+    public async Task RemoveAsync(string userId, string? id, CancellationToken cancellationToken)
+    {
+        var requested = RequireId(id);
+        var room = await catalog.FindAsync(requested, cancellationToken);
+        await favorites.RemoveAsync(
+            userId,
+            room?.Room.Id ?? requested,
+            room?.LegacyPropertyId ?? requested,
+            cancellationToken);
+    }
 
-    public async Task<FavoriteListResponse> ListAsync(
-        string userId,
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<FavoriteListResponse> ListAsync(string userId, int page, int pageSize, CancellationToken cancellationToken)
     {
         PropertyQueryValidation.EnsureValidPagination(page, pageSize);
+        var visible = await VisibleAsync(userId, cancellationToken);
 
-        var (items, total) = await favorites.ListAsync(userId, page, pageSize, cancellationToken);
-        var found = await LoadAsync(items.Select(item => item.PropertyId).ToArray(), cancellationToken);
-        var missing = await CleanOrphansAsync(userId, items.Select(item => item.PropertyId), found, cancellationToken);
-
-        var result = items
-            .Where(item => found.ContainsKey(item.PropertyId))
-            .Select(item =>
-            {
-                var property = found[item.PropertyId];
-                return new FavoriteItemResponse(
-                    property.Id,
-                    property.Title,
-                    property.Price,
-                    property.Currency,
-                    property.City,
-                    property.UniversityId,
-                    property.Bedrooms,
-                    property.Bathrooms,
-                    property.AreaM2,
-                    item.CreatedAt);
-            })
+        var items = visible
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(item => new FavoriteItemResponse(
+                item.Room.Room.Id,
+                item.Room.Building.Id,
+                item.Room.Title,
+                item.Room.Room.Price ?? 0,
+                "MXN",
+                item.Room.Room.Type,
+                item.Room.Room.Bathroom,
+                item.Room.Building.Address.City,
+                item.Room.ApproxLocation,
+                item.Room.Building.Demo,
+                item.Favorite.CreatedAt,
+                item.Room.LegacyPropertyId))
             .ToArray();
 
-        var totalItems = Math.Max(0, total - missing);
-        return new FavoriteListResponse(
-            result,
-            page,
-            pageSize,
-            totalItems,
-            PropertyQueryValidation.CalculateTotalPages(totalItems, pageSize));
+        return new FavoriteListResponse(items, page, pageSize, visible.Count, PropertyQueryValidation.CalculateTotalPages(visible.Count, pageSize));
     }
 
     public async Task<FavoriteIdsResponse> ListIdsAsync(string userId, CancellationToken cancellationToken)
     {
-        var ids = await favorites.ListPropertyIdsAsync(userId, MaximumFavorites, cancellationToken);
-        var found = await LoadAsync(ids, cancellationToken);
-        await CleanOrphansAsync(userId, ids, found, cancellationToken);
-        return new FavoriteIdsResponse(ids.Where(found.ContainsKey).ToArray());
+        var visible = await VisibleAsync(userId, cancellationToken);
+        return new FavoriteIdsResponse(
+            visible.Select(item => item.Room.Room.Id).ToArray(),
+            visible.Select(item => item.Room.LegacyPropertyId).OfType<string>().ToArray());
     }
 
-    private async Task<Dictionary<string, Property>> LoadAsync(
-        IReadOnlyCollection<string> ids,
-        CancellationToken cancellationToken)
+    // Favoritos cuyo cuarto está publicado, más recientes primero. Los de
+    // 1.1.0 aún sin migrar se traducen con el mapeo de demostración.
+    private async Task<List<(Favorite Favorite, CatalogRoom Room)>> VisibleAsync(string userId, CancellationToken cancellationToken)
     {
-        if (ids.Count == 0)
+        var all = await favorites.ListAllAsync(userId, cancellationToken);
+        var legacy = all.Any(favorite => favorite.RoomId.Length == 0)
+            ? await catalog.LegacyMapAsync(cancellationToken)
+            : new Dictionary<string, string>();
+
+        var roomIds = all
+            .Select(favorite => favorite.RoomId.Length > 0 ? favorite.RoomId : legacy.GetValueOrDefault(favorite.LegacyPropertyId ?? string.Empty) ?? string.Empty)
+            .ToArray();
+        var rooms = await catalog.LoadAsync(roomIds, cancellationToken);
+
+        var visible = new List<(Favorite, CatalogRoom)>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        for (var index = 0; index < all.Count; index++)
         {
-            return new Dictionary<string, Property>(StringComparer.Ordinal);
+            if (rooms.TryGetValue(roomIds[index], out var room) && room.IsPublished && seen.Add(room.Room.Id))
+            {
+                visible.Add((all[index], room));
+            }
         }
 
-        var loaded = await properties.GetByIdsAsync(ids, cancellationToken);
-        return loaded.ToDictionary(property => property.Id, StringComparer.Ordinal);
+        return visible;
     }
 
-    // Favoritos de propiedades que ya no existen: se omiten y se limpian.
-    private async Task<int> CleanOrphansAsync(
-        string userId,
-        IEnumerable<string> ids,
-        IReadOnlyDictionary<string, Property> found,
-        CancellationToken cancellationToken)
+    private static string RequireId(string? id) =>
+        PropertyQueryValidation.IsObjectId(id)
+            ? id!.ToLowerInvariant()
+            : throw new RequestValidationException("roomId", "roomId must be a 24-character hexadecimal ObjectId.");
+}
+
+// NV-15/NV-17 1.2.0: migración autorizada de favoritos y visitas a cuartos.
+public sealed class RoomMigrationService(RoomCatalog catalog, IFavoriteRepository favorites, IVisitRepository visits)
+{
+    public async Task<(MigrationCounts Favorites, MigrationCounts Visits)> MigrateAsync(CancellationToken cancellationToken)
     {
-        var orphans = ids.Where(id => !found.ContainsKey(id)).ToArray();
-        if (orphans.Length > 0)
+        var map = await catalog.LegacyMapAsync(cancellationToken);
+        if (map.Count == 0)
         {
-            await favorites.RemoveManyAsync(userId, orphans, cancellationToken);
+            throw new InvalidOperationException("Room migration requires the demo room seed (--seed-demo-rooms) first.");
         }
 
-        return orphans.Length;
+        return (await favorites.MigrateLegacyAsync(map, cancellationToken), await visits.MigrateLegacyAsync(map, cancellationToken));
     }
+}
 
-    private static string RequirePropertyId(string? propertyId)
-    {
-        if (!PropertyQueryValidation.IsObjectId(propertyId))
-        {
-            throw new RequestValidationException(
-                "propertyId",
-                "propertyId must be a 24-character hexadecimal ObjectId.");
-        }
-
-        return propertyId!.ToLowerInvariant();
-    }
+public sealed class RoomMigrationOptions
+{
+    public bool Enabled { get; init; }
 }

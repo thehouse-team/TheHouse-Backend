@@ -3,7 +3,8 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace TheHouse.Infrastructure.Persistence.Mongo.Documents;
 
-// NV-15: documento de `favorites`.
+// NV-15 1.2.0: documento de `favorites`. `propertyId` solo existe en los
+// favoritos de 1.1.0 aún no migrados.
 public sealed class FavoriteDocument
 {
     [BsonId]
@@ -12,8 +13,13 @@ public sealed class FavoriteDocument
     [BsonElement("userId")]
     public string UserId { get; set; } = string.Empty;
 
+    [BsonElement("roomId")]
+    [BsonIgnoreIfNull]
+    public string? RoomId { get; set; }
+
     [BsonElement("propertyId")]
-    public string PropertyId { get; set; } = string.Empty;
+    [BsonIgnoreIfNull]
+    public string? PropertyId { get; set; }
 
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; }
@@ -28,8 +34,14 @@ public sealed class VisitDocument
     [BsonElement("userId")]
     public string UserId { get; set; } = string.Empty;
 
+    // NV-17 1.2.0: `propertyId` solo en visitas de 1.1.0 aún no migradas.
+    [BsonElement("roomId")]
+    [BsonIgnoreIfNull]
+    public string? RoomId { get; set; }
+
     [BsonElement("propertyId")]
-    public string PropertyId { get; set; } = string.Empty;
+    [BsonIgnoreIfNull]
+    public string? PropertyId { get; set; }
 
     [BsonElement("scheduledAt")]
     public DateTime ScheduledAt { get; set; }

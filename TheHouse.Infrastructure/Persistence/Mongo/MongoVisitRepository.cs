@@ -92,6 +92,36 @@ public sealed class MongoVisitRepository(IMongoDatabase database) : IVisitReposi
                 : new VisitIdempotencyRecord(document.UserId, document.Key, document.RequestHash, document.VisitId, MongoDates.FromUtc(document.CreatedAt));
         });
 
+    public Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken) =>
+        Run(async () =>
+        {
+            var legacy = await Visits
+                .Find(Builders<VisitDocument>.Filter.And(
+                    Builders<VisitDocument>.Filter.Exists(visit => visit.PropertyId),
+                    Builders<VisitDocument>.Filter.Or(
+                        Builders<VisitDocument>.Filter.Exists(visit => visit.RoomId, false),
+                        Builders<VisitDocument>.Filter.Eq(visit => visit.RoomId, null))))
+                .ToListAsync(cancellationToken);
+
+            int migrated = 0, unmapped = 0;
+            foreach (var document in legacy)
+            {
+                if (!roomByProperty.TryGetValue(document.PropertyId!, out var roomId))
+                {
+                    unmapped++;
+                    continue;
+                }
+
+                await Visits.UpdateOneAsync(
+                    visit => visit.Id == document.Id,
+                    Builders<VisitDocument>.Update.Set(visit => visit.RoomId, roomId).Unset(visit => visit.PropertyId),
+                    cancellationToken: cancellationToken);
+                migrated++;
+            }
+
+            return new MigrationCounts(migrated, 0, unmapped);
+        });
+
     public Task SaveIdempotencyAsync(VisitIdempotencyRecord record, CancellationToken cancellationToken) =>
         Run(() => Keys.InsertOneAsync(
             new VisitIdempotencyDocument
@@ -157,7 +187,8 @@ public sealed class MongoVisitRepository(IMongoDatabase database) : IVisitReposi
         {
             Id = id,
             UserId = visit.UserId,
-            PropertyId = visit.PropertyId,
+            RoomId = visit.RoomId.Length > 0 ? visit.RoomId : null,
+            PropertyId = visit.LegacyPropertyId,
             ScheduledAt = MongoDates.ToUtc(visit.ScheduledAt),
             Status = visit.Status.ToString(),
             Message = visit.Message,
@@ -180,7 +211,8 @@ public sealed class MongoVisitRepository(IMongoDatabase database) : IVisitReposi
         {
             Id = document.Id.ToString(),
             UserId = document.UserId,
-            PropertyId = document.PropertyId,
+            RoomId = document.RoomId ?? string.Empty,
+            LegacyPropertyId = document.PropertyId,
             ScheduledAt = MongoDates.FromUtc(document.ScheduledAt),
             Status = Enum.Parse<VisitStatus>(document.Status),
             Message = document.Message,

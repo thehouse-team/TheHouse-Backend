@@ -19,6 +19,9 @@ public interface IBuildingRepository
 
     Task<Building?> GetAsync(string id, CancellationToken cancellationToken);
 
+    // NV-15/NV-17 1.2.0: lectura por lotes.
+    Task<IReadOnlyList<Building>> GetManyAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken);
+
     Task<(IReadOnlyList<Building> Items, long TotalItems)> ListByOwnerAsync(string ownerId, int page, int pageSize, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<Building>> ListAllByOwnerAsync(string ownerId, CancellationToken cancellationToken);
@@ -46,6 +49,9 @@ public interface IRoomRepository
     Task<IReadOnlyList<Room>> CreateManyAsync(IReadOnlyList<Room> rooms, CancellationToken cancellationToken);
 
     Task<Room?> GetAsync(string id, CancellationToken cancellationToken);
+
+    // NV-15/NV-17 1.2.0: lectura por lotes.
+    Task<IReadOnlyList<Room>> GetManyAsync(IReadOnlyCollection<string> ids, CancellationToken cancellationToken);
 
     Task<(IReadOnlyList<Room> Items, long TotalItems)> ListByBuildingAsync(string buildingId, int page, int pageSize, CancellationToken cancellationToken);
 

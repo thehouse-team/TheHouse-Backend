@@ -13,11 +13,19 @@ public static class SearchConfiguration
 
     public const string SeedDemoRooms = "--seed-demo-rooms";
 
+    // NV-15/NV-17 1.2.0: migración de favoritos y visitas a cuartos.
+    public const string MigrateToRooms = "--migrate-to-rooms";
+
+    public const string AllowProductionMigration = "--allow-production-migration";
+
     public static void AddSearch(this WebApplicationBuilder builder)
     {
         builder.Services.AddSingleton<SearchService>();
         builder.Services.AddSingleton<PlaceSeedService>();
         builder.Services.AddSingleton<DemoRoomSeedService>();
+        builder.Services.AddSingleton<RoomCatalog>();
+        builder.Services.AddSingleton<RoomMigrationService>();
+        builder.Services.AddSingleton(builder.Configuration.GetSection("RoomMigration").Get<RoomMigrationOptions>() ?? new RoomMigrationOptions());
         builder.Services.AddSingleton(builder.Configuration.GetSection("PlaceSeed").Get<PlaceSeedOptions>() ?? new PlaceSeedOptions());
         builder.Services.AddSingleton(builder.Configuration.GetSection("DemoRoomSeed").Get<DemoRoomSeedOptions>() ?? new DemoRoomSeedOptions());
 
@@ -25,6 +33,18 @@ public static class SearchConfiguration
             provider.GetService<IMongoDatabase>() is { } database
                 ? new MongoPlaceRepository(database)
                 : new UnavailablePlaceRepository());
+    }
+
+    public static string? RejectMigration(IReadOnlyCollection<string> args, bool enabled, bool isProduction)
+    {
+        if (!enabled)
+        {
+            return "Room migration is disabled. Set RoomMigration__Enabled=true only in an authorized environment.";
+        }
+
+        return isProduction && !args.Contains(AllowProductionMigration, StringComparer.Ordinal)
+            ? $"Room migration is not allowed in Production without {AllowProductionMigration}."
+            : null;
     }
 
     // Mismas reglas que el seed de NV-07/NV-08 (M-BE-043): habilitado por

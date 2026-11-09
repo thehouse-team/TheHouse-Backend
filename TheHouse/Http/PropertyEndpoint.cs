@@ -70,6 +70,7 @@ public static class PropertyEndpoint
         IRateLimitStore rateLimitStore,
         PropertyRateLimitOptions rateLimits)
     {
+        Deprecate(context);
         try
         {
             await EnforceRateLimit(
@@ -120,6 +121,7 @@ public static class PropertyEndpoint
         IRateLimitStore rateLimitStore,
         PropertyRateLimitOptions rateLimits)
     {
+        Deprecate(context);
         try
         {
             await EnforceRateLimit(
@@ -154,6 +156,14 @@ public static class PropertyEndpoint
         {
             return Error(context, 503);
         }
+    }
+
+    // NV-15/NV-17 1.2.0: el catálogo de NV-07 queda obsoleto; su sucesor es
+    // la búsqueda de cuartos de NV-14. Se retira en 1.3.0 de acuerdo con Mobile.
+    private static void Deprecate(HttpContext context)
+    {
+        context.Response.Headers["Deprecation"] = "true";
+        context.Response.Headers.Link = "</api/v1/rooms/search>; rel=\"successor-version\"";
     }
 
     private static int ParseQueryInteger(

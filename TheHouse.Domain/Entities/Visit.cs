@@ -18,14 +18,17 @@ public sealed record VisitHistoryEntry(
     DateTimeOffset At,
     string Actor);
 
-// NV-17: solicitud de visita de un estudiante a una propiedad.
+// NV-17: solicitud de visita de un estudiante a un cuarto (1.2.0). Las
+// visitas de 1.1.0 aún no migradas solo tienen `LegacyPropertyId`.
 public sealed class Visit
 {
     public string Id { get; init; } = string.Empty;
 
     public string UserId { get; init; } = string.Empty;
 
-    public string PropertyId { get; init; } = string.Empty;
+    public string RoomId { get; init; } = string.Empty;
+
+    public string? LegacyPropertyId { get; init; }
 
     // Siempre en UTC.
     public DateTimeOffset ScheduledAt { get; init; }
@@ -74,7 +77,8 @@ public sealed class Visit
         {
             Id = Id,
             UserId = UserId,
-            PropertyId = PropertyId,
+            RoomId = RoomId,
+            LegacyPropertyId = LegacyPropertyId,
             ScheduledAt = ScheduledAt,
             Status = VisitStatus.Cancelled,
             Message = Message,
