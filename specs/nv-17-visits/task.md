@@ -8,12 +8,12 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`; la migración `--migrate-to-rooms` en Production requiere autorización aparte) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas; T07–T10 esperan CI, migración y Azure** |
+| Estado de ejecución | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-09): PASS WITH WARNINGS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Plan | `plan.md` 1.2.0-borrador |
 | Tasks totales | 10 |
-| Tasks completadas | 6 |
+| Tasks completadas | 10 |
 
 ## Reglas de esta lista
 
@@ -40,10 +40,10 @@
 
 ## F4 — Pruebas y evidencia
 
-- [ ] **T07 · Contrato para Mobile y despliegue** — Requisito: NV-17-R07 · Fase: F4 · Aceptación: Contrato §6.1 entregado; migración autorizada en Production; prueba HTTP real en Azure (crear por cuarto y por propiedad, repetir, conflicto, listar, cancelar). · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06.
-- [ ] **T08 · Pruebas unitarias y de integración** — Requisito: NV-17-R08 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06, T07.
-- [ ] **T09 · Pruebas de seguridad** — Requisito: NV-17-R08 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06, T07.
-- [ ] **T10 · Evidencia y revisión final** — Requisito: NV-17-R08 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T08, T09.
+- [x] **T07 · Contrato para Mobile y despliegue** — Requisito: NV-17-R07 · Fase: F4 · Aceptación: Contrato §6.1 entregado; migración autorizada en Production; prueba HTTP real en Azure (crear por cuarto y por propiedad, repetir, conflicto, listar, cancelar). · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06.
+- [x] **T08 · Pruebas unitarias y de integración** — Requisito: NV-17-R08 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06, T07.
+- [x] **T09 · Pruebas de seguridad** — Requisito: NV-17-R08 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06, T07.
+- [x] **T10 · Evidencia y revisión final** — Requisito: NV-17-R08 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T08, T09.
 
 ## Matriz task → requisito
 
@@ -55,10 +55,10 @@
 | T04 | R04 | F2 | COMPLETA |
 | T05 | R05 | F2 | COMPLETA |
 | T06 | R06 | F3 | COMPLETA |
-| T07 | R07 | F4 | ABIERTA |
-| T08 | R08 | F4 | ABIERTA |
-| T09 | R08 | F4 | ABIERTA |
-| T10 | R08 | F4 | ABIERTA |
+| T07 | R07 | F4 | COMPLETA |
+| T08 | R08 | F4 | COMPLETA |
+| T09 | R08 | F4 | COMPLETA |
+| T10 | R08 | F4 | COMPLETA |
 
 ## Cobertura requisito → task
 
@@ -79,11 +79,11 @@
 | --- | --- |
 | Requisitos | 8 |
 | Tasks | 10 |
-| Tasks abiertas | 4 |
-| Tasks completadas | 6 |
+| Tasks abiertas | 0 |
+| Tasks completadas | 10 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas; T07–T10 esperan CI, migración y Azure** |
+| Estado de ejecución | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-09): PASS WITH WARNINGS, ver `evidence.md`** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
