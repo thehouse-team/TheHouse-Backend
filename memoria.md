@@ -605,3 +605,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** con NV-12 y NV-21 ya hay cuartos aprobados, pero ningún endpoint público los muestra.
 - **Impacto:** los seeds de colonias y de demostración en Production requieren autorización aparte (M-BE-043); la migración de favoritos y visitas queda como siguiente paso.
 
+## M-BE-067 — NV-15 y NV-17 1.2.0 aprobadas: favoritos y visitas sobre cuartos
+
+- **ID:** M-BE-067
+- **Decisión:** favoritos y visitas apuntan a `roomId` (cuartos publicados de NV-14). Transición hasta 1.3.0: los ids de las 12 propiedades de NV-07 se aceptan y se traducen a su cuarto con el mapeo del seed de demostración, y las respuestas incluyen `propertyId`/`propertyIds`/`property`; favoritos de cuartos no publicados se ocultan sin borrarse; visitas de cuartos no publicados se siguen viendo y cancelando; `/properties` agrega encabezados de obsolescencia; el comando `--migrate-to-rooms` convierte los datos existentes.
+- **Estado:** APROBADO — Victor, 2026-11-07 («Apruebo y EJECUTA», T01–T10 de cada spec). El responsable de Mobile validó antes los contratos §6.1.
+- **Fecha:** 2026-11-07.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Justificación:** con NV-14 los cuartos publicados son el catálogo real; las visitas necesitan un cuarto con dueño para que el arrendador las confirme más adelante.
+- **Impacto:** la migración en Production requiere autorización aparte; 1.3.0 retirará la transición cuando Mobile confirme.
+
