@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-07 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-14 1.1.0, decisiones de la §13 y tasks T01–T13 (M-BE-066). Contrato §6.1 validado antes por el responsable de Mobile |
-| Rama | `feat/nv-14-search` (sobre `docs/nv-14-1.1.0`, PR #26) |
-| Resultado | **🟡 EN CURSO**: T01–T07 y T09 completas con pruebas locales; T08 (p95 en Azure) y T10–T13 esperan CI, CD, seeds autorizados en Production y prueba HTTP real |
+| Rama | `feat/nv-14-search` → PR #27, mezclado en `main` (`f39aa59`); spec y aprobación en PR #26 (`0301f91`) |
+| Resultado | **✅ PASS WITH WARNINGS**: 13/13 tasks completas; desplegada en Azure, seeds de colonias y de demostración aplicados y prueba HTTP real 19/19 con p95 de 300 ms. Advertencia: adaptadores Mongo sin cobertura automatizada (verificados en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -66,8 +66,37 @@ Consulta Overpass del 2026-11-07 sobre nodos `place` (city, town, village, subur
 - `/properties`, favoritos y visitas no cambian (M-BE-066).
 - Costo: sin servicios nuevos; una colección de 60 documentos y lecturas con índices existentes.
 
-## 7. Pendiente
+## 7. Despliegue, seeds y CI
 
-- T08: medir p95 en Azure con los datos de demostración.
-- T10: CI, merge, CD; seeds de colonias y de demostración en Production con autorización; prueba HTTP real; contrato para Mobile.
-- T11–T13: TRX y cobertura del run de CI y cierre de esta evidencia.
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#26](https://github.com/thehouse-team/TheHouse-Backend/pull/26) (spec y aprobación) y [#27](https://github.com/thehouse-team/TheHouse-Backend/pull/27) (código), mezclados el 2026-11-07 |
+| CI de `main` (run 42407184856, `f39aa59`) | 7/7 checks en verde; 723/723 pruebas (unitarias 250, integración 418, seguridad 55); 49 casos de NV-14 |
+| Cobertura de líneas (CI) | 69.2 % total. `MongoPlaceRepository` y las consultas geoespaciales de `MongoListingRepositories` sin cobertura automatizada, como los demás adaptadores Mongo: verificados con la prueba real |
+| CD (run 42407348366) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--cf39aa59-25-1`, imagen `sha256:be6ac4f6…` |
+| Seeds en Production (M-BE-043) | Ejecutados por Victor el 2026-11-07 en esa revisión con `env PlaceSeed__Enabled=true DemoRoomSeed__Enabled=true dotnet TheHouse.dll --seed-places --seed-demo-rooms --allow-production-seed` vía `az containerapp exec`. Log: «Seed autorizado: colonias=True, cuartos de demostración=True», «Place seed completed (60)» y «Demo room seed completed (12 created)» |
+
+## 8. Prueba HTTP real en Azure
+
+Contra `https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io` (2026-11-07), con una cuenta de prueba (`nv14-azure-4c1a37a2@example.com`) para el detalle. **19/19 PASS**:
+
+| Bloque | Casos | Resultado |
+| --- | --- | --- |
+| Búsqueda | 11 cuartos `demo` a menos de 30 km de la UTTT con ETag y los 15 campos del contrato; sin datos privados; orden por distancia; `maxPrice=3000` con orden por precio (1 800 a 2 800); conteo 7 igual a la búsqueda; servicio fuera del catálogo 400 | 9/9 |
+| Mapa | 8 marcadores en el área; área demasiado grande 400 | 2/2 |
+| Detalle | sin sesión 401; con sesión 200 con `no-store` y edificio sin dirección ni dueño | 3/3 |
+| Colonias | "centro" → Centro; "cuauhtemoc" → Colonia Cuauhtémoc | 2/2 |
+| Rendimiento (T08) | 40 búsquedas, una por segundo, todas 200: **p50 230 ms, p95 300 ms**, máximo 753 ms, medidos desde el equipo de Victor (incluyen la red) | 2/2 |
+| Compatibilidad | `/properties` sigue con 12 propiedades | 1/1 |
+
+El duodécimo cuarto de demostración (Villa del Carbón) queda a más de 30 km de la UTTT, por eso la búsqueda desde la UTTT muestra 11. Queda en producción la cuenta de prueba de NV-14, sin datos personales y con su sesión cerrada.
+
+## 9. Contrato entregable a Mobile
+
+El contrato de `spec.md` §6.1 queda vigente sin cambios, con estos dos campos completos:
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        unitarias 250, integración 418, seguridad 55 en CI (723/723); prueba HTTP real en Azure 19/19, p95 300 ms (2026-11-07)
+```
