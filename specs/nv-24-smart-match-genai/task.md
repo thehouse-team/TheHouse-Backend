@@ -1,18 +1,18 @@
-# NV-24 — Smart Match — explicaciones con IA generativa — Task list
+# NV-24 — Smart Match — explicaciones con TheHouse-GenAI — Task list
 
 | Campo | Valor |
 | --- | --- |
 | ID | NV-24 |
 | Documento | `task.md` |
-| Versión | 1.0.0-borrador |
+| Versión | 1.1.0-borrador |
 | Fecha | 2026-11-06 |
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Aprobación humana | Pendiente |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.0.0-borrador |
-| Plan | `plan.md` 1.0.0-borrador |
-| Tasks totales | 8 |
+| Spec | `spec.md` 1.1.0-borrador |
+| Plan | `plan.md` 1.1.0-borrador |
+| Tasks totales | 11 |
 | Tasks completadas | 0 |
 
 ## Reglas de esta lista
@@ -25,23 +25,26 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Explicación fundamentada** — Requisito: NV-24-R01 · Fase: F1 · Aceptación: Resumen, ventajas y desventajas derivados solo de los hechos de entrada; casos de prueba con hechos fijos. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Validación anti-alucinación** — Requisito: NV-24-R02 · Fase: F1 · Aceptación: Un validador detecta números, servicios o condiciones ausentes de los hechos y cambia a plantilla; pruebas con salidas manipuladas. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [ ] **T01 · Hechos estructurados** — Requisito: NV-24-R01 · Fase: F1 · Aceptación: Los hechos se arman solo desde NV-23 y los datos públicos del cuarto; prueba de que no incluyen descripción libre, dirección, coordenadas ni datos del usuario. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [ ] **T02 · Ventajas, desventajas y plantilla** — Requisito: NV-24-R02 · Fase: F1 · Aceptación: Ventajas y desventajas por umbral del desglose y resumen por plantilla en español de México, deterministas, sin porcentajes por factor y con máximo de 600 caracteres; casos de prueba fijos. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [ ] **T03 · Endpoints de explicación** — Requisito: NV-24-R03 · Fase: F1 · Aceptación: `explanations/{roomId}` con sesión y `explanations/query` para invitados; 404 cuarto no publicado o no elegible; 422 perfil incompleto. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T03 · Respaldo por plantilla** — Requisito: NV-24-R03 · Fase: F2 · Aceptación: Con el proveedor caído o lento (> 3 s) responde la plantilla con `generatedBy=template`; el puntaje sigue disponible. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T04 · Caché y costo** — Requisito: NV-24-R04 · Fase: F2 · Aceptación: Caché por cuarto y versiones con TTL de 24 h; límites que mantienen el uso dentro del plan gratuito. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [ ] **T04 · Cliente de TheHouse-GenAI** — Requisito: NV-24-R04 · Fase: F2 · Aceptación: `GenAiExplanationClient` con el contrato `v1` de la §6, credencial de servicio, 3 s de timeout, un reintento y circuit breaker; probado con un doble de GenAI, sin red. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [ ] **T05 · Validación y degradación segura** — Requisito: NV-24-R05 · Fase: F2 · Aceptación: Respuestas con números, servicios o universidades ausentes, demasiado largas o con formato inválido usan la plantilla; con GenAI caído, lento, desactivado o con el circuito abierto responde 200 con `generatedBy=template`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [ ] **T06 · Caché y límites** — Requisito: NV-24-R06 · Fase: F2 · Aceptación: Caché de 24 h por cuarto, preferencias y versiones; rate limits con 429; Redis caído 503. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T05 · Protección contra inyección** — Requisito: NV-24-R05 · Fase: F3 · Aceptación: Pruebas con descripciones maliciosas que no llegan al prompt ni alteran la salida. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04.
+- [ ] **T07 · Protección contra inyección y minimización** — Requisito: NV-24-R07 · Fase: F3 · Aceptación: Pruebas con descripciones maliciosas del arrendador que no llegan a GenAI ni alteran la salida; ningún dato personal en la solicitud a GenAI ni en logs. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 
 ## F4 — Pruebas y evidencia
 
-- [ ] **T06 · Pruebas unitarias y de integración** — Requisito: NV-24-R06 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05.
-- [ ] **T07 · Pruebas de seguridad** — Requisito: NV-24-R06 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05.
-- [ ] **T08 · Evidencia y revisión final** — Requisito: NV-24-R06 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T06, T07.
+- [ ] **T08 · Contrato para Mobile y despliegue** — Requisito: NV-24-R08 · Fase: F4 · Aceptación: Contrato §6.1 entregado a Mobile; desplegado por el CD con GenAI desactivado; prueba HTTP real en Azure con plantilla; activar GenAI en Production solo con sus decisiones M-BE aprobadas y una prueba real adicional. · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06, T07.
+- [ ] **T09 · Pruebas unitarias y de integración** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
+- [ ] **T10 · Pruebas de seguridad** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
+- [ ] **T11 · Evidencia y revisión final** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T09, T10.
 
 ## Matriz task → requisito
 
@@ -49,12 +52,15 @@
 | --- | --- | --- | --- |
 | T01 | R01 | F1 | ABIERTA |
 | T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F2 | ABIERTA |
+| T03 | R03 | F1 | ABIERTA |
 | T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F3 | ABIERTA |
-| T06 | R06 | F4 | ABIERTA |
-| T07 | R06 | F4 | ABIERTA |
-| T08 | R06 | F4 | ABIERTA |
+| T05 | R05 | F2 | ABIERTA |
+| T06 | R06 | F2 | ABIERTA |
+| T07 | R07 | F3 | ABIERTA |
+| T08 | R08 | F4 | ABIERTA |
+| T09 | R09 | F4 | ABIERTA |
+| T10 | R09 | F4 | ABIERTA |
+| T11 | R09 | F4 | ABIERTA |
 
 ## Cobertura requisito → task
 
@@ -65,15 +71,18 @@
 | R03 | T03 |
 | R04 | T04 |
 | R05 | T05 |
-| R06 | T06, T07, T08 |
+| R06 | T06 |
+| R07 | T07 |
+| R08 | T08 |
+| R09 | T09, T10, T11 |
 
 ## Resumen
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 6 |
-| Tasks | 8 |
-| Tasks abiertas | 8 |
+| Requisitos | 9 |
+| Tasks | 11 |
+| Tasks abiertas | 11 |
 | Tasks completadas | 0 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
