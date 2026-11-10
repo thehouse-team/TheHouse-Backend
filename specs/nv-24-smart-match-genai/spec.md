@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA NV-16, NV-23 y NV-24»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-24-smart-match-genai/`; activar `TheHouse-GenAI` en Production requiere las decisiones M-BE de su hosting y de su proveedor) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-59, RF-60, RF-61, RF-62, RF-63 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-15, RNF-16 |
@@ -183,12 +183,12 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Generador | Plantillas siempre; `TheHouse-GenAI` solo para el resumen, desactivado por defecto | PROPUESTO |
-| Contrato con GenAI | `explain-match` versión `v1` según su spec 003; cambios con nueva versión en ambos repositorios | PROPUESTO |
-| Credencial de servicio | Clave compartida en un encabezado, guardada como secreto de Container Apps en el backend y en GenAI; rotación manual documentada | PROPUESTO |
+| Generador | Plantillas siempre; `TheHouse-GenAI` solo para el resumen, desactivado por defecto | APROBADO (M-BE-068) |
+| Contrato con GenAI | `explain-match` versión `v1` según su spec 003; cambios con nueva versión en ambos repositorios | APROBADO (M-BE-068) |
+| Credencial de servicio | Clave compartida en un encabezado, guardada como secreto de Container Apps en el backend y en GenAI; rotación manual documentada | APROBADO (M-BE-068) |
 | Hosting de TheHouse-GenAI | Azure Container Apps en el mismo entorno, escala a cero, ingreso interno; requiere decisión M-BE con evidencia de §17 | PENDIENTE |
 | Proveedor de IA de TheHouse-GenAI | Plan sin método de pago o límite de gasto en 0, con cuotas documentadas; requiere decisión M-BE con evidencia de §17 | PENDIENTE |
-| Idioma | Español neutro de México | PROPUESTO |
+| Idioma | Español neutro de México | APROBADO (M-BE-068) |
 
 ## 14. Costo — COST-001
 
@@ -226,8 +226,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
 
 ## 18. Aprobación pendiente
 

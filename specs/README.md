@@ -23,15 +23,15 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-13 | [Fotografías y documentos](nv-13-media-documents/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 | NV-14 | [Búsqueda, filtros y mapa](nv-14-search-map/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T13 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 13/13 |
 | NV-15 | [Favoritos](nv-15-favorites-compare/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-09): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
-| NV-16 | [Contacto, solicitudes y chat](nv-16-contact-chat-requests/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/11 |
+| NV-16 | [Contacto, solicitudes y chat](nv-16-contact-chat-requests/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** | 0/11 |
 | NV-17 | [Visitas: solicitudes (v1)](nv-17-visits/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-09): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-18 | [Cierre de trato con QR y renta](nv-18-deal-closing-rental/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 | NV-19 | [Reseñas y calificaciones](nv-19-reviews/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
 | NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/8 |
 | NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T14 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 14/14 |
 | NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
-| NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/13 |
-| NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/11 |
+| NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** | 0/13 |
+| NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** | 0/11 |
 | NV-25 | [Estadísticas del propietario y métricas de Smart Match](nv-25-metrics-stats/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 
 ## 2. Cobertura de requerimientos funcionales
