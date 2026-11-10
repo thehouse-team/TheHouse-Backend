@@ -2,13 +2,15 @@
 
 | Campo | Valor |
 | --- | --- |
-| Versión | 1.1.0 |
-| Fecha | 2026-11-06 |
-| Estado | **✅ APROBADA — VIGENTE** (sustituye a la versión 1.0.0) |
-| Aprobación humana | Victor Manuel Jose Jose, responsable del backend (M-BE-040) — 2026-11-06 («Apruebo 1.1.0») |
-| Decisión | M-BE-057 |
+| Versión | 1.2.0 |
+| Fecha | 2026-11-10 |
+| Estado | **✅ APROBADA — VIGENTE** (sustituye a la versión 1.1.0) |
+| Aprobación humana | Victor Manuel Jose Jose, responsable del backend (M-BE-040) — 2026-11-10 («Apruebo 1.2.0») |
+| Decisión | M-BE-062 |
 
 Autoridad: máxima norma del Backend dentro de las instrucciones humanas y políticas del entorno.
+
+**Cambios 1.2.0 (2026-11-10):** reconoce los dos proyectos separados que pidió el profesor sin romper el monolito modular: `TheHouse-ML` como **satélite de artefacto** (no se despliega; entrega un modelo ONNX que el backend carga en proceso) y `TheHouse-GenAI` como **servicio auxiliar** (se despliega aparte, solo lo llama el backend y su ausencia no rompe ninguna función). Agrega §6.1, precisa §15, §17 y §30 y actualiza §2. Las demás reglas no cambian. Detalle en M-BE-062.
 
 **Cambios 1.1.0 (2026-11-06):** la versión 1.0.0 describía la fase inicial solo documental. Esta versión conserva todas las reglas de fondo (SDD, COST-001, seguridad, Clean Architecture, monolito modular) y actualiza lo que quedó desfasado tras ejecutar NV-01 a NV-09: estado de la solución, proveedor cloud seleccionado, CI/CD vigente, protocolo de autorizaciones y flujo de Git. Detalle en `specs/README.md` §6.2 y en M-BE-056/M-BE-057.
 
@@ -18,7 +20,9 @@ Gobernar un backend académico seguro, verificable, mantenible y escalable para 
 
 ## 2. Alcance y estado técnico
 
-La solución `TheHouse.slnx` y sus siete proyectos existen. Con autorización humana se implementaron y verificaron NV-01 (fundamentos), NV-04 a NV-08 (registro, login, logout, propiedades y universidades) y la infraestructura de NV-03; la CI (NV-02) y la CD (NV-09) están operativas y el backend corre en Azure. El estado vigente de cada spec vive en su `task.md` y se resume en `specs/README.md`.
+La solución `TheHouse.slnx` y sus siete proyectos existen. Con autorización humana se implementaron y verificaron NV-01 (fundamentos), NV-04 a NV-08 (registro, login, logout, propiedades y universidades) y la infraestructura de NV-03; la CI (NV-02) y la CD (NV-09) están operativas y el backend corre en Azure. Después se completaron NV-10 a NV-12, NV-14, NV-15, NV-17 y NV-21. El estado vigente de cada spec vive en su `task.md` y se resume en `specs/README.md`.
+
+Existen dos proyectos separados del backend, gobernados por §6.1: `thehouse-team/TheHouse-ML` (Smart Match, satélite de artefacto) y `thehouse-team/TheHouse-GenAI` (IA generativa, servicio auxiliar). Cada uno tiene su propio repositorio, constitución y specs; ninguno modifica este repositorio.
 
 Quedan protegidos `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/`, la solución, todos los `.csproj`, `Program.cs`, `appsettings*.json`, `Controllers/` y `Properties/`. Solo se modifican cuando una autorización «EJECUTA» incluye esas rutas de forma explícita. No se recrean, renombran ni mueven proyectos, y agregar proyectos o paquetes requiere que la autorización lo nombre.
 
@@ -41,6 +45,22 @@ Domain contiene reglas de negocio puras; Application coordina casos de uso y def
 ## 6. Modular Monolith
 
 Se adopta un monolito modular, no microservicios. Cada módulo tiene propiedad exclusiva sobre sus casos de uso y sus colecciones; otros módulos solo acceden mediante contratos (puertos de Application) o eventos de dominio en proceso, idempotentes y sin dependencias circulares. Separar un módulo en un servicio desplegable aparte requiere reformar esta sección con revisión humana.
+
+### 6.1 Proyectos separados del backend
+
+El backend sigue siendo un monolito modular: ningún módulo se separa. Fuera de él solo existen estos dos tipos de proyecto, cada uno con su repositorio, su constitución, sus specs y su CI:
+
+1. **Satélite de artefacto** (`TheHouse-ML`). No se despliega, no expone API y no guarda datos de usuarios. Entrega artefactos versionados e inmutables (por ejemplo, un modelo ONNX) con SHA-256, esquema de entrada y casos dorados. El backend los carga **en proceso** detrás de un puerto de Application, verifica el hash al cargar y prueba la paridad con los casos dorados. Nunca se carga código ejecutable ni formatos serializados de Python (pickle).
+2. **Servicio auxiliar** (`TheHouse-GenAI`). Se despliega aparte y solo se admite si cumple todo lo siguiente:
+   - No es fuente de verdad ni dueño de datos: recibe del backend el contexto ya calculado y no puede alterar puntajes, precios, distancias ni disponibilidad.
+   - Solo el backend lo llama; Mobile y cualquier cliente externo nunca. La llamada usa credencial de servicio guardada como secreto (§31), nunca el JWT del usuario.
+   - Se consume detrás de un puerto de Application con un adaptador en Infrastructure que aplica timeout, reintentos acotados, circuit breaker y límite de tamaño.
+   - **Degradación segura:** si falla, tarda o no está configurado, el backend responde igual con un resultado determinista (por ejemplo, una explicación por plantilla) o sin la parte opcional. Ninguna función principal depende de él.
+   - Recibe el mínimo de datos: nunca contraseñas, tokens, dirección exacta ni datos privados del arrendador.
+   - Su contrato está versionado y se prueba en ambos lados con dobles de prueba, sin red en el CI del backend.
+   - COST-001 aplica completo a su hosting y a su proveedor de IA (§17 y §30).
+
+El contrato entre el backend y un proyecto separado se define en una spec del backend y en la spec correspondiente del otro repositorio; cambiarlo requiere nueva versión en ambos. Agregar otro proyecto separado requiere reformar esta sección.
 
 ## 7. Dependency Rule y arquitectura actual
 
@@ -96,6 +116,8 @@ Ninguna instancia de API debe ser propietaria exclusiva de sesiones, revocación
 
 La arquitectura debe demostrar funcionamiento con al menos dos instancias de la misma API. Reiniciar o reemplazar una instancia no puede perder estado de negocio ni eludir controles de seguridad. La operación normal puede escalar a cero para cumplir COST-001; la demostración con dos réplicas se hace en una ventana controlada (M-BE-039).
 
+Esta regla aplica al backend. Un servicio auxiliar de §6.1 puede operar con una sola instancia porque su caída no afecta ninguna función principal (degradación segura).
+
 ## 16. Load Balancer
 
 Un balanceador distribuye tráfico a las instancias con health checks y retirada de instancias no listas; en Azure lo provee el ingress de Container Apps. No se aceptan sticky sessions como solución al estado local. Deben probarse cabeceras reenviadas, IP del cliente, distribución y fallos.
@@ -105,6 +127,8 @@ Un balanceador distribuye tráfico a las instancias con health checks y retirada
 > El costo obligatorio del entorno académico deberá permanecer en $0.
 
 **Todo recurso académico: Costo obligatorio = $0.** Aplica a cómputo, dos instancias, Load Balancer, TLS, red/egress, almacenamiento/CDN, Redis, conectividad MongoDB, observabilidad, CI/CD, registros, servicios externos (correo, IA, archivos) y retención de artefactos. Un free tier, un crédito o una alerta de presupuesto no prueban costo cero ni constituyen un límite duro de gasto.
+
+Para un servicio auxiliar (§6.1) y su proveedor de IA se exige además: plan sin método de pago asociado o límite de gasto en cero que el proveedor haga cumplir, cuotas por minuto y por día documentadas, y que exceder la cuota produzca un error (que el backend degrada) y nunca un cobro. Si no se puede demostrar, el resultado es **BLOCKED** y el backend usa solo el resultado determinista.
 
 Antes de provisionar o contratar se exige evidencia vigente de elegibilidad, región, cuotas, duración, tarjeta, riesgo de cobro, destrucción y costo esperado total. Ante incertidumbre o imposibilidad de satisfacer simultáneamente $0 y dos instancias/balanceador, el resultado es **BLOCKED**: se presenta la incompatibilidad a revisión humana, sin rebajar el objetivo, contratar ni desplegar.
 
@@ -163,6 +187,8 @@ La infraestructura se describe en `infra/terraform/` y separa plan, aplicación 
 ## 30. Proveedores cloud y servicios externos
 
 AWS, Azure y Google Cloud son los únicos proveedores cloud permitidos. **Azure es el proveedor seleccionado** para cómputo e infraestructura (M-BE-028): Container Apps, Log Analytics e identidad administrada. Un servicio gestionado de terceros (por ejemplo MongoDB Atlas o Upstash) solo se usa con una decisión M-BE aprobada que justifique la excepción y demuestre COST-001 (precedentes: M-BE-034 y M-BE-035).
+
+Los proyectos separados de §6.1 son del equipo, pero su hosting y sus proveedores siguen esta misma regla: el hosting de un servicio auxiliar se elige entre los proveedores cloud permitidos, y un proveedor de IA (API de un LLM) es un servicio de terceros que requiere su propia decisión M-BE con la evidencia de §17 antes de usarse en producción.
 
 ## 31. Gestión de secretos
 

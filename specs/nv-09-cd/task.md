@@ -8,11 +8,11 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 15 de 20 tasks; T20 se cierra con el primer merge de solo documentación; T15–T17 y T19 pendientes** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 16 de 20 tasks; T15–T17 y T19 pendientes** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Plan | `plan.md` 1.1.0-u2 |
 | Tasks totales | 20 |
-| Tasks completadas | 15 |
+| Tasks completadas | 16 |
 
 **Cambio 1.1.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-09-R17 (no desplegar cambios que solo tocan documentación) y la task T20. T13 y T18 se ejecutan en este ciclo (T13 ya autorizada; T18 requiere su autorización propia).
 
@@ -61,7 +61,7 @@
 - [ ] **T17 · Primer despliegue real y registro** — Requisitos: NV-09-R09, NV-09-R15 · Fase: F6 · Aceptación: `main` con el PR #3 integrado desplegado por el pipeline con aprobación registrada; `deployment-record.json`; `VERSIONING.md` actualizado por pull request. · Evidencia: run, registro y pull request. · Depende de: T11, T12, T13, T14 e integración del PR #3.
 - [x] **T18 · Seed de catálogo en producción** — Requisito: NV-09-R14 · Fase: F6 · Aceptación: autorización explícita; ejecución única con `--seed-universities --seed-properties --allow-production-seed`; banderas de seed desactivadas al terminar; conteos verificados por la API pública. · Evidencia: log sanitizado y respuesta de la API. · Depende de: T17.
 - [ ] **T19 · Evidencia, costo y revisión final** — Requisitos: NV-09-R15, NV-09-R16 · Fase: F6 · Aceptación: `evidence.md` con runs, hallazgos, excepciones, duración y costo; evidencia enlazada a NV-03 T14, T19, T22 y T25; revisión de seguridad y coherencia con resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md` y acta. · Depende de: T17, T18.
-- [ ] **T20 · Omitir despliegues de solo documentación** — Requisito: NV-09-R17 · Fase: F2 · Aceptación: el job `resolve` compara los archivos del commit con su padre en `main`; solo documentación → modo `skip` sin publicar ni pedir aprobación; código o configuración → flujo completo; prueba con un commit de solo documentación y otro de código. · Evidencia: dos runs del CD. · Depende de: T04.
+- [x] **T20 · Omitir despliegues de solo documentación** — Requisito: NV-09-R17 · Fase: F2 · Aceptación: el job `resolve` compara los archivos del commit con su padre en `main`; solo documentación → modo `skip` sin publicar ni pedir aprobación; código o configuración → flujo completo; prueba con un commit de solo documentación y otro de código. · Evidencia: dos runs del CD. · Depende de: T04.
 
 ## Matriz task → requisito
 
@@ -86,7 +86,7 @@
 | T17 | R09, R15 | F6 | ABIERTA |
 | T18 | R14 | F6 | COMPLETADA |
 | T19 | R15, R16 | F6 | ABIERTA |
-| T20 | R17 | F2 | ABIERTA |
+| T20 | R17 | F2 | COMPLETA |
 
 ## Cobertura requisito → task
 
@@ -116,11 +116,11 @@
 | --- | --- |
 | Requisitos | 17 |
 | Tasks | 20 |
-| Tasks abiertas | 5 |
-| Tasks completadas | 15 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 16 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 15 de 20 tasks; T20 se cierra con el primer merge de solo documentación; T15–T17 y T19 pendientes** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 16 de 20 tasks; T15–T17 y T19 pendientes** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

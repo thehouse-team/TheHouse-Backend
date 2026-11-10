@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 15 de 20 tasks; T20 se cierra con el primer merge de solo documentación; T15–T17 y T19 pendientes** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 16 de 20 tasks; T15–T17 y T19 pendientes** |
 | Spec | `spec.md` 1.1.0-u2 |
 | Tasks | `task.md` 1.1.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |

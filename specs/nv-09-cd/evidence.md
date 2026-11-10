@@ -237,9 +237,16 @@ Estado posterior: `rb-10-1` Healthy/Running con la imagen previa; el catálogo (
 
 Autorizado por Victor el 2026-11-07 (M-BE-059). Ejecución única con `--allow-production-seed` mediante `az containerapp exec` y `env` (las banderas existen solo en ese proceso). Resultado verificado por la API pública: 10 universidades y 12 propiedades vinculadas; detalle en las evidencias de NV-08 y NV-07.
 
-### T20 — Omitir despliegues de solo documentación (en curso)
+### T20 — Omitir despliegues de solo documentación ✅
 
 - Implementado en `resolve` (PR #12): compara el commit con su padre; solo `specs/`, `*.md`, `.opencode/` o `docs/` → modo `skip`, sin publicar, desplegar ni pedir aprobación; `cd-summary` no corre.
 - Lógica probada en local con tres commits (solo documentación → `skip`; documentación + código → `publish`; archivo fuera de esas rutas → `publish`).
 - Run con código: CD `42348699940` (merge del PR #12) siguió el flujo completo.
-- Falta el run de un merge de solo documentación (este PR) para cerrar T20.
+- Cierre (2026-11-10), con dos runs del CD sobre `main`:
+
+| Merge | Archivos | Run del CD | Jobs |
+| --- | --- | --- | --- |
+| PR #31 (`6408ce2`, 2026-11-10) | Solo `specs/` (9 archivos de NV-15 y NV-17) | `42852852527` | `resolve` ✅; `publish`, `verify-ephemeral`, `deploy`, `dast-baseline` y `cd-summary` omitidos; sin aprobación pedida; Azure siguió en `ca-thehouse-u2--c14f4ff2-29-1` |
+| PR #30 (`14f4ff2`, 2026-11-09) | Código de Application, Infrastructure, API y pruebas | `42680553139` | Flujo completo: `resolve`, `publish`, `verify-ephemeral`, `deploy` (aprobado por Victor), `dast-baseline` y `cd-summary` ✅ |
+
+- Resultado: **PASS**. Los merges de solo documentación ya no publican imagen ni piden aprobación; los de código siguen el flujo completo.
