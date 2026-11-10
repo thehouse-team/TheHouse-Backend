@@ -7,8 +7,8 @@
 | Versión | 1.2.0 |
 | Fecha | 2026-11-09 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-15 1.2.0, tasks T01–T10 (M-BE-067); la migración `--migrate-to-rooms` en Production requiere autorización aparte |
-| Rama | `feat/nv-15-nv-17-rooms` (commit de implementación `a0de2d4`) → PR pendiente de revisión |
-| Resultado | **🟡 EN CURSO**: T01–T06 completas y verificadas en local; T07–T10 esperan CI, la migración autorizada en Production y la prueba HTTP real en Azure |
+| Rama | `feat/nv-15-nv-17-rooms` → PR #30 (specs en #29), mezclados en `main` (`14f4ff2`) |
+| Resultado | **✅ PASS WITH WARNINGS**: 10/10 tasks completas; desplegada en Azure, migración autorizada ejecutada y prueba HTTP real 38/38. Advertencia: adaptador Mongo sin cobertura automatizada (verificado en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -46,8 +46,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R04 | `Legacy_property_ids_are_accepted_during_the_transition`, `Legacy_property_catalog_announces_its_deprecation`, `Favorites_accept_legacy_property_ids_and_report_them` |
 | R05 | `Unmigrated_favorites_are_listed_by_room_and_migrated_by_the_command`, `Migration_converts_legacy_favorites_and_visits_and_removes_duplicates`, `Migration_requires_configuration_and_explicit_production_flag` (seguridad). Los índices reales se verifican en Azure |
 | R06 | `Users_never_see_each_others_favorites`, `Concurrent_double_tap_creates_a_single_favorite`, `Rate_limit_returns_429_with_retry_after`, `Fails_closed_when_redis_or_mongo_are_down`, `Requires_a_valid_bearer_token` |
-| R07 | Pendiente: migración autorizada y prueba HTTP real en Azure |
-| R08 | Pendiente: TRX y cobertura del CI del PR |
+| R07 | Migración autorizada en Production y prueba HTTP real en Azure 38/38 (§5 y §6); contrato entregado (§7) |
+| R08 | CI de `main`: 738/738 y cobertura del §5; TRX de `TheHouse.SecurityTests` 61/61 |
 
 ## 4. Seguridad y coherencia (1.2.0)
 
@@ -57,15 +57,83 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 - Redis, MongoDB o el catálogo de cuartos caídos → 503.
 - La migración solo corre con configuración explícita y, en Production, con su propia bandera.
 
-## 5. Pendiente para cerrar 1.2.0
+## 5. Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#29](https://github.com/thehouse-team/TheHouse-Backend/pull/29) (specs 1.2.0) y [#30](https://github.com/thehouse-team/TheHouse-Backend/pull/30) (implementación), aprobados por `IsaiAxel` y mezclados el 2026-11-09 (merge `14f4ff2`). El conflicto de `specs/README.md` con #28 se resolvió regenerando el índice |
+| CI de `main` (`14f4ff2`, run 42680187690) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI | 738/738: unitarias 251, integración 426, seguridad 61 |
+| Cobertura de líneas (CI) | 68.9 % total. `RoomCatalog` 100 %, `FavoriteService` 97.3 %, `VisitService` 99.2 %, `FavoritesEndpoint` 100 %, `VisitsEndpoint` 100 %, `PropertyEndpoint` 99.3 %. `MongoFavoriteRepository` y `MongoVisitRepository` en 0 %, como los demás adaptadores Mongo: se verifican en Azure |
+| CD (run 42680553139) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c14f4ff2-29-1` |
+| Migración en Production (M-BE-043) | Autorizada por Victor el 2026-11-09 («autoriso la migracion»). Una ejecución con `env RoomMigration__Enabled=true dotnet TheHouse.dll --migrate-to-rooms --allow-production-migration` vía `az containerapp exec` en esa revisión. Log: «favoritos migrados=1, duplicados eliminados=0, sin mapeo=0; visitas migradas=2, sin mapeo=0» y «Room migration completed». Los índices de favoritos se cambiaron en esa misma ejecución |
+
+## 6. Prueba HTTP real en Azure
+
+`.azure-check/nv15_17_v12_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-09 después de la migración, con dos cuentas `@example.com` nuevas; no se imprimen tokens ni contraseñas. Resultado: **38/38 PASS**.
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| Migración `--migrate-to-rooms --allow-production-migration` con `RoomMigration__Enabled=true` | Victor (autorización explícita) | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv15_17_v12_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Obsolescencia de `/properties` | `Deprecation: true` y `Link` al sucesor | 2/2 |
+| Favoritos | Agregar por `roomId` e idempotente; listado con los campos del §6.1 y sin datos privados; mismo cuarto por su `propertyId` sin duplicar; `ids` con `roomIds`/`propertyIds`; agregar y quitar por `propertyId` de NV-07; otro usuario no ve nada; 404 inexistente, 400 id inválido, 401 sin token | 16/16 |
+| Visitas | Crear por `roomId` (201, `room` con `id, buildingId, title, city`); repetir con la misma llave por `roomId` y por `propertyId` (200, mismo id); 409 `idempotency_key_reused` y `active_visit_for_property`; 422 `outside_hours`; 400 con ambos ids, sin ids y con `userId`; 404 cuarto inexistente; 429 en el intento 11 del día con `Retry-After`; crear por `propertyId` (201, `property.id` coincide); BOLA 404 en consultar y cancelar; cancelar; 401 sin token | 18/18 |
+| Compatibilidad | `/users/me` y búsqueda de cuartos sin cambios | 2/2 |
+
+Primera corrida: 35/37. Las dos fallas venían del script: la cuenta de prueba ya había hecho 10 intentos de crear visita y el límite diario de 10 de NV-17 1.1.0 respondió 429, como debe; la visita de transición no se creó y no había nada que cancelar. Se corrigió el script (caso V11a que espera el 429 y la visita de transición creada por otra cuenta); el API no cambió.
+
+## 7. Contrato entregable a Mobile
+
+Entregado el 2026-11-09 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` con la URL y las pruebas reales:
+
+```text
+ENDPOINT     /api/v1/users/me/favorites/{roomId}
+METHOD       PUT
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      —
+REQUEST      sin cuerpo; roomId (o, en transición, propertyId) en la ruta
+RESPONSE     204 sin cuerpo (también si ya era favorito)
+STATUS CODES 204, 400 id inválido, 401, 404 cuarto no publicado, 409 code=favorites_limit, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/users/me/favorites/{roomId}
+METHOD       DELETE
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      —
+REQUEST      sin cuerpo
+RESPONSE     204 sin cuerpo (también si no era favorito)
+STATUS CODES 204, 400, 401, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/users/me/favorites?page=1&pageSize=20
+METHOD       GET
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      —
+REQUEST      page, pageSize (1-50)
+RESPONSE     200 { items: [{ roomId, buildingId, title, price, currency, roomType, bathroom, city, approxLocation, demo, favoritedAt, propertyId (transición) }], page, pageSize, totalItems, totalPages }
+STATUS CODES 200, 400, 401, 429, 503
+PAGINATION   Sí: sobre de NV-01; orden favoritedAt desc
+```
+
+```text
+ENDPOINT     /api/v1/users/me/favorites/ids
+METHOD       GET
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      —
+REQUEST      sin parámetros
+RESPONSE     200 { roomIds: [..], propertyIds: [..] (transición) }
+STATUS CODES 200, 401, 429, 503
+PAGINATION   No
+```
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 42680187690): 738/738 (unitarias 251, integración 426, seguridad 61); prueba HTTP real en Azure 38/38 (2026-11-09)
+```
 
 ## Historial — evidencia de 1.1.0
 

@@ -7,8 +7,8 @@
 | Versión | 1.2.0 |
 | Fecha | 2026-11-09 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-17 1.2.0, tasks T01–T10 (M-BE-067); la migración `--migrate-to-rooms` en Production requiere autorización aparte |
-| Rama | `feat/nv-15-nv-17-rooms` (commit de implementación `a0de2d4`) → PR pendiente de revisión |
-| Resultado | **🟡 EN CURSO**: T01–T06 completas y verificadas en local; T07–T10 esperan CI, la migración autorizada en Production y la prueba HTTP real en Azure |
+| Rama | `feat/nv-15-nv-17-rooms` → PR #30 (specs en #29), mezclados en `main` (`14f4ff2`) |
+| Resultado | **✅ PASS WITH WARNINGS**: 10/10 tasks completas; desplegada en Azure, migración autorizada ejecutada y prueba HTTP real 38/38. Advertencias: W1 (llaves de idempotencia de 1.1.0) y adaptador Mongo sin cobertura automatizada (verificado en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -45,8 +45,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R04 | `Legacy_property_id_creates_the_visit_on_its_room_and_replays_by_room`, `Visit_create_replays_same_key_with_room_or_legacy_id` |
 | R05 | `Unmigrated_visits_are_read_with_their_room_and_migrated_by_the_command`, `Migration_converts_legacy_favorites_and_visits_and_removes_duplicates`, `Migration_requires_configuration_and_explicit_production_flag` (seguridad) |
 | R06 | `Other_users_visit_is_404_for_get_and_cancel`, `Daily_create_limit_returns_429_with_retry_after`, `Fails_closed_when_lock_or_storage_are_down`, `Requires_a_valid_bearer_token`, `Message_is_not_written_to_logs`, `Visit_create_fails_when_the_user_lock_is_held` |
-| R07 | Pendiente: migración autorizada y prueba HTTP real en Azure |
-| R08 | Pendiente: TRX y cobertura del CI del PR |
+| R07 | Migración autorizada en Production y prueba HTTP real en Azure 38/38 (§5 y §6); contrato entregado (§7) |
+| R08 | CI de `main`: 738/738 y cobertura del §5; TRX de `TheHouse.SecurityTests` 61/61 |
 
 ## 4. Seguridad y coherencia (1.2.0)
 
@@ -56,15 +56,72 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 - Lock de Redis o MongoDB caídos → 503.
 - **Advertencia W1:** el hash de idempotencia usa ahora el `roomId`. Durante las 24 h de vida de una llave, repetir después de la migración una petición de 1.1.0 con la misma llave responde 409 `idempotency_key_reused` en lugar de la visita original. El riesgo es bajo (ventana de 24 h, solo reintentos en ese momento) y se documenta para Mobile.
 
-## 5. Pendiente para cerrar 1.2.0
+## 5. Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#29](https://github.com/thehouse-team/TheHouse-Backend/pull/29) (specs 1.2.0) y [#30](https://github.com/thehouse-team/TheHouse-Backend/pull/30) (implementación), aprobados por `IsaiAxel` y mezclados el 2026-11-09 (merge `14f4ff2`). El conflicto de `specs/README.md` con #28 se resolvió regenerando el índice |
+| CI de `main` (`14f4ff2`, run 42680187690) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI | 738/738: unitarias 251, integración 426, seguridad 61 |
+| Cobertura de líneas (CI) | 68.9 % total. `RoomCatalog` 100 %, `FavoriteService` 97.3 %, `VisitService` 99.2 %, `FavoritesEndpoint` 100 %, `VisitsEndpoint` 100 %, `PropertyEndpoint` 99.3 %. `MongoFavoriteRepository` y `MongoVisitRepository` en 0 %, como los demás adaptadores Mongo: se verifican en Azure |
+| CD (run 42680553139) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c14f4ff2-29-1` |
+| Migración en Production (M-BE-043) | Autorizada por Victor el 2026-11-09 («autoriso la migracion»). Una ejecución con `env RoomMigration__Enabled=true dotnet TheHouse.dll --migrate-to-rooms --allow-production-migration` vía `az containerapp exec` en esa revisión. Log: «favoritos migrados=1, duplicados eliminados=0, sin mapeo=0; visitas migradas=2, sin mapeo=0» y «Room migration completed». Los índices de favoritos se cambiaron en esa misma ejecución |
+
+## 6. Prueba HTTP real en Azure
+
+`.azure-check/nv15_17_v12_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-09 después de la migración, con dos cuentas `@example.com` nuevas; no se imprimen tokens ni contraseñas. Resultado: **38/38 PASS**.
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| Migración `--migrate-to-rooms --allow-production-migration` con `RoomMigration__Enabled=true` | Victor (autorización explícita) | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv15_17_v12_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Obsolescencia de `/properties` | `Deprecation: true` y `Link` al sucesor | 2/2 |
+| Favoritos | Agregar por `roomId` e idempotente; listado con los campos del §6.1 y sin datos privados; mismo cuarto por su `propertyId` sin duplicar; `ids` con `roomIds`/`propertyIds`; agregar y quitar por `propertyId` de NV-07; otro usuario no ve nada; 404 inexistente, 400 id inválido, 401 sin token | 16/16 |
+| Visitas | Crear por `roomId` (201, `room` con `id, buildingId, title, city`); repetir con la misma llave por `roomId` y por `propertyId` (200, mismo id); 409 `idempotency_key_reused` y `active_visit_for_property`; 422 `outside_hours`; 400 con ambos ids, sin ids y con `userId`; 404 cuarto inexistente; 429 en el intento 11 del día con `Retry-After`; crear por `propertyId` (201, `property.id` coincide); BOLA 404 en consultar y cancelar; cancelar; 401 sin token | 18/18 |
+| Compatibilidad | `/users/me` y búsqueda de cuartos sin cambios | 2/2 |
+
+Primera corrida: 35/37. Las dos fallas venían del script: la cuenta de prueba ya había hecho 10 intentos de crear visita y el límite diario de 10 de NV-17 1.1.0 respondió 429, como debe; la visita de transición no se creó y no había nada que cancelar. Se corrigió el script (caso V11a que espera el 429 y la visita de transición creada por otra cuenta); el API no cambió.
+
+## 7. Contrato entregable a Mobile
+
+Entregado el 2026-11-09 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` con la URL y las pruebas reales:
+
+```text
+ENDPOINT     /api/v1/visits
+METHOD       POST
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      Idempotency-Key: <UUID> (obligatorio); Content-Type: application/json
+REQUEST      { "roomId": "<24 hex>", "scheduledAt": "2026-11-20T17:00:00-06:00", "message": "opcional, <= 300" } (transición: propertyId en lugar de roomId)
+RESPONSE     201 { id, room: { id, buildingId, title, city }, property: { id, title, city } | null (transición), scheduledAt, timeZone, status, message, createdAt, updatedAt, cancelledAt } | 200 con Idempotent-Replayed: true
+STATUS CODES 201, 200, 400, 401, 404 cuarto, 409 code=..., 422 code=..., 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/users/me/visits?status=requested&page=1&pageSize=20
+METHOD       GET
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      —
+REQUEST      status (requested|cancelled), page, pageSize
+RESPONSE     200 { items: [visita], page, pageSize, totalItems, totalPages }
+STATUS CODES 200, 400, 401, 429, 503
+PAGINATION   Sí: sobre de NV-01; orden scheduledAt asc, id asc
+```
+
+```text
+ENDPOINT     /api/v1/visits/{id} | /api/v1/visits/{id}/cancel
+METHOD       GET | POST
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      —
+REQUEST      id en la ruta; cancel: { reason? }
+RESPONSE     200 visita
+STATUS CODES 200, 400, 401, 404, 409 code=visit_in_past, 429, 503
+PAGINATION   No
+```
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 42680187690): 738/738 (unitarias 251, integración 426, seguridad 61); prueba HTTP real en Azure 38/38 (2026-11-09)
+```
 
 ## Historial — evidencia de 1.1.0
 
