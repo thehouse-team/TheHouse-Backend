@@ -558,11 +558,11 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 ## M-BE-062 — Proyectos separados del backend: TheHouse-ML y TheHouse-GenAI (constitution 1.2.0)
 
 - **ID:** M-BE-062
-- **Decisión propuesta:** reconocer en la constitution (§6.1) dos tipos de proyecto separado, sin separar ningún módulo del monolito:
+- **Decisión:** reconocer en la constitution (§6.1) dos tipos de proyecto separado, sin separar ningún módulo del monolito:
   - **Satélite de artefacto — `TheHouse-ML`:** no se despliega; entrega un modelo ONNX versionado con SHA-256, esquema y casos dorados; el backend lo carga en proceso detrás de `ICompatibilityModel` (NV-23).
   - **Servicio auxiliar — `TheHouse-GenAI`** (repositorio de Isai Axel Paniagua Francisco): se despliega aparte; solo lo llama el backend con credencial de servicio; recibe el puntaje y los hechos ya calculados y los explica, sin modificarlos; timeout, reintentos acotados, circuit breaker y **degradación segura** a una explicación determinista; mínimo de datos; COST-001 completo para su hosting y su proveedor de IA.
   - Ajustes: §15 (dos instancias aplica al backend; un servicio auxiliar puede tener una), §17 (evidencia de $0 y cuota que falla sin cobrar para servicios auxiliares e IA) y §30 (hosting en un proveedor permitido; el proveedor de IA requiere su propia decisión M-BE).
-- **Estado:** PROPUESTO — borrador de constitution 1.2.0 del 2026-11-10. Pedido de Victor del 2026-11-07 (Smart Match como proyecto separado) y del 2026-11-09 («si tienen que ser a fuerzas proyectos por separados», sobre ML e IA generativa). Requiere «Apruebo 1.2.0».
+- **Estado:** APROBADO — Victor Manuel Jose Jose, 2026-11-10 («Apruebo 1.2.0»). Constitution 1.2.0 vigente. Pedidos de origen: Victor, 2026-11-07 (Smart Match como proyecto separado) y 2026-11-09 («si tienen que ser a fuerzas proyectos por separados», sobre ML e IA generativa).
 - **Fecha:** 2026-11-07; ampliada el 2026-11-10 para incluir `TheHouse-GenAI`.
 - **Justificación:** el profesor pide proyectos separados para ML e IA generativa. El satélite de artefacto no agrega servicios en producción. El servicio auxiliar sí se despliega, pero como su caída no rompe ninguna función y no posee datos, no convierte al backend en microservicios (M-BE-004, M-BE-022) ni relaja COST-001.
 - **Impacto al aprobarse:** NV-23 debe pasar de "ML.NET entrenado aparte" a "carga ONNX de `TheHouse-ML` con `Microsoft.ML.OnnxRuntime`"; NV-24 debe pasar a "consume `TheHouse-GenAI` por un puerto con degradación segura"; el proveedor de IA y el hosting de GenAI requieren decisiones M-BE propias antes de producción. NV-11 1.1.0 define el esquema de preferencias que usa el modelo.

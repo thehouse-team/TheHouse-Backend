@@ -4,13 +4,13 @@
 | --- | --- |
 | Versión | 1.2.0 |
 | Fecha | 2026-11-10 |
-| Estado | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** (mientras no se apruebe, rige la versión 1.1.0 del historial de Git) |
-| Aprobación humana | Pendiente (Victor Manuel Jose Jose, responsable del backend, M-BE-040) |
+| Estado | **✅ APROBADA — VIGENTE** (sustituye a la versión 1.1.0) |
+| Aprobación humana | Victor Manuel Jose Jose, responsable del backend (M-BE-040) — 2026-11-10 («Apruebo 1.2.0») |
 | Decisión | M-BE-062 |
 
 Autoridad: máxima norma del Backend dentro de las instrucciones humanas y políticas del entorno.
 
-**Cambios 1.2.0 (2026-11-10, borrador):** reconoce los dos proyectos separados que pidió el profesor sin romper el monolito modular: `TheHouse-ML` como **satélite de artefacto** (no se despliega; entrega un modelo ONNX que el backend carga en proceso) y `TheHouse-GenAI` como **servicio auxiliar** (se despliega aparte, solo lo llama el backend y su ausencia no rompe ninguna función). Agrega §6.1, precisa §15, §17 y §30 y actualiza §2. Las demás reglas no cambian. Detalle en M-BE-062.
+**Cambios 1.2.0 (2026-11-10):** reconoce los dos proyectos separados que pidió el profesor sin romper el monolito modular: `TheHouse-ML` como **satélite de artefacto** (no se despliega; entrega un modelo ONNX que el backend carga en proceso) y `TheHouse-GenAI` como **servicio auxiliar** (se despliega aparte, solo lo llama el backend y su ausencia no rompe ninguna función). Agrega §6.1, precisa §15, §17 y §30 y actualiza §2. Las demás reglas no cambian. Detalle en M-BE-062.
 
 **Cambios 1.1.0 (2026-11-06):** la versión 1.0.0 describía la fase inicial solo documental. Esta versión conserva todas las reglas de fondo (SDD, COST-001, seguridad, Clean Architecture, monolito modular) y actualiza lo que quedó desfasado tras ejecutar NV-01 a NV-09: estado de la solución, proveedor cloud seleccionado, CI/CD vigente, protocolo de autorizaciones y flujo de Git. Detalle en `specs/README.md` §6.2 y en M-BE-056/M-BE-057.
 
