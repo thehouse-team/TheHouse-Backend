@@ -8,12 +8,12 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA NV-16, NV-23 y NV-24»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-16-contact-chat-requests/`) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 11 |
-| Tasks completadas | 0 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
@@ -25,19 +25,19 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Crear solicitud** — Requisito: NV-16-R01 · Fase: F1 · Aceptación: Valida preguntas del catálogo y mensaje; crea solicitud y conversación en la misma operación; 404 cuarto no publicado; 409 activa o límite; 422 propio cuarto; 409 participante suspendido. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Bandeja del estudiante y cancelación** — Requisito: NV-16-R02 · Fase: F1 · Aceptación: Lista, detalle y cancelación de sus solicitudes con la visita activa de NV-17; transiciones válidas; lo ajeno 404. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Bandeja del arrendador, aceptar y rechazar** — Requisito: NV-16-R03 · Fase: F1 · Aceptación: Lista por estado y cuarto, detalle, aceptar y rechazar con motivo; solo el dueño del cuarto; 409 en transiciones inválidas o cuarto no publicado. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Crear solicitud** — Requisito: NV-16-R01 · Fase: F1 · Aceptación: Valida preguntas del catálogo y mensaje; crea solicitud y conversación en la misma operación; 404 cuarto no publicado; 409 activa o límite; 422 propio cuarto; 409 participante suspendido. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Bandeja del estudiante y cancelación** — Requisito: NV-16-R02 · Fase: F1 · Aceptación: Lista, detalle y cancelación de sus solicitudes con la visita activa de NV-17; transiciones válidas; lo ajeno 404. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Bandeja del arrendador, aceptar y rechazar** — Requisito: NV-16-R03 · Fase: F1 · Aceptación: Lista por estado y cuarto, detalle, aceptar y rechazar con motivo; solo el dueño del cuarto; 409 en transiciones inválidas o cuarto no publicado. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T04 · Chat por consulta incremental** — Requisito: NV-16-R04 · Fase: F2 · Aceptación: Mensajes ordenados con cursor `after`, `hasMore` y `ETag`/304; envío idempotente por `clientMessageId`; conversación cerrada 409. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T05 · No leídos y lectura** — Requisito: NV-16-R05 · Fase: F2 · Aceptación: `unreadCount` por conversación y `read` hasta un mensaje; nunca cuenta los propios mensajes. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T06 · Persistencia e índices** — Requisito: NV-16-R06 · Fase: F2 · Aceptación: Índice único parcial de solicitudes activas, único de `clientMessageId` y de lectura de mensajes por conversación; prueba de doble toque concurrente. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T04 · Chat por consulta incremental** — Requisito: NV-16-R04 · Fase: F2 · Aceptación: Mensajes ordenados con cursor `after`, `hasMore` y `ETag`/304; envío idempotente por `clientMessageId`; conversación cerrada 409. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T05 · No leídos y lectura** — Requisito: NV-16-R05 · Fase: F2 · Aceptación: `unreadCount` por conversación y `read` hasta un mensaje; nunca cuenta los propios mensajes. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [x] **T06 · Persistencia e índices** — Requisito: NV-16-R06 · Fase: F2 · Aceptación: Índice único parcial de solicitudes activas, único de `clientMessageId` y de lectura de mensajes por conversación; prueba de doble toque concurrente. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T07 · Privacidad y abuso** — Requisito: NV-16-R07 · Fase: F3 · Aceptación: Ninguna respuesta incluye teléfono, correo, apellidos ni ids de usuario; rate limits con 429; Redis caído 503; cuentas suspendidas no escriben; contenido fuera de logs. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
+- [x] **T07 · Privacidad y abuso** — Requisito: NV-16-R07 · Fase: F3 · Aceptación: Ninguna respuesta incluye teléfono, correo, apellidos ni ids de usuario; rate limits con 429; Redis caído 503; cuentas suspendidas no escriben; contenido fuera de logs. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 
 ## F4 — Pruebas y evidencia
 
@@ -50,13 +50,13 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F2 | COMPLETA |
+| T07 | R07 | F3 | COMPLETA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R09 | F4 | ABIERTA |
 | T10 | R09 | F4 | ABIERTA |
@@ -82,11 +82,11 @@
 | --- | --- |
 | Requisitos | 9 |
 | Tasks | 11 |
-| Tasks abiertas | 11 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
