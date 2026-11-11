@@ -134,6 +134,27 @@ public static class UserResourceProblems
         };
     }
 
+    // NV-16: solicitudes y chat.
+    public static void NormalizeMessaging(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los datos de la solicitud o del mensaje no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            403 => "Esta acción requiere activar el modo arrendador.",
+            404 => "La solicitud, el cuarto o la conversación no existe.",
+            409 => "La solicitud entra en conflicto con el estado actual.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            422 => "La solicitud no cumple las reglas de contacto.",
+            429 => "Se superó el límite de solicitudes o mensajes.",
+            503 => "Las solicitudes y el chat no están disponibles temporalmente.",
+            504 => "Las solicitudes y el chat no respondieron a tiempo.",
+            _ => "No fue posible procesar la solicitud.",
+        };
+    }
+
     public static string? DetailFor(string code) => code switch
     {
         "favorites_limit" => "Se alcanzó el máximo de 200 favoritos.",
@@ -167,6 +188,14 @@ public static class UserResourceProblems
         "room_state" => "La acción no es válida en el estado actual del cuarto.",
         "version_conflict" => "Los datos cambiaron desde la última lectura; vuelve a cargarlos.",
         "publication_incomplete" => "Faltan pasos para enviar el edificio a revisión.",
+        "own_room" => "No puedes enviar una solicitud a un cuarto propio.",
+        "active_request_exists" => "Ya tienes una solicitud activa para este cuarto.",
+        "active_requests_limit" => "Alcanzaste el máximo de 10 solicitudes activas.",
+        "request_in_progress" => "Ya hay una solicitud en proceso; intenta de nuevo.",
+        "request_state" => "La solicitud no se puede cambiar en su estado actual.",
+        "room_unavailable" => "El cuarto ya no está publicado.",
+        "conversation_closed" => "La conversación está cerrada.",
+        "participant_suspended" => "Una de las cuentas de la conversación está suspendida.",
         _ => null,
     };
 }
