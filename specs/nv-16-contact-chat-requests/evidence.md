@@ -33,6 +33,7 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | --- | --- |
 | `dotnet build TheHouse.slnx -warnaserror` | 0 advertencias, 0 errores |
 | `dotnet test TheHouse.slnx` (dos corridas seguidas) | 799/799 en ambas: unitarias 284, seguridad 74, integración 441 |
+| `dotnet test TheHouse.slnx` (con la prueba de concurrencia y `main` integrado) | 800/800: unitarias 284, seguridad 74, integración 442 |
 | `dotnet test --filter MessagingHttpTests` (con la prueba de concurrencia) | 16/16 |
 
 ## 3. Trazabilidad requisito → prueba
