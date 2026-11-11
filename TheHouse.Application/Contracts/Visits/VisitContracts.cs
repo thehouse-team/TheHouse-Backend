@@ -28,17 +28,74 @@ public sealed record VisitRoomSummary(string Id, string BuildingId, string Title
 // Transición (NV-17 1.2.0): propiedad de NV-07 de la que salió el cuarto.
 public sealed record VisitPropertySummary(string Id, string Title, string City);
 
+// NV-17 1.3.0: campos agregados sin quitar ninguno. `Address` y `Location`
+// solo con la visita `confirmed` (RNF-02).
 public sealed record VisitResponse(
     string Id,
     VisitRoomSummary Room,
     VisitPropertySummary? Property,
     DateTimeOffset ScheduledAt,
+    DateTimeOffset? PreviousScheduledAt,
     string TimeZone,
     string Status,
     string? Message,
+    VisitLandlordSummary Landlord,
+    VisitAddress? Address,
+    VisitLocation? Location,
+    VisitCancellation? Cancellation,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
+    DateTimeOffset? ConfirmedAt,
     DateTimeOffset? CancelledAt);
+
+public sealed record VisitLandlordSummary(string Name);
+
+public sealed record VisitAddress(string Street, string Number, string Neighborhood, string City, string State, string PostalCode);
+
+public sealed record VisitLocation(double Lat, double Lng);
+
+public sealed record VisitCancellation(string By, string? Reason, string? Note);
+
+// Vista del arrendador: sin dirección (ya la conoce) ni datos de contacto.
+public sealed record VisitStudentSummary(string? Name, string? University);
+
+public sealed record LandlordVisitResponse(
+    string Id,
+    VisitRoomSummary Room,
+    DateTimeOffset ScheduledAt,
+    DateTimeOffset? PreviousScheduledAt,
+    string TimeZone,
+    string Status,
+    string? Message,
+    VisitStudentSummary Student,
+    VisitCancellation? Cancellation,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt,
+    DateTimeOffset? ConfirmedAt,
+    DateTimeOffset? CancelledAt);
+
+public sealed record LandlordVisitListResponse(
+    IReadOnlyList<LandlordVisitResponse> Items,
+    int Page,
+    int PageSize,
+    long TotalItems,
+    int TotalPages);
+
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+public sealed class RescheduleVisitRequest
+{
+    public string? ScheduledAt { get; init; }
+
+    public string? Note { get; init; }
+}
+
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+public sealed class LandlordCancelVisitRequest
+{
+    public string? Reason { get; init; }
+
+    public string? Note { get; init; }
+}
 
 public sealed record VisitListResponse(
     IReadOnlyList<VisitResponse> Items,

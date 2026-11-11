@@ -55,6 +55,27 @@ public sealed class VisitDocument
     [BsonElement("cancelReason")]
     public string? CancelReason { get; set; }
 
+    // NV-17 1.3.0: parte del arrendador.
+    [BsonElement("previousScheduledAt")]
+    [BsonIgnoreIfNull]
+    public DateTime? PreviousScheduledAt { get; set; }
+
+    [BsonElement("cancelNote")]
+    [BsonIgnoreIfNull]
+    public string? CancelNote { get; set; }
+
+    [BsonElement("cancelledBy")]
+    [BsonIgnoreIfNull]
+    public string? CancelledBy { get; set; }
+
+    [BsonElement("rescheduleNote")]
+    [BsonIgnoreIfNull]
+    public string? RescheduleNote { get; set; }
+
+    [BsonElement("confirmedAt")]
+    [BsonIgnoreIfNull]
+    public DateTime? ConfirmedAt { get; set; }
+
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; }
 

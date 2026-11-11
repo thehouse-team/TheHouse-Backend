@@ -17,6 +17,17 @@ public static class VisitsEndpoint
 
     public const string MinePath = ApiConventions.Prefix + "/users/me/visits";
 
+    // NV-17 1.3.0: calendario y acciones del arrendador.
+    public const string LandlordPath = ApiConventions.Prefix + "/landlord/visits";
+
+    public const string LandlordDetailPath = LandlordPath + "/{id}";
+
+    public const string LandlordConfirmPath = LandlordPath + "/{id}/confirm";
+
+    public const string LandlordReschedulePath = LandlordPath + "/{id}/reschedule";
+
+    public const string LandlordCancelPath = LandlordPath + "/{id}/cancel";
+
     public const string IdempotencyHeader = "Idempotency-Key";
 
     public const string ReplayedHeader = "Idempotent-Replayed";
@@ -92,6 +103,78 @@ public static class VisitsEndpoint
             .RequireTokenNotRevoked()
             .DisableRateLimiting();
     }
+
+    public static bool IsLandlordVisits(HttpContext context) =>
+        context.Request.Path.StartsWithSegments(LandlordPath, StringComparison.OrdinalIgnoreCase);
+
+    public static void MapLandlordVisits(this WebApplication app)
+    {
+        Landlord(app.MapGet(LandlordPath, CalendarAsync), "ListLandlordVisits", "Visits to my rooms by date range, status and room")
+            .Produces<LandlordVisitListResponse>(200);
+        Landlord(app.MapGet(LandlordDetailPath, LandlordGetAsync), "GetLandlordVisit", "One visit to one of my rooms")
+            .Produces<LandlordVisitResponse>(200).ProducesProblem(404);
+        Landlord(app.MapPost(LandlordConfirmPath, ConfirmAsync), "ConfirmVisit", "Confirm a requested visit")
+            .Produces<LandlordVisitResponse>(200).ProducesProblem(404).ProducesProblem(409);
+        Landlord(app.MapPost(LandlordReschedulePath, RescheduleAsync), "RescheduleVisit", "Move a visit to another time (it stays confirmed)")
+            .Accepts<RescheduleVisitRequest>("application/json")
+            .Produces<LandlordVisitResponse>(200).ProducesProblem(404).ProducesProblem(409).ProducesProblem(413).ProducesProblem(415).ProducesProblem(422);
+        Landlord(app.MapPost(LandlordCancelPath, LandlordCancelAsync), "CancelVisitAsLandlord", "Cancel a visit with a reason")
+            .Accepts<LandlordCancelVisitRequest>("application/json")
+            .Produces<LandlordVisitResponse>(200).ProducesProblem(404).ProducesProblem(409).ProducesProblem(413).ProducesProblem(415);
+    }
+
+    private static RouteHandlerBuilder Landlord(RouteHandlerBuilder builder, string name, string summary) =>
+        builder.WithName(name).WithTags("Visits").WithSummary(summary)
+            .ProducesValidationProblem(400)
+            .ProducesProblem(401).ProducesProblem(403).ProducesProblem(429).ProducesProblem(503).ProducesProblem(500)
+            .AllowAnonymous().RequireTokenNotRevoked().DisableRateLimiting();
+
+    private static Task<IResult> CalendarAsync(HttpContext context, LandlordVisitService visits, IRateLimitStore store, UserRateLimitOptions limits) =>
+        UserEndpointSupport.RunAsync(context, async userId =>
+        {
+            await Enforce(context, store, limits, userId);
+            var page = UserEndpointSupport.QueryInteger(context, "page", PropertyQueryValidation.DefaultPage);
+            var pageSize = UserEndpointSupport.QueryInteger(context, "pageSize", PropertyQueryValidation.DefaultPageSize);
+            return Results.Json(await visits.CalendarAsync(
+                userId,
+                UserEndpointSupport.QueryText(context, "from"),
+                UserEndpointSupport.QueryText(context, "to"),
+                UserEndpointSupport.QueryText(context, "status"),
+                UserEndpointSupport.QueryText(context, "roomId"),
+                page,
+                pageSize,
+                context.RequestAborted));
+        });
+
+    private static Task<IResult> LandlordGetAsync(string id, HttpContext context, LandlordVisitService visits, IRateLimitStore store, UserRateLimitOptions limits) =>
+        UserEndpointSupport.RunAsync(context, async userId =>
+        {
+            await Enforce(context, store, limits, userId);
+            return Results.Json(await visits.GetAsync(userId, id, context.RequestAborted));
+        });
+
+    private static Task<IResult> ConfirmAsync(string id, HttpContext context, LandlordVisitService visits, IRateLimitStore store, UserRateLimitOptions limits) =>
+        UserEndpointSupport.RunAsync(context, async userId =>
+        {
+            await Enforce(context, store, limits, userId);
+            return Results.Json(await visits.ConfirmAsync(userId, id, context.RequestAborted));
+        });
+
+    private static Task<IResult> RescheduleAsync(string id, HttpContext context, LandlordVisitService visits, IRateLimitStore store, UserRateLimitOptions limits) =>
+        UserEndpointSupport.RunAsync(context, async userId =>
+        {
+            await Enforce(context, store, limits, userId);
+            var body = await UserEndpointSupport.ReadJsonAsync<RescheduleVisitRequest>(context, optional: false);
+            return Results.Json(await visits.RescheduleAsync(userId, id, body!, context.RequestAborted));
+        });
+
+    private static Task<IResult> LandlordCancelAsync(string id, HttpContext context, LandlordVisitService visits, IRateLimitStore store, UserRateLimitOptions limits) =>
+        UserEndpointSupport.RunAsync(context, async userId =>
+        {
+            await Enforce(context, store, limits, userId);
+            var body = await UserEndpointSupport.ReadJsonAsync<LandlordCancelVisitRequest>(context, optional: false);
+            return Results.Json(await visits.CancelAsync(userId, id, body!, context.RequestAborted));
+        });
 
     private static Task<IResult> CreateAsync(
         HttpContext context,

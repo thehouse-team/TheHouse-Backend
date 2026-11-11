@@ -11,7 +11,21 @@ public interface IVisitRepository
 
     Task UpdateAsync(Visit visit, CancellationToken cancellationToken);
 
-    // Visitas Requested con horario posterior a `now`.
+    // Reemplaza la visita solo si nadie la cambió desde `expectedUpdatedAt`.
+    Task<bool> ReplaceIfUnchangedAsync(Visit visit, DateTimeOffset expectedUpdatedAt, CancellationToken cancellationToken);
+
+    // NV-17 1.3.0: calendario del arrendador. Visitas de esos cuartos con
+    // horario en [from, to]; orden scheduledAt asc, id asc.
+    Task<(IReadOnlyList<Visit> Items, long TotalItems)> ListForRoomsAsync(
+        IReadOnlyCollection<string> roomIds,
+        DateTimeOffset from,
+        DateTimeOffset to,
+        VisitStatus? status,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken);
+
+    // Visitas Requested o Confirmed con horario posterior a `now`.
     Task<IReadOnlyList<Visit>> ListActiveAsync(
         string userId,
         DateTimeOffset now,
