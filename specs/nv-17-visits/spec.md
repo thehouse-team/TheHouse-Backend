@@ -1,53 +1,60 @@
-# NV-17 — Visitas: solicitudes (v1)
+# NV-17 — Visitas: solicitud, confirmación y calendario
 
 | Campo | Valor |
 | --- | --- |
 | ID | NV-17 |
 | Documento | `spec.md` |
-| Versión | 1.2.0-borrador |
-| Fecha | 2026-11-07 |
-| Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-07 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`; la migración `--migrate-to-rooms` en Production requiere autorización aparte) |
-| Estado de ejecución | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-09): PASS WITH WARNINGS, ver `evidence.md`** |
+| Versión | 1.3.0-borrador |
+| Fecha | 2026-11-06 |
+| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
+| Aprobación humana | Pendiente |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Requerimientos de origen | RF-80 (parte del estudiante; la del arrendador en versión posterior) (`Requerimientos_TheHouse_v2`) |
+| Requerimientos de origen | RF-80 (estudiante y arrendador); RNF-02 (dirección al confirmar) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09 |
-| Plan | `plan.md` 1.2.0-borrador |
-| Tasks | `task.md` 1.2.0-borrador |
+| Plan | `plan.md` 1.3.0-borrador |
+| Tasks | `task.md` 1.3.0-borrador |
 | Módulo | Visits |
-| Precondición | NV-17 1.1.0, NV-12, NV-14 y NV-21 desplegadas; seed de demostración aplicado |
-| Relación | Las visitas apuntan a cuartos con dueño: base para que el arrendador las confirme en una versión posterior |
+| Precondición | NV-17 1.2.0, NV-12, NV-14, NV-16 y NV-21 desplegadas |
+| Relación | Completa RF-80; la dirección exacta habilita llegar a la visita; NV-18 cerrará el trato y NV-20 notificará los cambios |
 
 Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
 
-**Cambio 1.2.0-borrador (2026-11-07):** La versión 1.1.0 quedó completa y desplegada (ver `evidence.md`). Con NV-14 los cuartos publicados son el catálogo real; esta versión cambia el objetivo de `propertyId` (NV-07) a `roomId` (cuarto `available` de un edificio `verified`). Para no romper la app actual hay una **transición**: los ids de las 12 propiedades se aceptan y se traducen a su cuarto con el mapeo del seed de demostración (`demoSourceId`), y las respuestas incluyen además los campos anteriores (`propertyId`, `propertyIds`, `property`) con el valor de esa propiedad o `null`. La versión 1.3.0 retirará la transición cuando Mobile confirme que ya usa cuartos. Un comando autorizado migra los datos existentes. Las reglas de horario, idempotencia, conflictos y lock por usuario de 1.1.0 (y los ajustes M-BE-061) no cambian; ahora se aplican por cuarto.
+**Cambio 1.3.0-borrador (2026-11-11):** las versiones 1.1.0 y 1.2.0 quedaron completas y desplegadas (ver `evidence.md`). Esta versión agrega la parte del arrendador de RF-80: ve las visitas de sus cuartos en un calendario y las **confirma**, **reprograma** o **cancela**. Al confirmar, el estudiante ve la **dirección exacta** y la ubicación del edificio (RNF-02); antes nunca. Los estados siguen siendo `requested`, `confirmed` y `cancelled`; la cancelación indica quién la hizo y por qué. Las respuestas agregan campos sin quitar ninguno, así que la app actual sigue funcionando. NV-16 muestra también las visitas confirmadas en la solicitud. La retirada de la transición `propertyId` (prevista para 1.3.0 en M-BE-067) se mueve a una versión posterior, cuando Mobile confirme que ya no la usa.
 
 ## 1. Contexto
 
-Las visitas de 1.1.0 guardan `propertyId` de propiedades sin dueño, por eso nadie puede confirmarlas. Con NV-14 los cuartos publicados tienen arrendador; mover las visitas a cuartos es el paso previo para que el arrendador las vea y las confirme.
+Hoy el estudiante solicita visitas a cuartos publicados (NV-17 1.2.0), pero el arrendador no las ve ni puede responder, y la dirección exacta nunca se muestra, así que el estudiante no sabe a dónde ir. RF-80 pide que el propietario confirme, reprograme o cancele desde su calendario, y RNF-02 dice que la dirección exacta solo se muestra al confirmar una visita o al cerrar trato. Con NV-16 el arrendador ya tiene bandeja de solicitudes y chat.
 
 ## 2. Objetivo
 
-Que las visitas apunten a cuartos publicados con las mismas reglas de 1.1.0, sin romper la app actual y migrando las visitas existentes.
+Que el arrendador vea las visitas de sus cuartos y las confirme, reprograme o cancele, y que el estudiante vea la dirección exacta solo cuando su visita está confirmada.
 
 ## 3. Precondiciones
 
-1. NV-17 1.1.0 y NV-14 desplegadas con el seed de demostración.
+1. NV-17 1.2.0, NV-12, NV-14, NV-16 y NV-21 desplegadas.
 2. Validación del contrato §6.1 con el responsable de Mobile.
-3. Autorización «EJECUTA»; la migración de datos en Production requiere autorización aparte.
+3. Autorización «EJECUTA».
 
 ## 4. Alcance
 
-1. `POST /visits` con `roomId` (o `propertyId` en transición).
-2. Respuestas con `room` y, en transición, `property`.
-3. Las reglas de conflicto (misma visita activa, separación de 60 min, máximo 5) se aplican por cuarto.
-4. Migración de visitas existentes con el comando `--migrate-to-rooms` (compartido con NV-15).
-5. Contrato para Mobile y despliegue verificado en Azure.
+1. Calendario del arrendador: visitas de sus cuartos por rango de fechas, estado y cuarto.
+2. Detalle de una visita para el arrendador, con el nombre y la universidad del estudiante.
+3. Confirmar una visita `requested`.
+4. Reprogramar una visita `requested` o `confirmed` a otro horario válido (queda confirmada en el nuevo horario).
+5. Cancelar una visita `requested` o `confirmed` con motivo.
+6. El estudiante puede cancelar también visitas `confirmed`.
+7. Dirección exacta y ubicación en la visita del estudiante solo cuando está `confirmed` (RNF-02).
+8. NV-16: la visita activa que muestra la solicitud incluye las `confirmed`.
+9. Contrato para Mobile y despliegue verificado en Azure.
 
 ## 5. Fuera de alcance
 
-- Confirmar, rechazar o reprogramar visitas (arrendador): versión posterior.
-- Retirar la transición: 1.3.0.
+- Retirar la transición `propertyId`: versión posterior, cuando Mobile confirme.
+- Notificaciones push o por correo de los cambios: NV-20.
+- Que el estudiante acepte o rechace una reprogramación: la cancela si no le conviene.
+- Disponibilidad o agenda configurable del arrendador; varias visitas al mismo cuarto a la misma hora están permitidas.
+- Marcar la visita como realizada o no asistida.
 
 ## 6. Contrato HTTP
 
@@ -55,56 +62,120 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 | Método | Ruta | Acceso | Descripción | Respuestas |
 | --- | --- | --- | --- | --- |
-| POST | `/api/v1/visits` | Autenticado + `Idempotency-Key` | Solicita una visita a un cuarto publicado | 201, 200 (repetición), 400, 401, 404, 409, 422, 429, 503 |
-| GET | `/api/v1/users/me/visits` | Autenticado | Visitas propias paginadas; filtro `status` | 200, 400, 401, 429, 503 |
-| GET | `/api/v1/visits/{id}` | Autenticado (dueño de la visita) | Detalle de una visita propia | 200, 400, 401, 404, 429, 503 |
-| POST | `/api/v1/visits/{id}/cancel` | Autenticado (dueño de la visita) | Cancela una visita `requested` futura | 200, 400, 401, 404, 409, 429, 503 |
+| POST | `/api/v1/visits` | Autenticado + `Idempotency-Key` | Solicita una visita (sin cambios) | 201, 200, 400, 401, 404, 409, 422, 429, 503 |
+| GET | `/api/v1/users/me/visits` | Autenticado | Mis visitas; filtro `status` con `confirmed` | 200, 400, 401, 429, 503 |
+| GET | `/api/v1/visits/{id}` | Autenticado (estudiante) | Detalle; con dirección exacta si está `confirmed` | 200, 400, 401, 404, 429, 503 |
+| POST | `/api/v1/visits/{id}/cancel` | Autenticado (estudiante) | Cancela una visita `requested` o `confirmed` futura | 200, 400, 401, 404, 409, 429, 503 |
+| GET | `/api/v1/landlord/visits` | Arrendador | Calendario: visitas de mis cuartos por `from`, `to`, `status` y `roomId` | 200, 400, 401, 403, 429, 503 |
+| GET | `/api/v1/landlord/visits/{id}` | Arrendador (dueño del cuarto) | Detalle de una visita a mi cuarto | 200, 400, 401, 403, 404, 429, 503 |
+| POST | `/api/v1/landlord/visits/{id}/confirm` | Arrendador (dueño del cuarto) | Confirma una visita `requested` | 200, 400, 401, 403, 404, 409, 429, 503 |
+| POST | `/api/v1/landlord/visits/{id}/reschedule` | Arrendador (dueño del cuarto) | Mueve la visita a `{ scheduledAt, note }` y la deja confirmada | 200, 400, 401, 403, 404, 409, 422, 429, 503 |
+| POST | `/api/v1/landlord/visits/{id}/cancel` | Arrendador (dueño del cuarto) | Cancela con `{ reason, note }` | 200, 400, 401, 403, 404, 409, 429, 503 |
 
-- Entrada: `{ roomId, scheduledAt, message }`; en transición se acepta `propertyId` en lugar de `roomId` (exactamente uno de los dos; ambos o ninguno → 400). El id de propiedad se traduce a su cuarto.
-- Visita: `{ id, room: { id, buildingId, title, city }, property: { id, title, city } | null (transición), scheduledAt, timeZone, status, message, createdAt, updatedAt, cancelledAt }`; `room.city` es la ciudad del edificio (nunca la dirección).
-- Cuarto no publicado o inexistente → 404. Horario, idempotencia (24 h), conflictos y cancelación igual que 1.1.0, con `code` en 409/422 y fechas UTC `+00:00` (M-BE-061).
-- Las visitas ya creadas cuyo cuarto deja de publicarse se siguen viendo y cancelando.
+- Visita del estudiante: `{ id, room: { id, buildingId, title, city }, property: { id, title, city } | null, scheduledAt, previousScheduledAt | null, timeZone, status: "requested" | "confirmed" | "cancelled", message, landlord: { name }, address: { street, number, neighborhood, city, state, postalCode } | null, location: { lat, lng } | null, cancellation: { by: "student" | "landlord", reason, note } | null, createdAt, updatedAt, confirmedAt, cancelledAt }`. Campos nuevos respecto a 1.2.0: `previousScheduledAt`, `landlord`, `address`, `location`, `cancellation` y `confirmedAt`; ninguno se quita.
+- `address` y `location` (coordenadas reales del edificio) solo aparecen para el estudiante dueño de la visita y solo si está `confirmed`; en cualquier otro estado son `null`.
+- Visita del arrendador: `{ id, room: { id, buildingId, title, city }, scheduledAt, previousScheduledAt | null, timeZone, status, message, student: { name, university }, cancellation | null, createdAt, updatedAt, confirmedAt, cancelledAt }`. Nunca incluye teléfono, correo, apellidos ni ids de usuario.
+- Calendario: `from` y `to` (fechas ISO 8601 con zona; por defecto hoy y 30 días después; máximo 62 días), `status` (`requested`, `confirmed`, `cancelled`), `roomId`, `page`, `pageSize` ≤ 50; orden `scheduledAt` asc e id.
+- Reprogramar: `{ scheduledAt, note }` con las mismas reglas de horario de 1.1.0 (`America/Mexico_City`, 08:00–20:00, cuartos de hora, de 2 h a 60 días); `note` opcional ≤ 300; `previousScheduledAt` guarda el horario anterior.
+- Cancelar (arrendador): `reason` (`not_available`, `schedule_conflict`, `other`) y `note` ≤ 300, obligatoria con `other`. Cancelar (estudiante): `{ reason? }` como en 1.1.0, ahora también para `confirmed`.
+- Códigos nuevos: 409 `visit_state` (transición inválida), 409 `visit_in_past` (la visita ya pasó), 409 `student_schedule_overlap` (al reprogramar choca con otra visita activa del estudiante), 422 de horario como en 1.1.0, 403 `landlord_required`.
+- Todas las respuestas con `no-store`.
 
 ## 6.1 Contrato para Mobile
 
 Entregable acordado con Mobile: se envía junto con el aviso de despliegue. `DEPLOYED URL` y `TESTS` se completan en `evidence.md` al desplegar por el CD.
 
 ```text
-ENDPOINT     /api/v1/visits
-METHOD       POST
-AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
-HEADERS      Idempotency-Key: <UUID> (obligatorio); Content-Type: application/json
-REQUEST      { "roomId": "<24 hex>", "scheduledAt": "2026-11-20T17:00:00-06:00", "message": "opcional, <= 300" } (transición: propertyId en lugar de roomId)
-RESPONSE     201 { id, room: { id, buildingId, title, city }, property: { id, title, city } | null (transición), scheduledAt, timeZone, status, message, createdAt, updatedAt, cancelledAt } | 200 con Idempotent-Replayed: true
-STATUS CODES 201, 200, 400, 401, 404 cuarto, 409 code=..., 422 code=..., 429, 503
-PAGINATION   No
-```
-
-```text
-ENDPOINT     /api/v1/users/me/visits?status=requested&page=1&pageSize=20
+ENDPOINT     /api/v1/visits/{id}
 METHOD       GET
 AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
 HEADERS      —
-REQUEST      status (requested|cancelled), page, pageSize
-RESPONSE     200 { items: [visita], page, pageSize, totalItems, totalPages }
-STATUS CODES 200, 400, 401, 429, 503
-PAGINATION   Sí: sobre de NV-01; orden scheduledAt asc, id asc
-```
-
-```text
-ENDPOINT     /api/v1/visits/{id} | /api/v1/visits/{id}/cancel
-METHOD       GET | POST
-AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
-HEADERS      —
-REQUEST      id en la ruta; cancel: { reason? }
-RESPONSE     200 visita
-STATUS CODES 200, 400, 401, 404, 409 code=visit_in_past, 429, 503
+REQUEST      id en la ruta
+RESPONSE     200 { id, room: { id, buildingId, title, city }, property: { id, title, city } | null, scheduledAt, previousScheduledAt | null, timeZone, status: "requested" | "confirmed" | "cancelled", message, landlord: { name }, address: { street, number, neighborhood, city, state, postalCode } | null, location: { lat, lng } | null, cancellation: { by: "student" | "landlord", reason, note } | null, createdAt, updatedAt, confirmedAt, cancelledAt }
+STATUS CODES 200, 400, 401, 404 ajena, 429, 503
 PAGINATION   No
 ```
 
 ```text
-DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
-TESTS        CI de main (run 42680187690): 738/738 (unitarias 251, integración 426, seguridad 61); prueba HTTP real en Azure 38/38 (2026-11-09)
+ENDPOINT     /api/v1/users/me/visits?status=confirmed&page=1&pageSize=20
+METHOD       GET
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      —
+REQUEST      status (requested|confirmed|cancelled), page, pageSize
+RESPONSE     200 { items: [visita], page, pageSize, totalItems, totalPages }
+STATUS CODES 200, 400, 401, 429, 503
+PAGINATION   Sí: orden scheduledAt asc, id asc
+```
+
+```text
+ENDPOINT     /api/v1/visits/{id}/cancel
+METHOD       POST
+AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+HEADERS      —
+REQUEST      { reason? }
+RESPONSE     200 visita (cancellation.by = student)
+STATUS CODES 200, 400, 401, 404, 409 code=visit_state | visit_in_past, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/landlord/visits?from=2026-11-12T00:00:00-06:00&to=2026-11-30T23:59:59-06:00&status=requested&roomId=..
+METHOD       GET
+AUTH         Bearer JWT con perfil de arrendador (NV-12)
+HEADERS      —
+REQUEST      from, to (≤ 62 días), status, roomId, page, pageSize
+RESPONSE     200 { items: [{ id, room: { id, buildingId, title, city }, scheduledAt, previousScheduledAt | null, timeZone, status, message, student: { name, university }, cancellation | null, createdAt, updatedAt, confirmedAt, cancelledAt }], page, pageSize, totalItems, totalPages }
+STATUS CODES 200, 400, 401, 403 code=landlord_required, 429, 503
+PAGINATION   Sí: orden scheduledAt asc, id asc
+```
+
+```text
+ENDPOINT     /api/v1/landlord/visits/{id}
+METHOD       GET
+AUTH         Bearer JWT con perfil de arrendador (NV-12)
+HEADERS      —
+REQUEST      id en la ruta
+RESPONSE     200 visita del arrendador
+STATUS CODES 200, 400, 401, 403, 404 ajena, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/landlord/visits/{id}/confirm
+METHOD       POST
+AUTH         Bearer JWT con perfil de arrendador (NV-12)
+HEADERS      —
+REQUEST      sin cuerpo
+RESPONSE     200 visita del arrendador (confirmed)
+STATUS CODES 200, 401, 403, 404, 409 code=visit_state | visit_in_past, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/landlord/visits/{id}/reschedule
+METHOD       POST
+AUTH         Bearer JWT con perfil de arrendador (NV-12)
+HEADERS      —
+REQUEST      { scheduledAt, note? }
+RESPONSE     200 visita del arrendador (confirmed, previousScheduledAt)
+STATUS CODES 200, 400, 401, 403, 404, 409 code=visit_state | visit_in_past | student_schedule_overlap, 422 horario, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/landlord/visits/{id}/cancel
+METHOD       POST
+AUTH         Bearer JWT con perfil de arrendador (NV-12)
+HEADERS      —
+REQUEST      { reason: not_available|schedule_conflict|other, note? }
+RESPONSE     200 visita del arrendador (cancelled, cancellation.by = landlord)
+STATUS CODES 200, 400, 401, 403, 404, 409 code=visit_state | visit_in_past, 429, 503
+PAGINATION   No
+```
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io (pendiente de despliegue)
+TESTS        pendiente: unitarias, integración, seguridad y prueba HTTP real en Azure
 ```
 
 ## 7. Módulo, datos propios e integración
@@ -114,7 +185,7 @@ Módulo **Visits** del monolito modular (constitution §6): es propietario exclu
 | Aspecto | Detalle |
 | --- | --- |
 | Colecciones propias | `visits`, `visit_idempotency` |
-| Usa (puertos de otros módulos) | Listings `IRoomRepository`/`IBuildingRepository` (NV-12) para validar el cuarto y resumirlo |
+| Usa (puertos de otros módulos) | Listings `IRoomRepository`, `IBuildingRepository` e `ILandlordProfileRepository` (NV-12) para el cuarto, el dueño y la dirección; Profile `IProfileRepository` (NV-11) para el nombre y la universidad del estudiante |
 | Publica (eventos de dominio) | — |
 | Consume (eventos de dominio) | — |
 
@@ -122,16 +193,17 @@ Los eventos se procesan en el mismo proceso y de forma idempotente; si una répl
 
 ## 8. Modelo de datos
 
-- `visits`: `userId`, `roomId`, `scheduledAt` (UTC), `status`, `message`, `cancelReason`, `createdAt`, `updatedAt`, `cancelledAt`, `history[]`; índices `{ userId, scheduledAt }` y `{ userId, status }`.
-- `visit_idempotency`: sin cambios; el hash del cuerpo se calcula con el `roomId` ya traducido.
+- `visits` agrega `previousScheduledAt`, `confirmedAt`, `cancelledBy` (`student` | `landlord`), `cancelNote`; `history[]` registra cada confirmación, reprogramación y cancelación con su actor; índice nuevo `{ roomId, scheduledAt }`.
+- El calendario del arrendador consulta las visitas de los cuartos que le pertenecen (lista de sus cuartos de NV-12 y `$in` por `roomId`), sin migrar datos ni guardar el dueño en la visita.
+- La dirección y la ubicación se leen del edificio (NV-12) al responder; no se copian a la visita.
 
 ## 9. Reglas de negocio
 
-1. Estados, transiciones, horario en `America/Mexico_City`, lock por usuario (5 s) e idempotencia: iguales a 1.1.0.
-2. Conflictos por cuarto: una visita `requested` futura por cuarto, separación de 60 min y máximo 5 activas por usuario.
-3. Solo se solicitan visitas a cuartos publicados.
-4. Migración (`--migrate-to-rooms`): cada visita con `propertyId` recibe el `roomId` de su cuarto; las que no tienen mapeo se reportan y se conservan.
-5. No se revela dirección ni datos de contacto.
+1. Activas = `requested` o `confirmed`: una activa por estudiante y cuarto, separación de 60 min y máximo 5, como en 1.2.0.
+2. Transiciones: `requested` → `confirmed` (arrendador); `requested` | `confirmed` → `confirmed` en otro horario (reprogramar, arrendador); `requested` | `confirmed` → `cancelled` (estudiante o arrendador). Cualquier otra → 409 `visit_state`; sobre una visita cuyo horario ya pasó → 409 `visit_in_past`.
+3. Reprogramar valida el horario con las reglas de 1.1.0 y que no choque con otra visita activa del mismo estudiante (60 min) → 409 `student_schedule_overlap`.
+4. Solo el dueño del cuarto ve y cambia las visitas de ese cuarto; las visitas de cuartos que dejaron de publicarse siguen visibles y se pueden cancelar, pero no confirmar ni reprogramar → 409 `visit_state`.
+5. La dirección exacta solo se entrega al estudiante dueño de la visita y solo en estado `confirmed` (RNF-02).
 
 ## 10. Seguridad
 
@@ -146,9 +218,11 @@ Comunes a todas las specs funcionales:
 
 Específicas de esta spec:
 
-- El usuario sale del `sub`; visita ajena → 404 (BOLA).
-- Rate limit: 10 creaciones por día y 60 por minuto por usuario; Redis caído → 503.
-- Mensaje ≤ 300 caracteres y fuera de logs; `Idempotency-Key` solo con el hash del cuerpo.
+- BOLA: el estudiante solo ve sus visitas y el arrendador solo las de sus cuartos; lo ajeno responde 404.
+- La dirección exacta nunca aparece en listados públicos ni en visitas no confirmadas; prueba que lo verifica.
+- El arrendador ve el nombre del perfil y la universidad del estudiante, nunca su correo, teléfono ni id.
+- Rate limit 60/min por usuario en el calendario y las acciones; Redis caído → 503.
+- Notas y mensajes fuera de logs; entradas con campos desconocidos → 400.
 
 ## 11. Errores
 
@@ -158,9 +232,10 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | --- | --- | --- |
 | Validación | 400 | Validación fallida |
 | Sin autenticación o token revocado | 401 | No autorizado |
+| Sin perfil de arrendador | 403 | Acceso denegado |
 | Recurso inexistente o ajeno | 404 | Recurso no encontrado |
-| Conflicto de horario, visita activa duplicada, límite, llave reutilizada o transición inválida | 409 | Conflicto |
-| Horario fuera de las reglas | 422 | Solicitud no procesable |
+| Transición inválida, visita pasada o choque al reprogramar | 409 | Conflicto (`code`: `visit_state`, `visit_in_past`, `student_schedule_overlap`) |
+| Horario fuera de las reglas al reprogramar | 422 | Solicitud no procesable |
 | Rate limit | 429 | Demasiadas solicitudes |
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
@@ -169,14 +244,15 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
-| NV-17-R01 | Visitas a cuartos publicados | `POST /visits` con `roomId` de un cuarto publicado crea la visita (201); cuarto no publicado o inexistente 404; ambos ids o ninguno 400. | F1 | T01 |
-| NV-17-R02 | Respuesta con cuarto | Las respuestas incluyen `room { id, buildingId, title, city }` y, en transición, `property` o `null`. | F1 | T02 |
-| NV-17-R03 | Reglas por cuarto | Horario, idempotencia y conflictos de 1.1.0 aplicados por cuarto, con sus pruebas. | F1 | T03 |
-| NV-17-R04 | Transición desde propiedades | `propertyId` se traduce a su cuarto y produce la misma visita que con `roomId`; misma llave con el id de propiedad o de cuarto es el mismo cuerpo. | F2 | T04 |
-| NV-17-R05 | Migración de visitas | `--migrate-to-rooms` convierte las visitas existentes, reporta las no mapeadas y es idempotente. | F2 | T05 |
-| NV-17-R06 | Autorización y límites | Pruebas con dos usuarios; rate limits 429; Redis caído 503; `no-store`. | F3 | T06 |
-| NV-17-R07 | Contrato para Mobile y despliegue | Contrato §6.1 entregado; migración autorizada en Production; prueba HTTP real en Azure (crear por cuarto y por propiedad, repetir, conflicto, listar, cancelar). | F4 | T07 |
-| NV-17-R08 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T08, T09, T10 |
+| NV-17-R01 | Calendario del arrendador | Lista las visitas de sus cuartos por rango (≤ 62 días), estado y cuarto, ordenadas por horario; detalle con nombre y universidad del estudiante; lo ajeno 404; sin modo arrendador 403. | F1 | T01 |
+| NV-17-R02 | Confirmar | `requested` futura → `confirmed` con `confirmedAt` e historial; cualquier otro estado 409 `visit_state`; visita pasada 409 `visit_in_past`; cuarto no publicado 409. | F1 | T02 |
+| NV-17-R03 | Reprogramar | Nuevo horario válido con las reglas de 1.1.0, `previousScheduledAt` guardado, estado `confirmed`; 422 horario inválido; 409 `student_schedule_overlap`. | F1 | T03 |
+| NV-17-R04 | Cancelar por cualquiera de las partes | Arrendador con motivo del catálogo (nota obligatoria con `other`); estudiante también sobre `confirmed`; `cancellation.by` correcto; visita pasada 409. | F1 | T04 |
+| NV-17-R05 | Dirección exacta al confirmar | La visita del estudiante incluye `address` y `location` solo si está `confirmed`; en `requested` y `cancelled` son `null`; nunca en vistas del arrendador ni públicas. | F2 | T05 |
+| NV-17-R06 | Compatibilidad y NV-16 | Las respuestas de 1.2.0 conservan todos sus campos; el filtro `status` acepta `confirmed`; la solicitud de NV-16 muestra la visita activa `requested` o `confirmed`. | F2 | T06 |
+| NV-17-R07 | Privacidad, autorización y límites | Pruebas con estudiante, arrendador y un tercero; sin datos de contacto; rate limits 429; Redis caído 503. | F3 | T07 |
+| NV-17-R08 | Contrato para Mobile y despliegue | Contrato §6.1 entregado a Mobile; desplegado por el CD; prueba HTTP real en Azure (solicitar, calendario, confirmar con dirección, reprogramar, cancelar por ambas partes). | F4 | T08 |
+| NV-17-R09 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T09, T10, T11 |
 
 ## 13. Decisiones pendientes
 
@@ -184,16 +260,18 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Identificador | `roomId`; `propertyId` como alias en transición | APROBADO (M-BE-067) |
-| Respuesta | `room` nuevo y `property` de transición hasta 1.3.0 | APROBADO (M-BE-067) |
-| Migración | Mismo comando `--migrate-to-rooms` que NV-15 | APROBADO (M-BE-067) |
-| Visitas de cuartos que dejan de publicarse | Se siguen viendo y cancelando | APROBADO (M-BE-067) |
+| Estados | Se conservan `requested`, `confirmed` y `cancelled`; `cancellation.by` distingue quién canceló (no hay estado `declined`) | PROPUESTO |
+| Reprogramar | El arrendador mueve la visita y queda confirmada; el estudiante la cancela si no le conviene | PROPUESTO |
+| Dirección exacta | Solo al estudiante y solo con la visita `confirmed` (RNF-02); se lee del edificio al responder | PROPUESTO |
+| Calendario | Consulta por los cuartos del arrendador, sin migrar visitas; rango máximo de 62 días | PROPUESTO |
+| Varias visitas al mismo cuarto a la misma hora | Permitidas; el arrendador decide si confirma | PROPUESTO |
+| Transición `propertyId` | Se retira en una versión posterior, cuando Mobile confirme (cambia lo previsto en M-BE-067) | PROPUESTO |
 
 ## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
-| MongoDB Atlas M0 y Redis Upstash | $0 | Sin colecciones nuevas |
+| MongoDB Atlas M0 y Redis Upstash | $0 | Sin colecciones nuevas; un índice más en `visits` |
 
 Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
@@ -201,28 +279,28 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
-| NV-17-RK01 | Versión vieja de la app | Errores al agendar | Transición con `propertyId` |
-| NV-17-RK02 | Idempotencia entre versiones | Duplicados al reintentar con otro id | El hash usa el `roomId` traducido |
-| NV-17-RK03 | Migración parcial | Visitas perdidas | Comando idempotente con reporte |
+| NV-17-RK01 | Dirección expuesta antes de tiempo | Seguridad del arrendador | Prueba de que solo sale en `confirmed` y al dueño de la visita |
+| NV-17-RK02 | Reprogramación que no le conviene al estudiante | Visitas perdidas | El estudiante ve `previousScheduledAt` y puede cancelar; NV-20 notificará |
+| NV-17-RK03 | Arrendador con muchos cuartos | Calendario lento | Rango máximo de 62 días e índice `{ roomId, scheduledAt }` |
+| NV-17-RK04 | App anterior sin los nuevos estados | Pantallas incompletas | Campos solo agregados; `confirmed` documentado en el contrato |
 
 ## 16. Dependencias
 
-- NV-14 (cuartos publicados y mapeo).
-- NV-15 1.2.0 (comando compartido).
-- Versión posterior: confirmación del arrendador.
+- NV-17 1.2.0, NV-12, NV-14, NV-16 y NV-21.
+- NV-18 (cierre de trato) y NV-20 (notificaciones).
 
 ## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 8 |
+| Requisitos | 9 |
 | Fases del plan | 4 |
-| Tasks | 10 |
+| Tasks | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-09): PASS WITH WARNINGS, ver `evidence.md`** |
+| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
 ## 18. Aprobación pendiente
 
