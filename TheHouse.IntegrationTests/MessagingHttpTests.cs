@@ -233,6 +233,32 @@ public sealed class MessagingHttpTests
     }
 
     [Fact]
+    public async Task Concurrent_double_taps_create_one_request_and_one_message()
+    {
+        using var factory = new UserResourceFactory();
+        var roomId = await PublishRoomForBobAsync(factory);
+        using var alice = await factory.ClientForAsync(AliceId);
+        factory.Lock.HoldDelay = TimeSpan.FromMilliseconds(50);
+
+        var creates = await Task.WhenAll(Enumerable.Range(0, 6).Select(_ => CreateAsync(alice, roomId, new { message = "Hola" })));
+        var winner = Assert.Single(creates, response => response.StatusCode == HttpStatusCode.Created);
+        Assert.All(creates.Where(response => response != winner), response => Assert.Equal(HttpStatusCode.Conflict, response.StatusCode));
+        var (_, conversationId) = await IdsAsync(winner);
+
+        var clientId = Guid.NewGuid().ToString();
+        var sends = await Task.WhenAll(Enumerable.Range(0, 6).Select(_ => SendAsync(alice, conversationId, "Hola", clientId)));
+
+        Assert.Single(factory.RentalRequests.Requests);
+        Assert.Single(factory.Conversations.Messages);
+        Assert.Equal(1, sends.Count(response => response.StatusCode == HttpStatusCode.Created));
+        Assert.All(sends, response => Assert.True(response.StatusCode is HttpStatusCode.Created or HttpStatusCode.OK));
+        foreach (var response in creates.Concat(sends))
+        {
+            response.Dispose();
+        }
+    }
+
+    [Fact]
     public async Task Rate_limits_return_429_with_retry_after()
     {
         using var factory = new UserResourceFactory(new UserRateLimitOptions { RequestCreatesPerDay = 1, MessagePollsPerWindow = 1 });
