@@ -630,3 +630,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Siguen PENDIENTE:** hosting y proveedor de IA de `TheHouse-GenAI` (NV-24 §13); confirmación de visita y dirección exacta (NV-17 1.3.0).
 - **Impacto:** se ejecutan en orden NV-16 → NV-23 → NV-24, cada una con su PR. La T06 y la T07 de NV-23 esperan ML-04 y ML-06 de `TheHouse-ML` y una autorización que nombre `Microsoft.ML.OnnxRuntime`; sin ellas el resto se completa con el modelo base.
 
+## M-BE-069 — NV-17 1.3.0 aprobada: confirmar, reprogramar y cancelar visitas
+
+- **ID:** M-BE-069
+- **Decisión:** aprobar NV-17 1.3.0 con sus decisiones: calendario del arrendador por los cuartos que le pertenecen (máximo 62 días); confirmar, reprogramar (queda confirmada con `previousScheduledAt`) y cancelar con motivo; el estudiante cancela también visitas confirmadas; estados `requested`, `confirmed` y `cancelled` con `cancellation.by`; dirección exacta y ubicación solo al estudiante y solo con la visita `confirmed` (RNF-02); varias visitas al mismo cuarto a la misma hora permitidas.
+- **Cambio a M-BE-067:** la retirada de la transición `propertyId` ya no ocurre en 1.3.0; queda para una versión posterior, cuando Mobile confirme.
+- **Estado:** APROBADO — Victor, 2026-11-11 («apruebo y ejecuta», T01–T11). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-11.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** NV-16 muestra también visitas confirmadas en la solicitud; sin migración ni comandos en Production.
+

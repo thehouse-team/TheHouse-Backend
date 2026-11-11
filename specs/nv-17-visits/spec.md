@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.3.0-borrador |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-11 («apruebo y ejecuta»: aprobación de 1.3.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.3.0, T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-80 (estudiante y arrendador); RNF-02 (dirección al confirmar) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09 |
@@ -260,12 +260,12 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Estados | Se conservan `requested`, `confirmed` y `cancelled`; `cancellation.by` distingue quién canceló (no hay estado `declined`) | PROPUESTO |
-| Reprogramar | El arrendador mueve la visita y queda confirmada; el estudiante la cancela si no le conviene | PROPUESTO |
-| Dirección exacta | Solo al estudiante y solo con la visita `confirmed` (RNF-02); se lee del edificio al responder | PROPUESTO |
-| Calendario | Consulta por los cuartos del arrendador, sin migrar visitas; rango máximo de 62 días | PROPUESTO |
-| Varias visitas al mismo cuarto a la misma hora | Permitidas; el arrendador decide si confirma | PROPUESTO |
-| Transición `propertyId` | Se retira en una versión posterior, cuando Mobile confirme (cambia lo previsto en M-BE-067) | PROPUESTO |
+| Estados | Se conservan `requested`, `confirmed` y `cancelled`; `cancellation.by` distingue quién canceló (no hay estado `declined`) | APROBADO (M-BE-069) |
+| Reprogramar | El arrendador mueve la visita y queda confirmada; el estudiante la cancela si no le conviene | APROBADO (M-BE-069) |
+| Dirección exacta | Solo al estudiante y solo con la visita `confirmed` (RNF-02); se lee del edificio al responder | APROBADO (M-BE-069) |
+| Calendario | Consulta por los cuartos del arrendador, sin migrar visitas; rango máximo de 62 días | APROBADO (M-BE-069) |
+| Varias visitas al mismo cuarto a la misma hora | Permitidas; el arrendador decide si confirma | APROBADO (M-BE-069) |
+| Transición `propertyId` | Se retira en una versión posterior, cuando Mobile confirme (cambia lo previsto en M-BE-067) | APROBADO (M-BE-069) |
 
 ## 14. Costo — COST-001
 
@@ -299,8 +299,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.3.0, T01–T11 autorizadas** |
 
 ## 18. Aprobación pendiente
 
