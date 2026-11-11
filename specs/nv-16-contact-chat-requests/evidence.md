@@ -5,10 +5,10 @@
 | ID | NV-16 |
 | Documento | `evidence.md` |
 | Versión | 1.1.0 |
-| Fecha | 2026-11-10 |
+| Fecha | 2026-11-11 |
 | Autorización | «Apruebo y EJECUTA NV-16, NV-23 y NV-24» — Victor Manuel Jose Jose, 2026-11-10: NV-16 1.1.0, tasks T01–T11 (M-BE-068) |
-| Rama | `feat/nv-16-messaging` (implementación `014bd05`) → PR pendiente de revisión |
-| Resultado | **🟡 EN CURSO**: T01–T07 completas y verificadas en local; T08–T11 esperan CI, despliegue y prueba HTTP real en Azure |
+| Rama | `feat/nv-16-messaging` → PR #36 (spec y aprobación en #35), mezclado en `main` (`00839f8`) |
+| Resultado | **✅ PASS WITH WARNINGS**: 11/11 tasks completas; desplegada en Azure y verificada con prueba HTTP real 33/33. Advertencias: adaptador Mongo sin cobertura automatizada (verificado en Azure) y cuartos de demostración con arrendador de sistema que no responde |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -47,8 +47,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R05 No leídos y lectura | `Unread_counts_only_the_other_participant_and_read_marks_progress`, `Student_requests_landlord_accepts_and_both_chat` |
 | R06 Persistencia e índices | `Concurrent_double_taps_create_one_request_and_one_message` (6 solicitudes y 6 envíos simultáneos → 1 y 1), dobles con la misma unicidad que los índices; los índices reales se verifican en Azure |
 | R07 Privacidad y abuso | `No_contact_data_in_responses_and_no_content_in_logs`, `Rate_limits_return_429_with_retry_after`, `Fails_closed_when_mongo_or_redis_are_down`, `Suspended_landlord_blocks_new_requests_and_messages`, `Requires_a_valid_bearer_token`, `Redis_keys_never_contain_raw_user_or_conversation_ids`, `Inputs_reject_unknown_fields`, `Every_messaging_code_has_a_spanish_detail` |
-| R08 Contrato para Mobile y despliegue | Pendiente: CI, despliegue y prueba HTTP real en Azure |
-| R09 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+| R08 Contrato para Mobile y despliegue | Despliegue y prueba HTTP real en Azure 33/33 (§5 y §6); contrato entregado (§7) |
+| R09 Pruebas, seguridad y evidencia | CI de `main`: 800/800 y cobertura del §5; TRX de `TheHouse.SecurityTests` 74/74 |
 
 ## 4. Seguridad y coherencia
 
@@ -69,11 +69,138 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Concurrencia en la creación | Lock por estudiante en Redis (`request_in_progress` si otra creación está en curso), además del índice único |
 | Cuartos de demostración | Admiten solicitudes; su arrendador es la cuenta de sistema `system-demo` («TheHouse»), que no inicia sesión y no responde |
 
-## 5. Pendiente para cerrar
+## 5. Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#35](https://github.com/thehouse-team/TheHouse-Backend/pull/35) (spec 1.1.0 y aprobación) y [#36](https://github.com/thehouse-team/TheHouse-Backend/pull/36) (implementación), aprobados y mezclados por `IsaiAxel` (merge `00839f8`, 2026-11-11) |
+| CI de `main` (`00839f8`, run 42931704436) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI | 800/800: unitarias 284, integración 442, seguridad 74 |
+| Cobertura de líneas (CI) | 68.1 % total. `MessagingEndpoint` 100 %, `MessagingServices` 98.4 %. `MongoMessagingRepositories` en 0 %, como los demás adaptadores Mongo: se verifica en Azure |
+| CD (run 42932081749) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c00839f8-35-1`; `/api/v1/conversations` sin token → 401 |
+| Rol de prueba (M-BE-065) | Autorizado por Victor el 2026-11-11 («autorizo rol»): `--grant-role` dio `admin` a la cuenta de prueba `nv16-azure-admin-a9050368@example.com` (usuario `6af3b987…`) para aprobar el edificio de prueba, y al terminar `--revoke-role` lo retiró; ambos cambios en la bitácora con actor `cli` |
+
+## 6. Prueba HTTP real en Azure
+
+`.azure-check/nv16_azure_check.py` (fuera del repositorio), en dos fases: `prepare` creó tres cuentas `@example.com` (estudiante, arrendador y admin) y `run` ejecutó la prueba; no se imprimen tokens, contraseñas ni el texto de los mensajes. Resultado: **33/33 PASS** (2026-11-11).
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv16_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Preparación | Edificio «PRUEBA AUTOMATIZADA NV-16» con dos cuartos, aprobado por la cuenta admin de prueba | 2/2 |
+| Solicitudes | Crear (201, campos del §6.1, `no-store`); el estudiante no ve datos del estudiante y solo el primer nombre del arrendador; 409 `active_request_exists`; 400 por `status` en el cuerpo; 422 `own_room`; 404 cuarto inexistente; 401 sin token; mis solicitudes | 8/8 |
+| Bandeja del arrendador | 403 `landlord_required` sin modo arrendador; bandeja con `student { name, university }`; aceptar; 409 `request_state` al repetir; el estudiante no usa la bandeja | 5/5 |
+| Chat | Enviar 201; repetir `clientMessageId` → 200 con el mismo id; conversaciones con 1 no leído; mensajes con ETag y `pollAfterSeconds: 10`; **304** con `If-None-Match`; marcar leído 204 y no leídos en 0; respuesta del arrendador; otra cuenta → 404 | 9/9 |
+| Rechazo y cancelación | Segunda solicitud; 400 `other` sin nota; rechazar; 409 `conversation_closed`; cancelar la aceptada | 5/5 |
+| Privacidad | Sin teléfono ni correos en las respuestas; arrendador solo con su primer nombre | 2/2 |
+| Limpieza | Edificio de prueba suspendido y fuera de la búsqueda | 2/2 |
+
+Primera corrida interrumpida: se ejecutó `run` antes de asignar el rol; el script se detuvo tras crear el edificio de prueba. Se ajustó para comprobar el rol antes de empezar y para reutilizar ese edificio; el API no cambió.
+
+## 7. Contrato entregable a Mobile
+
+Entregado el 2026-11-11 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` con la URL y las pruebas reales:
+
+```text
+ENDPOINT     /api/v1/rooms/{roomId}/requests
+METHOD       POST
+AUTH         Bearer JWT (usuario tomado del token)
+HEADERS      —
+REQUEST      { quickQuestions: [..], message }
+RESPONSE     201 { id, status, room: { id, buildingId, title, city }, quickQuestions: [..], message, student: { name, university } | null, landlord: { name }, visit: { id, scheduledAt, status } | null, conversationId, rejection: { reason, note } | null, roomAvailable, createdAt, updatedAt }
+STATUS CODES 201, 400, 401, 404 cuarto no publicado, 409 code=active_request_exists | active_requests_limit, 422 code=own_room, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/users/me/requests?status=pending&page=1&pageSize=20 y /users/me/requests/{id}
+METHOD       GET
+AUTH         Bearer JWT (usuario tomado del token)
+HEADERS      —
+REQUEST      status, page, pageSize | id
+RESPONSE     200 sobre de NV-01 con solicitudes | 200 solicitud
+STATUS CODES 200, 400, 401, 404 ajena, 429, 503
+PAGINATION   Sí: orden updatedAt desc, id
+```
+
+```text
+ENDPOINT     /api/v1/users/me/requests/{id}/cancel
+METHOD       POST
+AUTH         Bearer JWT (usuario tomado del token)
+HEADERS      —
+REQUEST      sin cuerpo
+RESPONSE     200 solicitud (cancelled)
+STATUS CODES 200, 401, 404, 409 code=request_state, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/landlord/requests?status=pending&roomId=..&page=1 y /landlord/requests/{id}
+METHOD       GET
+AUTH         Bearer JWT con perfil de arrendador (NV-12)
+HEADERS      —
+REQUEST      status, roomId, page, pageSize | id
+RESPONSE     200 sobre de NV-01 con solicitudes | 200 solicitud
+STATUS CODES 200, 400, 401, 403 sin perfil de arrendador, 404 ajena, 429, 503
+PAGINATION   Sí
+```
+
+```text
+ENDPOINT     /api/v1/landlord/requests/{id}/accept | /reject
+METHOD       POST
+AUTH         Bearer JWT con perfil de arrendador (NV-12)
+HEADERS      —
+REQUEST      accept: sin cuerpo; reject: { reason, note }
+RESPONSE     200 solicitud
+STATUS CODES 200, 400, 401, 403, 404, 409 code=request_state | room_unavailable, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/conversations?page=1&pageSize=20
+METHOD       GET
+AUTH         Bearer JWT (usuario tomado del token)
+HEADERS      —
+REQUEST      page, pageSize
+RESPONSE     200 { items: [{ id, requestId, room: { id, title }, counterpart: { name, role }, status: "open" | "closed", lastMessageAt, unreadCount }], ... }
+STATUS CODES 200, 400, 401, 429, 503
+PAGINATION   Sí: orden lastMessageAt desc, id
+```
+
+```text
+ENDPOINT     /api/v1/conversations/{id}/messages?after=..&limit=50
+METHOD       GET
+AUTH         Bearer JWT; solo el estudiante o el arrendador de la conversación
+HEADERS      —
+REQUEST      after, limit; If-None-Match opcional
+RESPONSE     200 { items: [{ id, senderRole: "student" | "landlord", text, createdAt, mine }], hasMore, pollAfterSeconds } con ETag | 304
+STATUS CODES 200, 304, 400, 401, 404, 429, 503
+PAGINATION   Cursor `after`
+```
+
+```text
+ENDPOINT     /api/v1/conversations/{id}/messages
+METHOD       POST
+AUTH         Bearer JWT; solo el estudiante o el arrendador de la conversación
+HEADERS      —
+REQUEST      { text (1-1000), clientMessageId (UUID) }
+RESPONSE     201 { id, senderRole: "student" | "landlord", text, createdAt, mine } | 200 si se repite clientMessageId
+STATUS CODES 201, 200, 400, 401, 404, 409 code=conversation_closed | participant_suspended, 429, 503
+PAGINATION   No
+```
+
+```text
+ENDPOINT     /api/v1/conversations/{id}/read
+METHOD       POST
+AUTH         Bearer JWT; solo el estudiante o el arrendador de la conversación
+HEADERS      —
+REQUEST      { lastMessageId }
+RESPONSE     204
+STATUS CODES 204, 400, 401, 404, 429, 503
+PAGINATION   No
+```
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 42931704436): 800/800 (unitarias 284, integración 442, seguridad 74); prueba HTTP real en Azure 33/33 (2026-11-11)
+```
