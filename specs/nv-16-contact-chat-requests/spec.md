@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA NV-16, NV-23 y NV-24»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-16-contact-chat-requests/`) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-34, RF-35 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-02, RNF-03 |
@@ -279,12 +279,12 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Horario propuesto | No se duplica: se muestra la visita activa de NV-17 | PROPUESTO |
-| Tiempo real | Consulta incremental con cursor, `ETag` y `pollAfterSeconds: 10`; SignalR con backplane Redis como evolución | PROPUESTO |
-| Catálogo de preguntas rápidas | `available_now`, `services_included`, `deposit`, `minimum_contract`, `visit_possible`, `pets_allowed`, `roommates` | PROPUESTO |
-| Nombres visibles | Primer nombre del arrendador (NV-12) y nombre del perfil del estudiante (NV-11) con su universidad | PROPUESTO |
-| Límites | 10 solicitudes nuevas al día, 10 activas, 30 mensajes/min, 12 consultas/min por conversación | PROPUESTO |
-| Retención de mensajes | Mientras exista la cuenta; se anonimizan cuando exista la eliminación de cuenta | PROPUESTO |
+| Horario propuesto | No se duplica: se muestra la visita activa de NV-17 | APROBADO (M-BE-068) |
+| Tiempo real | Consulta incremental con cursor, `ETag` y `pollAfterSeconds: 10`; SignalR con backplane Redis como evolución | APROBADO (M-BE-068) |
+| Catálogo de preguntas rápidas | `available_now`, `services_included`, `deposit`, `minimum_contract`, `visit_possible`, `pets_allowed`, `roommates` | APROBADO (M-BE-068) |
+| Nombres visibles | Primer nombre del arrendador (NV-12) y nombre del perfil del estudiante (NV-11) con su universidad | APROBADO (M-BE-068) |
+| Límites | 10 solicitudes nuevas al día, 10 activas, 30 mensajes/min, 12 consultas/min por conversación | APROBADO (M-BE-068) |
+| Retención de mensajes | Mientras exista la cuenta; se anonimizan cuando exista la eliminación de cuenta | APROBADO (M-BE-068) |
 | Confirmación de visita y dirección exacta | NV-17 1.3.0, coordinada con Mobile | PENDIENTE |
 
 ## 14. Costo — COST-001
@@ -320,9 +320,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Tasks completadas | 7 |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 
 ## 18. Aprobación pendiente
 

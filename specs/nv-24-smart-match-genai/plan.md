@@ -6,9 +6,9 @@
 | Documento | `plan.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA NV-16, NV-23 y NV-24»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-24-smart-match-genai/`; activar `TheHouse-GenAI` en Production requiere las decisiones M-BE de su hosting y de su proveedor) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Tasks | `task.md` 1.1.0-borrador |
@@ -151,4 +151,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **⛔ NO EJECUTAR HASTA «EJECUTA»**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — T01–T11 autorizadas**.

@@ -41,7 +41,9 @@ public static class ProblemResponses
         problem.Instance = null;
         problem.Extensions.Clear();
         problem.Extensions["traceId"] = context.TraceIdentifier;
-        if (UserResourceProblems.IsAdmin(context))
+        if (MessagingEndpoint.IsMessaging(context))
+            UserResourceProblems.NormalizeMessaging(problem, status);
+        else if (UserResourceProblems.IsAdmin(context))
             UserResourceProblems.NormalizeAdmin(problem, status);
         else if (RegistrationProblems.IsRegistration(context))
             RegistrationProblems.Normalize(problem, status);

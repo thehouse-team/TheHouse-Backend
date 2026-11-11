@@ -35,6 +35,16 @@ public sealed class UserRateLimitOptions
 
     public int RoomDetailPerWindow { get; init; } = 60;
 
+    // NV-16: 60/min general, 10 solicitudes nuevas al día, 30 mensajes/min y
+    // 12 consultas de mensajes por minuto por conversación.
+    public int MessagingPerWindow { get; init; } = 60;
+
+    public int RequestCreatesPerDay { get; init; } = 10;
+
+    public int MessageSendsPerWindow { get; init; } = 30;
+
+    public int MessagePollsPerWindow { get; init; } = 12;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

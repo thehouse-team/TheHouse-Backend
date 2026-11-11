@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-06 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA NV-16, NV-23 y NV-24»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T13; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-23-smart-match-ml/`; el paquete `Microsoft.ML.OnnxRuntime` de la T06 requiere una autorización que lo nombre, y la T06 y la T07 esperan el release de `TheHouse-ML`) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-48 a RF-58, RF-64, RF-65, RF-68 (uso sin cuenta) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-13, RNF-14 |
@@ -228,12 +228,12 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Enfoque | Modelo base por reglas en C# desde ahora; modelo ONNX de `TheHouse-ML` cuando se publique (constitution 1.2.0 §6.1) | PROPUESTO |
-| Pesos iniciales | Presupuesto 30, distancia 25, servicios 20, tipo de lugar 10, tipo de inmueble 10, extras 5 (iguales a ML-04) | PROPUESTO |
-| Distribución del artefacto | Release de `TheHouse-ML` descargado en el build de la imagen y verificado con `SHA256SUMS`; versión y hash fijados en el repositorio | PROPUESTO |
-| Mascotas | Neutral hasta que NV-12 registre si el cuarto las admite (versión futura de NV-12 y de ML-03) | PROPUESTO |
-| Convivencia | Misma regla que el filtro `allowedTenants` de NV-14 | PROPUESTO |
-| Métrica de promoción | NDCG@10, decidida y medida en `TheHouse-ML` (ML-05) | PROPUESTO |
+| Enfoque | Modelo base por reglas en C# desde ahora; modelo ONNX de `TheHouse-ML` cuando se publique (constitution 1.2.0 §6.1) | APROBADO (M-BE-068) |
+| Pesos iniciales | Presupuesto 30, distancia 25, servicios 20, tipo de lugar 10, tipo de inmueble 10, extras 5 (iguales a ML-04) | APROBADO (M-BE-068) |
+| Distribución del artefacto | Release de `TheHouse-ML` descargado en el build de la imagen y verificado con `SHA256SUMS`; versión y hash fijados en el repositorio | APROBADO (M-BE-068) |
+| Mascotas | Neutral hasta que NV-12 registre si el cuarto las admite (versión futura de NV-12 y de ML-03) | APROBADO (M-BE-068) |
+| Convivencia | Misma regla que el filtro `allowedTenants` de NV-14 | APROBADO (M-BE-068) |
+| Métrica de promoción | NDCG@10, decidida y medida en `TheHouse-ML` (ML-05) | APROBADO (M-BE-068) |
 
 ## 14. Costo — COST-001
 
@@ -272,8 +272,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** |
 
 ## 18. Aprobación pendiente
 

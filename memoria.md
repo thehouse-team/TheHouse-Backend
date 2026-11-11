@@ -617,3 +617,16 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** con NV-14 los cuartos publicados son el catálogo real; las visitas necesitan un cuarto con dueño para que el arrendador las confirme más adelante.
 - **Impacto:** la migración en Production requiere autorización aparte; 1.3.0 retirará la transición cuando Mobile confirme.
 
+## M-BE-068 — NV-16, NV-23 y NV-24 1.1.0 aprobadas: contacto y chat, Smart Match y explicaciones
+
+- **ID:** M-BE-068
+- **Decisión:** aprobar con sus decisiones de la §13:
+  - **NV-16 1.1.0:** solicitudes de interés sobre cuartos publicados; la visita sigue en NV-17 y la solicitud muestra la activa; catálogo de 7 preguntas rápidas; chat por consulta incremental (cursor, `ETag`, `pollAfterSeconds: 10`); límites de 10 solicitudes nuevas al día, 10 activas y 30 mensajes por minuto; nombres visibles sin teléfono, correo ni apellidos.
+  - **NV-23 1.1.0:** modelo base por reglas en C# (`baseline-1.0.0`, pesos 30/25/20/10/10/5) y carga del ONNX de `TheHouse-ML` con verificación y respaldo; mascotas neutral; convivencia como el filtro de NV-14; artefacto incluido en el build.
+  - **NV-24 1.1.0:** ventajas y desventajas deterministas, resumen por plantilla y cliente de `TheHouse-GenAI` (`explain-match` v1) desactivado por defecto.
+- **Estado:** APROBADO — Victor, 2026-11-10 («Apruebo y EJECUTA NV-16, NV-23 y NV-24»). El responsable de Mobile validó antes los contratos §6.1.
+- **Fecha:** 2026-11-10.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Siguen PENDIENTE:** hosting y proveedor de IA de `TheHouse-GenAI` (NV-24 §13); confirmación de visita y dirección exacta (NV-17 1.3.0).
+- **Impacto:** se ejecutan en orden NV-16 → NV-23 → NV-24, cada una con su PR. La T06 y la T07 de NV-23 esperan ML-04 y ML-06 de `TheHouse-ML` y una autorización que nombre `Microsoft.ML.OnnxRuntime`; sin ellas el resto se completa con el modelo base.
+

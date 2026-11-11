@@ -73,8 +73,22 @@ public sealed class OpenApiContractTests
                 path.Name.StartsWith(AdminEndpoint.BasePath + "/", StringComparison.Ordinal) ||
                 path.Name == AdminEndpoint.ReportsPath ||
                 path.Name.StartsWith(SearchEndpoint.RoomsPath + "/", StringComparison.Ordinal) ||
-                path.Name == SearchEndpoint.PlacesPath + "/search",
+                path.Name == SearchEndpoint.PlacesPath + "/search" ||
+                path.Name.StartsWith(MessagingEndpoint.MinePath, StringComparison.Ordinal) ||
+                path.Name.StartsWith(MessagingEndpoint.ConversationsPath, StringComparison.Ordinal),
                 $"Unexpected OpenAPI path: {path.Name}");
+        }
+
+        // NV-16: las 12 operaciones de solicitudes y chat están publicadas.
+        foreach (var messagingPath in new[]
+                 {
+                     MessagingEndpoint.RoomRequestsPath, MessagingEndpoint.MinePath, MessagingEndpoint.MineDetailPath,
+                     MessagingEndpoint.MineCancelPath, MessagingEndpoint.LandlordPath, MessagingEndpoint.LandlordDetailPath,
+                     MessagingEndpoint.LandlordAcceptPath, MessagingEndpoint.LandlordRejectPath, MessagingEndpoint.ConversationsPath,
+                     MessagingEndpoint.MessagesPath, MessagingEndpoint.ReadPath,
+                 })
+        {
+            Assert.True(paths.TryGetProperty(messagingPath, out _), messagingPath);
         }
 
         Assert.True(

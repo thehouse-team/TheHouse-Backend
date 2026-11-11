@@ -62,6 +62,22 @@ public static class RateLimitKeys
     public static string RoomDetailUser(string userId) =>
         "thehouse:u2:search:detail:v1:" + Hash(userId);
 
+    // NV-16: solicitudes y chat por usuario; consultas por usuario y conversación.
+    public static string MessagingUser(string userId) =>
+        "thehouse:u2:messaging:user:v1:" + Hash(userId);
+
+    public static string RequestCreatesUser(string userId) =>
+        "thehouse:u2:messaging:request:v1:" + Hash(userId);
+
+    public static string MessageSendsUser(string userId) =>
+        "thehouse:u2:messaging:send:v1:" + Hash(userId);
+
+    public static string MessagePolls(string userId, string conversationId) =>
+        "thehouse:u2:messaging:poll:v1:" + Hash(userId + ":" + conversationId);
+
+    public static string MessagingLock(string userId) =>
+        "thehouse:u2:messaging:lock:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

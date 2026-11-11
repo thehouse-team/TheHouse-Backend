@@ -69,6 +69,10 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
 
     public InMemoryPlaceRepository Places { get; } = new();
 
+    public InMemoryRentalRequestRepository RentalRequests { get; } = new();
+
+    public InMemoryConversationRepository Conversations { get; } = new();
+
     // NV-11: el catálogo real del seed (10 universidades con coordenadas).
     public UniversityTestStore Universities { get; } = SeededUniversities();
 
@@ -95,6 +99,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             services.RemoveAll<IBuildingRepository>();
             services.RemoveAll<IRoomRepository>();
             services.RemoveAll<IPlaceRepository>();
+            services.RemoveAll<IRentalRequestRepository>();
+            services.RemoveAll<IConversationRepository>();
 
             services.AddSingleton<IUserRepository>(Users);
             services.AddSingleton<IRateLimitStore>(RateLimit);
@@ -112,6 +118,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             services.AddSingleton<IBuildingRepository>(Buildings);
             services.AddSingleton<IRoomRepository>(Rooms);
             services.AddSingleton<IPlaceRepository>(Places);
+            services.AddSingleton<IRentalRequestRepository>(RentalRequests);
+            services.AddSingleton<IConversationRepository>(Conversations);
             services.AddSingleton<ILoggerProvider>(new CaptureProvider(Logs));
 
             if (limits is not null)
