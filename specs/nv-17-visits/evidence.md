@@ -4,6 +4,81 @@
 | --- | --- |
 | ID | NV-17 |
 | Documento | `evidence.md` |
+| Versión | 1.3.0 |
+| Fecha | 2026-11-11 |
+| Autorización | «apruebo y ejecuta» — Victor Manuel Jose Jose, 2026-11-11: NV-17 1.3.0, tasks T01–T11 (M-BE-069) |
+| Rama | `feat/nv-17-landlord-visits` (implementación `95f0c49`) → PR pendiente de revisión |
+| Resultado | **🟡 EN CURSO**: T01–T07 completas y verificadas en local; T08–T11 esperan CI, despliegue y prueba HTTP real en Azure |
+
+No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
+
+## 1. Cambios por capa (1.3.0)
+
+| Capa | Archivo | Cambio |
+| --- | --- | --- |
+| Domain | `Entities/Visit.cs` | `Confirm`, `Reschedule` y `CancelByLandlord`; `Cancel` del estudiante acepta también `confirmed`; activas = `requested` o `confirmed`; campos `previousScheduledAt`, `confirmedAt`, `cancelledBy`, `cancelNote`, `rescheduleNote`; historial con actor |
+| Application | `Abstractions/Persistence/IVisitRepository.cs` | `ReplaceIfUnchangedAsync` (cambio condicional por `updatedAt`) y `ListForRoomsAsync` (calendario) |
+| Application | `Contracts/Visits/VisitContracts.cs` | `VisitResponse` con `previousScheduledAt`, `landlord`, `address`, `location`, `cancellation` y `confirmedAt` (ninguno quitado); `LandlordVisitResponse`; entradas de reprogramar y cancelar con `JsonUnmappedMemberHandling.Disallow` |
+| Application | `UseCases/VisitService.cs` | Dirección y ubicación solo con la visita `confirmed`; nombre del arrendador; filtro `confirmed`; cancelación condicional con un reintento |
+| Application | `UseCases/LandlordVisitService.cs` (nuevo) | Calendario (por los cuartos del arrendador, rango ≤ 62 días), detalle, confirmar, reprogramar y cancelar; lo ajeno 404 |
+| Infrastructure | `MongoVisitRepository.cs`, `Documents/FavoriteVisitDocuments.cs` | Campos nuevos, activas `Requested` o `Confirmed`, `ReplaceOne` condicional, consulta del calendario e índice `ix_visits_room_scheduled` |
+| API | `Http/VisitsEndpoint.cs` | 5 endpoints `/landlord/visits` |
+| API | `Http/ProblemResponses.cs`, `Http/UserResourceProblems.cs` | Mensajes de visitas en `/landlord/visits`; `student_schedule_overlap`; textos de `visit_state` y `visit_in_past` generalizados |
+| Pruebas | `UnitTests/LandlordVisitTests.cs`, `IntegrationTests/LandlordVisitsHttpTests.cs`, `SecurityTests/LandlordVisitSecurityTests.cs` | 17 unitarias, 7 de integración y 6 de seguridad; pruebas de 1.2.0 ajustadas a los campos nuevos y a `confirmed` |
+
+## 2. Comandos y resultados (local, 2026-11-11)
+
+| Comando | Resultado |
+| --- | --- |
+| `dotnet build TheHouse.slnx -warnaserror` | 0 advertencias, 0 errores |
+| `dotnet test TheHouse.slnx` (dos corridas seguidas) | 830/830 en ambas: unitarias 301, seguridad 80, integración 449 |
+
+## 3. Trazabilidad requisito → prueba (1.3.0)
+
+| Requisito | Pruebas |
+| --- | --- |
+| R01 Calendario del arrendador | `Calendar_lists_only_my_rooms_in_range_with_student_summary`, `Calendar_validates_the_range`, `Landlord_mode_is_required_and_foreign_visits_are_404`, `Landlord_confirms_and_student_then_sees_the_exact_address`, `Calendar_and_actions_are_private_to_the_room_owner` |
+| R02 Confirmar | `Confirm_only_from_requested_and_before_the_time`, `Confirm_requires_a_published_room`, `Rules_and_codes_for_landlord_actions` (`visit_state`) |
+| R03 Reprogramar | `Reschedule_keeps_the_previous_time_and_leaves_it_confirmed`, `Reschedule_validates_the_schedule_and_the_students_other_visits`, `Reschedule_and_cancel_by_both_sides`, `Rules_and_codes_for_landlord_actions` (`outside_hours`, `student_schedule_overlap`) |
+| R04 Cancelar por cualquiera de las partes | `Landlord_cancel_records_who_and_why`, `Landlord_cancel_validates_reason_and_note`, `Cancel_rejects_past_visits_and_reserved_states`, `Reschedule_and_cancel_by_both_sides`, `A_concurrent_change_is_reported_instead_of_overwritten` |
+| R05 Dirección exacta al confirmar | `Student_sees_the_exact_address_only_when_confirmed`, `Landlord_confirms_and_student_then_sees_the_exact_address`, `Landlord_views_never_include_contact_data_or_the_address`, `Only_confirmed_visits_can_reveal_the_address` |
+| R06 Compatibilidad y NV-16 | `Create_returns_201_with_contract_shape_in_utc` (campos de 1.2.0 conservados), `Confirmed_visits_count_as_active`, `Rental_request_shows_the_confirmed_visit`, suite de visitas 1.2.0 en verde |
+| R07 Privacidad, autorización y límites | `Calendar_and_actions_are_private_to_the_room_owner`, `Landlord_views_never_include_contact_data_or_the_address`, `Limits_and_dependencies_fail_closed`, `Landlord_inputs_reject_unknown_fields`, `Visit_codes_have_a_spanish_detail` |
+| R08 Contrato para Mobile y despliegue | Pendiente: CI, despliegue y prueba HTTP real en Azure |
+| R09 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+
+## 4. Seguridad y coherencia (1.3.0)
+
+- **RNF-02:** la dirección exacta y la ubicación solo salen en la visita del estudiante dueño y solo en estado `confirmed`; la vista del arrendador no tiene esos campos y la búsqueda pública sigue con la celda aproximada.
+- **BOLA:** el arrendador solo ve y cambia visitas de sus cuartos (lo ajeno 404); sin modo arrendador 403 `landlord_required`.
+- **Datos de contacto:** el arrendador ve nombre de perfil y universidad del estudiante; nunca correo, teléfono ni id.
+- **Concurrencia:** confirmar, reprogramar y cancelar guardan solo si la visita no cambió desde que se leyó; si cambió, 409 `visit_state` (el estudiante reintenta una vez sobre el estado nuevo).
+- **Compatibilidad:** las respuestas de 1.2.0 conservan todos sus campos; la transición `propertyId` sigue activa (M-BE-069).
+- **Fallo cerrado:** MongoDB o Redis caídos → 503; rate limit 60/min por usuario.
+
+### Decisiones de implementación (dentro de la spec)
+
+| Tema | Decisión |
+| --- | --- |
+| Nota al reprogramar | Se guarda en la visita (`rescheduleNote`) para auditoría; no se expone porque el contrato §6.1 validado no la incluye |
+| Cuarto que dejó de publicarse | Confirmar y reprogramar → 409 `visit_state`; cancelar sí se permite |
+| Visitas de 1.1.0 sin cuarto | No aparecen en el calendario ni las puede cambiar el arrendador (en Production ya se migraron todas) |
+
+## 5. Pendiente para cerrar 1.3.0
+
+| Paso | Responsable | Estado |
+| --- | --- | --- |
+| CI del PR en verde y merge | CI / Isai | Pendiente |
+| Aprobación del CD a Production | Victor | Pendiente |
+| Prueba HTTP real en Azure (`.azure-check/nv17_v13_azure_check.py`) | Victor | Pendiente |
+| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+
+## Historial — evidencia de 1.2.0
+
+| Campo | Valor |
+| --- | --- |
+| ID | NV-17 |
+| Documento | `evidence.md` |
 | Versión | 1.2.0 |
 | Fecha | 2026-11-09 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-17 1.2.0, tasks T01–T10 (M-BE-067); la migración `--migrate-to-rooms` en Production requiere autorización aparte |
@@ -12,7 +87,7 @@
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
-## 1. Cambios por capa (1.2.0)
+### 1. Cambios por capa (1.2.0)
 
 | Capa | Archivo | Cambio |
 | --- | --- | --- |
@@ -28,14 +103,14 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | API | `Http/PropertyEndpoint.cs` | `/properties` responde `Deprecation: true` y `Link: </api/v1/rooms/search>; rel="successor-version"` |
 | API | `Configuration/SearchConfiguration.cs`, `Program.cs` | Comando `--migrate-to-rooms`: requiere `RoomMigration__Enabled=true` y, en Production, `--allow-production-migration` (M-BE-043); la bandera de seeds no lo autoriza |
 
-## 2. Comandos y resultados (local, 2026-11-07)
+### 2. Comandos y resultados (local, 2026-11-07)
 
 | Comando | Resultado |
 | --- | --- |
 | `dotnet build TheHouse.slnx -warnaserror` | 0 advertencias, 0 errores |
 | `dotnet test TheHouse.slnx` (dos corridas seguidas) | 738/738 en ambas: unitarias 251, seguridad 61, integración 426 |
 
-## 3. Trazabilidad requisito → prueba (1.2.0)
+### 3. Trazabilidad requisito → prueba (1.2.0)
 
 | Requisito | Pruebas |
 | --- | --- |
@@ -48,7 +123,7 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R07 | Migración autorizada en Production y prueba HTTP real en Azure 38/38 (§5 y §6); contrato entregado (§7) |
 | R08 | CI de `main`: 738/738 y cobertura del §5; TRX de `TheHouse.SecurityTests` 61/61 |
 
-## 4. Seguridad y coherencia (1.2.0)
+### 4. Seguridad y coherencia (1.2.0)
 
 - El usuario sale del `sub`; `userId` o `status` en el cuerpo → 400 (asignación masiva). Las visitas de otro usuario responden 404.
 - Un cuarto no publicado no admite visitas nuevas (404); las visitas existentes se pueden leer y cancelar.
@@ -56,7 +131,7 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 - Lock de Redis o MongoDB caídos → 503.
 - **Advertencia W1:** el hash de idempotencia usa ahora el `roomId`. Durante las 24 h de vida de una llave, repetir después de la migración una petición de 1.1.0 con la misma llave responde 409 `idempotency_key_reused` en lugar de la visita original. El riesgo es bajo (ventana de 24 h, solo reintentos en ese momento) y se documenta para Mobile.
 
-## 5. Despliegue y CI
+### 5. Despliegue y CI
 
 | Paso | Resultado |
 | --- | --- |
@@ -68,7 +143,7 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Azure | revisión `ca-thehouse-u2--c14f4ff2-29-1` |
 | Migración en Production (M-BE-043) | Autorizada por Victor el 2026-11-09 («autoriso la migracion»). Una ejecución con `env RoomMigration__Enabled=true dotnet TheHouse.dll --migrate-to-rooms --allow-production-migration` vía `az containerapp exec` en esa revisión. Log: «favoritos migrados=1, duplicados eliminados=0, sin mapeo=0; visitas migradas=2, sin mapeo=0» y «Room migration completed». Los índices de favoritos se cambiaron en esa misma ejecución |
 
-## 6. Prueba HTTP real en Azure
+### 6. Prueba HTTP real en Azure
 
 `.azure-check/nv15_17_v12_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-09 después de la migración, con dos cuentas `@example.com` nuevas; no se imprimen tokens ni contraseñas. Resultado: **38/38 PASS**.
 
@@ -81,7 +156,7 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 
 Primera corrida: 35/37. Las dos fallas venían del script: la cuenta de prueba ya había hecho 10 intentos de crear visita y el límite diario de 10 de NV-17 1.1.0 respondió 429, como debe; la visita de transición no se creó y no había nada que cancelar. Se corrigió el script (caso V11a que espera el 429 y la visita de transición creada por otra cuenta); el API no cambió.
 
-## 7. Contrato entregable a Mobile
+### 7. Contrato entregable a Mobile
 
 Entregado el 2026-11-09 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` con la URL y las pruebas reales:
 

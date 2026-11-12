@@ -51,10 +51,11 @@ public sealed class MongoVisitRepository(IMongoDatabase database) : IVisitReposi
     public Task<IReadOnlyList<Visit>> ListActiveAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken) =>
         Run(async () =>
         {
-            var requested = VisitStatus.Requested.ToString();
+            string[] active = [VisitStatus.Requested.ToString(), VisitStatus.Confirmed.ToString()];
             var utcNow = MongoDates.ToUtc(now);
+            var builder = Builders<VisitDocument>.Filter;
             var documents = await Visits
-                .Find(visit => visit.UserId == userId && visit.Status == requested && visit.ScheduledAt > utcNow)
+                .Find(builder.Eq(visit => visit.UserId, userId) & builder.In(visit => visit.Status, active) & builder.Gt(visit => visit.ScheduledAt, utcNow))
                 .ToListAsync(cancellationToken);
             return (IReadOnlyList<Visit>)documents.Select(Map).ToArray();
         });
@@ -71,6 +72,48 @@ public sealed class MongoVisitRepository(IMongoDatabase database) : IVisitReposi
             if (status is { } value)
             {
                 filter &= Builders<VisitDocument>.Filter.Eq(visit => visit.Status, value.ToString());
+            }
+
+            var total = await Visits.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
+            var documents = await Visits
+                .Find(filter)
+                .Sort(Builders<VisitDocument>.Sort.Ascending(visit => visit.ScheduledAt).Ascending(visit => visit.Id))
+                .Skip((page - 1) * pageSize)
+                .Limit(pageSize)
+                .ToListAsync(cancellationToken);
+            return ((IReadOnlyList<Visit>)documents.Select(Map).ToArray(), total);
+        });
+
+    public Task<bool> ReplaceIfUnchangedAsync(Visit visit, DateTimeOffset expectedUpdatedAt, CancellationToken cancellationToken) =>
+        Run(async () =>
+        {
+            var id = MongoDB.Bson.ObjectId.Parse(visit.Id);
+            var expected = MongoDates.ToUtc(expectedUpdatedAt);
+            var result = await Visits.ReplaceOneAsync(
+                document => document.Id == id && document.UpdatedAt == expected,
+                ToDocument(visit, id),
+                cancellationToken: cancellationToken);
+            return result.ModifiedCount == 1;
+        });
+
+    public Task<(IReadOnlyList<Visit> Items, long TotalItems)> ListForRoomsAsync(
+        IReadOnlyCollection<string> roomIds,
+        DateTimeOffset from,
+        DateTimeOffset to,
+        VisitStatus? status,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken) =>
+        Run(async () =>
+        {
+            await EnsureIndexesAsync(cancellationToken);
+            var builder = Builders<VisitDocument>.Filter;
+            var filter = builder.In(visit => visit.RoomId, roomIds) &
+                         builder.Gte(visit => visit.ScheduledAt, MongoDates.ToUtc(from)) &
+                         builder.Lte(visit => visit.ScheduledAt, MongoDates.ToUtc(to));
+            if (status is { } value)
+            {
+                filter &= builder.Eq(visit => visit.Status, value.ToString());
             }
 
             var total = await Visits.CountDocumentsAsync(filter, cancellationToken: cancellationToken);
@@ -159,6 +202,9 @@ public sealed class MongoVisitRepository(IMongoDatabase database) : IVisitReposi
                     new CreateIndexModel<VisitDocument>(
                         visitKeys.Ascending(visit => visit.UserId).Ascending(visit => visit.Status).Ascending(visit => visit.ScheduledAt),
                         new CreateIndexOptions { Name = "ix_visits_user_status" }),
+                    new CreateIndexModel<VisitDocument>(
+                        visitKeys.Ascending(visit => visit.RoomId).Ascending(visit => visit.ScheduledAt),
+                        new CreateIndexOptions { Name = "ix_visits_room_scheduled" }),
                 ],
                 cancellationToken);
 
@@ -193,6 +239,11 @@ public sealed class MongoVisitRepository(IMongoDatabase database) : IVisitReposi
             Status = visit.Status.ToString(),
             Message = visit.Message,
             CancelReason = visit.CancelReason,
+            PreviousScheduledAt = visit.PreviousScheduledAt is { } previous ? MongoDates.ToUtc(previous) : null,
+            CancelNote = visit.CancelNote,
+            CancelledBy = visit.CancelledBy,
+            RescheduleNote = visit.RescheduleNote,
+            ConfirmedAt = visit.ConfirmedAt is { } confirmed ? MongoDates.ToUtc(confirmed) : null,
             CreatedAt = MongoDates.ToUtc(visit.CreatedAt),
             UpdatedAt = MongoDates.ToUtc(visit.UpdatedAt),
             CancelledAt = visit.CancelledAt is { } cancelled ? MongoDates.ToUtc(cancelled) : null,
@@ -217,6 +268,11 @@ public sealed class MongoVisitRepository(IMongoDatabase database) : IVisitReposi
             Status = Enum.Parse<VisitStatus>(document.Status),
             Message = document.Message,
             CancelReason = document.CancelReason,
+            PreviousScheduledAt = document.PreviousScheduledAt is { } previous ? MongoDates.FromUtc(previous) : null,
+            CancelNote = document.CancelNote,
+            CancelledBy = document.CancelledBy,
+            RescheduleNote = document.RescheduleNote,
+            ConfirmedAt = document.ConfirmedAt is { } confirmed ? MongoDates.FromUtc(confirmed) : null,
             CreatedAt = MongoDates.FromUtc(document.CreatedAt),
             UpdatedAt = MongoDates.FromUtc(document.UpdatedAt),
             CancelledAt = document.CancelledAt is { } cancelled ? MongoDates.FromUtc(cancelled) : null,

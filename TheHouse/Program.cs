@@ -272,6 +272,7 @@ app.MapUsersMe();
 app.MapProperties();
 app.MapFavorites();
 app.MapVisits();
+app.MapLandlordVisits();
 app.MapProfile();
 app.MapUniversitySearch();
 app.MapLandlord();

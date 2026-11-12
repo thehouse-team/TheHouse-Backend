@@ -19,6 +19,7 @@ namespace TheHouse.Application.UseCases;
 public sealed class VisitService(
     IVisitRepository visits,
     RoomCatalog catalog,
+    ILandlordProfileRepository landlords,
     IUserLock userLock,
     TimeProvider timeProvider)
 {
@@ -134,7 +135,7 @@ public sealed class VisitService(
             new VisitIdempotencyRecord(userId, keyText, requestHash, created.Id, now),
             cancellationToken);
 
-        return new CreateVisitResult(ToResponse(created, room), Replayed: false);
+        return new CreateVisitResult(ToResponse(created, room, await LandlordNameAsync(room.Building.OwnerId, cancellationToken)), Replayed: false);
     }
 
     public async Task<VisitResponse> GetAsync(string userId, string? id, CancellationToken cancellationToken)
@@ -156,8 +157,9 @@ public sealed class VisitService(
         {
             null or "" => null,
             "requested" => VisitStatus.Requested,
+            "confirmed" => VisitStatus.Confirmed,
             "cancelled" => VisitStatus.Cancelled,
-            _ => throw new RequestValidationException("status", "status must be requested or cancelled."),
+            _ => throw new RequestValidationException("status", "status must be requested, confirmed or cancelled."),
         };
 
         var (items, total) = await visits.ListAsync(userId, filter, page, pageSize, cancellationToken);
@@ -165,9 +167,18 @@ public sealed class VisitService(
             ? await catalog.LegacyMapAsync(cancellationToken)
             : new Dictionary<string, string>();
         var rooms = await catalog.LoadAsync(items.Select(visit => EffectiveRoomId(visit, legacy)), cancellationToken);
+        var names = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var owner in rooms.Values.Select(room => room.Building.OwnerId).Distinct(StringComparer.Ordinal))
+        {
+            names[owner] = await LandlordNameAsync(owner, cancellationToken);
+        }
 
         return new VisitListResponse(
-            items.Select(visit => ToResponse(visit, rooms.GetValueOrDefault(EffectiveRoomId(visit, legacy)))).ToArray(),
+            items.Select(visit =>
+            {
+                var room = rooms.GetValueOrDefault(EffectiveRoomId(visit, legacy));
+                return ToResponse(visit, room, room is null ? MessagingRules.FirstName(null) : names[room.Building.OwnerId]);
+            }).ToArray(),
             page,
             pageSize,
             total,
@@ -186,15 +197,22 @@ public sealed class VisitService(
             throw new RequestValidationException("reason", "reason is too long.");
         }
 
-        var visit = await LoadOwnAsync(userId, id, cancellationToken);
-        var cancelled = visit.Cancel(cleanReason, timeProvider.GetUtcNow());
-
-        if (!ReferenceEquals(cancelled, visit))
+        // Actualización condicional: si el arrendador la cambió al mismo tiempo,
+        // se vuelve a leer una vez y se aplica sobre el estado nuevo.
+        for (var attempt = 0; ; attempt++)
         {
-            await visits.UpdateAsync(cancelled, cancellationToken);
-        }
+            var visit = await LoadOwnAsync(userId, id, cancellationToken);
+            var cancelled = visit.Cancel(cleanReason, timeProvider.GetUtcNow());
+            if (ReferenceEquals(cancelled, visit) || await visits.ReplaceIfUnchangedAsync(cancelled, visit.UpdatedAt, cancellationToken))
+            {
+                return await ToResponseAsync(cancelled, cancellationToken);
+            }
 
-        return await ToResponseAsync(cancelled, cancellationToken);
+            if (attempt == 1)
+            {
+                throw new ConflictException("visit_state");
+            }
+        }
     }
 
     private async Task<Visit> LoadOwnAsync(string userId, string? id, CancellationToken cancellationToken)
@@ -220,14 +238,40 @@ public sealed class VisitService(
         var room = visit.RoomId.Length > 0
             ? await catalog.FindAsync(visit.RoomId, cancellationToken)
             : await catalog.FromLegacyAsync(visit.LegacyPropertyId ?? string.Empty, cancellationToken);
-        return ToResponse(visit, room);
+        var name = room is null ? MessagingRules.FirstName(null) : await LandlordNameAsync(room.Building.OwnerId, cancellationToken);
+        return ToResponse(visit, room, name);
     }
+
+    private async Task<string> LandlordNameAsync(string ownerId, CancellationToken cancellationToken) =>
+        MessagingRules.FirstName((await landlords.GetAsync(ownerId, cancellationToken))?.FullName);
+
+    // La dirección exacta solo con la visita confirmada (RNF-02).
+    private static VisitAddress? AddressOf(Visit visit, CatalogRoom? room) =>
+        visit.Status == VisitStatus.Confirmed && room is not null
+            ? new VisitAddress(
+                room.Building.Address.Street,
+                room.Building.Address.Number,
+                room.Building.Address.Neighborhood,
+                room.Building.Address.City,
+                room.Building.Address.State,
+                room.Building.Address.PostalCode)
+            : null;
+
+    private static VisitLocation? LocationOf(Visit visit, CatalogRoom? room) =>
+        visit.Status == VisitStatus.Confirmed && room is not null
+            ? new VisitLocation(room.Building.Latitude, room.Building.Longitude)
+            : null;
+
+    public static VisitCancellation? CancellationOf(Visit visit) =>
+        visit.Status == VisitStatus.Cancelled
+            ? new VisitCancellation(visit.CancelledBy ?? VisitActors.Student, visit.CancelReason, visit.CancelNote)
+            : null;
 
     private static string EffectiveRoomId(Visit visit, IReadOnlyDictionary<string, string> legacy) =>
         visit.RoomId.Length > 0 ? visit.RoomId : legacy.GetValueOrDefault(visit.LegacyPropertyId ?? string.Empty) ?? string.Empty;
 
     // Las visitas de cuartos que dejaron de publicarse se siguen mostrando.
-    private static VisitResponse ToResponse(Visit visit, CatalogRoom? room) =>
+    private static VisitResponse ToResponse(Visit visit, CatalogRoom? room, string landlordName) =>
         new(
             visit.Id,
             new VisitRoomSummary(
@@ -239,11 +283,17 @@ public sealed class VisitService(
                 ? new VisitPropertySummary(propertyId, room.Building.Name, room.Building.Address.City)
                 : null,
             visit.ScheduledAt.ToUniversalTime(),
+            visit.PreviousScheduledAt?.ToUniversalTime(),
             VisitSchedulePolicy.TimeZoneId,
             visit.Status.ToString().ToLowerInvariant(),
             visit.Message,
+            new VisitLandlordSummary(landlordName),
+            AddressOf(visit, room),
+            LocationOf(visit, room),
+            CancellationOf(visit),
             visit.CreatedAt,
             visit.UpdatedAt,
+            visit.ConfirmedAt,
             visit.CancelledAt);
 
     private static string Hash(string value) =>

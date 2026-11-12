@@ -99,10 +99,16 @@ public sealed class FavoriteVisitTests
     public void Cancel_rejects_past_visits_and_reserved_states()
     {
         var past = NewVisit(Now.AddMinutes(-1));
+        var completed = new Visit { Status = VisitStatus.Completed, ScheduledAt = Now.AddDays(1) };
         var confirmed = new Visit { Status = VisitStatus.Confirmed, ScheduledAt = Now.AddDays(1) };
 
         Assert.Equal("visit_in_past", Assert.Throws<ConflictException>(() => past.Cancel(null, Now)).Reason);
-        Assert.Equal("visit_state", Assert.Throws<ConflictException>(() => confirmed.Cancel(null, Now)).Reason);
+        Assert.Equal("visit_state", Assert.Throws<ConflictException>(() => completed.Cancel(null, Now)).Reason);
+
+        // NV-17 1.3.0: el estudiante también cancela visitas confirmadas.
+        var cancelled = confirmed.Cancel("Ya no puedo", Now);
+        Assert.Equal(VisitStatus.Cancelled, cancelled.Status);
+        Assert.Equal(VisitActors.Student, cancelled.CancelledBy);
     }
 
     // --- FavoriteService (1.2.0, cuartos) --------------------------
@@ -280,7 +286,7 @@ public sealed class FavoriteVisitTests
     {
         var world = World();
         var userLock = new InMemoryUserLock();
-        var service = new VisitService(world.Visits, world.Catalog, userLock, new ManualTimeProvider(Now));
+        var service = new VisitService(world.Visits, world.Catalog, new InMemoryLandlordProfileRepository(), userLock, new ManualTimeProvider(Now));
         await using var held = await userLock.TryAcquireAsync(RateLimitKeys.VisitLock(User), TimeSpan.FromSeconds(5), CancellationToken.None);
 
         var exception = await Assert.ThrowsAsync<ConflictException>(
@@ -309,7 +315,7 @@ public sealed class FavoriteVisitTests
     {
         var world = World();
         var clock = new ManualTimeProvider(Now);
-        var service = new VisitService(world.Visits, world.Catalog, new InMemoryUserLock(), clock);
+        var service = new VisitService(world.Visits, world.Catalog, new InMemoryLandlordProfileRepository(), new InMemoryUserLock(), clock);
         var created = await service.CreateAsync(User, Guid.NewGuid().ToString(), Request(world.RoomIds[0], "2026-11-20T11:00:00-06:00"), CancellationToken.None);
 
         clock.Now = new DateTimeOffset(2026, 11, 20, 17, 0, 0, TimeSpan.Zero);
@@ -323,7 +329,7 @@ public sealed class FavoriteVisitTests
     {
         var service = Visits(World());
 
-        await Assert.ThrowsAsync<RequestValidationException>(() => service.ListAsync(User, "confirmed", 1, 20, CancellationToken.None));
+        await Assert.ThrowsAsync<RequestValidationException>(() => service.ListAsync(User, "closed", 1, 20, CancellationToken.None));
         await Assert.ThrowsAsync<RequestValidationException>(() => service.ListAsync(User, null, 0, 20, CancellationToken.None));
         Assert.Empty((await service.ListAsync(User, "requested", 1, 20, CancellationToken.None)).Items);
     }
@@ -352,7 +358,7 @@ public sealed class FavoriteVisitTests
         new() { PropertyId = propertyId, ScheduledAt = scheduledAt };
 
     private static VisitService Visits(TestWorld world) =>
-        new(world.Visits, world.Catalog, new InMemoryUserLock(), new ManualTimeProvider(Now));
+        new(world.Visits, world.Catalog, new InMemoryLandlordProfileRepository(), new InMemoryUserLock(), new ManualTimeProvider(Now));
 
     private sealed record TestWorld(
         InMemoryBuildingRepository Buildings,
