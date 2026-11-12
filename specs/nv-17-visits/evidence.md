@@ -5,10 +5,10 @@
 | ID | NV-17 |
 | Documento | `evidence.md` |
 | Versión | 1.3.0 |
-| Fecha | 2026-11-11 |
+| Fecha | 2026-11-12 |
 | Autorización | «apruebo y ejecuta» — Victor Manuel Jose Jose, 2026-11-11: NV-17 1.3.0, tasks T01–T11 (M-BE-069) |
-| Rama | `feat/nv-17-landlord-visits` (implementación `95f0c49`) → PR pendiente de revisión |
-| Resultado | **🟡 EN CURSO**: T01–T07 completas y verificadas en local; T08–T11 esperan CI, despliegue y prueba HTTP real en Azure |
+| Rama | `feat/nv-17-landlord-visits` (implementación `95f0c49`) → PR #39, merge `3f94bbf`; desplegado con el parche #40 (`00405b3`) |
+| Resultado | **✅ PASS WITH WARNINGS** — T01–T11 completas: CI 830/830, desplegado en `ca-thehouse-u2--c00405b3-38-1`, prueba HTTP real en Azure 25/25 |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -44,8 +44,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R05 Dirección exacta al confirmar | `Student_sees_the_exact_address_only_when_confirmed`, `Landlord_confirms_and_student_then_sees_the_exact_address`, `Landlord_views_never_include_contact_data_or_the_address`, `Only_confirmed_visits_can_reveal_the_address` |
 | R06 Compatibilidad y NV-16 | `Create_returns_201_with_contract_shape_in_utc` (campos de 1.2.0 conservados), `Confirmed_visits_count_as_active`, `Rental_request_shows_the_confirmed_visit`, suite de visitas 1.2.0 en verde |
 | R07 Privacidad, autorización y límites | `Calendar_and_actions_are_private_to_the_room_owner`, `Landlord_views_never_include_contact_data_or_the_address`, `Limits_and_dependencies_fail_closed`, `Landlord_inputs_reject_unknown_fields`, `Visit_codes_have_a_spanish_detail` |
-| R08 Contrato para Mobile y despliegue | Pendiente: CI, despliegue y prueba HTTP real en Azure |
-| R09 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+| R08 Contrato para Mobile y despliegue | CD run 43272131477; prueba HTTP real en Azure 25/25 (§6); contrato entregado (§7) |
+| R09 Pruebas, seguridad y evidencia | TRX del CI run 43271840026: 830/830; `TheHouse.SecurityTests` 80/80; cobertura en §5; esta evidencia |
 
 ## 4. Seguridad y coherencia (1.3.0)
 
@@ -64,14 +64,55 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Cuarto que dejó de publicarse | Confirmar y reprogramar → 409 `visit_state`; cancelar sí se permite |
 | Visitas de 1.1.0 sin cuarto | No aparecen en el calendario ni las puede cambiar el arrendador (en Production ya se migraron todas) |
 
-## 5. Pendiente para cerrar 1.3.0
+## 5. Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#38](https://github.com/thehouse-team/TheHouse-Backend/pull/38) (spec 1.3.0, mezclado por `IsaiAxel`) y [#39](https://github.com/thehouse-team/TheHouse-Backend/pull/39) (implementación, aprobado por `IsaiAxel`; el merge lo hizo `vicmanujo` el 2026-11-12, merge `3f94bbf`) |
+| CI de `main` en `3f94bbf` | Falló `container-security`: CVE-2026-114146, CVE-2026-114147 y CVE-2026-114149 (HIGH) en `Microsoft.AspNetCore.App.Runtime` 10.0.14. El CD se omitió, como debe |
+| Parche de seguridad | [#40](https://github.com/thehouse-team/TheHouse-Backend/pull/40) autorizado por Victor («Autorizo el parche»): imagen `aspnet:10.0.15-noble`, SDK `10.0.404`, `global.json` `10.0.115`, `Microsoft.AspNetCore.OpenApi` y `Microsoft.AspNetCore.Mvc.Testing` 10.0.15. Mezclado por `IsaiAxel` (merge `00405b3`) |
+| CI de `main` (`00405b3`, run 43271840026) | 7/7 checks obligatorios en verde, `container-security` incluido; mutación semanal omitida |
+| Pruebas en CI | 830/830: unitarias 301, integración 449, seguridad 80 (también en el CI de `9dfb497`, run 43274830109) |
+| Cobertura de líneas (CI) | 68.6 % total (ramas 71.3 %). `Visit` 98.8 %, `VisitService` 97.6 %, `LandlordVisitService` 95.1 %, `VisitsEndpoint` 100 %. `MongoVisitRepository` en 0 %, como los demás adaptadores Mongo: se verifica en Azure |
+| CD (run 43272131477) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c00405b3-38-1`, 100 % del tráfico, Healthy |
+| Rol admin temporal (M-BE-065) | Autorizado por Victor el 2026-11-12 («autorizo rol»). `--grant-role` a la cuenta admin de prueba antes de la corrida y `--revoke-role` justo después (usuario `6af5ff3e327b3842ee0d5c75`), vía `az containerapp exec` en esa revisión |
+
+## 6. Prueba HTTP real en Azure
+
+`.azure-check/nv17_v13_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-12 con tres cuentas `@example.com` nuevas (estudiante, arrendador y admin); no se imprimen tokens ni contraseñas. Resultado: **25/25 PASS**.
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv17_v13_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Preparación | Edificio de prueba creado (201) y aprobado por el admin (200) | 2/2 |
+| Visitas del estudiante | Solicitar (201) con todos los campos del §6.1; sin dirección mientras está `requested`; nombre del arrendador sin apellidos; segunda visita en otro cuarto | 4/4 |
+| Calendario del arrendador | 403 `landlord_required` sin modo arrendador; calendario 200 con `Cache-Control: no-store` y los campos del §6.1; nombre y universidad del estudiante, sin dirección ni contacto; rango > 62 días 400; detalle 403 sin modo arrendador | 5/5 |
+| Confirmar y dirección exacta | Confirmar 200; confirmar de nuevo 409 `visit_state`; el estudiante ve `address` y `location` de su visita confirmada; la dirección es la del edificio; filtro `confirmed`; la búsqueda pública no muestra la dirección | 6/6 |
+| Reprogramar | Fuera de horario 422 `outside_hours`; encima de otra visita del estudiante 409 `student_schedule_overlap`; reprogramar 200 con `previousScheduledAt` | 3/3 |
+| Cancelar | `other` sin nota 400; el arrendador cancela (`by=landlord`); el estudiante cancela una confirmada (`by=student`, `address` null); confirmar una cancelada 409 `visit_state` | 4/4 |
+| Limpieza | Edificio de prueba suspendido | 1/1 |
+
+Primer intento de `prepare`: el registro de la primera cuenta superó los 30 s del script porque la app estaba escalada a cero y arrancó en ese momento (log «Application started» a las 17:59:48). Se agregó al script una espera a `/health/ready` y un tiempo máximo de 60 s por petición; el API no cambió. Ese intento pudo dejar una cuenta `@example.com` sin usar.
+
+## 7. Contrato entregable a Mobile
+
+Entregado el 2026-11-12 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` (validado por Mobile antes de ejecutar) con la URL y las pruebas reales; ningún campo de 1.2.0 se quitó.
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 43271840026): 830/830 (unitarias 301, integración 449, seguridad 80); prueba HTTP real en Azure 25/25 (2026-11-12)
+```
+
+## 8. Hallazgos y resultado
+
+| # | Hallazgo | Severidad | Estado |
+| --- | --- | --- | --- |
+| H1 | El merge de #39 lo hizo el autor (`vicmanujo`) y no Isai; la revisión aprobada sí fue de `IsaiAxel` | Gobierno | Avisado a Victor; los merges siguientes (#40, #37) los hizo Isai |
+| H2 | CVE HIGH del runtime 10.0.14 bloquearon el CD | Alta | Corregido en #40 (10.0.15) |
+| H3 | Adaptadores Mongo sin cobertura en CI | Baja | Aceptado: se verifican con la prueba real en Azure, como en versiones anteriores |
+| H4 | Arranque en frío de la app (escala a cero) puede superar 30 s | Baja | El script ahora espera `/health/ready`; sin cambio de infraestructura (costo) |
+
+Resultado: **PASS WITH WARNINGS**. Costo: sin recursos nuevos; un índice nuevo en MongoDB Atlas M0 (`ix_visits_room_scheduled`), dentro del plan gratuito. Revisión de coherencia: spec, plan, tasks, README y esta evidencia indican 1.3.0 completa 11/11.
 
 ## Historial — evidencia de 1.2.0
 
