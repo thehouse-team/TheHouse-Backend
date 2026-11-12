@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.403-noble AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.404-noble AS build
 
 WORKDIR /src
 
@@ -20,7 +20,7 @@ RUN dotnet publish TheHouse/TheHouse.csproj \
     /p:UseAppHost=false
 
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.14-noble AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-noble AS runtime
 
 USER root
 
