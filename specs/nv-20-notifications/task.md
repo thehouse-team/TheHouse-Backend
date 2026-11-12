@@ -8,12 +8,12 @@
 | Fecha | 2026-11-12 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-12 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T11 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 11 |
-| Tasks completadas | 0 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
@@ -25,19 +25,19 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Generación desde las acciones** — Requisito: NV-20-R01 · Fase: F1 · Aceptación: Cada tipo del catálogo se crea para el destinatario correcto cuando ocurre su acción en NV-16, NV-17, NV-18 o NV-21; repetir el hecho no duplica; quien actúa no se notifica; si MongoDB falla la acción principal no se deshace. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Textos sin datos sensibles** — Requisito: NV-20-R02 · Fase: F1 · Aceptación: Cada tipo produce `title` y `body` en español con nombre sin apellidos y título del cuarto; ninguno contiene dirección, teléfono, correo, texto del chat, notas ni ids. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Generación desde las acciones** — Requisito: NV-20-R01 · Fase: F1 · Aceptación: Cada tipo del catálogo se crea para el destinatario correcto cuando ocurre su acción en NV-16, NV-17, NV-18 o NV-21; repetir el hecho no duplica; quien actúa no se notifica; si MongoDB falla la acción principal no se deshace. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Textos sin datos sensibles** — Requisito: NV-20-R02 · Fase: F1 · Aceptación: Cada tipo produce `title` y `body` en español con nombre sin apellidos y título del cuarto; ninguno contiene dirección, teléfono, correo, texto del chat, notas ni ids. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T03 · Bandeja y filtros** — Requisito: NV-20-R03 · Fase: F2 · Aceptación: Lista paginada por `updatedAt` desc con filtros `unread` y `category`; validación de parámetros. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T04 · Marcar como leídas** — Requisito: NV-20-R04 · Fase: F2 · Aceptación: Una (idempotente; ajena 404) o todas, opcionalmente por categoría; leer el chat marca la notificación de esa conversación. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T05 · Contador eficiente** — Requisito: NV-20-R05 · Fase: F2 · Aceptación: Total y por categoría con índice; `ETag` débil, `private, no-cache` y 304 cuando no cambió. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T06 · Agrupación de mensajes y retención** — Requisito: NV-20-R06 · Fase: F2 · Aceptación: Una notificación no leída por conversación con `count`; TTL de 90 días. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T03 · Bandeja y filtros** — Requisito: NV-20-R03 · Fase: F2 · Aceptación: Lista paginada por `updatedAt` desc con filtros `unread` y `category`; validación de parámetros. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T04 · Marcar como leídas** — Requisito: NV-20-R04 · Fase: F2 · Aceptación: Una (idempotente; ajena 404) o todas, opcionalmente por categoría; leer el chat marca la notificación de esa conversación. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T05 · Contador eficiente** — Requisito: NV-20-R05 · Fase: F2 · Aceptación: Total y por categoría con índice; `ETag` débil, `private, no-cache` y 304 cuando no cambió. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T06 · Agrupación de mensajes y retención** — Requisito: NV-20-R06 · Fase: F2 · Aceptación: Una notificación no leída por conversación con `count`; TTL de 90 días. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T07 · Privacidad, autorización y límites** — Requisito: NV-20-R07 · Fase: F3 · Aceptación: Pruebas con dos usuarios; rate limits 429; Redis caído 503; campos desconocidos 400. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
+- [x] **T07 · Privacidad, autorización y límites** — Requisito: NV-20-R07 · Fase: F3 · Aceptación: Pruebas con dos usuarios; rate limits 429; Redis caído 503; campos desconocidos 400. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 
 ## F4 — Pruebas y evidencia
 
@@ -50,13 +50,13 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F2 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F2 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F2 | COMPLETA |
+| T07 | R07 | F3 | COMPLETA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R09 | F4 | ABIERTA |
 | T10 | R09 | F4 | ABIERTA |
@@ -82,11 +82,11 @@
 | --- | --- |
 | Requisitos | 9 |
 | Tasks | 11 |
-| Tasks abiertas | 11 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T11 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

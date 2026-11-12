@@ -17,6 +17,7 @@ builder.AddModeration();
 builder.AddSearch();
 builder.AddMessaging();
 builder.AddRentals();
+builder.AddNotifications();
 builder.AddUniversities();
 builder.AddObservability();
 
@@ -281,6 +282,7 @@ app.MapAdmin();
 app.MapSearch();
 app.MapMessaging();
 app.MapRentals();
+app.MapNotifications();
 app.MapUniversities();
 
 app.Run();

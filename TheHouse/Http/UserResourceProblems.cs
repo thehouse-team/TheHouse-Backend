@@ -177,6 +177,24 @@ public static class UserResourceProblems
         };
     }
 
+    // NV-20: bandeja de notificaciones.
+    public static void NormalizeNotifications(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los filtros o los datos de la notificación no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            404 => "La notificación no existe.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de solicitudes de notificaciones.",
+            503 => "Las notificaciones no están disponibles temporalmente.",
+            504 => "Las notificaciones no respondieron a tiempo.",
+            _ => "No fue posible procesar las notificaciones.",
+        };
+    }
+
     public static string? DetailFor(string code) => code switch
     {
         "favorites_limit" => "Se alcanzó el máximo de 200 favoritos.",

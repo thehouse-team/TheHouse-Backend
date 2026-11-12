@@ -95,6 +95,13 @@ public static class RateLimitKeys
     public static string RentalRoomLock(string roomId) =>
         "thehouse:u2:rentals:lock:room:v1:" + Hash(roomId);
 
+    // NV-20: bandeja y contador de notificaciones por usuario.
+    public static string NotificationsUser(string userId) =>
+        "thehouse:u2:notifications:user:v1:" + Hash(userId);
+
+    public static string NotificationCountUser(string userId) =>
+        "thehouse:u2:notifications:count:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

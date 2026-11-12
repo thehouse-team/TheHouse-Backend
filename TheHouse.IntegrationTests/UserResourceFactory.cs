@@ -75,6 +75,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
 
     public InMemoryAgreementRepository Agreements { get; } = new();
 
+    public InMemoryNotificationRepository Notifications { get; } = new();
+
     // NV-11: el catálogo real del seed (10 universidades con coordenadas).
     public UniversityTestStore Universities { get; } = SeededUniversities();
 
@@ -104,6 +106,7 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             services.RemoveAll<IRentalRequestRepository>();
             services.RemoveAll<IConversationRepository>();
             services.RemoveAll<IAgreementRepository>();
+            services.RemoveAll<INotificationRepository>();
 
             services.AddSingleton<IUserRepository>(Users);
             services.AddSingleton<IRateLimitStore>(RateLimit);
@@ -124,6 +127,7 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             services.AddSingleton<IRentalRequestRepository>(RentalRequests);
             services.AddSingleton<IConversationRepository>(Conversations);
             services.AddSingleton<IAgreementRepository>(Agreements);
+            services.AddSingleton<INotificationRepository>(Notifications);
             services.AddSingleton<ILoggerProvider>(new CaptureProvider(Logs));
 
             if (limits is not null)
