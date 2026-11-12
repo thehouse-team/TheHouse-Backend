@@ -648,3 +648,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-12.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** colección nueva `agreements` (módulo Rentals); los cuartos usan el estado `rented` ya existente; sin migración ni comandos en Production.
+
+## M-BE-071 — NV-20 1.1.0 aprobada: bandeja de notificaciones
+
+- **ID:** M-BE-071
+- **Decisión:** aprobar NV-20 1.1.0 con sus decisiones: solo bandeja en la app (RF-75), sin push, correo ni SMS hasta una decisión M-BE con proveedor; los casos de uso de NV-16, NV-17, NV-18 y NV-21 llaman al puerto `INotificationSink` después de guardar y, si la notificación falla, la acción principal no se deshace (sin outbox ni bus de eventos todavía); catálogo cerrado de 16 tipos en las categorías `requests`, `visits` y `system`; mensajes agrupados por conversación con `count` y sin texto del chat; contador con `ETag` débil, `private, no-cache` y 304; retención de 90 días con TTL; el aviso de baja de precio de favoritos queda para una versión posterior.
+- **Estado:** APROBADO — Victor, 2026-11-12 («Apruebo y EJECUTA», T01–T11). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-12.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** colección nueva `notifications` (módulo Notifications); los servicios de Messaging, Visits, Rentals y Moderation reciben el puerto; sin migración ni comandos en Production.

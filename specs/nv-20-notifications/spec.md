@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-12 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-12 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-75 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09 |
@@ -207,13 +207,13 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Canal | Solo bandeja en la app (RF-75); push con FCM, correo y SMS fuera hasta una decisión M-BE con proveedor | PROPUESTO |
-| Emisión | Puerto `INotificationSink` llamado por los casos de uso tras guardar; si falla, se registra y la acción principal no se deshace (sin outbox ni bus de eventos todavía) | PROPUESTO |
-| Catálogo | 16 tipos cerrados con destinatario y categoría (`requests`, `visits`, `system`) como las pestañas del prototipo | PROPUESTO |
-| Mensajes | Agrupados por conversación con `count`; sin texto del mensaje (el prototipo mostraba una cita) | PROPUESTO |
-| Contador | `ETag` débil con `private, no-cache` y 304; la app consulta cada 30 segundos o al volver a primer plano | PROPUESTO |
-| Retención | 90 días con TTL; sin borrar a mano | PROPUESTO |
-| Baja de precio de favoritos | Fuera de 1.1.0; versión posterior | PROPUESTO |
+| Canal | Solo bandeja en la app (RF-75); push con FCM, correo y SMS fuera hasta una decisión M-BE con proveedor | APROBADO (M-BE-071) |
+| Emisión | Puerto `INotificationSink` llamado por los casos de uso tras guardar; si falla, se registra y la acción principal no se deshace (sin outbox ni bus de eventos todavía) | APROBADO (M-BE-071) |
+| Catálogo | 16 tipos cerrados con destinatario y categoría (`requests`, `visits`, `system`) como las pestañas del prototipo | APROBADO (M-BE-071) |
+| Mensajes | Agrupados por conversación con `count`; sin texto del mensaje (el prototipo mostraba una cita) | APROBADO (M-BE-071) |
+| Contador | `ETag` débil con `private, no-cache` y 304; la app consulta cada 30 segundos o al volver a primer plano | APROBADO (M-BE-071) |
+| Retención | 90 días con TTL; sin borrar a mano | APROBADO (M-BE-071) |
+| Baja de precio de favoritos | Fuera de 1.1.0; versión posterior | APROBADO (M-BE-071) |
 
 ## 14. Costo — COST-001
 
@@ -247,8 +247,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T11 autorizadas** |
 
 ## 18. Aprobación pendiente
 
