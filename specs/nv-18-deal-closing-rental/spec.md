@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-12 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-12 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-18-deal-closing-rental/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-81, RF-82, RF-83, RF-84; RES-03 y RES-04 (sin pagos ni contrato formal) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09, RNF-17, RNF-18 |
@@ -279,13 +279,13 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Origen del convenio | Desde `requestId` de una solicitud aceptada de NV-16; el estudiante y el cuarto salen de ella | PROPUESTO |
-| Atomicidad | Cambio condicional del convenio + estado del cuarto con `version` y compensación, bajo candado de Redis por cuarto (patrón de NV-16, M-BE-068); sin transacción multi-documento. Alternativa: transacción de MongoDB (Atlas M0 la soporta) con una unidad de trabajo nueva | PROPUESTO |
-| Código | Embebido en el convenio (sin colección `closing_codes`); crear ya entrega el QR, como el prototipo | PROPUESTO |
-| Contacto en Mi renta | Solo el chat de NV-16 (`conversationId`); sin teléfono ni correo (cambia la propuesta de 1.0.0) | PROPUESTO |
-| Otras solicitudes y visitas del cuarto | Se rechazan con `not_available` y se cancelan al rentarse; sin enum nuevo para Mobile | PROPUESTO |
-| Eventos | Sin bus de eventos todavía: el caso de uso llama a los puertos de Listings, Messaging y Visits; NV-20 agregará `AgreementActivated` y `AgreementEnded` | PROPUESTO |
-| Fin de renta | Solo el arrendador, sin fin automático por fecha; el estudiante ve `endDate` | PROPUESTO |
+| Origen del convenio | Desde `requestId` de una solicitud aceptada de NV-16; el estudiante y el cuarto salen de ella | APROBADO (M-BE-070) |
+| Atomicidad | Cambio condicional del convenio + estado del cuarto con `version` y compensación, bajo candado de Redis por cuarto (patrón de NV-16, M-BE-068); sin transacción multi-documento. Alternativa: transacción de MongoDB (Atlas M0 la soporta) con una unidad de trabajo nueva | APROBADO (M-BE-070) |
+| Código | Embebido en el convenio (sin colección `closing_codes`); crear ya entrega el QR, como el prototipo | APROBADO (M-BE-070) |
+| Contacto en Mi renta | Solo el chat de NV-16 (`conversationId`); sin teléfono ni correo (cambia la propuesta de 1.0.0) | APROBADO (M-BE-070) |
+| Otras solicitudes y visitas del cuarto | Se rechazan con `not_available` y se cancelan al rentarse; sin enum nuevo para Mobile | APROBADO (M-BE-070) |
+| Eventos | Sin bus de eventos todavía: el caso de uso llama a los puertos de Listings, Messaging y Visits; NV-20 agregará `AgreementActivated` y `AgreementEnded` | APROBADO (M-BE-070) |
+| Fin de renta | Solo el arrendador, sin fin automático por fecha; el estudiante ve `endDate` | APROBADO (M-BE-070) |
 
 ## 14. Costo — COST-001
 
@@ -320,8 +320,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T11 autorizadas** |
 
 ## 18. Aprobación pendiente
 
