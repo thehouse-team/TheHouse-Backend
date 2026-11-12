@@ -8,7 +8,7 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-11 («apruebo y ejecuta»: aprobación de 1.3.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.3.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
+| Estado de ejecución | **✅ COMPLETA — 1.3.0 T01–T11 (2026-11-12): PASS WITH WARNINGS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-80 (estudiante y arrendador); RNF-02 (dirección al confirmar) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09 |
@@ -174,8 +174,8 @@ PAGINATION   No
 ```
 
 ```text
-DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io (pendiente de despliegue)
-TESTS        pendiente: unitarias, integración, seguridad y prueba HTTP real en Azure
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 43271840026): 830/830 (unitarias 301, integración 449, seguridad 80); prueba HTTP real en Azure 25/25 (2026-11-12)
 ```
 
 ## 7. Módulo, datos propios e integración
@@ -298,9 +298,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 7 |
+| Tasks completadas | 11 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.3.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
+| Estado de ejecución | **✅ COMPLETA — 1.3.0 T01–T11 (2026-11-12): PASS WITH WARNINGS, ver `evidence.md`** |
 
 ## 18. Aprobación pendiente
 
