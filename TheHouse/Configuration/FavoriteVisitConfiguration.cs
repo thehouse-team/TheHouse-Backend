@@ -19,6 +19,7 @@ public static class FavoriteVisitConfiguration
         builder.Services.AddSingleton(new UserRateLimitOptions());
         builder.Services.AddSingleton<FavoriteService>();
         builder.Services.AddSingleton<VisitService>();
+        builder.Services.AddSingleton<LandlordVisitService>();
 
         builder.Services.AddSingleton<IFavoriteRepository>(provider =>
         {

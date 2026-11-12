@@ -33,7 +33,7 @@ public sealed class VisitsHttpTests
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         var root = document.RootElement;
         Assert.Equal(
-            new[] { "id", "room", "property", "scheduledAt", "timeZone", "status", "message", "createdAt", "updatedAt", "cancelledAt" },
+            new[] { "id", "room", "property", "scheduledAt", "previousScheduledAt", "timeZone", "status", "message", "landlord", "address", "location", "cancellation", "createdAt", "updatedAt", "confirmedAt", "cancelledAt" },
             root.EnumerateObject().Select(property => property.Name));
         Assert.Equal(
             new[] { "id", "buildingId", "title", "city" },
@@ -216,7 +216,7 @@ public sealed class VisitsHttpTests
 
         using var all = await alice.GetAsync(Mine);
         using var cancelled = await alice.GetAsync($"{Mine}?status=cancelled");
-        using var badStatus = await alice.GetAsync($"{Mine}?status=confirmed");
+        using var badStatus = await alice.GetAsync($"{Mine}?status=closed");
         using (var document = JsonDocument.Parse(await all.Content.ReadAsStringAsync()))
         {
             // Orden scheduledAt asc: la de pasado mañana va primero.

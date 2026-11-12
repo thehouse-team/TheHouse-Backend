@@ -160,6 +160,42 @@ public sealed class InMemoryVisitRepository : IVisitRepository
         return Task.CompletedTask;
     }
 
+    public Task<bool> ReplaceIfUnchangedAsync(Visit visit, DateTimeOffset expectedUpdatedAt, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            if (!Visits.TryGetValue(visit.Id, out var current) || current.UpdatedAt != expectedUpdatedAt)
+            {
+                return Task.FromResult(false);
+            }
+
+            Visits[visit.Id] = visit;
+            return Task.FromResult(true);
+        }
+    }
+
+    public Task<(IReadOnlyList<Visit> Items, long TotalItems)> ListForRoomsAsync(
+        IReadOnlyCollection<string> roomIds,
+        DateTimeOffset from,
+        DateTimeOffset to,
+        VisitStatus? status,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            var matching = Visits.Values
+                .Where(visit => roomIds.Contains(visit.RoomId) && visit.ScheduledAt >= from && visit.ScheduledAt <= to && (status is null || visit.Status == status))
+                .OrderBy(visit => visit.ScheduledAt).ThenBy(visit => visit.Id, StringComparer.Ordinal)
+                .ToList();
+            IReadOnlyList<Visit> items = matching.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            return Task.FromResult((items, (long)matching.Count));
+        }
+    }
+
     public Task<IReadOnlyList<Visit>> ListActiveAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
@@ -255,6 +291,11 @@ public sealed class InMemoryVisitRepository : IVisitRepository
             Status = visit.Status,
             Message = visit.Message,
             CancelReason = visit.CancelReason,
+            PreviousScheduledAt = visit.PreviousScheduledAt,
+            CancelNote = visit.CancelNote,
+            CancelledBy = visit.CancelledBy,
+            RescheduleNote = visit.RescheduleNote,
+            ConfirmedAt = visit.ConfirmedAt,
             CreatedAt = visit.CreatedAt,
             UpdatedAt = visit.UpdatedAt,
             CancelledAt = visit.CancelledAt,

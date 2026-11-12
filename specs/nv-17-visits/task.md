@@ -8,12 +8,12 @@
 | Fecha | 2026-11-06 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-11 («apruebo y ejecuta»: aprobación de 1.3.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-17-visits/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.3.0, T01–T11 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.3.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.3.0-borrador |
 | Plan | `plan.md` 1.3.0-borrador |
 | Tasks totales | 11 |
-| Tasks completadas | 0 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
@@ -25,19 +25,19 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Calendario del arrendador** — Requisito: NV-17-R01 · Fase: F1 · Aceptación: Lista las visitas de sus cuartos por rango (≤ 62 días), estado y cuarto, ordenadas por horario; detalle con nombre y universidad del estudiante; lo ajeno 404; sin modo arrendador 403. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Confirmar** — Requisito: NV-17-R02 · Fase: F1 · Aceptación: `requested` futura → `confirmed` con `confirmedAt` e historial; cualquier otro estado 409 `visit_state`; visita pasada 409 `visit_in_past`; cuarto no publicado 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Reprogramar** — Requisito: NV-17-R03 · Fase: F1 · Aceptación: Nuevo horario válido con las reglas de 1.1.0, `previousScheduledAt` guardado, estado `confirmed`; 422 horario inválido; 409 `student_schedule_overlap`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T04 · Cancelar por cualquiera de las partes** — Requisito: NV-17-R04 · Fase: F1 · Aceptación: Arrendador con motivo del catálogo (nota obligatoria con `other`); estudiante también sobre `confirmed`; `cancellation.by` correcto; visita pasada 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Calendario del arrendador** — Requisito: NV-17-R01 · Fase: F1 · Aceptación: Lista las visitas de sus cuartos por rango (≤ 62 días), estado y cuarto, ordenadas por horario; detalle con nombre y universidad del estudiante; lo ajeno 404; sin modo arrendador 403. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Confirmar** — Requisito: NV-17-R02 · Fase: F1 · Aceptación: `requested` futura → `confirmed` con `confirmedAt` e historial; cualquier otro estado 409 `visit_state`; visita pasada 409 `visit_in_past`; cuarto no publicado 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Reprogramar** — Requisito: NV-17-R03 · Fase: F1 · Aceptación: Nuevo horario válido con las reglas de 1.1.0, `previousScheduledAt` guardado, estado `confirmed`; 422 horario inválido; 409 `student_schedule_overlap`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T04 · Cancelar por cualquiera de las partes** — Requisito: NV-17-R04 · Fase: F1 · Aceptación: Arrendador con motivo del catálogo (nota obligatoria con `other`); estudiante también sobre `confirmed`; `cancellation.by` correcto; visita pasada 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T05 · Dirección exacta al confirmar** — Requisito: NV-17-R05 · Fase: F2 · Aceptación: La visita del estudiante incluye `address` y `location` solo si está `confirmed`; en `requested` y `cancelled` son `null`; nunca en vistas del arrendador ni públicas. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
-- [ ] **T06 · Compatibilidad y NV-16** — Requisito: NV-17-R06 · Fase: F2 · Aceptación: Las respuestas de 1.2.0 conservan todos sus campos; el filtro `status` acepta `confirmed`; la solicitud de NV-16 muestra la visita activa `requested` o `confirmed`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
+- [x] **T05 · Dirección exacta al confirmar** — Requisito: NV-17-R05 · Fase: F2 · Aceptación: La visita del estudiante incluye `address` y `location` solo si está `confirmed`; en `requested` y `cancelled` son `null`; nunca en vistas del arrendador ni públicas. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
+- [x] **T06 · Compatibilidad y NV-16** — Requisito: NV-17-R06 · Fase: F2 · Aceptación: Las respuestas de 1.2.0 conservan todos sus campos; el filtro `status` acepta `confirmed`; la solicitud de NV-16 muestra la visita activa `requested` o `confirmed`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03, T04.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T07 · Privacidad, autorización y límites** — Requisito: NV-17-R07 · Fase: F3 · Aceptación: Pruebas con estudiante, arrendador y un tercero; sin datos de contacto; rate limits 429; Redis caído 503. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
+- [x] **T07 · Privacidad, autorización y límites** — Requisito: NV-17-R07 · Fase: F3 · Aceptación: Pruebas con estudiante, arrendador y un tercero; sin datos de contacto; rate limits 429; Redis caído 503. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 
 ## F4 — Pruebas y evidencia
 
@@ -50,13 +50,13 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F1 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F1 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F2 | COMPLETA |
+| T07 | R07 | F3 | COMPLETA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R09 | F4 | ABIERTA |
 | T10 | R09 | F4 | ABIERTA |
@@ -82,11 +82,11 @@
 | --- | --- |
 | Requisitos | 9 |
 | Tasks | 11 |
-| Tasks abiertas | 11 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.3.0, T01–T11 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.3.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

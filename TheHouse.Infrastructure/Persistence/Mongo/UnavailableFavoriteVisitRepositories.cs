@@ -41,6 +41,17 @@ public sealed class UnavailableVisitRepository : IVisitRepository
 
     public Task SaveIdempotencyAsync(VisitIdempotencyRecord record, CancellationToken cancellationToken) => Fail<bool>();
 
+    public Task<bool> ReplaceIfUnchangedAsync(Visit visit, DateTimeOffset expectedUpdatedAt, CancellationToken cancellationToken) => Fail<bool>();
+
+    public Task<(IReadOnlyList<Visit> Items, long TotalItems)> ListForRoomsAsync(
+        IReadOnlyCollection<string> roomIds,
+        DateTimeOffset from,
+        DateTimeOffset to,
+        VisitStatus? status,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken) => Fail<(IReadOnlyList<Visit>, long)>();
+
     public Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken) => Fail<MigrationCounts>();
 
     private static Task<T> Fail<T>() => throw new DependencyUnavailableException();

@@ -43,6 +43,8 @@ public static class ProblemResponses
         problem.Extensions["traceId"] = context.TraceIdentifier;
         if (MessagingEndpoint.IsMessaging(context))
             UserResourceProblems.NormalizeMessaging(problem, status);
+        else if (VisitsEndpoint.IsLandlordVisits(context))
+            UserResourceProblems.NormalizeVisits(problem, status);
         else if (UserResourceProblems.IsAdmin(context))
             UserResourceProblems.NormalizeAdmin(problem, status);
         else if (RegistrationProblems.IsRegistration(context))
