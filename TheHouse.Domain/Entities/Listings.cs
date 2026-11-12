@@ -189,4 +189,15 @@ public sealed record Room
         Status == RoomStatus.Paused
             ? this with { Status = RoomStatus.Available, UpdatedAt = now }
             : throw new ConflictException("room_state");
+
+    // NV-18: el convenio activo lo marca rentado y el fin de renta lo libera.
+    public Room Rent(DateTimeOffset now) =>
+        Status == RoomStatus.Available
+            ? this with { Status = RoomStatus.Rented, UpdatedAt = now }
+            : throw new ConflictException("room_unavailable");
+
+    public Room Release(DateTimeOffset now) =>
+        Status == RoomStatus.Rented
+            ? this with { Status = RoomStatus.Available, UpdatedAt = now }
+            : throw new ConflictException("room_state");
 }

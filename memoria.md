@@ -640,3 +640,11 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** NV-16 muestra también visitas confirmadas en la solicitud; sin migración ni comandos en Production.
 
+## M-BE-070 — NV-18 1.1.0 aprobada: cierre de trato con QR, Mi renta y fin de renta
+
+- **ID:** M-BE-070
+- **Decisión:** aprobar NV-18 1.1.0 con sus decisiones: el convenio nace de una solicitud `accepted` de NV-16 (`requestId`); el código de cierre (QR opaco y código de respaldo de 8 caracteres, 10 minutos, un solo uso, solo hash) vive dentro del convenio y se entrega al crearlo; aceptar es un cambio condicional del convenio más el cambio del cuarto a `rented` con `version`, compensación y candado de Redis por cuarto, sin transacción multi-documento; Mi renta da el contacto solo por el chat de NV-16 (sin teléfono ni correo); al rentarse, las demás solicitudes del cuarto se rechazan con `not_available` y las visitas activas de otros estudiantes se cancelan; sin bus de eventos hasta NV-20; la renta solo la termina el arrendador.
+- **Estado:** APROBADO — Victor, 2026-11-12 («Apruebo y EJECUTA», T01–T11). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-12.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** colección nueva `agreements` (módulo Rentals); los cuartos usan el estado `rented` ya existente; sin migración ni comandos en Production.

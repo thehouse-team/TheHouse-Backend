@@ -16,6 +16,7 @@ builder.AddLandlord();
 builder.AddModeration();
 builder.AddSearch();
 builder.AddMessaging();
+builder.AddRentals();
 builder.AddUniversities();
 builder.AddObservability();
 
@@ -279,6 +280,7 @@ app.MapLandlord();
 app.MapAdmin();
 app.MapSearch();
 app.MapMessaging();
+app.MapRentals();
 app.MapUniversities();
 
 app.Run();

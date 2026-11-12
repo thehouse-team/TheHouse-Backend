@@ -22,6 +22,7 @@ public static class ProblemResponses
         405 => "Método no permitido",
         408 => "Tiempo de solicitud agotado",
         409 => "Conflicto",
+        410 => "Recurso no disponible",
         413 => "Solicitud demasiado grande",
         415 => "Tipo de contenido no admitido",
         422 => "Solicitud no procesable",
@@ -45,6 +46,8 @@ public static class ProblemResponses
             UserResourceProblems.NormalizeMessaging(problem, status);
         else if (VisitsEndpoint.IsLandlordVisits(context))
             UserResourceProblems.NormalizeVisits(problem, status);
+        else if (RentalsEndpoint.IsRentals(context))
+            UserResourceProblems.NormalizeRentals(problem, status);
         else if (UserResourceProblems.IsAdmin(context))
             UserResourceProblems.NormalizeAdmin(problem, status);
         else if (RegistrationProblems.IsRegistration(context))

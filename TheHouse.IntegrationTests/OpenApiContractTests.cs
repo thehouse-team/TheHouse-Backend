@@ -75,7 +75,9 @@ public sealed class OpenApiContractTests
                 path.Name.StartsWith(SearchEndpoint.RoomsPath + "/", StringComparison.Ordinal) ||
                 path.Name == SearchEndpoint.PlacesPath + "/search" ||
                 path.Name.StartsWith(MessagingEndpoint.MinePath, StringComparison.Ordinal) ||
-                path.Name.StartsWith(MessagingEndpoint.ConversationsPath, StringComparison.Ordinal),
+                path.Name.StartsWith(MessagingEndpoint.ConversationsPath, StringComparison.Ordinal) ||
+                path.Name.StartsWith(RentalsEndpoint.StudentPath + "/", StringComparison.Ordinal) ||
+                path.Name == RentalsEndpoint.RentalPath,
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 
@@ -89,6 +91,17 @@ public sealed class OpenApiContractTests
                  })
         {
             Assert.True(paths.TryGetProperty(messagingPath, out _), messagingPath);
+        }
+
+        // NV-18: las 9 operaciones de convenios y Mi renta están publicadas.
+        foreach (var rentalPath in new[]
+                 {
+                     RentalsEndpoint.LandlordPath, RentalsEndpoint.LandlordDetailPath, RentalsEndpoint.LandlordCodePath,
+                     RentalsEndpoint.LandlordCancelPath, RentalsEndpoint.LandlordEndPath, RentalsEndpoint.PreviewPath,
+                     RentalsEndpoint.AcceptPath, RentalsEndpoint.RentalPath,
+                 })
+        {
+            Assert.True(paths.TryGetProperty(rentalPath, out _), rentalPath);
         }
 
         Assert.True(
