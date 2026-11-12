@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-12 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-12: NV-18 1.1.0, tasks T01–T11 (M-BE-070) |
-| Rama | `feat/nv-18-deal-closing` → PR pendiente de revisión |
-| Resultado | **🟡 EN CURSO**: T01–T07 completas y verificadas en local; T08–T11 esperan CI, despliegue y prueba HTTP real en Azure |
+| Rama | `feat/nv-18-deal-closing` → PR #43, merge `6dcf73d` |
+| Resultado | **✅ PASS WITH WARNINGS** — T01–T11 completas: CI 876/876, desplegado en `ca-thehouse-u2--c6dcf73d-41-1`, prueba HTTP real en Azure 28/28 |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -46,8 +46,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R05 Mi renta | `Accept_rents_the_room_and_closes_other_requests_and_visits`, `End_frees_the_room_and_removes_the_address`, `Only_my_rental_reveals_the_address_and_nobody_sees_contact_data` |
 | R06 Convenios del arrendador, cancelar y fin de renta | `Landlord_list_filters_by_status_and_room`, `End_frees_the_room_and_removes_the_address` (incluye `RentalHistoryQuery`), `Only_active_rentals_end_and_rooms_move_between_available_and_rented`, `Agreements_are_private_to_their_landlord_and_student` |
 | R07 Fuerza bruta y privacidad | `Another_account_gets_404_and_five_failures_block_the_code`, `Closing_code_attempts_are_limited_per_account`, `Dependencies_fail_closed`, `Rental_inputs_reject_unknown_fields`, `Rental_codes_have_a_spanish_detail`, `Agreements_are_private_to_their_landlord_and_student` |
-| R08 Contrato para Mobile y despliegue | Pendiente: CI, despliegue y prueba HTTP real en Azure |
-| R09 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+| R08 Contrato para Mobile y despliegue | CD run 43308222051; prueba HTTP real en Azure 28/28 (§6); contrato entregado (§7) |
+| R09 Pruebas, seguridad y evidencia | TRX del CI run 43307781030: 876/876; `TheHouse.SecurityTests` 95/95; cobertura en §5; esta evidencia |
 
 ## 4. Seguridad y coherencia
 
@@ -70,11 +70,47 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Efectos al rentar | Rechazar solicitudes y cancelar visitas se reintenta 3 veces en la misma petición; si aun así falla, la renta queda y se registra una advertencia solo con el id del convenio |
 | `endDate` | Exclusiva para el próximo pago: no se calcula un pago en la fecha de fin |
 
-## 5. Pendiente para cerrar 1.1.0
+## 5. Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#42](https://github.com/thehouse-team/TheHouse-Backend/pull/42) (spec 1.1.0) incluido en [#43](https://github.com/thehouse-team/TheHouse-Backend/pull/43) (aprobación e implementación), aprobado y mezclado por `IsaiAxel` el 2026-11-12 (merge `6dcf73d`). El conflicto de `specs/README.md` con #41 se resolvió conservando ambas filas |
+| CI de `main` (`6dcf73d`, run 43307781030) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI | 876/876: unitarias 327, integración 454, seguridad 95 |
+| Cobertura de líneas (CI) | 68.8 % total (ramas 71.7 %). `Rental` 100 %, `RentalServices` 97.7 %, `RentalsEndpoint` 97.3 %. `MongoAgreementRepository` en 0 %, como los demás adaptadores Mongo: se verifica en Azure |
+| CD (run 43308222051) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c6dcf73d-41-1`, 100 % del tráfico, Healthy |
+| Rol admin temporal (M-BE-065) | Autorizado por Victor el 2026-11-12 («autorizo el rol»). `--grant-role` a la cuenta admin de prueba antes de la corrida y `--revoke-role` justo después (usuario `6af62e5ad51c6e14a29900a5`), vía `az containerapp exec` en esa revisión. El primer intento de asignación falló por un error de DNS local hacia `management.azure.com`; el segundo funcionó |
+
+## 6. Prueba HTTP real en Azure
+
+`.azure-check/nv18_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-12 con cuatro cuentas `@example.com` nuevas (estudiante, otro estudiante, arrendador y admin); no se imprimen tokens, contraseñas, códigos de cierre ni direcciones. Resultado: **28/28 PASS**.
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv18_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Preparación | Edificio de prueba creado (201) y aprobado por el admin (200) | 2/2 |
+| Solicitudes (NV-16) | Dos estudiantes piden informes del mismo cuarto; el otro solicita una visita; el arrendador acepta al primero | 4/4 |
+| Crear el convenio | 403 `landlord_required`; 409 `request_state` desde una solicitud pendiente; crear 201 con los campos del §6.1, `closingCode` y `no-store`; pendiente en MXN y estudiante solo con nombre y universidad; 409 `agreement_open`; el detalle ya no trae el código | 6/6 |
+| Revisar y aceptar | 404 `code_invalid` con otra cuenta; revisar con el código en minúsculas y guion (200) sin dirección; aceptar sin `acceptedTerms` 400; aceptar con el QR 200 con dirección, ubicación y `conversationId`, sin teléfono; cuarto `rented`; la otra solicitud `rejected` con `not_available`; la visita del otro estudiante cancelada por el arrendador; 410 `code_used` | 10/10 |
+| Mi renta y fin de renta | Mi renta 200 con `nextPayment` y `no-store`; el arrendador ve el convenio activo; terminar 200 (`ended`); el cuarto vuelve a `available`; 404 `no_active_rental` | 5/5 |
+| Limpieza | Edificio de prueba suspendido | 1/1 |
+
+## 7. Contrato entregable a Mobile
+
+Entregado el 2026-11-12 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` (validado por Mobile antes de ejecutar) con la URL y las pruebas reales; las 9 rutas son nuevas y no cambia ninguna anterior.
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 43307781030): 876/876 (unitarias 327, integración 454, seguridad 95); prueba HTTP real en Azure 28/28 (2026-11-12)
+```
+
+## 8. Hallazgos y resultado
+
+| # | Hallazgo | Severidad | Estado |
+| --- | --- | --- | --- |
+| H1 | Los intentos por cuenta cuentan cada revisión o aceptación, no solo los fallidos (el contador de Redis no se consulta sin sumar) | Baja | Aceptado: más estricto que la spec; el flujo normal usa 2 de 5 |
+| H2 | Índices de los hashes del código no únicos (la spec decía único parcial) | Baja | Aceptado: colisión ~1 en 10^12 y se valida la cuenta; el índice único por cuarto sí está |
+| H3 | Adaptadores Mongo sin cobertura en CI | Baja | Aceptado: se verifican con la prueba real en Azure, como en versiones anteriores |
+| H4 | El estudiante ve «Pagar» en el prototipo, pero TheHouse no cobra (RES-03) | Información | Mobile oculta o deshabilita el botón; `nextPayment` es solo informativo |
+
+Resultado: **PASS WITH WARNINGS**. Costo: sin recursos nuevos; una colección pequeña (`agreements`) con cinco índices en MongoDB Atlas M0 y llaves de Redis con expiración, dentro de los planes gratuitos. Revisión de coherencia: spec, plan, tasks, README y esta evidencia indican 1.1.0 completa 11/11; las rutas de NV-12 a NV-17 no cambiaron.
