@@ -46,9 +46,13 @@ public static class UserEndpointSupport
         {
             return Error(context, exception.Status);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
-            return Error(context, 404);
+            return Error(context, 404, exception.Code);
+        }
+        catch (GoneException exception)
+        {
+            return Error(context, 410, exception.Reason);
         }
         catch (ForbiddenException exception)
         {
@@ -66,7 +70,7 @@ public static class UserEndpointSupport
         {
             context.Response.Headers.RetryAfter =
                 exception.RetryAfterSeconds.ToString(CultureInfo.InvariantCulture);
-            return Error(context, 429);
+            return Error(context, 429, exception.Code);
         }
         catch (DependencyUnavailableException)
         {

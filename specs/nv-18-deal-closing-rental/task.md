@@ -8,12 +8,12 @@
 | Fecha | 2026-11-12 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-12 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-18-deal-closing-rental/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T11 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 11 |
-| Tasks completadas | 0 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
@@ -25,19 +25,19 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Convenio desde una solicitud aceptada** — Requisito: NV-18-R01 · Fase: F1 · Aceptación: El arrendador crea el convenio solo con solicitud `accepted` de su cuarto, cuarto `available` y edificio `verified`; valida montos, fechas, duración y día de pago; calcula `endDate`; 409 `request_state`, `room_unavailable` y `agreement_open`; lo ajeno 404; sin modo arrendador 403. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Código de cierre seguro** — Requisito: NV-18-R02 · Fase: F1 · Aceptación: Crear y `/code` entregan `qrToken` y `backupCode` que vencen a los 10 minutos; solo se guarda su hash; un código nuevo invalida el anterior; el código se acepta sin guiones ni distinción de mayúsculas. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Convenio desde una solicitud aceptada** — Requisito: NV-18-R01 · Fase: F1 · Aceptación: El arrendador crea el convenio solo con solicitud `accepted` de su cuarto, cuarto `available` y edificio `verified`; valida montos, fechas, duración y día de pago; calcula `endDate`; 409 `request_state`, `room_unavailable` y `agreement_open`; lo ajeno 404; sin modo arrendador 403. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Código de cierre seguro** — Requisito: NV-18-R02 · Fase: F1 · Aceptación: Crear y `/code` entregan `qrToken` y `backupCode` que vencen a los 10 minutos; solo se guarda su hash; un código nuevo invalida el anterior; el código se acepta sin guiones ni distinción de mayúsculas. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T03 · Revisar y aceptar** — Requisito: NV-18-R03 · Fase: F2 · Aceptación: `preview` devuelve los términos y las reglas sin consumir el código; `accept` exige `acceptedTerms: true`, activa el convenio, consume el código y marca el cuarto `rented`; 410 vencido o usado; 404 de otra cuenta; prueba de concurrencia con dos aceptaciones y con un cambio del cuarto a mitad. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T04 · Efectos al rentar** — Requisito: NV-18-R04 · Fase: F2 · Aceptación: Las demás solicitudes activas del cuarto quedan `rejected` con `not_available` y las visitas activas de otros estudiantes a ese cuarto quedan canceladas por el arrendador; el cuarto deja de salir en la búsqueda; los pasos se pueden repetir sin duplicar efectos. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T05 · Mi renta** — Requisito: NV-18-R05 · Fase: F2 · Aceptación: Devuelve el convenio `active` con próximo pago calculado, dirección exacta, ubicación, reglas y `conversationId`; sin renta activa 404 `no_active_rental`; tras terminar la renta ya no sale la dirección. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T06 · Convenios del arrendador, cancelar y fin de renta** — Requisito: NV-18-R06 · Fase: F2 · Aceptación: Listado y detalle por estado y cuarto sin el código; cancelar solo `pending`; terminar solo `active` con motivo opcional, el cuarto vuelve a `available`; historial conservado; puerto de historial de rentas para NV-19. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T03 · Revisar y aceptar** — Requisito: NV-18-R03 · Fase: F2 · Aceptación: `preview` devuelve los términos y las reglas sin consumir el código; `accept` exige `acceptedTerms: true`, activa el convenio, consume el código y marca el cuarto `rented`; 410 vencido o usado; 404 de otra cuenta; prueba de concurrencia con dos aceptaciones y con un cambio del cuarto a mitad. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T04 · Efectos al rentar** — Requisito: NV-18-R04 · Fase: F2 · Aceptación: Las demás solicitudes activas del cuarto quedan `rejected` con `not_available` y las visitas activas de otros estudiantes a ese cuarto quedan canceladas por el arrendador; el cuarto deja de salir en la búsqueda; los pasos se pueden repetir sin duplicar efectos. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T05 · Mi renta** — Requisito: NV-18-R05 · Fase: F2 · Aceptación: Devuelve el convenio `active` con próximo pago calculado, dirección exacta, ubicación, reglas y `conversationId`; sin renta activa 404 `no_active_rental`; tras terminar la renta ya no sale la dirección. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T06 · Convenios del arrendador, cancelar y fin de renta** — Requisito: NV-18-R06 · Fase: F2 · Aceptación: Listado y detalle por estado y cuarto sin el código; cancelar solo `pending`; terminar solo `active` con motivo opcional, el cuarto vuelve a `available`; historial conservado; puerto de historial de rentas para NV-19. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T07 · Protección contra fuerza bruta y privacidad** — Requisito: NV-18-R07 · Fase: F3 · Aceptación: Rate limits y bloqueos por cuenta y por código verificados; hashes sin código en claro en base de datos ni logs; vistas sin datos de contacto; Redis caído 503. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
+- [x] **T07 · Protección contra fuerza bruta y privacidad** — Requisito: NV-18-R07 · Fase: F3 · Aceptación: Rate limits y bloqueos por cuenta y por código verificados; hashes sin código en claro en base de datos ni logs; vistas sin datos de contacto; Redis caído 503. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 
 ## F4 — Pruebas y evidencia
 
@@ -50,13 +50,13 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F2 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F2 | ABIERTA |
-| T07 | R07 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F2 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F2 | COMPLETA |
+| T07 | R07 | F3 | COMPLETA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R09 | F4 | ABIERTA |
 | T10 | R09 | F4 | ABIERTA |
@@ -82,11 +82,11 @@
 | --- | --- |
 | Requisitos | 9 |
 | Tasks | 11 |
-| Tasks abiertas | 11 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T11 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

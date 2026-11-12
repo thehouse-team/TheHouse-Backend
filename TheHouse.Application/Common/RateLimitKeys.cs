@@ -78,6 +78,23 @@ public static class RateLimitKeys
     public static string MessagingLock(string userId) =>
         "thehouse:u2:messaging:lock:v1:" + Hash(userId);
 
+    // NV-18: convenios por usuario; código de cierre por usuario, por IP y
+    // por cuenta en 15 minutos; candado por cuarto al aceptar o terminar.
+    public static string RentalsUser(string userId) =>
+        "thehouse:u2:rentals:user:v1:" + Hash(userId);
+
+    public static string ClosingCodeUser(string userId) =>
+        "thehouse:u2:rentals:code:user:v1:" + Hash(userId);
+
+    public static string ClosingCodeIp(string ipAddress) =>
+        "thehouse:u2:rentals:code:ip:v1:" + Hash(ipAddress);
+
+    public static string ClosingCodeAttempts(string userId) =>
+        "thehouse:u2:rentals:code:attempts:v1:" + Hash(userId);
+
+    public static string RentalRoomLock(string roomId) =>
+        "thehouse:u2:rentals:lock:room:v1:" + Hash(roomId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

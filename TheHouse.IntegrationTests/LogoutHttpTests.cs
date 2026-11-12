@@ -399,7 +399,15 @@ public sealed class LogoutHttpTests
                     or "/api/v1/landlord/visits/{id}"
                     or "/api/v1/landlord/visits/{id}/confirm"
                     or "/api/v1/landlord/visits/{id}/reschedule"
-                    or "/api/v1/landlord/visits/{id}/cancel",
+                    or "/api/v1/landlord/visits/{id}/cancel"
+                    or "/api/v1/landlord/agreements"
+                    or "/api/v1/landlord/agreements/{id}"
+                    or "/api/v1/landlord/agreements/{id}/code"
+                    or "/api/v1/landlord/agreements/{id}/cancel"
+                    or "/api/v1/landlord/agreements/{id}/end"
+                    or "/api/v1/agreements/preview"
+                    or "/api/v1/agreements/accept"
+                    or "/api/v1/users/me/rental",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

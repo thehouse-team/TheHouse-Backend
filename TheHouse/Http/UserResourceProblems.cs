@@ -13,7 +13,7 @@ public static class UserResourceProblems
     // Agrega `code` y su `detail` si el endpoint lo indicó para este status.
     public static void ApplyCode(HttpContext context, ProblemDetails problem, int status)
     {
-        if (status is 403 or 409 or 422 &&
+        if (status is 403 or 404 or 409 or 410 or 422 or 429 &&
             context.Items.TryGetValue(CodeItem, out var value) &&
             value is string code &&
             DetailFor(code) is { } detail)
@@ -156,6 +156,27 @@ public static class UserResourceProblems
         };
     }
 
+    // NV-18: convenios, código de cierre y Mi renta.
+    public static void NormalizeRentals(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los datos del convenio o del código no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            403 => "Esta acción requiere activar el modo arrendador.",
+            404 => "El convenio, la solicitud o la renta no existe.",
+            409 => "La solicitud entra en conflicto con el estado actual del convenio.",
+            410 => "El código ya no está disponible.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de solicitudes de convenios.",
+            503 => "Los convenios no están disponibles temporalmente.",
+            504 => "Los convenios no respondieron a tiempo.",
+            _ => "No fue posible procesar el convenio.",
+        };
+    }
+
     public static string? DetailFor(string code) => code switch
     {
         "favorites_limit" => "Se alcanzó el máximo de 200 favoritos.",
@@ -198,6 +219,13 @@ public static class UserResourceProblems
         "room_unavailable" => "El cuarto ya no está publicado.",
         "conversation_closed" => "La conversación está cerrada.",
         "participant_suspended" => "Una de las cuentas de la conversación está suspendida.",
+        "agreement_open" => "El cuarto ya tiene un convenio pendiente o activo.",
+        "agreement_state" => "El convenio no se puede cambiar en su estado actual.",
+        "code_invalid" => "El código no es válido.",
+        "code_expired" => "El código venció; pide al arrendador uno nuevo.",
+        "code_used" => "El código ya se usó.",
+        "too_many_attempts" => "Demasiados intentos con códigos; espera 15 minutos.",
+        "no_active_rental" => "No tienes una renta activa.",
         _ => null,
     };
 }

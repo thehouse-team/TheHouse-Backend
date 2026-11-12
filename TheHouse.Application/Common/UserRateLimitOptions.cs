@@ -45,6 +45,20 @@ public sealed class UserRateLimitOptions
 
     public int MessagePollsPerWindow { get; init; } = 12;
 
+    // NV-18: 60/min general; código de cierre 10/min por usuario, 30/min por
+    // IP y 5 intentos por cuenta en 15 minutos (RNF-17).
+    public int RentalsPerWindow { get; init; } = 60;
+
+    public int ClosingCodePerWindow { get; init; } = 10;
+
+    public int ClosingCodeIpPerWindow { get; init; } = 30;
+
+    public int ClosingCodeAttempts { get; init; } = 5;
+
+    public TimeSpan ClosingCodeAttemptsWindow { get; init; } = TimeSpan.FromMinutes(15);
+
+    public int ClosingCodeAttemptsRetryAfterSeconds => (int)ClosingCodeAttemptsWindow.TotalSeconds;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);
