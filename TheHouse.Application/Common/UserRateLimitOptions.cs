@@ -59,6 +59,11 @@ public sealed class UserRateLimitOptions
 
     public int ClosingCodeAttemptsRetryAfterSeconds => (int)ClosingCodeAttemptsWindow.TotalSeconds;
 
+    // NV-20: bandeja y marcas 60/min; contador 30/min por usuario.
+    public int NotificationsPerWindow { get; init; } = 60;
+
+    public int NotificationCountPerWindow { get; init; } = 30;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

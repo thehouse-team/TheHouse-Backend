@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.Security;
 using TheHouse.Application.Common;
@@ -127,7 +128,8 @@ public sealed class ReviewService(
     IVerificationReviewRepository reviews,
     ILandlordProfileRepository landlords,
     IUniversityRepository universities,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    INotificationSink? notifications = null)
 {
     private static readonly Dictionary<string, BuildingStatus> Statuses = new(StringComparer.Ordinal)
     {
@@ -205,6 +207,19 @@ public sealed class ReviewService(
         await rooms.SetStatusByBuildingAsync(building.Id, RoomStatus.InReview, roomStatus, now, cancellationToken);
         await reviews.AddAsync(new VerificationReview(building.Id, userId, decision, reason, now), cancellationToken);
         await staff.AuditAsync(userId, "building." + decision, "building", building.Id, reason, cancellationToken);
+        var type = decision switch
+        {
+            "approved" => NotificationTypes.BuildingApproved,
+            "changes_requested" => NotificationTypes.BuildingChangesRequested,
+            _ => NotificationTypes.BuildingRejected,
+        };
+        if (notifications is not null)
+        {
+            await notifications.NotifyAsync(
+                new NotificationEvent(type, changed.OwnerId, changed.Id, $"{type}:{changed.Id}:{changed.Version}", BuildingId: changed.Id),
+                cancellationToken);
+        }
+
         return await ResponseAsync(changed, cancellationToken);
     }
 
@@ -238,7 +253,8 @@ public sealed class ModerationService(
     IUserRepository users,
     IRefreshTokenStore refreshTokens,
     SessionService sessions,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    INotificationSink? notifications = null)
 {
     public const string SuspendedReason = "suspended";
 
@@ -317,6 +333,14 @@ public sealed class ModerationService(
         }
 
         await staff.AuditAsync(actorId, action, "building", building.Id, reason, cancellationToken);
+        var type = changed.Status == BuildingStatus.Suspended ? NotificationTypes.BuildingSuspended : NotificationTypes.BuildingUnsuspended;
+        if (notifications is not null)
+        {
+            await notifications.NotifyAsync(
+                new NotificationEvent(type, changed.OwnerId, changed.Id, $"{type}:{changed.Id}:{changed.Version}", BuildingId: changed.Id),
+                cancellationToken);
+        }
+
         return ListingRules.BuildingStatusText(changed.Status);
     }
 }

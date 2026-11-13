@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Notifications;
 using System.Buffers.Text;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -163,7 +164,8 @@ public sealed class AgreementService(
     IUniversityRepository universities,
     IVisitRepository visits,
     IUserLock userLock,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    INotificationSink? notifications = null)
 {
     private static readonly TimeSpan LockTtl = TimeSpan.FromSeconds(10);
 
@@ -282,6 +284,9 @@ public sealed class AgreementService(
         var ended = current.End(reason, note, now);
         await SaveAsync(current, ended, cancellationToken);
         await ReleaseRoomAsync(current.RoomId, now, cancellationToken);
+        await NotifyAsync(
+            new NotificationEvent(NotificationTypes.AgreementEnded, ended.StudentId, ended.Id, $"{NotificationTypes.AgreementEnded}:{ended.Id}", RoomId: ended.RoomId, LandlordId: ended.OwnerId),
+            cancellationToken);
         return await ToLandlordResponseAsync(ended, null, cancellationToken);
     }
 
@@ -346,6 +351,9 @@ public sealed class AgreementService(
             }
         }
 
+        await NotifyAsync(
+            new NotificationEvent(NotificationTypes.AgreementActivated, activated.OwnerId, activated.Id, $"{NotificationTypes.AgreementActivated}:{activated.Id}", RoomId: activated.RoomId, StudentId: activated.StudentId),
+            cancellationToken);
         var effectsPending = !await ApplyRentedEffectsAsync(activated, cancellationToken);
         return (await ToRentalAsync(activated, cancellationToken), effectsPending);
     }
@@ -398,6 +406,9 @@ public sealed class AgreementService(
                 if (await requests.UpdateStatusAsync(rejected, status, cancellationToken))
                 {
                     await conversations.CloseAsync(request.ConversationId, cancellationToken);
+                    await NotifyAsync(
+                        new NotificationEvent(NotificationTypes.RequestRejected, request.StudentId, request.Id, $"{NotificationTypes.RequestRejected}:{request.Id}", RoomId: request.RoomId, LandlordId: request.OwnerId),
+                        cancellationToken);
                 }
             }
         }
@@ -411,7 +422,12 @@ public sealed class AgreementService(
             var (items, _) = await visits.ListForRoomsAsync([agreement.RoomId], now, now.AddDays(62), status, 1, EffectPageSize, cancellationToken);
             foreach (var visit in items.Where(item => item.UserId != agreement.StudentId && item.IsActive(now)))
             {
-                await visits.ReplaceIfUnchangedAsync(visit.CancelByLandlord("not_available", AgreementRules.RentedNote, now), visit.UpdatedAt, cancellationToken);
+                if (await visits.ReplaceIfUnchangedAsync(visit.CancelByLandlord("not_available", AgreementRules.RentedNote, now), visit.UpdatedAt, cancellationToken))
+                {
+                    await NotifyAsync(
+                        new NotificationEvent(NotificationTypes.VisitCancelled, visit.UserId, visit.Id, $"{NotificationTypes.VisitCancelled}:{visit.Id}", RoomId: visit.RoomId, LandlordId: agreement.OwnerId, At: visit.ScheduledAt),
+                        cancellationToken);
+                }
             }
         }
     }
@@ -465,6 +481,9 @@ public sealed class AgreementService(
 
         return agreement;
     }
+
+    private Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken) =>
+        notifications?.NotifyAsync(notification, cancellationToken) ?? Task.CompletedTask;
 
     private static ClosingCode NewCode(string backupCode, string qrToken, DateTimeOffset now) =>
         new(ClosingCodes.Hash(backupCode), ClosingCodes.Hash(qrToken), now + ClosingCode.Lifetime, null, 0);

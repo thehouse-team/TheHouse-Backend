@@ -77,7 +77,8 @@ public sealed class OpenApiContractTests
                 path.Name.StartsWith(MessagingEndpoint.MinePath, StringComparison.Ordinal) ||
                 path.Name.StartsWith(MessagingEndpoint.ConversationsPath, StringComparison.Ordinal) ||
                 path.Name.StartsWith(RentalsEndpoint.StudentPath + "/", StringComparison.Ordinal) ||
-                path.Name == RentalsEndpoint.RentalPath,
+                path.Name == RentalsEndpoint.RentalPath ||
+                path.Name.StartsWith(NotificationsEndpoint.BasePath, StringComparison.Ordinal),
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 
@@ -102,6 +103,16 @@ public sealed class OpenApiContractTests
                  })
         {
             Assert.True(paths.TryGetProperty(rentalPath, out _), rentalPath);
+        }
+
+        // NV-20: las 4 operaciones de la bandeja están publicadas.
+        foreach (var notificationPath in new[]
+                 {
+                     NotificationsEndpoint.BasePath, NotificationsEndpoint.CountPath,
+                     NotificationsEndpoint.ReadPath, NotificationsEndpoint.ReadAllPath,
+                 })
+        {
+            Assert.True(paths.TryGetProperty(notificationPath, out _), notificationPath);
         }
 
         Assert.True(

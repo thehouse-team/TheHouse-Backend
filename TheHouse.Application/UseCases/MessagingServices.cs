@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.Security;
 using TheHouse.Application.Common;
@@ -89,7 +90,8 @@ public sealed class RentalRequestService(
     IVisitRepository visits,
     IAccountSuspensionQuery suspensions,
     IUserLock userLock,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    INotificationSink? notifications = null)
 {
     private static readonly TimeSpan LockTtl = TimeSpan.FromSeconds(10);
 
@@ -187,6 +189,7 @@ public sealed class RentalRequestService(
             throw;
         }
 
+        await NotifyAsync(NotificationTypes.RequestReceived, created.OwnerId, created, studentActor: true, cancellationToken);
         return await ToResponseAsync(created, forLandlord: false, cancellationToken);
     }
 
@@ -229,6 +232,7 @@ public sealed class RentalRequestService(
         }
 
         await conversations.CloseAsync(request.ConversationId, cancellationToken);
+        await NotifyAsync(NotificationTypes.RequestCancelled, request.OwnerId, request, studentActor: true, cancellationToken);
         return await ToResponseAsync(updated, forLandlord: false, cancellationToken);
     }
 
@@ -279,6 +283,7 @@ public sealed class RentalRequestService(
             throw new ConflictException("request_state");
         }
 
+        await NotifyAsync(NotificationTypes.RequestAccepted, request.StudentId, request, studentActor: false, cancellationToken);
         return await ToResponseAsync(updated, forLandlord: true, cancellationToken);
     }
 
@@ -324,8 +329,22 @@ public sealed class RentalRequestService(
         }
 
         await conversations.CloseAsync(request.ConversationId, cancellationToken);
+        await NotifyAsync(NotificationTypes.RequestRejected, request.StudentId, request, studentActor: false, cancellationToken);
         return await ToResponseAsync(updated, forLandlord: true, cancellationToken);
     }
+
+    // NV-20: aviso para la otra parte después de guardar.
+    private Task NotifyAsync(string type, string recipientId, RentalRequest request, bool studentActor, CancellationToken cancellationToken) =>
+        notifications?.NotifyAsync(
+            new NotificationEvent(
+                type,
+                recipientId,
+                request.Id,
+                $"{type}:{request.Id}",
+                RoomId: request.RoomId,
+                StudentId: studentActor ? request.StudentId : null,
+                LandlordId: studentActor ? null : request.OwnerId),
+            cancellationToken) ?? Task.CompletedTask;
 
     private async Task EnsureNotSuspendedAsync(string first, string second, CancellationToken cancellationToken)
     {
@@ -440,7 +459,8 @@ public sealed class ConversationService(
     ILandlordProfileRepository landlords,
     IProfileRepository profiles,
     IAccountSuspensionQuery suspensions,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    INotificationSink? notifications = null)
 {
     public async Task<ConversationListResponse> ListAsync(string userId, int page, int pageSize, CancellationToken cancellationToken)
     {
@@ -527,6 +547,22 @@ public sealed class ConversationService(
                 CreatedAt = timeProvider.GetUtcNow(),
             },
             cancellationToken);
+        if (created && notifications is not null)
+        {
+            // NV-20: un aviso no leído por conversación; sin texto del mensaje.
+            var fromStudent = userId == conversation.StudentId;
+            await notifications.NotifyAsync(
+                new NotificationEvent(
+                    NotificationTypes.MessageReceived,
+                    conversation.CounterpartOf(userId),
+                    conversation.Id,
+                    NotificationService.MessageKey(conversation.Id),
+                    RoomId: conversation.RoomId,
+                    StudentId: fromStudent ? userId : null,
+                    LandlordId: fromStudent ? null : userId),
+                cancellationToken);
+        }
+
         return (ToResponse(userId, message), created);
     }
 
@@ -540,6 +576,10 @@ public sealed class ConversationService(
         }
 
         await conversations.MarkReadAsync(conversation.Id, userId == conversation.StudentId, body.LastMessageId!, cancellationToken);
+        if (notifications is not null)
+        {
+            await notifications.ClearAsync(userId, NotificationService.MessageKey(conversation.Id), cancellationToken);
+        }
     }
 
     private async Task<Conversation> LoadAsync(string userId, string id, CancellationToken cancellationToken)

@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Notifications;
 using System.Security.Cryptography;
 using System.Text;
 using TheHouse.Application.Abstractions.Persistence;
@@ -21,7 +22,8 @@ public sealed class VisitService(
     RoomCatalog catalog,
     ILandlordProfileRepository landlords,
     IUserLock userLock,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    INotificationSink? notifications = null)
 {
     public const int MaximumActiveVisits = 5;
 
@@ -135,6 +137,7 @@ public sealed class VisitService(
             new VisitIdempotencyRecord(userId, keyText, requestHash, created.Id, now),
             cancellationToken);
 
+        await NotifyOwnerAsync(NotificationTypes.VisitRequested, created, room.Building.OwnerId, cancellationToken);
         return new CreateVisitResult(ToResponse(created, room, await LandlordNameAsync(room.Building.OwnerId, cancellationToken)), Replayed: false);
     }
 
@@ -205,6 +208,12 @@ public sealed class VisitService(
             var cancelled = visit.Cancel(cleanReason, timeProvider.GetUtcNow());
             if (ReferenceEquals(cancelled, visit) || await visits.ReplaceIfUnchangedAsync(cancelled, visit.UpdatedAt, cancellationToken))
             {
+                if (!ReferenceEquals(cancelled, visit) && cancelled.RoomId.Length > 0 &&
+                    await catalog.FindAsync(cancelled.RoomId, cancellationToken) is { } room)
+                {
+                    await NotifyOwnerAsync(NotificationTypes.VisitCancelled, cancelled, room.Building.OwnerId, cancellationToken);
+                }
+
                 return await ToResponseAsync(cancelled, cancellationToken);
             }
 
@@ -298,4 +307,10 @@ public sealed class VisitService(
 
     private static string Hash(string value) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value))).ToLowerInvariant();
+
+    // NV-20: aviso al arrendador del cuarto después de guardar.
+    private Task NotifyOwnerAsync(string type, Visit visit, string ownerId, CancellationToken cancellationToken) =>
+        notifications?.NotifyAsync(
+            new NotificationEvent(type, ownerId, visit.Id, $"{type}:{visit.Id}", RoomId: visit.RoomId, StudentId: visit.UserId, At: visit.ScheduledAt),
+            cancellationToken) ?? Task.CompletedTask;
 }

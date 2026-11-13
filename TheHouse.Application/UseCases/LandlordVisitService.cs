@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
 using TheHouse.Application.Contracts.Visits;
@@ -15,7 +16,8 @@ public sealed class LandlordVisitService(
     ILandlordProfileRepository landlords,
     IProfileRepository profiles,
     IUniversityRepository universities,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    INotificationSink? notifications = null)
 {
     public static readonly TimeSpan DefaultRange = TimeSpan.FromDays(30);
 
@@ -92,7 +94,9 @@ public sealed class LandlordVisitService(
         var (visit, room) = await LoadOwnedAsync(ownerId, id, cancellationToken);
         await EnsurePublishedAsync(room, cancellationToken);
         var confirmed = visit.Confirm(timeProvider.GetUtcNow());
-        return await SaveAsync(visit, confirmed, room, cancellationToken);
+        var response = await SaveAsync(visit, confirmed, room, cancellationToken);
+        await NotifyStudentAsync(NotificationTypes.VisitConfirmed, confirmed, ownerId, $"{NotificationTypes.VisitConfirmed}:{visit.Id}", cancellationToken);
+        return response;
     }
 
     public async Task<LandlordVisitResponse> RescheduleAsync(string ownerId, string? id, RescheduleVisitRequest body, CancellationToken cancellationToken)
@@ -112,7 +116,14 @@ public sealed class LandlordVisitService(
             throw new ConflictException("student_schedule_overlap");
         }
 
-        return await SaveAsync(visit, moved, room, cancellationToken);
+        var rescheduled = await SaveAsync(visit, moved, room, cancellationToken);
+        await NotifyStudentAsync(
+            NotificationTypes.VisitRescheduled,
+            moved,
+            ownerId,
+            $"{NotificationTypes.VisitRescheduled}:{visit.Id}:{moved.UpdatedAt.UtcTicks}",
+            cancellationToken);
+        return rescheduled;
     }
 
     public async Task<LandlordVisitResponse> CancelAsync(string ownerId, string? id, LandlordCancelVisitRequest body, CancellationToken cancellationToken)
@@ -126,7 +137,9 @@ public sealed class LandlordVisitService(
         var note = Note(body.Note, required: body.Reason == "other");
         var (visit, room) = await LoadOwnedAsync(ownerId, id, cancellationToken);
         var cancelled = visit.CancelByLandlord(body.Reason, note, timeProvider.GetUtcNow());
-        return await SaveAsync(visit, cancelled, room, cancellationToken);
+        var response = await SaveAsync(visit, cancelled, room, cancellationToken);
+        await NotifyStudentAsync(NotificationTypes.VisitCancelled, cancelled, ownerId, $"{NotificationTypes.VisitCancelled}:{visit.Id}", cancellationToken);
+        return response;
     }
 
     private async Task<LandlordVisitResponse> SaveAsync(Visit previous, Visit updated, Room room, CancellationToken cancellationToken)
@@ -138,6 +151,12 @@ public sealed class LandlordVisitService(
 
         return await ToResponseAsync(updated, room, cancellationToken);
     }
+
+    // NV-20: aviso al estudiante después de guardar.
+    private Task NotifyStudentAsync(string type, Visit visit, string ownerId, string key, CancellationToken cancellationToken) =>
+        notifications?.NotifyAsync(
+            new NotificationEvent(type, visit.UserId, visit.Id, key, RoomId: visit.RoomId, LandlordId: ownerId, At: visit.ScheduledAt),
+            cancellationToken) ?? Task.CompletedTask;
 
     private static string? Note(string? value, bool required)
     {

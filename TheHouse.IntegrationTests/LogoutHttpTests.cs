@@ -407,7 +407,11 @@ public sealed class LogoutHttpTests
                     or "/api/v1/landlord/agreements/{id}/end"
                     or "/api/v1/agreements/preview"
                     or "/api/v1/agreements/accept"
-                    or "/api/v1/users/me/rental",
+                    or "/api/v1/users/me/rental"
+                    or "/api/v1/users/me/notifications"
+                    or "/api/v1/users/me/notifications/unread-count"
+                    or "/api/v1/users/me/notifications/{id}/read"
+                    or "/api/v1/users/me/notifications/read-all",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------
