@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-13 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-13 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-19-reviews/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-85 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09 |
@@ -235,13 +235,13 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Elegibilidad «visitó» | Visita `confirmed` cuyo horario ya pasó (NV-17 no emite `completed`) | PROPUESTO |
-| Criterios | Los 9 del prototipo (4 del arrendador y 5 de la propiedad), de 1 a 5, todos obligatorios al crear | PROPUESTO |
-| Promedios | Calculados al leer desde las reseñas publicadas; sin `rating_summaries` ni eventos (cambia la propuesta de 1.0.0) | PROPUESTO |
-| Visibilidad | Las reseñas requieren sesión, igual que el detalle (RF-24) | PROPUESTO |
-| Edición | 30 días desde la creación; sin borrar la reseña | PROPUESTO |
-| Moderación | Objetivo `review` en los reportes de NV-21; ocultar y mostrar por un `admin` desde NV-21 (Moderation usa un puerto de Reviews) | PROPUESTO |
-| NV-14 y NV-20 | Sin cambios en 1.1.0: el promedio en la búsqueda y la notificación de reseña nueva quedan para después | PROPUESTO |
+| Elegibilidad «visitó» | Visita `confirmed` cuyo horario ya pasó (NV-17 no emite `completed`) | APROBADO (M-BE-072) |
+| Criterios | Los 9 del prototipo (4 del arrendador y 5 de la propiedad), de 1 a 5, todos obligatorios al crear | APROBADO (M-BE-072) |
+| Promedios | Calculados al leer desde las reseñas publicadas; sin `rating_summaries` ni eventos (cambia la propuesta de 1.0.0) | APROBADO (M-BE-072) |
+| Visibilidad | Las reseñas requieren sesión, igual que el detalle (RF-24) | APROBADO (M-BE-072) |
+| Edición | 30 días desde la creación; sin borrar la reseña | APROBADO (M-BE-072) |
+| Moderación | Objetivo `review` en los reportes de NV-21; ocultar y mostrar por un `admin` desde NV-21 (Moderation usa un puerto de Reviews) | APROBADO (M-BE-072) |
+| NV-14 y NV-20 | Sin cambios en 1.1.0: el promedio en la búsqueda y la notificación de reseña nueva quedan para después | APROBADO (M-BE-072) |
 
 ## 14. Costo — COST-001
 
@@ -275,8 +275,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
 
 ## 18. Aprobación pendiente
 

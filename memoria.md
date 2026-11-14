@@ -657,3 +657,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-12.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** colección nueva `notifications` (módulo Notifications); los servicios de Messaging, Visits, Rentals y Moderation reciben el puerto; sin migración ni comandos en Production.
+
+## M-BE-072 — NV-19 1.1.0 aprobada: reseñas y calificaciones
+
+- **ID:** M-BE-072
+- **Decisión:** aprobar NV-19 1.1.0 con sus decisiones: «visitó» es una visita `confirmed` de NV-17 cuyo horario ya pasó (NV-17 no emite `completed`) y «rentó» es un convenio `active` o `ended` de NV-18; los 9 criterios del prototipo (4 del arrendador y 5 de la propiedad) de 1 a 5, obligatorios al crear, y comentario opcional ≤ 1000; una reseña por autor y cuarto, editable 30 días; promedios calculados al leer desde las reseñas publicadas, sin `rating_summaries` ni eventos; las reseñas requieren sesión (RF-24); moderación en NV-21 (objetivo de reporte `review` y ocultar o mostrar por un `admin` con motivo y bitácora); NV-14 y NV-20 sin cambios en esta versión.
+- **Estado:** APROBADO — Victor, 2026-11-13 («Apruebo y EJECUTA», T01–T10). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-13.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** colección nueva `reviews` (módulo Reviews); NV-21 agrega el objetivo de reporte `review` y dos rutas de admin; sin migración ni comandos en Production.
