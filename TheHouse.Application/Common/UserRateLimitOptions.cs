@@ -64,6 +64,11 @@ public sealed class UserRateLimitOptions
 
     public int NotificationCountPerWindow { get; init; } = 30;
 
+    // NV-19: reseñas 60/min y 10 nuevas al día por usuario.
+    public int ReviewsPerWindow { get; init; } = 60;
+
+    public int ReviewCreatesPerDay { get; init; } = 10;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

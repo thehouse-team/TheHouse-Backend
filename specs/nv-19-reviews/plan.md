@@ -8,7 +8,7 @@
 | Fecha | 2026-11-13 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-13 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-19-reviews/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Tasks | `task.md` 1.1.0-borrador |
@@ -145,4 +145,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan CI, despliegue y Azure**.

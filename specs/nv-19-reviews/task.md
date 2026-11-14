@@ -8,12 +8,12 @@
 | Fecha | 2026-11-13 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-13 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-19-reviews/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 10 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
@@ -25,18 +25,18 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Elegibilidad verificada** — Requisito: NV-19-R01 · Fase: F1 · Aceptación: Visita confirmada pasada o convenio activo o terminado del autor en ese cuarto; el dueño 403 `own_room`; sin estancia 403 `no_stay`; la consulta de elegibilidad responde lo mismo que crear. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Crear y editar** — Requisito: NV-19-R02 · Fase: F1 · Aceptación: 9 criterios de 1 a 5 obligatorios al crear y comentario ≤ 1000; una por autor y cuarto (409 `review_exists`); editar solo el autor durante 30 días (409 `review_locked`); promedios de la reseña con un decimal. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Elegibilidad verificada** — Requisito: NV-19-R01 · Fase: F1 · Aceptación: Visita confirmada pasada o convenio activo o terminado del autor en ese cuarto; el dueño 403 `own_room`; sin estancia 403 `no_stay`; la consulta de elegibilidad responde lo mismo que crear. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Crear y editar** — Requisito: NV-19-R02 · Fase: F1 · Aceptación: 9 criterios de 1 a 5 obligatorios al crear y comentario ≤ 1000; una por autor y cuarto (409 `review_exists`); editar solo el autor durante 30 días (409 `review_locked`); promedios de la reseña con un decimal. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T03 · Listado y resumen** — Requisito: NV-19-R03 · Fase: F2 · Aceptación: Reseñas publicadas del cuarto paginadas por fecha; resumen con promedio del cuarto, del arrendador (todas sus reseñas) y por criterio; sin reseñas, promedios `null`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T04 · Mis reseñas** — Requisito: NV-19-R04 · Fase: F2 · Aceptación: Lista del autor con su estado, incluidas las ocultas. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T05 · Moderación** — Requisito: NV-19-R05 · Fase: F2 · Aceptación: Reporte con objetivo `review` en NV-21; ocultar y mostrar solo con rol `admin`, motivo y bitácora; una oculta deja de contar en los promedios. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T03 · Listado y resumen** — Requisito: NV-19-R03 · Fase: F2 · Aceptación: Reseñas publicadas del cuarto paginadas por fecha; resumen con promedio del cuarto, del arrendador (todas sus reseñas) y por criterio; sin reseñas, promedios `null`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T04 · Mis reseñas** — Requisito: NV-19-R04 · Fase: F2 · Aceptación: Lista del autor con su estado, incluidas las ocultas. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T05 · Moderación** — Requisito: NV-19-R05 · Fase: F2 · Aceptación: Reporte con objetivo `review` en NV-21; ocultar y mostrar solo con rol `admin`, motivo y bitácora; una oculta deja de contar en los promedios. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T06 · Privacidad, autorización y límites** — Requisito: NV-19-R06 · Fase: F3 · Aceptación: Pruebas con autor, arrendador, tercero y admin; autor solo con primer nombre; rate limits 429; Redis caído 503; campos desconocidos 400. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T06 · Privacidad, autorización y límites** — Requisito: NV-19-R06 · Fase: F3 · Aceptación: Pruebas con autor, arrendador, tercero y admin; autor solo con primer nombre; rate limits 429; Redis caído 503; campos desconocidos 400. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
 
 ## F4 — Pruebas y evidencia
 
@@ -49,12 +49,12 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F2 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F2 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F3 | COMPLETA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R08 | F4 | ABIERTA |
@@ -79,11 +79,11 @@
 | --- | --- |
 | Requisitos | 8 |
 | Tasks | 10 |
-| Tasks abiertas | 10 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 6 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
