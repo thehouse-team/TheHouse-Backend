@@ -27,7 +27,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-17 | [Visitas: solicitud, confirmación y calendario](nv-17-visits/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.3.0 T01–T11 (2026-11-12): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-18 | [Cierre de trato con QR y renta](nv-18-deal-closing-rental/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T11 (2026-11-12): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-19 | [Reseñas y calificaciones](nv-19-reviews/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
-| NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — 1.1.0: T01–T07 completas; T08–T11 esperan CI, despliegue y Azure** | 7/11 |
+| NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T11 (2026-11-13): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T14 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 14/14 |
 | NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
 | NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** | 0/13 |
