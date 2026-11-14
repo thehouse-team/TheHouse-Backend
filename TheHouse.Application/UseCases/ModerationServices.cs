@@ -12,13 +12,13 @@ namespace TheHouse.Application.UseCases;
 // NV-21: catálogos y validaciones de moderación.
 public static class ModerationRules
 {
-    public static readonly IReadOnlySet<string> ReportTargets = new HashSet<string>(StringComparer.Ordinal) { "building", "room", "user" };
+    public static readonly IReadOnlySet<string> ReportTargets = new HashSet<string>(StringComparer.Ordinal) { "building", "room", "user", "review" };
 
     public static readonly IReadOnlySet<string> ReportReasons = new HashSet<string>(StringComparer.Ordinal) { "fake", "fraud", "inappropriate", "spam", "other" };
 
     public static readonly IReadOnlySet<string> ReportStatuses = new HashSet<string>(StringComparer.Ordinal) { "open", "resolved", "dismissed" };
 
-    public static readonly IReadOnlySet<string> ReportActions = new HashSet<string>(StringComparer.Ordinal) { "dismiss", "suspend_building", "suspend_user" };
+    public static readonly IReadOnlySet<string> ReportActions = new HashSet<string>(StringComparer.Ordinal) { "dismiss", "suspend_building", "suspend_user", "hide_review" };
 
     public static readonly IReadOnlySet<string> StaffRoleNames = new HashSet<string>(StringComparer.Ordinal) { StaffRoles.Reviewer, StaffRoles.Admin };
 
@@ -353,7 +353,9 @@ public sealed class ReportService(
     IBuildingRepository buildings,
     IRoomRepository rooms,
     IUserRepository users,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IReviewRepository? reviews = null,
+    ReviewModerationService? reviewModeration = null)
 {
     public async Task<ReportCreatedResponse> CreateAsync(string userId, CreateReportRequest request, CancellationToken cancellationToken)
     {
@@ -371,6 +373,7 @@ public sealed class ReportService(
         {
             "building" => await buildings.GetAsync(targetId, cancellationToken) is not null,
             "room" => await rooms.GetAsync(targetId, cancellationToken) is not null,
+            "review" => reviews is not null && await reviews.GetAsync(targetId, cancellationToken) is not null,
             _ => await users.GetByIdAsync(targetId, cancellationToken) is not null,
         };
 
@@ -423,7 +426,7 @@ public sealed class ReportService(
                 {
                     "building" => report.TargetId,
                     "room" => (await rooms.GetAsync(report.TargetId, cancellationToken))?.BuildingId ?? throw new NotFoundException("room"),
-                    _ => throw new RequestValidationException("action", "A user report cannot suspend a building."),
+                    _ => throw new RequestValidationException("action", "Only building or room reports can suspend a building."),
                 };
                 await moderation.SuspendBuildingAsync(userId, buildingId, moderationRequest, cancellationToken);
                 break;
@@ -432,9 +435,18 @@ public sealed class ReportService(
                 {
                     "user" => report.TargetId,
                     "building" => (await buildings.GetAsync(report.TargetId, cancellationToken))?.OwnerId ?? throw new NotFoundException("building"),
+                    "review" => (reviews is null ? null : await reviews.GetAsync(report.TargetId, cancellationToken))?.AuthorId ?? throw new NotFoundException("review"),
                     _ => (await rooms.GetAsync(report.TargetId, cancellationToken))?.OwnerId ?? throw new NotFoundException("room"),
                 };
                 await moderation.SuspendUserAsync(userId, ownerId, moderationRequest, cancellationToken);
+                break;
+            case "hide_review":
+                if (report.TargetType != "review" || reviewModeration is null)
+                {
+                    throw new RequestValidationException("action", "Only review reports can hide a review.");
+                }
+
+                await reviewModeration.HideAsync(userId, report.TargetId, moderationRequest, cancellationToken);
                 break;
         }
 

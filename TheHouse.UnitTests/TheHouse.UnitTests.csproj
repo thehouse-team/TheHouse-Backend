@@ -28,6 +28,7 @@
     <Compile Include="..\TheHouse.IntegrationTests\MessagingTestDoubles.cs" Link="Shared\MessagingTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\RentalTestDoubles.cs" Link="Shared\RentalTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\NotificationTestDoubles.cs" Link="Shared\NotificationTestDoubles.cs" />
+    <Compile Include="..\TheHouse.IntegrationTests\ReviewTestDoubles.cs" Link="Shared\ReviewTestDoubles.cs" />
   </ItemGroup>
 
   <ItemGroup>
