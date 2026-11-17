@@ -78,7 +78,9 @@ public sealed class OpenApiContractTests
                 path.Name.StartsWith(MessagingEndpoint.ConversationsPath, StringComparison.Ordinal) ||
                 path.Name.StartsWith(RentalsEndpoint.StudentPath + "/", StringComparison.Ordinal) ||
                 path.Name == RentalsEndpoint.RentalPath ||
-                path.Name.StartsWith(NotificationsEndpoint.BasePath, StringComparison.Ordinal),
+                path.Name.StartsWith(NotificationsEndpoint.BasePath, StringComparison.Ordinal) ||
+                path.Name.StartsWith(ReviewsEndpoint.ReviewsPath + "/", StringComparison.Ordinal) ||
+                path.Name == ReviewsEndpoint.MinePath,
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 
@@ -113,6 +115,16 @@ public sealed class OpenApiContractTests
                  })
         {
             Assert.True(paths.TryGetProperty(notificationPath, out _), notificationPath);
+        }
+
+        // NV-19: las 7 operaciones de reseñas están publicadas.
+        foreach (var reviewPath in new[]
+                 {
+                     ReviewsEndpoint.RoomReviewsPath, ReviewsEndpoint.EligibilityPath, ReviewsEndpoint.ReviewPath,
+                     ReviewsEndpoint.MinePath, ReviewsEndpoint.HidePath, ReviewsEndpoint.UnhidePath,
+                 })
+        {
+            Assert.True(paths.TryGetProperty(reviewPath, out _), reviewPath);
         }
 
         Assert.True(

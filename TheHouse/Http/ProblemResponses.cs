@@ -50,6 +50,8 @@ public static class ProblemResponses
             UserResourceProblems.NormalizeRentals(problem, status);
         else if (NotificationsEndpoint.IsNotifications(context))
             UserResourceProblems.NormalizeNotifications(problem, status);
+        else if (ReviewsEndpoint.IsReviews(context))
+            UserResourceProblems.NormalizeReviews(problem, status);
         else if (UserResourceProblems.IsAdmin(context))
             UserResourceProblems.NormalizeAdmin(problem, status);
         else if (RegistrationProblems.IsRegistration(context))

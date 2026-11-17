@@ -102,6 +102,13 @@ public static class RateLimitKeys
     public static string NotificationCountUser(string userId) =>
         "thehouse:u2:notifications:count:v1:" + Hash(userId);
 
+    // NV-19: reseñas por usuario; reseñas nuevas por día.
+    public static string ReviewsUser(string userId) =>
+        "thehouse:u2:reviews:user:v1:" + Hash(userId);
+
+    public static string ReviewCreatesUser(string userId) =>
+        "thehouse:u2:reviews:create:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

@@ -195,6 +195,26 @@ public static class UserResourceProblems
         };
     }
 
+    // NV-19: reseñas.
+    public static void NormalizeReviews(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los datos de la reseña no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            403 => "No puedes calificar este cuarto.",
+            404 => "El cuarto o la reseña no existe.",
+            409 => "La reseña entra en conflicto con su estado actual.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de solicitudes de reseñas.",
+            503 => "Las reseñas no están disponibles temporalmente.",
+            504 => "Las reseñas no respondieron a tiempo.",
+            _ => "No fue posible procesar la reseña.",
+        };
+    }
+
     public static string? DetailFor(string code) => code switch
     {
         "favorites_limit" => "Se alcanzó el máximo de 200 favoritos.",
@@ -229,7 +249,11 @@ public static class UserResourceProblems
         "room_state" => "La acción no es válida en el estado actual del cuarto.",
         "version_conflict" => "Los datos cambiaron desde la última lectura; vuelve a cargarlos.",
         "publication_incomplete" => "Faltan pasos para enviar el edificio a revisión.",
-        "own_room" => "No puedes enviar una solicitud a un cuarto propio.",
+        "own_room" => "No puedes enviar una solicitud ni calificar un cuarto propio.",
+        "no_stay" => "Solo califica quien visitó o rentó el cuarto.",
+        "review_exists" => "Ya calificaste este cuarto; puedes editar tu reseña.",
+        "review_locked" => "La reseña ya no se puede editar (pasaron 30 días).",
+        "review_state" => "La reseña no se puede cambiar en su estado actual.",
         "active_request_exists" => "Ya tienes una solicitud activa para este cuarto.",
         "active_requests_limit" => "Alcanzaste el máximo de 10 solicitudes activas.",
         "request_in_progress" => "Ya hay una solicitud en proceso; intenta de nuevo.",
