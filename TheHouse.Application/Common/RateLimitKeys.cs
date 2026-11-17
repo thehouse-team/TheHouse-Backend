@@ -109,6 +109,19 @@ public static class RateLimitKeys
     public static string ReviewCreatesUser(string userId) =>
         "thehouse:u2:reviews:create:v1:" + Hash(userId);
 
+    // NV-13: cargas por arrendador, lecturas públicas por IP y privadas por usuario.
+    public static string MediaUploadsUser(string userId) =>
+        "thehouse:u2:media:upload:v1:" + Hash(userId);
+
+    public static string MediaPublicIp(string ipAddress) =>
+        "thehouse:u2:media:public:v1:" + Hash(ipAddress);
+
+    public static string MediaPrivateUser(string userId) =>
+        "thehouse:u2:media:private:v1:" + Hash(userId);
+
+    public static string MediaRetentionLock() =>
+        "thehouse:u2:media:retention:lock:v1";
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

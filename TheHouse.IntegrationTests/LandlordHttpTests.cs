@@ -103,7 +103,7 @@ public sealed class LandlordHttpTests
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         var root = document.RootElement;
         Assert.Equal(
-            new[] { "id", "type", "name", "address", "location", "nearestUniversity", "distanceToUniversityKm", "walkingMinutes", "allowedTenants", "services", "rules", "status", "roomsTotal", "roomsAvailable", "version", "createdAt", "updatedAt" },
+            new[] { "id", "type", "name", "address", "location", "nearestUniversity", "distanceToUniversityKm", "walkingMinutes", "allowedTenants", "services", "rules", "status", "roomsTotal", "roomsAvailable", "version", "createdAt", "updatedAt", "photo" },
             root.EnumerateObject().Select(property => property.Name));
         Assert.Equal("draft", root.GetProperty("status").GetString());
         Assert.Equal(1, root.GetProperty("version").GetInt64());
@@ -166,7 +166,7 @@ public sealed class LandlordHttpTests
             Assert.Equal(new[] { 101, 102, 103, 201, 202 }, items.Select(item => item.GetProperty("number").GetInt32()));
             Assert.All(items, item => Assert.Equal("ready", item.GetProperty("status").GetString()));
             Assert.Equal(
-                new[] { "id", "buildingId", "number", "floor", "price", "currency", "sizeM2", "type", "bathroom", "furniture", "availableFrom", "minContract", "status", "version", "createdAt", "updatedAt" },
+                new[] { "id", "buildingId", "number", "floor", "price", "currency", "sizeM2", "type", "bathroom", "furniture", "availableFrom", "minContract", "status", "version", "createdAt", "updatedAt", "photos" },
                 items[0].EnumerateObject().Select(property => property.Name));
         }
 

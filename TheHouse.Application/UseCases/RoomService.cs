@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Media;
 using System.Globalization;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
@@ -13,7 +14,8 @@ public sealed class RoomService(
     BuildingService buildingsService,
     LandlordService landlords,
     IRoomRepository rooms,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IMediaPort? media = null)
 {
     public async Task<GeneratedRoomsResponse> GenerateAsync(string userId, string? buildingId, GenerateRoomsRequest request, CancellationToken cancellationToken)
     {
@@ -83,7 +85,13 @@ public sealed class RoomService(
         var building = await buildingsService.LoadOwnedAsync(userId, buildingId, cancellationToken);
         PropertyQueryValidation.EnsureValidPagination(page, pageSize);
         var (items, total) = await rooms.ListByBuildingAsync(building.Id, page, pageSize, cancellationToken);
-        return new RoomListResponse(items.Select(ToResponse).ToArray(), page, pageSize, total, PropertyQueryValidation.CalculateTotalPages(total, pageSize));
+        var snapshot = media is null ? MediaSnapshot.Empty : await media.SnapshotAsync([building.Id], publicUrls: building.Status == BuildingStatus.Verified, cancellationToken);
+        return new RoomListResponse(
+            items.Select(room => ToResponse(room) with { Photos = snapshot.Room(room.Id) }).ToArray(),
+            page,
+            pageSize,
+            total,
+            PropertyQueryValidation.CalculateTotalPages(total, pageSize));
     }
 
     public async Task<RoomResponse> UpdateAsync(string userId, string? roomId, UpdateRoomRequest request, CancellationToken cancellationToken)
@@ -141,6 +149,11 @@ public sealed class RoomService(
         if (!await rooms.DeleteAsync(room.Id, expected, cancellationToken))
         {
             throw new ConflictException("version_conflict");
+        }
+
+        if (media is not null)
+        {
+            await media.DeleteRoomAsync(room.Id, cancellationToken);
         }
     }
 
