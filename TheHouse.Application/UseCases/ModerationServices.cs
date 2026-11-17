@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Media;
 using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.Security;
@@ -129,7 +130,8 @@ public sealed class ReviewService(
     ILandlordProfileRepository landlords,
     IUniversityRepository universities,
     TimeProvider timeProvider,
-    INotificationSink? notifications = null)
+    INotificationSink? notifications = null,
+    IMediaPort? media = null)
 {
     private static readonly Dictionary<string, BuildingStatus> Statuses = new(StringComparer.Ordinal)
     {
@@ -166,11 +168,13 @@ public sealed class ReviewService(
         var landlord = await landlords.GetAsync(building.OwnerId, cancellationToken);
         var university = await universities.GetByIdAsync(building.NearestUniversityId, cancellationToken);
 
+        var snapshot = media is null ? MediaSnapshot.Empty : await media.SnapshotAsync([building.Id], publicUrls: false, cancellationToken);
         return new AdminBuildingDetailResponse(
-            BuildingService.ToResponse(building, university, buildingRooms),
-            buildingRooms.OrderBy(room => room.Floor).ThenBy(room => room.Number).Select(RoomService.ToResponse).ToArray(),
+            BuildingService.ToResponse(building, university, buildingRooms) with { Photo = snapshot.Building(building.Id) },
+            buildingRooms.OrderBy(room => room.Floor).ThenBy(room => room.Number).Select(room => RoomService.ToResponse(room) with { Photos = snapshot.Room(room.Id) }).ToArray(),
             landlord is null ? null : new ReviewLandlord(landlord.FullName, landlord.RentalMode, landlord.Rfc),
-            await LastDecisionAsync(building.Id, cancellationToken));
+            await LastDecisionAsync(building.Id, cancellationToken),
+            media is null ? null : await media.DocumentsAsync(building.Id, cancellationToken));
     }
 
     public async Task<BuildingResponse> DecideAsync(string userId, string? id, string decision, DecisionRequest request, CancellationToken cancellationToken)
@@ -206,6 +210,12 @@ public sealed class ReviewService(
 
         await rooms.SetStatusByBuildingAsync(building.Id, RoomStatus.InReview, roomStatus, now, cancellationToken);
         await reviews.AddAsync(new VerificationReview(building.Id, userId, decision, reason, now), cancellationToken);
+        if (media is not null && decision is "approved" or "rejected")
+        {
+            // NV-13: los documentos se borran 90 días después de la decisión.
+            await media.StartRetentionAsync(building.Id, now, cancellationToken);
+        }
+
         await staff.AuditAsync(userId, "building." + decision, "building", building.Id, reason, cancellationToken);
         var type = decision switch
         {

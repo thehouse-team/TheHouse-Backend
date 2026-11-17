@@ -80,7 +80,8 @@ public sealed class OpenApiContractTests
                 path.Name == RentalsEndpoint.RentalPath ||
                 path.Name.StartsWith(NotificationsEndpoint.BasePath, StringComparison.Ordinal) ||
                 path.Name.StartsWith(ReviewsEndpoint.ReviewsPath + "/", StringComparison.Ordinal) ||
-                path.Name == ReviewsEndpoint.MinePath,
+                path.Name == ReviewsEndpoint.MinePath ||
+                path.Name.StartsWith(ApiConventions.Prefix + "/media/", StringComparison.Ordinal),
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 
@@ -125,6 +126,17 @@ public sealed class OpenApiContractTests
                  })
         {
             Assert.True(paths.TryGetProperty(reviewPath, out _), reviewPath);
+        }
+
+        // NV-13: las 9 operaciones de fotos y documentos están publicadas.
+        foreach (var mediaPath in new[]
+                 {
+                     MediaEndpoint.BuildingPhotoPath, MediaEndpoint.RoomPhotosPath, MediaEndpoint.RoomPhotoPath,
+                     MediaEndpoint.DocumentPath, MediaEndpoint.DocumentsPath, MediaEndpoint.PublicPath,
+                     MediaEndpoint.PrivatePath, MediaEndpoint.ReviewerDocumentPath,
+                 })
+        {
+            Assert.True(paths.TryGetProperty(mediaPath, out _), mediaPath);
         }
 
         Assert.True(

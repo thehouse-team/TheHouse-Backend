@@ -48,7 +48,8 @@ public sealed record AdminBuildingDetailResponse(
     BuildingResponse Building,
     IReadOnlyList<RoomResponse> Rooms,
     ReviewLandlord? Landlord,
-    LastDecision? LastDecision);
+    LastDecision? LastDecision,
+    IReadOnlyList<TheHouse.Application.Contracts.Media.DocumentResponse>? Documents = null);
 
 public sealed record AdminBuildingListResponse(IReadOnlyList<BuildingResponse> Items, int Page, int PageSize, long TotalItems, int TotalPages);
 

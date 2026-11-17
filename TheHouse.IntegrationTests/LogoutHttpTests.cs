@@ -417,7 +417,15 @@ public sealed class LogoutHttpTests
                     or "/api/v1/reviews/{id}"
                     or "/api/v1/users/me/reviews"
                     or "/api/v1/admin/reviews/{id}/hide"
-                    or "/api/v1/admin/reviews/{id}/unhide",
+                    or "/api/v1/admin/reviews/{id}/unhide"
+                    or "/api/v1/landlord/buildings/{id}/photo"
+                    or "/api/v1/landlord/rooms/{id}/photos"
+                    or "/api/v1/landlord/rooms/{id}/photos/{photoId}"
+                    or "/api/v1/landlord/buildings/{id}/documents"
+                    or "/api/v1/landlord/buildings/{id}/documents/{kind}"
+                    or "/api/v1/media/{id}"
+                    or "/api/v1/media/{id}/private"
+                    or "/api/v1/admin/buildings/{id}/documents/{documentId}",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

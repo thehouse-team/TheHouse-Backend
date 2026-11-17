@@ -19,6 +19,7 @@ builder.AddMessaging();
 builder.AddRentals();
 builder.AddNotifications();
 builder.AddReviews();
+builder.AddMedia();
 builder.AddUniversities();
 builder.AddObservability();
 
@@ -285,6 +286,7 @@ app.MapMessaging();
 app.MapRentals();
 app.MapNotifications();
 app.MapReviews();
+app.MapMedia();
 app.MapUniversities();
 
 app.Run();

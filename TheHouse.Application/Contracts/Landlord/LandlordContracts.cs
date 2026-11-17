@@ -158,7 +158,8 @@ public sealed record BuildingResponse(
     int RoomsAvailable,
     long Version,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    TheHouse.Application.Contracts.Media.PhotoResponse? Photo = null);
 
 public sealed record LandlordSummary(int Buildings, int Rooms, int Available, int OccupancyPercent, long MonthlyIncome);
 
@@ -186,7 +187,8 @@ public sealed record RoomResponse(
     string Status,
     long Version,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    IReadOnlyList<TheHouse.Application.Contracts.Media.PhotoResponse>? Photos = null);
 
 public sealed record RoomListResponse(IReadOnlyList<RoomResponse> Items, int Page, int PageSize, long TotalItems, int TotalPages);
 

@@ -666,3 +666,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-13.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** colección nueva `reviews` (módulo Reviews); NV-21 agrega el objetivo de reporte `review` y dos rutas de admin; sin migración ni comandos en Production.
+
+## M-BE-073 — NV-13 1.1.0 aprobada: fotografías y documentos
+
+- **ID:** M-BE-073
+- **Decisión:** aprobar NV-13 1.1.0 con sus decisiones: archivos en MongoDB GridFS dentro de Atlas M0 ($0) con cuota de 60 MB por arrendador; re-codificación de fotos con SixLabors.ImageSharp 3.x (paquete nuevo, versión fijada, licencia válida para este proyecto académico) a WebP de 1600 px y miniatura de 400 px sin metadatos; documentos cifrados con AES-256-GCM y llave de datos por documento envuelta por una llave maestra en un secreto de Container Apps (M-BE-038), que Victor crea con autorización aparte; la publicación de NV-12 exige foto del edificio, INE y comprobante; fotos por endpoint propio (públicas e inmutables con edificio verificado, privadas para dueño y revisor); fotos ≤ 5 MB y documentos ≤ 10 MB; documentos retenidos 90 días después de la decisión de revisión.
+- **Estado:** APROBADO — Victor, 2026-11-17 («Apruebo y EJECUTA», T01–T10). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-17.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Cambio (2026-11-17):** SixLabors.ImageSharp 3.2.0 exige una llave de licencia de Six Labors para compilar en Release, así que, con aprobación de Victor («Sí, usa SkiaSharp»), las fotos se procesan con **SkiaSharp 4.154.0** y `SkiaSharp.NativeAssets.Linux.NoDependencies` 4.154.0 (MIT, sin vulnerabilidades publicadas, publicados el 2026-10-28), la alternativa ya prevista en la spec. ImageSharp 2.1.x se descartó por 5 vulnerabilidades publicadas.
+- **Impacto:** colecciones nuevas (`media_items`, `verification_documents` y los buckets GridFS) del módulo Media; NV-12, NV-14 y NV-21 agregan campos y pasos sin quitar ninguno; paquete NuGet nuevo; un secreto nuevo en Container Apps antes del despliegue.

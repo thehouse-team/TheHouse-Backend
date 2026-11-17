@@ -197,7 +197,7 @@ public sealed class SearchHttpTests
         var body = await detail.Content.ReadAsStringAsync();
         using var document = JsonDocument.Parse(body);
         Assert.Equal(
-            new[] { "id", "buildingId", "title", "price", "currency", "roomType", "bathroom", "sizeM2", "furniture", "availableFrom", "minContract", "distanceKm", "walkingMinutes", "approxLocation", "nearestUniversity", "building", "thumbnailUrl", "demo" },
+            new[] { "id", "buildingId", "title", "price", "currency", "roomType", "bathroom", "sizeM2", "furniture", "availableFrom", "minContract", "distanceKm", "walkingMinutes", "approxLocation", "nearestUniversity", "building", "thumbnailUrl", "demo", "photos" },
             document.RootElement.EnumerateObject().Select(property => property.Name));
         Assert.Equal(new[] { "id", "name", "type", "allowedTenants", "services", "rules" }, document.RootElement.GetProperty("building").EnumerateObject().Select(property => property.Name));
         Assert.DoesNotContain("Ubicación de ejemplo", body, StringComparison.Ordinal);

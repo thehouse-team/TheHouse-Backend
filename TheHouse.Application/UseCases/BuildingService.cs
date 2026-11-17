@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Media;
 using System.Globalization;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
@@ -14,7 +15,8 @@ public sealed class BuildingService(
     IBuildingRepository buildings,
     IRoomRepository rooms,
     IUniversityRepository universities,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IMediaPort? media = null)
 {
     public async Task<BuildingResponse> CreateAsync(string userId, BuildingRequest request, CancellationToken cancellationToken)
     {
@@ -78,8 +80,10 @@ public sealed class BuildingService(
             allRooms.Count == 0 ? 0 : (int)Math.Round(rented.Length * 100.0 / allRooms.Count),
             rented.Sum(room => (long)(room.Price ?? 0)));
 
+        var snapshot = media is null ? MediaSnapshot.Empty : await media.SnapshotAsync(items.Select(building => building.Id).ToArray(), publicUrls: false, cancellationToken);
         return new BuildingListResponse(
-            items.Select(building => ToResponse(building, universityById.GetValueOrDefault(building.NearestUniversityId), byBuilding[building.Id].ToArray())).ToArray(),
+            items.Select(building => ToResponse(building, universityById.GetValueOrDefault(building.NearestUniversityId), byBuilding[building.Id].ToArray())
+                with { Photo = Photo(snapshot, building) }).ToArray(),
             page,
             pageSize,
             total,
@@ -192,6 +196,10 @@ public sealed class BuildingService(
         }
 
         await rooms.DeleteByBuildingAsync(building.Id, cancellationToken);
+        if (media is not null)
+        {
+            await media.DeleteBuildingAsync(building.Id, cancellationToken);
+        }
     }
 
     public async Task<PublicationResponse> PublicationAsync(string userId, string? id, CancellationToken cancellationToken)
@@ -249,6 +257,13 @@ public sealed class BuildingService(
             new PublicationStep("room_ready", buildingRooms.Any(room => room.Status == RoomStatus.Ready)),
         };
 
+        // NV-13: foto del edificio y los dos documentos de verificación.
+        if (media is { PublicationRequiresFiles: true })
+        {
+            var (photo, documents) = await media.PublicationAsync(building.Id, cancellationToken);
+            steps = [.. steps, new PublicationStep("building_photo", photo), new PublicationStep("documents", documents)];
+        }
+
         return new PublicationResponse(building.Status == BuildingStatus.Draft && steps.All(step => step.Done), steps);
     }
 
@@ -266,8 +281,15 @@ public sealed class BuildingService(
     {
         var university = await universities.GetByIdAsync(building.NearestUniversityId, cancellationToken);
         var buildingRooms = await rooms.ListAllByBuildingAsync(building.Id, cancellationToken);
-        return ToResponse(building, university, buildingRooms);
+        var snapshot = media is null ? MediaSnapshot.Empty : await media.SnapshotAsync([building.Id], publicUrls: false, cancellationToken);
+        return ToResponse(building, university, buildingRooms) with { Photo = Photo(snapshot, building) };
     }
+
+    // Al dueño se le dan rutas privadas mientras el edificio no esté verificado.
+    private static Contracts.Media.PhotoResponse? Photo(MediaSnapshot snapshot, Building building) =>
+        snapshot.Building(building.Id) is { } photo && building.Status == BuildingStatus.Verified
+            ? photo with { Url = MediaRules.PublicUrl(photo.Id), ThumbUrl = MediaRules.PublicUrl(photo.Id) + "?size=thumb" }
+            : snapshot.Building(building.Id);
 
     private async Task<University> UniversityAsync(string? id, CancellationToken cancellationToken)
     {

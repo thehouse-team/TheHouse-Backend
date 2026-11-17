@@ -20,7 +20,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-10 | [Sesión: refresh token y cuenta propia](nv-10-account-session/spec.md) | **✅ APROBADA** | **✅ COMPLETADA — DESPLEGADA EN AZURE (revisión `c55feed2-7-1`) Y VERIFICADA 13/13 (2026-11-06)** | 11/11 |
 | NV-11 | [Perfil, universidad y preferencias](nv-11-profile-preferences/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T11 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-12 | [Arrendador, edificios y cuartos](nv-12-landlord-buildings-rooms/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T13 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 13/13 |
-| NV-13 | [Fotografías y documentos](nv-13-media-documents/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/10 |
+| NV-13 | [Fotografías y documentos](nv-13-media-documents/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan secreto, CI, despliegue y Azure** | 6/10 |
 | NV-14 | [Búsqueda, filtros y mapa](nv-14-search-map/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T13 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 13/13 |
 | NV-15 | [Favoritos](nv-15-favorites-compare/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-09): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-16 | [Contacto, solicitudes y chat](nv-16-contact-chat-requests/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T11 (2026-11-11): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |

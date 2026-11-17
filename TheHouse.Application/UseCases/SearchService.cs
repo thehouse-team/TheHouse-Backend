@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Media;
 using System.Globalization;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
@@ -52,7 +53,8 @@ public sealed class SearchService(
     IUniversityRepository universities,
     IBuildingRepository buildings,
     IRoomRepository rooms,
-    IPlaceRepository places)
+    IPlaceRepository places,
+    IMediaPort? media = null)
 {
     public const double DefaultMaxDistanceKm = 10;
 
@@ -79,7 +81,9 @@ public sealed class SearchService(
             _ => candidates.OrderBy(item => item.DistanceKm).ThenBy(item => item.Room.Price).ThenBy(item => item.Room.Id, StringComparer.Ordinal),
         };
 
-        var items = ordered.Skip((page - 1) * pageSize).Take(pageSize).Select(ToItem).ToArray();
+        var pageItems = ordered.Skip((page - 1) * pageSize).Take(pageSize).ToArray();
+        var snapshot = media is null ? MediaSnapshot.Empty : await media.SnapshotAsync(pageItems.Select(item => item.Room.BuildingId).Distinct(StringComparer.Ordinal).ToArray(), publicUrls: true, cancellationToken);
+        var items = pageItems.Select(item => ToItem(item) with { ThumbnailUrl = Thumbnail(snapshot, item.Room) }).ToArray();
         return new RoomSearchResponse(items, page, pageSize, candidates.Count, PropertyQueryValidation.CalculateTotalPages(candidates.Count, pageSize));
     }
 
@@ -116,6 +120,7 @@ public sealed class SearchService(
         }
 
         var university = await universities.GetByIdAsync(building.NearestUniversityId, cancellationToken);
+        var snapshot = media is null ? MediaSnapshot.Empty : await media.SnapshotAsync([building.Id], publicUrls: true, cancellationToken);
         var (cellLat, cellLng) = ApproximateLocation.Cell(building.Latitude, building.Longitude);
         var distance = university?.Latitude is { } uLat && university.Longitude is { } uLng
             ? ListingRules.DistanceKm(cellLat, cellLng, uLat, uLng)
@@ -138,9 +143,14 @@ public sealed class SearchService(
             new ApproxLocation(cellLat, cellLng),
             university is null ? null : new SearchUniversity(university.Id, university.Code, university.Name),
             new SearchBuilding(building.Id, building.Name, building.Type, building.AllowedTenants, building.Services, building.Rules),
-            null,
-            building.Demo);
+            Thumbnail(snapshot, room),
+            building.Demo,
+            snapshot.Room(room.Id));
     }
+
+    // NV-13: la primera foto del cuarto o, si no tiene, la del edificio.
+    private static string? Thumbnail(MediaSnapshot snapshot, Room room) =>
+        snapshot.Room(room.Id).FirstOrDefault()?.ThumbUrl ?? snapshot.Building(room.BuildingId)?.ThumbUrl;
 
     public async Task<PlaceSearchResponse> PlacesAsync(string? query, string? universityId, CancellationToken cancellationToken)
     {
