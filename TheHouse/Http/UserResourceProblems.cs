@@ -13,7 +13,7 @@ public static class UserResourceProblems
     // Agrega `code` y su `detail` si el endpoint lo indicó para este status.
     public static void ApplyCode(HttpContext context, ProblemDetails problem, int status)
     {
-        if (status is 403 or 404 or 409 or 410 or 422 or 429 &&
+        if (status is 400 or 403 or 404 or 409 or 410 or 415 or 422 or 429 &&
             context.Items.TryGetValue(CodeItem, out var value) &&
             value is string code &&
             DetailFor(code) is { } detail)
@@ -215,6 +215,26 @@ public static class UserResourceProblems
         };
     }
 
+    // NV-13: fotos y documentos.
+    public static void NormalizeMedia(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los datos del archivo no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            403 => "Esta acción requiere activar el modo arrendador o un rol de revisión.",
+            404 => "La foto, el documento o el recurso no existe.",
+            409 => "El archivo entra en conflicto con el estado actual.",
+            413 => "El archivo supera el tamaño permitido.",
+            415 => "El tipo de archivo no está admitido.",
+            429 => "Se superó el límite de solicitudes de archivos.",
+            503 => "Los archivos no están disponibles temporalmente.",
+            504 => "Los archivos no respondieron a tiempo.",
+            _ => "No fue posible procesar el archivo.",
+        };
+    }
+
     public static string? DetailFor(string code) => code switch
     {
         "favorites_limit" => "Se alcanzó el máximo de 200 favoritos.",
@@ -251,6 +271,10 @@ public static class UserResourceProblems
         "publication_incomplete" => "Faltan pasos para enviar el edificio a revisión.",
         "own_room" => "No puedes enviar una solicitud ni calificar un cuarto propio.",
         "no_stay" => "Solo califica quien visitó o rentó el cuarto.",
+        "unsupported_media" => "El archivo no es una imagen JPEG, PNG o WebP, o un PDF, válido.",
+        "image_too_large" => "La imagen supera los 40 megapíxeles.",
+        "photos_limit" => "El cuarto ya tiene 4 fotos.",
+        "storage_limit" => "Se alcanzó el espacio de 60 MB del arrendador.",
         "review_exists" => "Ya calificaste este cuarto; puedes editar tu reseña.",
         "review_locked" => "La reseña ya no se puede editar (pasaron 30 días).",
         "review_state" => "La reseña no se puede cambiar en su estado actual.",

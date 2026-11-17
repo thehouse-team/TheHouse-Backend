@@ -54,6 +54,10 @@ public static class UserEndpointSupport
         {
             return Error(context, 410, exception.Reason);
         }
+        catch (TheHouse.Application.Abstractions.Media.MediaRejectedException exception)
+        {
+            return Error(context, exception.Code == "image_too_large" ? 400 : 415, exception.Code);
+        }
         catch (ForbiddenException exception)
         {
             return Error(context, 403, exception.Reason);

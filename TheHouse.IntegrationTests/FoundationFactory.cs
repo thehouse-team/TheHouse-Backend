@@ -17,6 +17,9 @@ public class FoundationFactory(IReadOnlyDictionary<string, string?>? settings = 
     // NV-21: moderación en memoria para todas las fábricas.
     public InMemoryModerationRepositories Moderation { get; } = new();
 
+    // NV-13: fotos y documentos en memoria para todas las fábricas.
+    public InMemoryMediaRepository Media { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
@@ -26,11 +29,13 @@ public class FoundationFactory(IReadOnlyDictionary<string, string?>? settings = 
             services.RemoveAll<IReportRepository>();
             services.RemoveAll<IUserSuspensionRepository>();
             services.RemoveAll<IAuditRepository>();
+            services.RemoveAll<IMediaRepository>();
             services.AddSingleton<IStaffRoleRepository>(Moderation);
             services.AddSingleton<IVerificationReviewRepository>(Moderation);
             services.AddSingleton<IReportRepository>(Moderation);
             services.AddSingleton<IUserSuspensionRepository>(Moderation);
             services.AddSingleton<IAuditRepository>(Moderation);
+            services.AddSingleton<IMediaRepository>(Media);
         });
 
         builder.UseEnvironment(environment);

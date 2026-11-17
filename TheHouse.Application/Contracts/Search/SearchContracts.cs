@@ -50,7 +50,8 @@ public sealed record RoomDetailResponse(
     SearchUniversity? NearestUniversity,
     SearchBuilding Building,
     string? ThumbnailUrl,
-    bool Demo);
+    bool Demo,
+    IReadOnlyList<TheHouse.Application.Contracts.Media.PhotoResponse>? Photos = null);
 
 public sealed record PlaceItem(string Id, string Name, string Type, ApproxLocation ApproxLocation, double DistanceKm);
 

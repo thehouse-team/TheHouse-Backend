@@ -58,7 +58,7 @@ public sealed class AdminHttpTests
         using var detail = await bob.GetAsync($"{Admin}/buildings/{building.Id}");
         using (var document = JsonDocument.Parse(await detail.Content.ReadAsStringAsync()))
         {
-            Assert.Equal(new[] { "building", "rooms", "landlord", "lastDecision" }, document.RootElement.EnumerateObject().Select(property => property.Name));
+            Assert.Equal(new[] { "building", "rooms", "landlord", "lastDecision", "documents" }, document.RootElement.EnumerateObject().Select(property => property.Name));
             Assert.Equal(new[] { "fullName", "rentalMode", "rfc" }, document.RootElement.GetProperty("landlord").EnumerateObject().Select(property => property.Name));
             Assert.DoesNotContain("+527731234567", document.RootElement.GetRawText());
         }

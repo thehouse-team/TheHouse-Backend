@@ -674,4 +674,5 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — Victor, 2026-11-17 («Apruebo y EJECUTA», T01–T10). El responsable de Mobile validó antes el contrato §6.1.
 - **Fecha:** 2026-11-17.
 - **Aprobador:** Victor Manuel Jose Jose.
+- **Cambio (2026-11-17):** SixLabors.ImageSharp 3.2.0 exige una llave de licencia de Six Labors para compilar en Release, así que, con aprobación de Victor («Sí, usa SkiaSharp»), las fotos se procesan con **SkiaSharp 4.154.0** y `SkiaSharp.NativeAssets.Linux.NoDependencies` 4.154.0 (MIT, sin vulnerabilidades publicadas, publicados el 2026-10-28), la alternativa ya prevista en la spec. ImageSharp 2.1.x se descartó por 5 vulnerabilidades publicadas.
 - **Impacto:** colecciones nuevas (`media_items`, `verification_documents` y los buckets GridFS) del módulo Media; NV-12, NV-14 y NV-21 agregan campos y pasos sin quitar ninguno; paquete NuGet nuevo; un secreto nuevo en Container Apps antes del despliegue.

@@ -8,7 +8,7 @@
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-13-media-documents/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan secreto, CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-76, RF-77 (foto del edificio, fotos de cuartos e identificación); RNF-19 (documentos sensibles) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09, RNF-19 |
@@ -255,7 +255,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
 | Almacenamiento | MongoDB GridFS en Atlas M0 (persistencia ya aprobada, $0) con cuota de 60 MB por arrendador; Azure Blob y servicios de imágenes externos fuera | APROBADO (M-BE-073) |
-| Procesamiento de imágenes | SixLabors.ImageSharp 3.x (paquete nuevo, administrado, sin binarios nativos; su licencia permite uso en proyectos con ingresos menores a 1 M USD) en versión fijada; alternativa: SkiaSharp | APROBADO (M-BE-073) |
+| Procesamiento de imágenes | SkiaSharp 4.154.0 con `SkiaSharp.NativeAssets.Linux.NoDependencies` (MIT, versión fijada); cambio aprobado el 2026-11-17 porque SixLabors.ImageSharp 3.2.0 exige llave de licencia para compilar en Release | APROBADO (M-BE-073) |
 | Cifrado de documentos | AES-256-GCM con llave de datos por documento envuelta por una llave maestra en un secreto de Container Apps (M-BE-038); Victor crea el secreto con autorización aparte | APROBADO (M-BE-073) |
 | Publicación | NV-12 exige foto del edificio, INE y comprobante para enviar a revisión; los edificios ya verificados no cambian | APROBADO (M-BE-073) |
 | Entrega de fotos | Endpoint propio: público e inmutable para edificios verificados, privado para dueño y revisor; sin URLs firmadas | APROBADO (M-BE-073) |
@@ -296,9 +296,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 10 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan secreto, CI, despliegue y Azure** |
 
 ## 18. Aprobación pendiente
 

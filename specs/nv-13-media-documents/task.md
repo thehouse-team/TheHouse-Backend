@@ -8,12 +8,12 @@
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-13-media-documents/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan secreto, CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 10 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
@@ -25,18 +25,18 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Fotos de edificio y cuarto** — Requisito: NV-13-R01 · Fase: F1 · Aceptación: El dueño sube, reemplaza y quita la foto del edificio y hasta 4 por cuarto; validación por firma; re-codificación a WebP 1600/400 sin EXIF ni GPS; 409 `photos_limit`, `storage_limit` y `building_in_review`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Entrega de fotos** — Requisito: NV-13-R02 · Fase: F1 · Aceptación: Ruta pública solo con edificio `verified` (si no, 404), con `ETag`, 304 y caché inmutable; ruta privada para dueño y revisor con `no-store`; miniatura con `size=thumb`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Fotos de edificio y cuarto** — Requisito: NV-13-R01 · Fase: F1 · Aceptación: El dueño sube, reemplaza y quita la foto del edificio y hasta 4 por cuarto; validación por firma; re-codificación a WebP 1600/400 sin EXIF ni GPS; 409 `photos_limit`, `storage_limit` y `building_in_review`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Entrega de fotos** — Requisito: NV-13-R02 · Fase: F1 · Aceptación: Ruta pública solo con edificio `verified` (si no, 404), con `ETag`, 304 y caché inmutable; ruta privada para dueño y revisor con `no-store`; miniatura con `size=thumb`. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T03 · Documentos cifrados** — Requisito: NV-13-R03 · Fase: F2 · Aceptación: El dueño sube o reemplaza `ine` y `property_proof` (PDF, JPEG o PNG ≤ 10 MB); se guardan cifrados con AES-256-GCM; el dueño solo ve metadatos. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T04 · Revisión y retención de documentos** — Requisito: NV-13-R04 · Fase: F2 · Aceptación: Solo `reviewer` o `admin` leen el contenido descifrado, con bitácora; `retentionUntil` = decisión + 90 días; la limpieza periódica los borra. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T05 · Integración con NV-12, NV-14 y NV-21** — Requisito: NV-13-R05 · Fase: F2 · Aceptación: La publicación pide foto y documentos; NV-14 agrega `photos` y `thumbUrl`; NV-21 muestra fotos y metadatos de documentos; borrar cuarto o edificio borra sus archivos; respuestas anteriores sin cambios. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T03 · Documentos cifrados** — Requisito: NV-13-R03 · Fase: F2 · Aceptación: El dueño sube o reemplaza `ine` y `property_proof` (PDF, JPEG o PNG ≤ 10 MB); se guardan cifrados con AES-256-GCM; el dueño solo ve metadatos. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T04 · Revisión y retención de documentos** — Requisito: NV-13-R04 · Fase: F2 · Aceptación: Solo `reviewer` o `admin` leen el contenido descifrado, con bitácora; `retentionUntil` = decisión + 90 días; la limpieza periódica los borra. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T05 · Integración con NV-12, NV-14 y NV-21** — Requisito: NV-13-R05 · Fase: F2 · Aceptación: La publicación pide foto y documentos; NV-14 agrega `photos` y `thumbUrl`; NV-21 muestra fotos y metadatos de documentos; borrar cuarto o edificio borra sus archivos; respuestas anteriores sin cambios. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T06 · Validación, límites y privacidad** — Requisito: NV-13-R06 · Fase: F3 · Aceptación: Firma de bytes, tamaños por ruta, megapíxeles, cuota, rate limits 429, Redis o MongoDB caídos 503, BOLA y nada de contenido en logs. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T06 · Validación, límites y privacidad** — Requisito: NV-13-R06 · Fase: F3 · Aceptación: Firma de bytes, tamaños por ruta, megapíxeles, cuota, rate limits 429, Redis o MongoDB caídos 503, BOLA y nada de contenido en logs. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
 
 ## F4 — Pruebas y evidencia
 
@@ -49,12 +49,12 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F2 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F2 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F3 | COMPLETA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R08 | F4 | ABIERTA |
@@ -79,11 +79,11 @@
 | --- | --- |
 | Requisitos | 8 |
 | Tasks | 10 |
-| Tasks abiertas | 10 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 6 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan secreto, CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

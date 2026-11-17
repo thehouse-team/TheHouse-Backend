@@ -16,8 +16,8 @@ namespace TheHouse.IntegrationTests;
 
 // NV-15/NV-17: fábrica con dos usuarios reales (login por HTTP) y
 // almacenes en memoria para MongoDB y Redis. Permite pruebas BOLA.
-public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
-    : FoundationFactory(Settings)
+public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, bool requirePublicationFiles = false)
+    : FoundationFactory(SettingsFor(requirePublicationFiles))
 {
     public const string Password = "Correct-Horse-Battery-9";
     public const string AliceId = "665f1c2a9b1e4a00000a11ce";
@@ -26,6 +26,16 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
     public const string PropertyA = "0123456789876543000000a1";
     public const string PropertyB = "0123456789876543000000b2";
     public const string PropertyC = "0123456789876543000000c3";
+
+    // NV-13: llave maestra de prueba (32 bytes en base64; nunca se usa fuera de las pruebas).
+    public const string TestMasterKey = "VGhlSG91c2UtTlYxMy1wcnVlYmFzLWxsYXZlLTMyQkI=";
+
+    // NV-13: las pruebas anteriores publican edificios sin fotos ni documentos.
+    private static IReadOnlyDictionary<string, string?> SettingsFor(bool requirePublicationFiles) =>
+        new Dictionary<string, string?>(Settings, StringComparer.OrdinalIgnoreCase)
+        {
+            ["Media:RequirePublicationFiles"] = requirePublicationFiles ? "true" : "false",
+        };
 
     private static readonly IReadOnlyDictionary<string, string?> Settings =
         new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
@@ -41,6 +51,7 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null)
             ["LoginRateLimit:WindowSeconds"] = "60",
             ["LogoutRateLimit:LogoutIpPerWindow"] = "30",
             ["LogoutRateLimit:WindowSeconds"] = "60",
+            ["Media:DocumentMasterKey"] = TestMasterKey,
         };
 
     public MultiUserStore Users { get; } = new();
