@@ -32,7 +32,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** | 0/13 |
 | NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** | 0/11 |
-| NV-25 | [Estadísticas del arrendador](nv-25-metrics-stats/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
+| NV-25 | [Estadísticas del arrendador](nv-25-metrics-stats/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — 1.1.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** | 5/9 |
 
 ## 2. Cobertura de requerimientos funcionales
 

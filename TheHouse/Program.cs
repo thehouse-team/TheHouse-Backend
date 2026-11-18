@@ -21,6 +21,7 @@ builder.AddNotifications();
 builder.AddReviews();
 builder.AddMedia();
 builder.AddRoommates();
+builder.AddAnalytics();
 builder.AddUniversities();
 builder.AddObservability();
 
@@ -289,6 +290,7 @@ app.MapNotifications();
 app.MapReviews();
 app.MapMedia();
 app.MapRoommates();
+app.MapLandlordStats();
 app.MapUniversities();
 
 app.Run();

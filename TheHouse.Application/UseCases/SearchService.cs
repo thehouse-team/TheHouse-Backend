@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Analytics;
 using TheHouse.Application.Abstractions.Media;
 using System.Globalization;
 using TheHouse.Application.Abstractions.Persistence;
@@ -54,7 +55,8 @@ public sealed class SearchService(
     IBuildingRepository buildings,
     IRoomRepository rooms,
     IPlaceRepository places,
-    IMediaPort? media = null)
+    IMediaPort? media = null,
+    IRoomViewSink? views = null)
 {
     public const double DefaultMaxDistanceKm = 10;
 
@@ -104,7 +106,11 @@ public sealed class SearchService(
     public async Task<RoomCountResponse> CountAsync(SearchCriteria criteria, CancellationToken cancellationToken) =>
         new((await CandidatesAsync(criteria, cancellationToken)).Count);
 
-    public async Task<RoomDetailResponse> DetailAsync(string? roomId, CancellationToken cancellationToken)
+    public Task<RoomDetailResponse> DetailAsync(string? roomId, CancellationToken cancellationToken) =>
+        DetailAsync(roomId, null, cancellationToken);
+
+    // NV-25: con `viewerId`, registra la vista sin cambiar la respuesta.
+    public async Task<RoomDetailResponse> DetailAsync(string? roomId, string? viewerId, CancellationToken cancellationToken)
     {
         var id = ModerationRules.ObjectId("id", roomId);
         var room = await rooms.GetAsync(id, cancellationToken);
@@ -117,6 +123,11 @@ public sealed class SearchService(
         if (building is null || building.Status != BuildingStatus.Verified)
         {
             throw new NotFoundException("room");
+        }
+
+        if (views is not null && viewerId is not null)
+        {
+            await views.RecordAsync(room, viewerId, cancellationToken);
         }
 
         var university = await universities.GetByIdAsync(building.NearestUniversityId, cancellationToken);

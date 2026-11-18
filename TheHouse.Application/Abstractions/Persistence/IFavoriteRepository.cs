@@ -18,6 +18,9 @@ public interface IFavoriteRepository
     // Todos los favoritos del usuario (máximo 200), más recientes primero.
     Task<IReadOnlyList<Favorite>> ListAllAsync(string userId, CancellationToken cancellationToken);
 
+    // NV-25: favoritos actuales de esos cuartos (máximo 5000), para contarlos.
+    Task<IReadOnlyList<Favorite>> ListByRoomsAsync(IReadOnlyCollection<string> roomIds, CancellationToken cancellationToken);
+
     // Migración: asigna `roomId` a los favoritos que solo tienen `propertyId`.
     Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken);
 }

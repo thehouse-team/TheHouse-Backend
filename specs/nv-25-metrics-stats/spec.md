@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-17 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T09; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-25-metrics-stats/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-86 (estadísticas del propietario); RF-66 se mueve a NV-23/NV-24 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-05, RNF-11 |
@@ -193,11 +193,11 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Alcance | Solo estadísticas del arrendador (RF-86); las métricas de Smart Match (RF-66) pasan a NV-23/NV-24 | PROPUESTO |
-| Cálculo | Al pedirlo, sobre las colecciones existentes, sin tarea diaria ni colección de agregados; se reconsidera si una consulta pasa de 1 s | PROPUESTO |
-| Vistas | Solo el detalle del cuarto y del edificio; una por persona y día; sal diaria en Redis sin secreto nuevo | PROPUESTO |
-| Retención | 400 días para `room_views` (permite comparar con el año anterior) | PROPUESTO |
-| Sugerencias | 6 reglas fijas con umbrales documentados (2 fotos, 20 % sobre la mediana, 30 vistas, 48 h, 24 h) | PROPUESTO |
+| Alcance | Solo estadísticas del arrendador (RF-86); las métricas de Smart Match (RF-66) pasan a NV-23/NV-24 | APROBADO (M-BE-075) |
+| Cálculo | Al pedirlo, sobre las colecciones existentes, sin tarea diaria ni colección de agregados; se reconsidera si una consulta pasa de 1 s | APROBADO (M-BE-075) |
+| Vistas | Solo el detalle del cuarto y del edificio; una por persona y día; sal diaria en Redis sin secreto nuevo | APROBADO (M-BE-075) |
+| Retención | 400 días para `room_views` (permite comparar con el año anterior) | APROBADO (M-BE-075) |
+| Sugerencias | 6 reglas fijas con umbrales documentados (2 fotos, 20 % sobre la mediana, 30 vistas, 48 h, 24 h) | APROBADO (M-BE-075) |
 
 ## 14. Costo — COST-001
 
@@ -230,9 +230,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 9 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Tasks completadas | 5 |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** |
 
 ## 18. Aprobación pendiente
 

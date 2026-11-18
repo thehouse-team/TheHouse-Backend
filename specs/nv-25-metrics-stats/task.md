@@ -6,14 +6,14 @@
 | Documento | `task.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-17 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T09; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-25-metrics-stats/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 9 |
-| Tasks completadas | 0 |
+| Tasks completadas | 5 |
 
 ## Reglas de esta lista
 
@@ -25,17 +25,17 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Registro de vistas** — Requisito: NV-25-R01 · Fase: F1 · Aceptación: Una vista por persona, cuarto o edificio y día con `actorHash` de sal diaria; sin vistas del dueño; dos réplicas no duplican; si falla, el detalle público responde igual. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Resumen del arrendador** — Requisito: NV-25-R02 · Fase: F1 · Aceptación: Totales del rango, periodo anterior y serie diaria con conversión; solo datos propios; rango validado (90 días). · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Registro de vistas** — Requisito: NV-25-R01 · Fase: F1 · Aceptación: Una vista por persona, cuarto o edificio y día con `actorHash` de sal diaria; sin vistas del dueño; dos réplicas no duplican; si falla, el detalle público responde igual. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Resumen del arrendador** — Requisito: NV-25-R02 · Fase: F1 · Aceptación: Totales del rango, periodo anterior y serie diaria con conversión; solo datos propios; rango validado (90 días). · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T03 · Estadísticas por cuarto** — Requisito: NV-25-R03 · Fase: F2 · Aceptación: Vistas, favoritos, solicitudes, visitas, convenios, conversión y calificación por cuarto; paginado y ordenado; filtro por edificio propio. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T04 · Sugerencias por reglas** — Requisito: NV-25-R04 · Fase: F2 · Aceptación: Las 6 reglas documentadas, cada una con una prueba que la dispara y otra que no; máximo 20; textos en español con números del arrendador. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T03 · Estadísticas por cuarto** — Requisito: NV-25-R03 · Fase: F2 · Aceptación: Vistas, favoritos, solicitudes, visitas, convenios, conversión y calificación por cuarto; paginado y ordenado; filtro por edificio propio. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T04 · Sugerencias por reglas** — Requisito: NV-25-R04 · Fase: F2 · Aceptación: Las 6 reglas documentadas, cada una con una prueba que la dispara y otra que no; máximo 20; textos en español con números del arrendador. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T05 · Privacidad, autorización y límites** — Requisito: NV-25-R05 · Fase: F3 · Aceptación: Sin datos de usuarios en ninguna respuesta; otro arrendador o estudiante 403/404; 429; Redis caído 503 en estadísticas. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04.
+- [x] **T05 · Privacidad, autorización y límites** — Requisito: NV-25-R05 · Fase: F3 · Aceptación: Sin datos de usuarios en ninguna respuesta; otro arrendador o estudiante 403/404; 429; Redis caído 503 en estadísticas. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04.
 
 ## F4 — Pruebas y evidencia
 
@@ -48,11 +48,11 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F2 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F2 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F3 | COMPLETA |
 | T06 | R06 | F4 | ABIERTA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R07 | F4 | ABIERTA |
@@ -76,11 +76,11 @@
 | --- | --- |
 | Requisitos | 7 |
 | Tasks | 9 |
-| Tasks abiertas | 9 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 5 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

@@ -685,3 +685,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-17.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** colección nueva `roommate_profiles` (módulo Roommates); `conversations` de NV-16 agrega `kind` y `pairKey` sin migración; sin paquetes, secretos ni comandos en Production.
+
+## M-BE-075 — NV-25 1.1.0 aprobada: estadísticas del arrendador
+
+- **ID:** M-BE-075
+- **Decisión:** aprobar NV-25 1.1.0 con sus decisiones: solo estadísticas del arrendador (RF-86), las métricas de Smart Match (RF-66) pasan a NV-23/NV-24; cálculo al pedirlo sobre las colecciones existentes (favoritos, visitas, solicitudes, convenios, reseñas y fotos), sin tarea diaria ni agregados guardados; vistas solo del detalle público del cuarto y del edificio, una por persona y día, con `actorHash` de sal diaria aleatoria en Redis (sin secreto nuevo) y sin contar al dueño ni al staff; retención de 400 días en `room_views`; 6 sugerencias por reglas fijas (menos de 2 fotos, precio 20 % arriba de la mediana cercana a la misma universidad con al menos 5 cuartos, datos faltantes, 30 vistas sin solicitudes en 30 días, solicitudes sin responder más de 48 h, visitas sin confirmar más de 24 h).
+- **Estado:** APROBADO — Victor, 2026-11-17 («Apruebo y EJECUTA», T01–T09). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-17.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** colección nueva `room_views` (módulo Analytics) con TTL; una llave diaria en Redis; el detalle público registra la vista sin cambiar su respuesta; sin paquetes, secretos, migraciones ni comandos en Production.

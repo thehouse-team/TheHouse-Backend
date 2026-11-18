@@ -79,6 +79,9 @@ public sealed class UserRateLimitOptions
 
     public int RoommateContactsPerDay { get; init; } = 10;
 
+    // NV-25: 30/min en las estadísticas del arrendador.
+    public int LandlordStatsPerWindow { get; init; } = 30;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

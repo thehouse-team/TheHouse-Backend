@@ -255,6 +255,22 @@ public static class UserResourceProblems
         };
     }
 
+    public static void NormalizeStats(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "El rango de fechas, el edificio o la paginación no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            403 => "Esta acción requiere activar el modo arrendador.",
+            404 => "El edificio no existe.",
+            429 => "Se superó el límite de consultas de estadísticas.",
+            503 => "Las estadísticas no están disponibles temporalmente.",
+            504 => "Las estadísticas no respondieron a tiempo.",
+            _ => "No fue posible procesar la solicitud.",
+        };
+    }
+
     public static string? DetailFor(string code) => code switch
     {
         "favorites_limit" => "Se alcanzó el máximo de 200 favoritos.",

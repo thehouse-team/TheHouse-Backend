@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using TheHouse.Application.Abstractions.Analytics;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.Security;
 using TheHouse.Application.Common;
@@ -93,6 +94,10 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
 
     public InMemoryRoommateProfileRepository Roommates { get; } = new();
 
+    public InMemoryRoomViewRepository RoomViews { get; } = new();
+
+    public InMemoryViewSaltStore ViewSalts { get; } = new();
+
     // NV-11: el catálogo real del seed (10 universidades con coordenadas).
     public UniversityTestStore Universities { get; } = SeededUniversities();
 
@@ -125,6 +130,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.RemoveAll<INotificationRepository>();
             services.RemoveAll<IReviewRepository>();
             services.RemoveAll<IRoommateProfileRepository>();
+            services.RemoveAll<IRoomViewRepository>();
+            services.RemoveAll<IViewSaltStore>();
 
             services.AddSingleton<IUserRepository>(Users);
             services.AddSingleton<IRateLimitStore>(RateLimit);
@@ -148,6 +155,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.AddSingleton<INotificationRepository>(Notifications);
             services.AddSingleton<IReviewRepository>(Reviews);
             services.AddSingleton<IRoommateProfileRepository>(Roommates);
+            services.AddSingleton<IRoomViewRepository>(RoomViews);
+            services.AddSingleton<IViewSaltStore>(ViewSalts);
             services.AddSingleton<ILoggerProvider>(new CaptureProvider(Logs));
 
             if (limits is not null)

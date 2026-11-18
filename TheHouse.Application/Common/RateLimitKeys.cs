@@ -129,6 +129,10 @@ public static class RateLimitKeys
     public static string RoommateContactsUser(string userId) =>
         "thehouse:u2:roommates:contact:v1:" + Hash(userId);
 
+    // NV-25: estadísticas del arrendador por usuario.
+    public static string LandlordStatsUser(string userId) =>
+        "thehouse:u2:landlord-stats:user:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 
