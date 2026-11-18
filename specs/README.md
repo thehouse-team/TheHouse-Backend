@@ -29,7 +29,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-19 | [Reseñas y calificaciones](nv-19-reviews/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T11 (2026-11-13): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T14 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 14/14 |
-| NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan CI, despliegue y Azure** | 6/10 |
+| NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** | 0/13 |
 | NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** | 0/11 |
 | NV-25 | [Estadísticas del propietario y métricas de Smart Match](nv-25-metrics-stats/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |

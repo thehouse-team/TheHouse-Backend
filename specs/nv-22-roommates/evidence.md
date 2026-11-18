@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-17 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-17: NV-22 1.1.0, tasks T01–T10 (M-BE-074) |
-| Rama | `feat/nv-22-roommates` → PR pendiente de revisión |
-| Resultado | **🟡 EN CURSO**: T01–T06 completas y verificadas en local; T07–T10 esperan CI, despliegue y prueba HTTP real en Azure |
+| Rama | `feat/nv-22-roommates` → PR #56, merge `31614c5` |
+| Resultado | **✅ PASS WITH WARNINGS** — T01–T10 completas: CI 957/957, desplegado en `ca-thehouse-u2--c31614c5-51-1`, prueba HTTP real en Azure 20/20 |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -45,8 +45,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R04 Contacto por chat | `Contact_opens_one_roommate_conversation_per_pair`, `Two_students_find_each_other_and_chat` (201 y luego 200 con la misma conversación, aviso de NV-20) |
 | R05 Compatibilidad con NV-16 | `Roommate_conversations_appear_without_room_and_with_the_first_name`, `MessagingHttpTests` en verde con `kind` |
 | R06 Privacidad, autorización y límites | `Cards_never_carry_user_ids_contact_data_or_location`, `Roommate_inputs_reject_unknown_fields`, `Roommate_codes_have_a_spanish_detail`, `Dependencies_fail_closed`, suspensión en `List_is_reciprocal...` y `Contact_opens...` |
-| R07 Contrato para Mobile y despliegue | Pendiente: CI, despliegue y prueba HTTP real en Azure |
-| R08 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+| R07 Contrato para Mobile y despliegue | CD run 44210636026; prueba HTTP real en Azure 20/20 (§6); contrato entregado (§7) |
+| R08 Pruebas, seguridad y evidencia | TRX del CI run 44209958409: 957/957; `TheHouse.SecurityTests` 123/123; cobertura en §5; esta evidencia |
 
 ## 4. Seguridad y coherencia
 
@@ -65,11 +65,44 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Lugar en el aviso | Un aviso sin cuarto ni edificio dice «sobre tu búsqueda de compañero» (antes «TheHouse», que ningún aviso usaba) |
 | Candidatos | Se leen hasta 500 perfiles vigentes de la universidad y se ordenan en memoria por coincidencias |
 
-## 5. Pendiente para cerrar 1.1.0
+## 5. Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#55](https://github.com/thehouse-team/TheHouse-Backend/pull/55) (spec 1.1.0) y [#56](https://github.com/thehouse-team/TheHouse-Backend/pull/56) (aprobación e implementación), aprobados y mezclados por `IsaiAxel` (merge `31614c5`) |
+| CI de `main` (`31614c5`, run 44209958409) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI | 957/957: unitarias 365, integración 469, seguridad 123 |
+| Cobertura de líneas (CI) | 68.2 % total (ramas 72.0 %). `Roommate` 100 %, `RoommateServices` 98.3 %, `RoommatesEndpoint` 96.2 %, `MessagingServices` 98.6 %. `MongoRoommateProfileRepository` en 0 %, como los demás adaptadores Mongo: se verifica en Azure |
+| CD (run 44210636026) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c31614c5-51-1`, Healthy |
+| Rol admin | No se usó: la prueba solo necesita cuentas de estudiante |
+
+## 6. Prueba HTTP real en Azure
+
+`.azure-check/nv22_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-17 con tres cuentas de estudiante `@example.com` nuevas (Ana, Beto y Caro) en la misma universidad (UTTT); solo se imprimen códigos, campos y conteos, nunca tokens, contraseñas ni el texto de los mensajes. Resultado: **20/20 PASS**.
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv22_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Perfiles | Sin universidad 409 `university_required`; lista sin perfil propio 403 `roommate_profile_required`; crear 201 con los campos del §6.1 y `no-store`; actualizar 200; Beto y Caro 201; campos desconocidos 400 | 7/7 |
+| Lista y coincidencias | Lista 200 con los campos del §6.1; orden Beto (7) y Caro (5); sin ids de usuario ni apellidos; detalle 200 | 4/4 |
+| Contacto | A sí misma 409 `own_profile`; primer contacto 201; segundo contacto 200 con la misma conversación; Beto la ve con `kind=roommate`, `room=null` y rol `student`; responde 201; aviso `message_received` | 6/6 |
+| Limpieza | Los tres perfiles borrados (204) | 3/3 |
+
+## 7. Contrato entregable a Mobile
+
+Entregado el 2026-11-17 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` (validado por Mobile antes de ejecutar) con la URL y las pruebas reales; las 6 operaciones en 4 rutas son nuevas y el único cambio a una respuesta existente es el campo `kind` al final de las conversaciones de NV-16.
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 44209958409): 957/957 (unitarias 365, integración 469, seguridad 123); prueba HTTP real en Azure 20/20 (2026-11-17)
+```
+
+## 8. Hallazgos y resultado
+
+| # | Hallazgo | Severidad | Estado |
+| --- | --- | --- | --- |
+| H1 | Adaptadores Mongo sin cobertura en CI | Baja | Aceptado: se verifican con la prueba real en Azure |
+| H2 | La lista lee hasta 500 perfiles vigentes por universidad y ordena en memoria | Baja | Aceptado para el volumen del piloto; si crece, se pasa a un orden en la base sin cambiar el contrato |
+| H3 | Las cuentas y la conversación de prueba quedan en Production | Información | Intencional, como en specs anteriores: los perfiles de compañero se borraron y las cuentas son `@example.com` |
+
+Resultado: **PASS WITH WARNINGS**. Costo: sin recursos nuevos; una colección `roommate_profiles` con dos índices en MongoDB Atlas M0, dentro del plan gratuito. Revisión de coherencia: spec, plan, tasks, README y esta evidencia indican 1.1.0 completa 10/10; las rutas de NV-12 a NV-21 no cambiaron y el cambio en NV-16 es aditivo.
