@@ -695,6 +695,15 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** colección nueva `room_views` (módulo Analytics) con TTL; una llave diaria en Redis; el detalle público registra la vista sin cambiar su respuesta; sin paquetes, secretos, migraciones ni comandos en Production.
 
+## M-BE-076 — NV-09 T17 y T19 ejecutadas: registro de despliegues y cierre de evidencia
+
+- **ID:** M-BE-076
+- **Decisión:** ejecutar NV-09 T17 (primer despliegue real y registro) y T19 (evidencia, costo y revisión final). T17 se acepta con el run `42180858665` (primer despliegue de `main` por el pipeline con aprobación en `production` y `deployment-record.json`) y con `VERSIONING.md` §11 completado por pull request con los 14 despliegues posteriores a la última fila. T19 cierra la evidencia del CD con resultado PASS WITH WARNINGS. T15 (RESTler) y T16 (NBomber o k6) siguen abiertas y requieren su propia autorización. Smart Match (NV-23/NV-24) y la ventana de dos réplicas (NV-03) quedan en pausa por decisión de Victor.
+- **Estado:** APROBADO — Victor, 2026-11-17 («EJECUTA T17 y T19»).
+- **Fecha:** 2026-11-17.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** solo documentación (`VERSIONING.md`, `specs/nv-09-cd/`, `specs/README.md` y esta memoria); sin cambios en Azure, Terraform, workflows, paquetes ni secretos. Costo del grupo `rg-thehouse-u2` en noviembre (1 al 17): 0.00 USD.
+
 ## M-BE-077 — NV-10 1.2.0 aprobada: eliminar cuenta, sesión siempre viva y aviso de privacidad
 
 - **ID:** M-BE-077
