@@ -35,6 +35,15 @@ public sealed class MongoLandlordProfileRepository(IMongoDatabase database) : IL
                 };
         });
 
+    public Task AnonymizeAsync(string userId, string displayName, DateTimeOffset now, CancellationToken cancellationToken) =>
+        MongoCalls.Run(() => index.Collection.UpdateOneAsync(
+            profile => profile.UserId == userId,
+            Builders<LandlordProfileDocument>.Update
+                .Set(profile => profile.FullName, displayName)
+                .Set(profile => profile.Phone, string.Empty)
+                .Unset(profile => profile.Rfc),
+            cancellationToken: cancellationToken));
+
     public async Task<bool> CreateAsync(LandlordProfile profile, CancellationToken cancellationToken)
     {
         try
@@ -526,6 +535,8 @@ public sealed class UnavailableLandlordProfileRepository : ILandlordProfileRepos
     public Task<LandlordProfile?> GetAsync(string userId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<bool> CreateAsync(LandlordProfile profile, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task AnonymizeAsync(string userId, string displayName, DateTimeOffset now, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 }
 
 public sealed class UnavailableBuildingRepository : IBuildingRepository

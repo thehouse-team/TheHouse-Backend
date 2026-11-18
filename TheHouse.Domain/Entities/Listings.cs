@@ -31,6 +31,9 @@ public enum BuildingStatus
     // NV-21: rechazo terminal y suspensión por moderación.
     Rejected,
     Suspended,
+
+    // NV-10 1.2.0: el dueño eliminó su cuenta; nunca vuelve a publicarse.
+    Deleted,
 }
 
 public enum RoomStatus

@@ -25,6 +25,30 @@ public sealed class InMemoryLandlordProfileRepository : ILandlordProfileReposito
         }
     }
 
+    public Task AnonymizeAsync(string userId, string displayName, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        Guard(Unavailable, cancellationToken);
+        lock (gate)
+        {
+            if (Profiles.TryGetValue(userId, out var profile))
+            {
+                Profiles[userId] = new LandlordProfile
+                {
+                    UserId = profile.UserId,
+                    FullName = displayName,
+                    Phone = string.Empty,
+                    RentalMode = profile.RentalMode,
+                    Rfc = null,
+                    AcceptedTermsVersion = profile.AcceptedTermsVersion,
+                    AcceptedTermsAt = profile.AcceptedTermsAt,
+                    CreatedAt = profile.CreatedAt,
+                };
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
     public Task<bool> CreateAsync(LandlordProfile profile, CancellationToken cancellationToken)
     {
         Guard(Unavailable, cancellationToken);

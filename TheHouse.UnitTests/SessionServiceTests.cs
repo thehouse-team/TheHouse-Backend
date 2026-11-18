@@ -34,7 +34,7 @@ public sealed class SessionServiceTests
         Assert.Equal(stored.SessionId, jwt.LastSessionId);
         Assert.True(SessionTokens.IsCanonicalSessionId(stored.SessionId));
         Assert.Equal(Start.AddDays(30), stored.ExpiresAt);
-        Assert.Equal(Start.AddDays(90), stored.SessionExpiresAt);
+        Assert.Equal(Start.AddDays(30), stored.SessionExpiresAt);
         Assert.Equal("Bearer", response.TokenType);
         Assert.Equal(900, response.ExpiresIn);
     }
@@ -109,21 +109,24 @@ public sealed class SessionServiceTests
     }
 
     [Fact]
-    public async Task Session_cannot_be_extended_beyond_absolute_lifetime()
+    public async Task Session_stays_alive_while_used_and_expires_after_idle_window()
     {
         var service = Service();
         var token = (await service.StartAsync(users.User, CancellationToken.None)).RefreshToken;
 
-        for (var day = 0; day < 3; day++)
+        // NV-10 1.2.0: un año usando la app cada 29 días; nunca vence.
+        for (var step = 0; step < 13; step++)
         {
             clock.Advance(TimeSpan.FromDays(29));
             token = (await service.RefreshAsync(token, CancellationToken.None)).RefreshToken;
         }
 
-        // Día 87: el token nuevo vence con la sesión (día 90), no a los 30 días.
-        Assert.Equal(Start.AddDays(90), store.Tokens[SessionTokens.Hash(token)].ExpiresAt);
+        var stored = store.Tokens[SessionTokens.Hash(token)];
+        Assert.Equal(Start.AddDays(29 * 13 + 30), stored.ExpiresAt);
+        Assert.Equal(stored.ExpiresAt, stored.SessionExpiresAt);
 
-        clock.Advance(TimeSpan.FromDays(3) + TimeSpan.FromSeconds(1));
+        // 30 días sin usarla: vence.
+        clock.Advance(TimeSpan.FromDays(30) + TimeSpan.FromSeconds(1));
         await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
             service.RefreshAsync(token, CancellationToken.None));
     }
@@ -236,7 +239,7 @@ public sealed class SessionServiceTests
         Assert.Equal(users.User.Id, me.Id);
         Assert.Equal(users.User.Email, me.Email);
         Assert.Equal(users.User.CreatedAt, me.CreatedAt);
-        Assert.Equal(3, typeof(Application.Contracts.Users.MeResponse).GetProperties().Length);
+        Assert.Equal(5, typeof(Application.Contracts.Users.MeResponse).GetProperties().Length);
     }
 
     [Fact]

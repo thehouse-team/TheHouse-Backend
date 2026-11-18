@@ -10,6 +10,9 @@ public interface IProfileRepository
     Task SaveNameAsync(string userId, string name, DateTimeOffset now, CancellationToken cancellationToken);
 
     Task SaveUniversityAsync(string userId, string universityId, DateTimeOffset now, CancellationToken cancellationToken);
+
+    // NV-10 1.2.0: deja solo el nombre de marcador y quita la universidad.
+    Task AnonymizeAsync(string userId, string displayName, DateTimeOffset now, CancellationToken cancellationToken);
 }
 
 // NV-11: `user_preferences`, un documento por usuario.
@@ -19,4 +22,7 @@ public interface IPreferencesRepository
 
     // Reemplaza el documento e incrementa `Version` de forma atómica.
     Task<UserPreferences> ReplaceAsync(UserPreferences preferences, CancellationToken cancellationToken);
+
+    // NV-10 1.2.0: idempotente.
+    Task DeleteAsync(string userId, CancellationToken cancellationToken);
 }

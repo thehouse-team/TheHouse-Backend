@@ -13,7 +13,7 @@ public static class UserResourceProblems
     // Agrega `code` y su `detail` si el endpoint lo indicó para este status.
     public static void ApplyCode(HttpContext context, ProblemDetails problem, int status)
     {
-        if (status is 400 or 403 or 404 or 409 or 410 or 415 or 422 or 429 &&
+        if (status is 400 or 403 or 404 or 409 or 410 or 415 or 422 or 429 or 503 &&
             context.Items.TryGetValue(CodeItem, out var value) &&
             value is string code &&
             DetailFor(code) is { } detail)
@@ -22,6 +22,12 @@ public static class UserResourceProblems
             problem.Detail = context.Items.TryGetValue(DetailItem, out var specific) && specific is string text
                 ? text
                 : detail;
+        }
+
+        // NV-10 1.2.0: qué impide eliminar la cuenta (409 `deletion_blocked`).
+        if (status == 409 && context.Items.TryGetValue(AccountEndpoint.BlockersItem, out var blockers) && blockers is not null)
+        {
+            problem.Extensions["blockers"] = blockers;
         }
     }
 
@@ -271,8 +277,27 @@ public static class UserResourceProblems
         };
     }
 
+    public static void NormalizeAccount(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "La solicitud no es válida: revisa la contraseña y la confirmación.",
+            401 => "Se requiere una sesión válida.",
+            403 => "La contraseña no es correcta.",
+            409 => "No se puede completar la acción con el estado actual de la cuenta.",
+            429 => "Se superó el límite de intentos; espera antes de volver a intentar.",
+            503 => "El servicio no está disponible temporalmente.",
+            _ => "No fue posible procesar la solicitud.",
+        };
+    }
+
     public static string? DetailFor(string code) => code switch
     {
+        "password_mismatch" => "La contraseña no es correcta.",
+        "deletion_blocked" => "No se puede eliminar la cuenta todavía: termina tu renta activa o pide que te retiren el rol de staff.",
+        "deletion_incomplete" => "No se pudo terminar de eliminar la cuenta; intenta de nuevo para completarla.",
+        "legal_version_outdated" => "Hay una versión más reciente de los términos o del aviso de privacidad; acéptala para continuar.",
         "favorites_limit" => "Se alcanzó el máximo de 200 favoritos.",
         "visit_in_progress" => "Ya hay una solicitud de visita en proceso; intenta de nuevo.",
         "idempotency_key_reused" => "La Idempotency-Key ya se usó con otra solicitud.",

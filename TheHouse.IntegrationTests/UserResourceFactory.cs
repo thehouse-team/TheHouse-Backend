@@ -236,8 +236,55 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
     }
 }
 
-public sealed class MultiUserStore : IUserRepository
+public sealed class MultiUserStore : IUserRepository, IUserAccountRepository
 {
+    public List<string> Deleted { get; } = [];
+
+    public bool Unavailable { get; set; }
+
+    public Task<bool> SetLegalAsync(string userId, LegalAcceptance legal, CancellationToken cancellationToken)
+    {
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+
+        if (!users.TryGetValue(userId, out var user))
+        {
+            return Task.FromResult(false);
+        }
+
+        users[userId] = new User
+        {
+            Id = user.Id,
+            Email = user.Email,
+            PasswordHash = user.PasswordHash,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = legal.AcceptedAt,
+            Legal = legal,
+        };
+        return Task.FromResult(true);
+    }
+
+    public Task DeleteAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+
+        lock (Deleted)
+        {
+            if (!Deleted.Contains(userId))
+            {
+                Deleted.Add(userId);
+            }
+        }
+
+        users.TryRemove(userId, out _);
+        return Task.CompletedTask;
+    }
+
     private readonly ConcurrentUsers users = new();
 
     public void Add(User user) => users[user.Id] = user;

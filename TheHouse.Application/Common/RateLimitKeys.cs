@@ -129,6 +129,17 @@ public static class RateLimitKeys
     public static string RoommateContactsUser(string userId) =>
         "thehouse:u2:roommates:contact:v1:" + Hash(userId);
 
+    // NV-10 1.2.0: cuenta propia (lecturas y aviso legal), intentos de
+    // eliminación por hora y aviso legal público por IP.
+    public static string AccountUser(string userId) =>
+        "thehouse:u2:account:user:v1:" + Hash(userId);
+
+    public static string AccountDeletionUser(string userId) =>
+        "thehouse:u2:account-deletion:user:v1:" + Hash(userId);
+
+    public static string LegalIp(string ipAddress) =>
+        "thehouse:u2:legal:ip:v1:" + Hash(ipAddress);
+
     // NV-25: estadísticas del arrendador por usuario.
     public static string LandlordStatsUser(string userId) =>
         "thehouse:u2:landlord-stats:user:v1:" + Hash(userId);

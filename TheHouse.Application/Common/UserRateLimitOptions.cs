@@ -82,6 +82,14 @@ public sealed class UserRateLimitOptions
     // NV-25: 30/min en las estadísticas del arrendador.
     public int LandlordStatsPerWindow { get; init; } = 30;
 
+    // NV-10 1.2.0: 30/min en la cuenta propia, 5 intentos de eliminación por
+    // hora y 60/min por IP en el aviso legal público.
+    public int AccountPerWindow { get; init; } = 30;
+
+    public int AccountDeletionsPerHour { get; init; } = 5;
+
+    public int LegalPerWindow { get; init; } = 60;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

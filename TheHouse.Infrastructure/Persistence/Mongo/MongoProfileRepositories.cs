@@ -36,6 +36,15 @@ public sealed class MongoProfileRepository(IMongoDatabase database) : IProfileRe
     public Task SaveUniversityAsync(string userId, string universityId, DateTimeOffset now, CancellationToken cancellationToken) =>
         UpsertAsync(userId, Builders<UserProfileDocument>.Update.Set(profile => profile.UniversityId, universityId), now, cancellationToken);
 
+    public Task AnonymizeAsync(string userId, string displayName, DateTimeOffset now, CancellationToken cancellationToken) =>
+        UpsertAsync(
+            userId,
+            Builders<UserProfileDocument>.Update.Combine(
+                Builders<UserProfileDocument>.Update.Set(profile => profile.Name, displayName),
+                Builders<UserProfileDocument>.Update.Unset(profile => profile.UniversityId)),
+            now,
+            cancellationToken);
+
     private Task UpsertAsync(
         string userId,
         UpdateDefinition<UserProfileDocument> change,
@@ -73,6 +82,9 @@ public sealed class MongoPreferencesRepository(IMongoDatabase database) : IPrefe
             var document = await Collection.Find(preferences => preferences.UserId == userId).FirstOrDefaultAsync(cancellationToken);
             return document is null ? null : Map(document);
         });
+
+    public Task DeleteAsync(string userId, CancellationToken cancellationToken) =>
+        MongoCalls.Run(() => Collection.DeleteOneAsync(preferences => preferences.UserId == userId, cancellationToken));
 
     public Task<UserPreferences> ReplaceAsync(UserPreferences preferences, CancellationToken cancellationToken) =>
         MongoCalls.Run(async () =>
@@ -224,6 +236,8 @@ public sealed class UnavailableProfileRepository : IProfileRepository
     public Task SaveNameAsync(string userId, string name, DateTimeOffset now, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task SaveUniversityAsync(string userId, string universityId, DateTimeOffset now, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task AnonymizeAsync(string userId, string displayName, DateTimeOffset now, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 }
 
 public sealed class UnavailablePreferencesRepository : IPreferencesRepository
@@ -231,4 +245,6 @@ public sealed class UnavailablePreferencesRepository : IPreferencesRepository
     public Task<UserPreferences?> GetAsync(string userId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<UserPreferences> ReplaceAsync(UserPreferences preferences, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task DeleteAsync(string userId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 }

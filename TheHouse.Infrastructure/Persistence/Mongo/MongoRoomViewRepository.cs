@@ -117,6 +117,9 @@ public sealed class MongoRoomViewRepository(IMongoDatabase database) : IRoomView
         }
     }
 
+    public Task DeleteByOwnerAsync(string ownerId, CancellationToken cancellationToken) =>
+        MongoCalls.Run(() => Collection.DeleteManyAsync(item => item.OwnerId == ownerId, cancellationToken));
+
     public void Dispose() => gate.Dispose();
 }
 
@@ -126,4 +129,6 @@ public sealed class UnavailableRoomViewRepository : IRoomViewRepository
 
     public Task<IReadOnlyList<RoomViewCount>> CountAsync(string ownerId, string fromDay, string toDay, CancellationToken cancellationToken) =>
         throw new DependencyUnavailableException();
+
+    public Task DeleteByOwnerAsync(string ownerId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 }

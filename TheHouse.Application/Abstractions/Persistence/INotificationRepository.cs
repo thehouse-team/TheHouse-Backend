@@ -27,4 +27,7 @@ public interface INotificationRepository
     Task MarkAllReadAsync(string userId, string? category, DateTimeOffset now, CancellationToken cancellationToken);
 
     Task MarkReadByKeyAsync(string userId, string dedupeKey, DateTimeOffset now, CancellationToken cancellationToken);
+
+    // NV-10 1.2.0: borra la bandeja del usuario.
+    Task DeleteAllAsync(string userId, CancellationToken cancellationToken);
 }

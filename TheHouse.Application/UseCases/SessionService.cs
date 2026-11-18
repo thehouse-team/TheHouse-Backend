@@ -131,11 +131,13 @@ public sealed class SessionService(
             throw new ForbiddenException("account_suspended");
         }
 
+        // NV-10 1.2.0: sesión siempre viva mientras se use. Cada rotación
+        // extiende la ventana de inactividad; ya no hay tope absoluto.
         var newRefreshToken = await IssueRefreshTokenAsync(
             user.Id,
             rotated.SessionId,
             now,
-            rotated.SessionExpiresAt,
+            now.Add(options.SessionLifetime),
             cancellationToken);
 
         var access = jwtTokenService.CreateAccessToken(

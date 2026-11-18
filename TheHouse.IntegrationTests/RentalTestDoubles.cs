@@ -98,6 +98,18 @@ public sealed class InMemoryAgreementRepository : IAgreementRepository
         }
     }
 
+    public Task<IReadOnlyList<Agreement>> ListOpenForUserAsync(string userId, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult<IReadOnlyList<Agreement>>(Agreements.Values
+                .Where(item => (item.OwnerId == userId || item.StudentId == userId) &&
+                    item.Status is AgreementStatus.Pending or AgreementStatus.Active)
+                .ToList());
+        }
+    }
+
     public Task<Agreement?> GetActiveForStudentAsync(string studentId, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
