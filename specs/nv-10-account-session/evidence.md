@@ -7,8 +7,8 @@
 | Versión | 1.2.0 (1.1.0 completa, ver «Historial 1.1.0») |
 | Fecha | 2026-11-17 |
 | Autorización | 1.2.0: «apruebo y EJECUTA NV-10» — Victor Manuel Jose Jose, 2026-11-17: tasks T01–T09 (M-BE-077), con el contrato §6.1 validado antes por Mobile. 1.1.0: «Apruebo y EJECUTA», 2026-11-06 (M-BE-058) |
-| Rama | 1.2.0: `feat/nv-10-account-deletion` → PR pendiente de revisión. 1.1.0: `docs/nv-10-refresh-me` (PR #10) |
-| Resultado | **🟡 EN CURSO (1.2.0)**: T01–T05 completas y verificadas en local; T06–T09 esperan CI, despliegue y prueba HTTP real en Azure. 1.1.0: ✅ PASS WITH WARNINGS (13/13 en Azure) |
+| Rama | 1.2.0: `feat/nv-10-account-deletion` → PR #63, merge `a368c0a`. 1.1.0: `docs/nv-10-refresh-me` (PR #10) |
+| Resultado | **✅ PASS WITH WARNINGS (1.2.0)** — T01–T09 completas: CI 1010/1010, desplegado en `ca-thehouse-u2--ca368c0a-58-1`, prueba HTTP real en Azure 27/27. 1.1.0: ✅ PASS WITH WARNINGS (13/13 en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. Ningún token, hash ni `sid` real aparece en esta evidencia.
 
@@ -46,8 +46,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R03 Sesión siempre viva | `Session_stays_alive_while_used_and_expires_after_idle_window` (13 refresh en un año; vence tras 30 días sin uso), `Session_has_no_absolute_cap_but_expires_when_idle` |
 | R04 Aviso de privacidad y términos | `Legal_versions_are_public_and_acceptance_is_recorded`, `Legal_options_are_validated`, campos de `/users/me` en `SessionHttpTests` |
 | R05 Seguridad, privacidad y límites | 403 `password_mismatch`, 400 por campos desconocidos y confirmación inválida, `Deletion_attempts_are_limited_and_anonymous_is_rejected` (429 al sexto intento, 401 anónimo), `Account_responses_never_carry_secrets`, `Request_bodies_reject_unknown_fields`, `Codes_are_explained_in_spanish` |
-| R06 Contrato para Mobile y despliegue | Pendiente: CI, despliegue y prueba HTTP real en Azure |
-| R07 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+| R06 Contrato para Mobile y despliegue | CD run 44250910491; prueba HTTP real en Azure 27/27; contrato entregado |
+| R07 Pruebas, seguridad y evidencia | TRX del CI run 44250483818: 1010/1010; `TheHouse.SecurityTests` 143/143; cobertura en «Despliegue y CI»; esta evidencia |
 
 ### 1.2.0 · Decisiones de implementación (dentro de la spec)
 
@@ -58,15 +58,50 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Cuartos | No cambian de estado: el edificio `deleted` ya los saca de búsqueda, mapa y detalle (404) |
 | URLs legales | Opcionales en configuración (`Legal__TermsUrl`, `Legal__PrivacyUrl`, `Legal__AccountDeletionUrl`); mientras la landing page no las tenga, `GET /legal` las devuelve en `null` |
 
-### 1.2.0 · Pendiente para cerrar
+### 1.2.0 · Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#62](https://github.com/thehouse-team/TheHouse-Backend/pull/62) (borradores 1.2.0) y [#63](https://github.com/thehouse-team/TheHouse-Backend/pull/63) (aprobación e implementación), mezclados por `IsaiAxel` (merge `a368c0a`) |
+| CI de `main` (`a368c0a`, run 44250483818) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI | 1010/1010: unitarias 389, integración 478, seguridad 143 |
+| Cobertura de líneas (CI) | 68.8 % total (ramas 72.4 %). `AccountDeletionServices` 94.1 %, `AccountService` 96.9 %, `SessionService` 99.1 %, `AccountEndpoint` 85.7 %, `AccountConfiguration` 81.8 %, `LegalOptions` 100 %. `MongoUserRepository` 2.9 %, como los demás adaptadores Mongo: se verifica en Azure |
+| CD (run 44250910491) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--ca368c0a-58-1`, Healthy, 100 % del tráfico |
+| Rol admin | Asignado con «autorizo rol» de Victor a la cuenta de prueba `nv10-azure-admin-…@example.com` solo para aprobar el edificio de prueba y revisar su estado; retirado al terminar la corrida (2026-11-18) |
+
+### 1.2.0 · Prueba HTTP real en Azure
+
+`.azure-check/nv10_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-18 con tres cuentas `@example.com` nuevas (estudiante, arrendador y admin temporal); solo se imprimen códigos, campos y conteos, nunca tokens, contraseñas, documentos ni el texto de los mensajes. Resultado: **27/27 PASS**.
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| URLs de la landing page en la Container App (`Legal__*`, no son secretos) | Victor / Mobile | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv10_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Aviso legal y sesión | `GET /legal` público con `public, max-age=3600` y los campos del §6.1; versión vieja 409 `legal_version_outdated`; aceptar la vigente 200; `/users/me` con `legal` y `legalUpToDate`; refresh 200 | 5/5 |
+| Preparación | Crear edificio 201; enviar a revisión 202; el admin aprueba 200 | 3/3 |
+| Actividad del estudiante | Favorito 204; solicitud 201; visita 201 | 3/3 |
+| Eliminación del estudiante | Vista previa con los campos del §6.1 y 1 favorito, 1 solicitud, 1 visita y 1 conversación; contraseña incorrecta 403 `password_mismatch`; confirmación inválida 400; eliminar 204; después access token, refresh y login 401 | 8/8 |
+| Lo que ve el arrendador | Solicitud `cancelled`; conversación con «Usuario eliminado» sin el nombre real; avisos `request_cancelled` y `visit_cancelled` | 3/3 |
+| Eliminación del arrendador | Vista previa con 1 edificio y 1 cuarto; eliminar 204; cuarto 404; edificio `deleted`; sesión 401 | 5/5 |
+
+### 1.2.0 · Contrato entregable a Mobile
+
+Entregado el 2026-11-18 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` (validado por Mobile antes de ejecutar) con la URL y las pruebas reales; las 4 rutas nuevas no cambian ninguna respuesta existente salvo dos campos al final de `/users/me` (`legal` y `legalUpToDate`).
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 44250483818): 1010/1010 (unitarias 389, integración 478, seguridad 143); prueba HTTP real en Azure 27/27 (2026-11-18)
+```
+
+### 1.2.0 · Hallazgos y resultado
+
+| # | Hallazgo | Severidad | Estado |
+| --- | --- | --- | --- |
+| H1 | Las URLs legales (`Legal__TermsUrl`, `Legal__PrivacyUrl`, `Legal__AccountDeletionUrl`) todavía no están configuradas: `GET /legal` las devuelve en `null`. Google Play pide la URL de eliminación de cuenta | Media | Abierto: la landing page debe publicarlas y Victor cargarlas en la Container App (no son secretos) |
+| H2 | Adaptadores Mongo sin cobertura en CI | Baja | Aceptado: se verificaron con la prueba real en Azure |
+| H3 | Quien fue suspendido puede eliminar su cuenta y registrarse de nuevo con el mismo correo | Baja | Aceptado en el piloto (riesgo de la spec); la cuenta nueva sigue sujeta a reportes y moderación |
+| H4 | Las cuentas de prueba del estudiante y del arrendador quedaron eliminadas; solo queda la cuenta admin de prueba (sin rol) y el edificio de prueba en `deleted` | Información | Intencional |
+
+Resultado: **PASS WITH WARNINGS**. Costo: sin recursos nuevos; una colección pequeña `deleted_accounts` en MongoDB Atlas M0. Revisión de coherencia: spec, plan, tasks, README y esta evidencia indican 1.2.0 completa 9/9; las rutas existentes no cambiaron su contrato y los módulos no tienen dependencias circulares (`IAccountDeletionParticipant`).
 
 # Historial 1.1.0
 
