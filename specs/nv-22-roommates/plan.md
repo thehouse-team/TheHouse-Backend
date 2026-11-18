@@ -4,20 +4,20 @@
 | --- | --- |
 | ID | NV-22 |
 | Documento | `plan.md` |
-| Versión | 1.0.0-borrador |
-| Fecha | 2026-11-06 |
+| Versión | 1.1.0-borrador |
+| Fecha | 2026-11-17 |
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Aprobación humana | Pendiente |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.0.0-borrador |
-| Tasks | `task.md` 1.0.0-borrador |
+| Spec | `spec.md` 1.1.0-borrador |
+| Tasks | `task.md` 1.1.0-borrador |
 
 Plan preparado para revisión. No crea código, colecciones ni índices hasta la autorización «EJECUTA».
 
 ## 1. Enfoque
 
-Spec pequeña que reutiliza el chat de NV-16; se implementa después de él.
+Primero el perfil de compañero y la regla de coincidencias con pruebas unitarias; después la lista, el detalle y el contacto sobre una conversación `roommate` de NV-16; luego la compatibilidad del chat y los avisos; al final privacidad, límites y la prueba real en Azure.
 
 Principios:
 
@@ -31,37 +31,40 @@ Principios:
 
 | Fase | Nombre | Requisitos | Tasks | Salida |
 | --- | --- | --- | --- | --- |
-| F1 | Contrato y dominio | R01, R02 | T01, T02 | Publicación propia; Consulta con filtros |
-| F2 | Persistencia e integración | R03 | T03 | Contacto por chat |
-| F3 | Seguridad, autorización y límites | R04 | T04 | Caducidad y privacidad |
-| F4 | Pruebas y evidencia | R05 | T05, T06, T07 | Pruebas, seguridad y evidencia |
+| F1 | Contrato y dominio | R01, R02 | T01, T02 | Mi perfil de compañero; Lista y coincidencias |
+| F2 | Persistencia e integración | R03, R04, R05 | T03, T04, T05 | Detalle del compañero; Contacto por chat; Compatibilidad con NV-16 |
+| F3 | Seguridad, autorización y límites | R06 | T06 | Privacidad, autorización y límites |
+| F4 | Pruebas y evidencia | R07, R08 | T07, T08, T09, T10 | Contrato para Mobile y despliegue; Pruebas, seguridad y evidencia |
 
 ## 3. Detalle de fases
 
 ### F1 — Contrato y dominio
 
-- **T01 · Publicación propia** (R01): Crear, editar y retirar; una activa por usuario; validación de campos.
-- **T02 · Consulta con filtros** (R02): Por universidad y presupuesto, solo activas y no expiradas, paginada.
+- **T01 · Mi perfil de compañero** (R01): PUT crea (201) o actualiza (200) con validación de presupuesto, zona, mes, duración, hábitos y `about`; usa la universidad de NV-11 (409 `university_required`); renueva `expiresAt`; GET y DELETE.
+- **T02 · Lista y coincidencias** (R02): Solo perfiles visibles, vigentes, de mi universidad, no propios y no suspendidos; filtros; `matches` = hábitos iguales + traslape de presupuesto; orden por `matches` y `updatedAt`; sin perfil propio 403.
 
 **Criterio de salida:** tasks de F1 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
 
 ### F2 — Persistencia e integración
 
-- **T03 · Contacto por chat** (R03): Crea o reutiliza una conversación de tipo compañero con el autor; límites diarios.
+- **T03 · Detalle del compañero** (R03): Tarjeta con el id del perfil, primer nombre y universidad; ajeno de otra universidad, oculto o vencido 404.
+- **T04 · Contacto por chat** (R04): Abre una conversación `roommate` de NV-16 con el primer mensaje (201) o la reutiliza (200); no a uno mismo; suspensión 409; NV-20 avisa con `message_received`.
+- **T05 · Compatibilidad con NV-16** (R05): `kind` en las conversaciones; las de renta siguen igual; las `roommate` sin cuarto ni solicitud; leer, enviar y marcar leído funcionan igual.
 
 **Criterio de salida:** tasks de F2 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
 
 ### F3 — Seguridad, autorización y límites
 
-- **T04 · Caducidad y privacidad** (R04): Expiración a 60 días; ninguna respuesta incluye correo ni teléfono.
+- **T06 · Privacidad, autorización y límites** (R06): Sin id de usuario, correo, teléfono ni apellidos en ninguna respuesta; rate limits 429; Redis caído 503; campos desconocidos 400.
 
 **Criterio de salida:** tasks de F3 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
 
 ### F4 — Pruebas y evidencia
 
-- **T05 · Pruebas unitarias y de integración** (R05): Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago.
-- **T06 · Pruebas de seguridad** (R05): BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs.
-- **T07 · Evidencia y revisión final** (R05): `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED.
+- **T07 · Contrato para Mobile y despliegue** (R07): Contrato §6.1 entregado a Mobile; desplegado por el CD; prueba HTTP real en Azure (dos estudiantes de la misma universidad: perfiles, lista con coincidencias, contacto y chat).
+- **T08 · Pruebas unitarias y de integración** (R08): Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago.
+- **T09 · Pruebas de seguridad** (R08): BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs.
+- **T10 · Evidencia y revisión final** (R08): `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED.
 
 **Criterio de salida:** tasks de F4 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
 
@@ -80,39 +83,48 @@ F4 Pruebas y evidencia
 - T01 depende de: autorización «EJECUTA».
 - T02 depende de: autorización «EJECUTA».
 - T03 depende de: T01, T02.
-- T04 depende de: T01, T02, T03.
-- T05 depende de: T01, T02, T03, T04.
-- T06 depende de: T01, T02, T03, T04.
-- T07 depende de: T05, T06.
+- T04 depende de: T01, T02.
+- T05 depende de: T01, T02.
+- T06 depende de: T01, T02, T03, T04, T05.
+- T07 depende de: T01, T02, T03, T04, T05, T06.
+- T08 depende de: T01, T02, T03, T04, T05, T06, T07.
+- T09 depende de: T01, T02, T03, T04, T05, T06, T07.
+- T10 depende de: T08, T09.
 
 ## 5. Estrategia de verificación
 
 | Requisito | Control | Verificación |
 | --- | --- | --- |
-| R01 | Publicación propia | Pruebas automatizadas en CI |
-| R02 | Consulta con filtros | Pruebas automatizadas en CI |
-| R03 | Contacto por chat | Pruebas automatizadas en CI |
-| R04 | Caducidad y privacidad | Pruebas automatizadas en CI |
-| R05 | Pruebas, seguridad y evidencia | Revisión de reportes y `evidence.md` |
+| R01 | Mi perfil de compañero | Pruebas automatizadas en CI |
+| R02 | Lista y coincidencias | Pruebas automatizadas en CI |
+| R03 | Detalle del compañero | Pruebas automatizadas en CI |
+| R04 | Contacto por chat | Pruebas automatizadas en CI |
+| R05 | Compatibilidad con NV-16 | Pruebas automatizadas en CI |
+| R06 | Privacidad, autorización y límites | Pruebas automatizadas en CI |
+| R07 | Contrato para Mobile y despliegue | Revisión de reportes y `evidence.md` |
+| R08 | Pruebas, seguridad y evidencia | Revisión de reportes y `evidence.md` |
 
 ## 6. Seguridad
 
-- Consulta solo con sesión.
-- Rate limit: 10 contactos/día por usuario.
-- Publicaciones reportables y ocultables por NV-21.
+- Reciprocidad: solo quien también aparece ve a los demás, y solo de su universidad; reduce la recolección masiva de perfiles.
+- Nunca se exponen el id de usuario, el correo, el teléfono, los apellidos ni una ubicación; el contacto es solo por el chat de TheHouse (RNF-02).
+- BOLA: el perfil propio sale del token; el detalle de otro solo si es visible, vigente y de la misma universidad (si no, 404).
+- Rate limit: 60/min por usuario en lectura y edición; 10 contactos nuevos al día; Redis caído → 503.
+- Entradas con campos desconocidos → 400; textos `about` y mensajes fuera de logs.
+- Los usuarios se reportan con NV-21 (objetivo `user`) y la suspensión los oculta de la lista.
 - Revisión de seguridad (OWASP API Top 10) al cierre de cada fase.
 
 ## 7. Costo
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
-| MongoDB Atlas M0 | $0 | — |
+| MongoDB Atlas M0 y Redis Upstash | $0 | Una colección pequeña (`roommate_profiles`) y un campo e índice en `conversations` |
 
 ## 8. Puertas
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0-Doc | Antes de ejecutar | Aprobación documental de 1.0.0-borrador | BLOCKED |
+| G0-Doc | Antes de ejecutar | Aprobación documental de 1.1.0-borrador | BLOCKED |
 | G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | BLOCKED |
 | G1 | Fin F1 | Tasks de F1 cerradas con evidencia | No avanzar |
 | G2 | Fin F2 | Tasks de F2 cerradas con evidencia | No avanzar |
@@ -126,8 +138,11 @@ F4 Pruebas y evidencia
 | R01 | F1 | T01 |
 | R02 | F1 | T02 |
 | R03 | F2 | T03 |
-| R04 | F3 | T04 |
-| R05 | F4 | T05, T06, T07 |
+| R04 | F2 | T04 |
+| R05 | F2 | T05 |
+| R06 | F3 | T06 |
+| R07 | F4 | T07 |
+| R08 | F4 | T08, T09, T10 |
 
 ## 10. No ejecución
 
