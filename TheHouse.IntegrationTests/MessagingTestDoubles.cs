@@ -132,6 +132,18 @@ public sealed class InMemoryConversationRepository : IConversationRepository
     // Simula una falla al crear la conversación (para probar que no queda la solicitud).
     public bool FailCreate { get; set; }
 
+    public async Task<(Conversation Conversation, bool Created)> CreateIfAbsentAsync(Conversation conversation, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        Conversation? existing;
+        lock (gate)
+        {
+            existing = Conversations.Values.FirstOrDefault(item => item.RequestId == conversation.RequestId);
+        }
+
+        return existing is not null ? (existing, false) : (await CreateAsync(conversation, cancellationToken), true);
+    }
+
     public Task<Conversation> CreateAsync(Conversation conversation, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);

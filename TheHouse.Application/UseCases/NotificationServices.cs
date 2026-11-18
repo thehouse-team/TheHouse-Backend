@@ -137,7 +137,7 @@ public sealed class NotificationPublisher(
             return building is null ? "Tu edificio" : building.Name;
         }
 
-        return "TheHouse";
+        return "tu búsqueda de compañero";
     }
 }
 
