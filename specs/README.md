@@ -17,7 +17,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-07 | [Property Core (U2)](nv-07-property-core/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 13/13 |
 | NV-08 | [University Catalog (U2)](nv-08-university-catalog/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 14/14 |
 | NV-09 | [Entrega continua (CD) U2](nv-09-cd/spec.md) | **✅ APROBADA** | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes** | 18/20 |
-| NV-10 | [Sesión: refresh token y cuenta propia](nv-10-account-session/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — 1.2.0: T01–T09 autorizadas** | 0/9 |
+| NV-10 | [Sesión: refresh token y cuenta propia](nv-10-account-session/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — 1.2.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** | 5/9 |
 | NV-11 | [Perfil, universidad y preferencias](nv-11-profile-preferences/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T11 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-12 | [Arrendador, edificios y cuartos](nv-12-landlord-buildings-rooms/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T13 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 13/13 |
 | NV-13 | [Fotografías y documentos](nv-13-media-documents/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |

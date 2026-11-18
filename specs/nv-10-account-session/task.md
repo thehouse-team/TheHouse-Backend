@@ -8,12 +8,12 @@
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T09; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-10-account-session/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T09 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Plan | `plan.md` 1.2.0-borrador |
 | Tasks totales | 9 |
-| Tasks completadas | 0 |
+| Tasks completadas | 5 |
 
 ## Reglas de esta lista
 
@@ -25,17 +25,17 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Vista previa y bloqueos** — Requisito: NV-10-R01 · Fase: F1 · Aceptación: La vista previa cuenta lo que se borra o cancela y lista los bloqueos (`active_rental`, `staff_account`); coincide con lo que hace la eliminación. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Sesión siempre viva** — Requisito: NV-10-R03 · Fase: F1 · Aceptación: Sin tope absoluto: una sesión usada cada menos de 30 días no vence; 30 días sin uso, logout, reuso, suspensión o eliminación la cierran; tokens existentes sin migración. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T04 · Aviso de privacidad y términos** — Requisito: NV-10-R04 · Fase: F1 · Aceptación: `GET /legal` con versiones y URLs; aceptación registrada; `/users/me` con `legal` y `legalUpToDate`; versión distinta → 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Vista previa y bloqueos** — Requisito: NV-10-R01 · Fase: F1 · Aceptación: La vista previa cuenta lo que se borra o cancela y lista los bloqueos (`active_rental`, `staff_account`); coincide con lo que hace la eliminación. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Sesión siempre viva** — Requisito: NV-10-R03 · Fase: F1 · Aceptación: Sin tope absoluto: una sesión usada cada menos de 30 días no vence; 30 días sin uso, logout, reuso, suspensión o eliminación la cierran; tokens existentes sin migración. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T04 · Aviso de privacidad y términos** — Requisito: NV-10-R04 · Fase: F1 · Aceptación: `GET /legal` con versiones y URLs; aceptación registrada; `/users/me` con `legal` y `legalUpToDate`; versión distinta → 409. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T02 · Eliminación de cuenta** — Requisito: NV-10-R02 · Fase: F2 · Aceptación: Contraseña y `ELIMINAR`; cada dato de la tabla de reglas queda borrado, cancelado, retirado o anonimizado (una prueba por módulo); pasos idempotentes; un fallo deja la sesión viva y repetir termina; al final 401 en toda ruta, refresh y login. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T03, T04.
+- [x] **T02 · Eliminación de cuenta** — Requisito: NV-10-R02 · Fase: F2 · Aceptación: Contraseña y `ELIMINAR`; cada dato de la tabla de reglas queda borrado, cancelado, retirado o anonimizado (una prueba por módulo); pasos idempotentes; un fallo deja la sesión viva y repetir termina; al final 401 en toda ruta, refresh y login. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T03, T04.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T05 · Seguridad, privacidad y límites** — Requisito: NV-10-R05 · Fase: F3 · Aceptación: Reautenticación, rate limit, sin PII en logs, archivos borrados del almacenamiento, otra cuenta intacta, Redis caído 503. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T03, T04, T02.
+- [x] **T05 · Seguridad, privacidad y límites** — Requisito: NV-10-R05 · Fase: F3 · Aceptación: Reautenticación, rate limit, sin PII en logs, archivos borrados del almacenamiento, otra cuenta intacta, Redis caído 503. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T03, T04, T02.
 
 ## F4 — Pruebas y evidencia
 
@@ -48,11 +48,11 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F2 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F1 | ABIERTA |
-| T05 | R05 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F2 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F1 | COMPLETA |
+| T05 | R05 | F3 | COMPLETA |
 | T06 | R06 | F4 | ABIERTA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R07 | F4 | ABIERTA |
@@ -76,11 +76,11 @@
 | --- | --- |
 | Requisitos | 7 |
 | Tasks | 9 |
-| Tasks abiertas | 9 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 5 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T09 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
