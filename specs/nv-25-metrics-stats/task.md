@@ -1,17 +1,17 @@
-# NV-25 — Estadísticas del propietario y métricas de Smart Match — Task list
+# NV-25 — Estadísticas del arrendador — Task list
 
 | Campo | Valor |
 | --- | --- |
 | ID | NV-25 |
 | Documento | `task.md` |
-| Versión | 1.0.0-borrador |
-| Fecha | 2026-11-06 |
+| Versión | 1.1.0-borrador |
+| Fecha | 2026-11-17 |
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Aprobación humana | Pendiente |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.0.0-borrador |
-| Plan | `plan.md` 1.0.0-borrador |
+| Spec | `spec.md` 1.1.0-borrador |
+| Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 9 |
 | Tasks completadas | 0 |
 
@@ -25,21 +25,21 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Registro de eventos** — Requisito: NV-25-R01 · Fase: F1 · Aceptación: Vistas deduplicadas por día y eventos de favoritos, solicitudes y recomendaciones con `actorHash` no reversible. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Estadísticas del propietario** — Requisito: NV-25-R03 · Fase: F1 · Aceptación: Rango de hasta 90 días con vistas, favoritos, solicitudes y conversión; solo cuartos propios. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T04 · Recomendaciones por reglas** — Requisito: NV-25-R04 · Fase: F1 · Aceptación: Reglas documentadas y probadas con casos que disparan cada sugerencia. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [ ] **T01 · Registro de vistas** — Requisito: NV-25-R01 · Fase: F1 · Aceptación: Una vista por persona, cuarto o edificio y día con `actorHash` de sal diaria; sin vistas del dueño; dos réplicas no duplican; si falla, el detalle público responde igual. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [ ] **T02 · Resumen del arrendador** — Requisito: NV-25-R02 · Fase: F1 · Aceptación: Totales del rango, periodo anterior y serie diaria con conversión; solo datos propios; rango validado (90 días). · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T02 · Agregados diarios** — Requisito: NV-25-R02 · Fase: F2 · Aceptación: Tarea idempotente que produce contadores por cuarto y día; reejecución sin duplicar. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T03, T04.
-- [ ] **T05 · Métricas de Smart Match** — Requisito: NV-25-R05 · Fase: F2 · Aceptación: Puntaje promedio, CTR, tasa de utilidad y descartes por versión de modelo; solo admin. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T03, T04.
+- [ ] **T03 · Estadísticas por cuarto** — Requisito: NV-25-R03 · Fase: F2 · Aceptación: Vistas, favoritos, solicitudes, visitas, convenios, conversión y calificación por cuarto; paginado y ordenado; filtro por edificio propio. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [ ] **T04 · Sugerencias por reglas** — Requisito: NV-25-R04 · Fase: F2 · Aceptación: Las 6 reglas documentadas, cada una con una prueba que la dispara y otra que no; máximo 20; textos en español con números del arrendador. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T06 · Privacidad de la analítica** — Requisito: NV-25-R06 · Fase: F3 · Aceptación: Ninguna respuesta permite identificar usuarios; prueba con eventos de un mismo usuario en dos días. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T03, T04, T02, T05.
+- [ ] **T05 · Privacidad, autorización y límites** — Requisito: NV-25-R05 · Fase: F3 · Aceptación: Sin datos de usuarios en ninguna respuesta; otro arrendador o estudiante 403/404; 429; Redis caído 503 en estadísticas. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04.
 
 ## F4 — Pruebas y evidencia
 
+- [ ] **T06 · Contrato para Mobile y despliegue** — Requisito: NV-25-R06 · Fase: F4 · Aceptación: Contrato §6.1 entregado a Mobile; desplegado por el CD; prueba HTTP real en Azure (vistas de un estudiante, favorito, visita y solicitud reflejados en el resumen, por cuarto y en sugerencias). · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05.
 - [ ] **T07 · Pruebas unitarias y de integración** — Requisito: NV-25-R07 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06.
 - [ ] **T08 · Pruebas de seguridad** — Requisito: NV-25-R07 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06.
 - [ ] **T09 · Evidencia y revisión final** — Requisito: NV-25-R07 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T07, T08.
@@ -49,11 +49,11 @@
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
 | T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F2 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F1 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F3 | ABIERTA |
+| T02 | R02 | F1 | ABIERTA |
+| T03 | R03 | F2 | ABIERTA |
+| T04 | R04 | F2 | ABIERTA |
+| T05 | R05 | F3 | ABIERTA |
+| T06 | R06 | F4 | ABIERTA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R07 | F4 | ABIERTA |
 | T09 | R07 | F4 | ABIERTA |
