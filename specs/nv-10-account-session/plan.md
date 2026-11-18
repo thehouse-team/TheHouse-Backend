@@ -4,20 +4,20 @@
 | --- | --- |
 | ID | NV-10 |
 | Documento | `plan.md` |
-| Versión | 1.1.0 |
-| Fecha | 2026-11-06 |
-| Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-06 («Apruebo y EJECUTA»: NV-10 1.1.0, tasks T01–T11, rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, `TheHouse.UnitTests/`, `TheHouse.IntegrationTests/`, `TheHouse.SecurityTests/` y `specs/nv-10-account-session/`) |
-| Estado de ejecución | **✅ COMPLETADA — DESPLEGADA EN AZURE (revisión `c55feed2-7-1`) Y VERIFICADA 13/13 (2026-11-06)** |
+| Versión | 1.2.0-borrador |
+| Fecha | 2026-11-17 |
+| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
+| Aprobación humana | Pendiente |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.1.0 |
-| Tasks | `task.md` 1.1.0 |
+| Spec | `spec.md` 1.2.0-borrador |
+| Tasks | `task.md` 1.2.0-borrador |
 
 Plan preparado para revisión. No crea código, colecciones ni índices hasta la autorización «EJECUTA».
 
 ## 1. Enfoque
 
-Primero el contrato y el dominio de la sesión (emisión, rotación y `/users/me`) con pruebas unitarias; después la persistencia, la detección de reuso y la integración con el logout; al final el rechazo de sesiones revocadas, los límites y la regresión de los contratos existentes. Al terminar, el CD despliega y se prueba en Azure antes de avisar a Mobile.
+Primero la sesión sin tope y el registro legal (cambios pequeños con pruebas unitarias); después la vista previa y la eliminación módulo por módulo, cada uno con su prueba de integración; luego seguridad y límites; al final la prueba real en Azure.
 
 Principios:
 
@@ -31,41 +31,39 @@ Principios:
 
 | Fase | Nombre | Requisitos | Tasks | Salida |
 | --- | --- | --- | --- | --- |
-| F1 | Contrato y dominio | R01, R02, R03 | T01, T02, T03 | Refresh token en el login; Renovación con rotación; Cuenta propia |
-| F2 | Persistencia e integración | R04, R05, R06 | T04, T05, T06 | Persistencia e índices; Detección de reuso y concurrencia; Logout integrado |
-| F3 | Seguridad, autorización y límites | R07, R08 | T07, T08 | Rechazo inmediato de sesiones revocadas; Límites y no regresión |
-| F4 | Pruebas y evidencia | R09 | T09, T10, T11 | Pruebas, seguridad y evidencia |
+| F1 | Contrato y dominio | R01, R03, R04 | T01, T03, T04 | Vista previa y bloqueos; Sesión siempre viva; Aviso de privacidad y términos |
+| F2 | Persistencia e integración | R02 | T02 | Eliminación de cuenta |
+| F3 | Seguridad, autorización y límites | R05 | T05 | Seguridad, privacidad y límites |
+| F4 | Pruebas y evidencia | R06, R07 | T06, T07, T08, T09 | Contrato para Mobile y despliegue; Pruebas, seguridad y evidencia |
 
 ## 3. Detalle de fases
 
 ### F1 — Contrato y dominio
 
-- **T01 · Refresh token en el login** (R01): Login 200 devuelve `refreshToken` además de los campos actuales sin cambiar su forma; el access token incluye `sid`; en la base solo queda el hash; prueba de contrato que compara la respuesta con la de NV-05.
-- **T02 · Renovación con rotación** (R02): `POST /auth/refresh` con token válido devuelve access y refresh nuevos y el anterior deja de servir; token desconocido, vencido o revocado 401 uniforme; cuerpo inválido 400; vencimiento de 30 días por token y 90 por sesión.
-- **T03 · Cuenta propia** (R03): `GET /users/me` con Bearer válido devuelve exactamente `id`, `email` y `createdAt` del `sub`; sin token o con token revocado 401; `Cache-Control: no-store`.
+- **T01 · Vista previa y bloqueos** (R01): La vista previa cuenta lo que se borra o cancela y lista los bloqueos (`active_rental`, `staff_account`); coincide con lo que hace la eliminación.
+- **T03 · Sesión siempre viva** (R03): Sin tope absoluto: una sesión usada cada menos de 30 días no vence; 30 días sin uso, logout, reuso, suspensión o eliminación la cierran; tokens existentes sin migración.
+- **T04 · Aviso de privacidad y términos** (R04): `GET /legal` con versiones y URLs; aceptación registrada; `/users/me` con `legal` y `legalUpToDate`; versión distinta → 409.
 
 **Criterio de salida:** tasks de F1 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
 
 ### F2 — Persistencia e integración
 
-- **T04 · Persistencia e índices** (R04): `refresh_tokens` con índice único en `tokenHash`, índice por `sessionId` e índice TTL; búsqueda de usuario por id con proyección explícita.
-- **T05 · Detección de reuso y concurrencia** (R05): Reusar un token rotado revoca toda la sesión y responde 401; dos refresh simultáneos con el mismo token producen una sola emisión; pruebas de ambos casos.
-- **T06 · Logout integrado** (R06): Logout sigue respondiendo 204 y revoca el `jti` como hoy; con `sid` revoca también la sesión y su refresh token deja de servir; un access token sin `sid` sigue funcionando hasta su expiración.
+- **T02 · Eliminación de cuenta** (R02): Contraseña y `ELIMINAR`; cada dato de la tabla de reglas queda borrado, cancelado, retirado o anonimizado (una prueba por módulo); pasos idempotentes; un fallo deja la sesión viva y repetir termina; al final 401 en toda ruta, refresh y login.
 
 **Criterio de salida:** tasks de F2 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
 
 ### F3 — Seguridad, autorización y límites
 
-- **T07 · Rechazo inmediato de sesiones revocadas** (R07): Tras el logout o un reuso, cualquier access token de esa sesión recibe 401 en la siguiente solicitud, en cualquier réplica (estado en Redis).
-- **T08 · Límites y no regresión** (R08): Rate limit de refresh con 429 y `Retry-After`; fallo de Redis 503; pruebas de regresión de register 201, login 200 y logout 204 con los contratos actuales.
+- **T05 · Seguridad, privacidad y límites** (R05): Reautenticación, rate limit, sin PII en logs, archivos borrados del almacenamiento, otra cuenta intacta, Redis caído 503.
 
 **Criterio de salida:** tasks de F3 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
 
 ### F4 — Pruebas y evidencia
 
-- **T09 · Pruebas unitarias y de integración** (R09): Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago.
-- **T10 · Pruebas de seguridad** (R09): BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs.
-- **T11 · Evidencia y revisión final** (R09): `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED.
+- **T06 · Contrato para Mobile y despliegue** (R06): Contrato §6.1 entregado a Mobile; desplegado por el CD; prueba HTTP real en Azure: cuenta de prueba con perfil, favorito, solicitud y visita, eliminada, y la contraparte ve «Usuario eliminado».
+- **T07 · Pruebas unitarias y de integración** (R07): Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago.
+- **T08 · Pruebas de seguridad** (R07): BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs.
+- **T09 · Evidencia y revisión final** (R07): `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED.
 
 **Criterio de salida:** tasks de F4 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
 
@@ -82,52 +80,48 @@ F4 Pruebas y evidencia
 ```
 
 - T01 depende de: autorización «EJECUTA».
-- T02 depende de: autorización «EJECUTA».
+- T02 depende de: T01, T03, T04.
 - T03 depende de: autorización «EJECUTA».
-- T04 depende de: T01, T02, T03.
-- T05 depende de: T01, T02, T03.
-- T06 depende de: T01, T02, T03.
+- T04 depende de: autorización «EJECUTA».
+- T05 depende de: T01, T03, T04, T02.
+- T06 depende de: T01, T03, T04, T02, T05.
 - T07 depende de: T01, T02, T03, T04, T05, T06.
 - T08 depende de: T01, T02, T03, T04, T05, T06.
-- T09 depende de: T01, T02, T03, T04, T05, T06, T07, T08.
-- T10 depende de: T01, T02, T03, T04, T05, T06, T07, T08.
-- T11 depende de: T09, T10.
+- T09 depende de: T07, T08.
 
 ## 5. Estrategia de verificación
 
 | Requisito | Control | Verificación |
 | --- | --- | --- |
-| R01 | Refresh token en el login | Pruebas automatizadas en CI |
-| R02 | Renovación con rotación | Pruebas automatizadas en CI |
-| R03 | Cuenta propia | Pruebas automatizadas en CI |
-| R04 | Persistencia e índices | Pruebas automatizadas en CI |
-| R05 | Detección de reuso y concurrencia | Pruebas automatizadas en CI |
-| R06 | Logout integrado | Pruebas automatizadas en CI |
-| R07 | Rechazo inmediato de sesiones revocadas | Pruebas automatizadas en CI |
-| R08 | Límites y no regresión | Pruebas automatizadas en CI |
-| R09 | Pruebas, seguridad y evidencia | Revisión de reportes y `evidence.md` |
+| R01 | Vista previa y bloqueos | Pruebas automatizadas en CI |
+| R02 | Eliminación de cuenta | Pruebas automatizadas en CI |
+| R03 | Sesión siempre viva | Pruebas automatizadas en CI |
+| R04 | Aviso de privacidad y términos | Pruebas automatizadas en CI |
+| R05 | Seguridad, privacidad y límites | Pruebas automatizadas en CI |
+| R06 | Contrato para Mobile y despliegue | Revisión de reportes y `evidence.md` |
+| R07 | Pruebas, seguridad y evidencia | Revisión de reportes y `evidence.md` |
 
 ## 6. Seguridad
 
-- El refresh token viaja solo en el cuerpo JSON por HTTPS, nunca en cookies ni en la URL (sin riesgo CSRF); la app lo guarda cifrado con Android Keystore y mantiene el access token solo en memoria.
-- Refresh tokens, `sid` revocados y hashes nunca aparecen en logs, Problem Details ni evidencia.
-- Rate limit de refresh: 30 solicitudes por 60 s por IP en Redis; si Redis no está disponible, el refresh y la validación de revocación fallan cerrados con 503.
-- La detección de reuso protege contra el robo de un refresh token: el primer uso del token robado o del legítimo invalida la sesión entera.
-- `/users/me` no permite consultar a otros usuarios (BOLA imposible por diseño) y no devuelve `PasswordHash` ni `UpdatedAt`.
+- Reautenticación con contraseña para eliminar (protege un teléfono desbloqueado o un token robado).
+- BOLA: solo la cuenta del token; no existe forma de eliminar otra cuenta por esta ruta.
+- Tras eliminar, el access token se rechaza en todas las réplicas (revocación por sesión en Redis, NV-10/NV-21).
+- Sin correo, nombre ni contraseña en logs; el evento de auditoría guarda solo el id interno y la hora.
+- Rate limit: 5 eliminaciones intentadas por hora por usuario y 30 lecturas por minuto; Redis caído → 503.
+- Contratos estrictos: campos desconocidos → 400.
 - Revisión de seguridad (OWASP API Top 10) al cierre de cada fase.
 
 ## 7. Costo
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
-| MongoDB Atlas M0 | $0 | Documentos pequeños con TTL |
-| Redis Upstash | $0 | Claves con TTL de 15 minutos; vigilar el límite de comandos del plan gratuito |
+| MongoDB Atlas M0 | $0 | Una colección pequeña (`deleted_accounts`) y un campo en `users`; sin recursos nuevos |
 
 ## 8. Puertas
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0-Doc | Antes de ejecutar | Aprobación documental de 1.1.0 | BLOCKED |
+| G0-Doc | Antes de ejecutar | Aprobación documental de 1.2.0-borrador | BLOCKED |
 | G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | BLOCKED |
 | G1 | Fin F1 | Tasks de F1 cerradas con evidencia | No avanzar |
 | G2 | Fin F2 | Tasks de F2 cerradas con evidencia | No avanzar |
@@ -139,15 +133,13 @@ F4 Pruebas y evidencia
 | Requisito | Fase | Tasks |
 | --- | --- | --- |
 | R01 | F1 | T01 |
-| R02 | F1 | T02 |
+| R02 | F2 | T02 |
 | R03 | F1 | T03 |
-| R04 | F2 | T04 |
-| R05 | F2 | T05 |
-| R06 | F2 | T06 |
-| R07 | F3 | T07 |
-| R08 | F3 | T08 |
-| R09 | F4 | T09, T10, T11 |
+| R04 | F1 | T04 |
+| R05 | F3 | T05 |
+| R06 | F4 | T06 |
+| R07 | F4 | T07, T08, T09 |
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: T01–T11 autorizadas con «EJECUTA» el 2026-11-06; avance en `task.md` y `evidence.md`.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **⛔ NO EJECUTAR HASTA «EJECUTA»**.
