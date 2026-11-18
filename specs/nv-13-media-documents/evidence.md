@@ -7,8 +7,8 @@
 | Versión | 1.1.0 |
 | Fecha | 2026-11-17 |
 | Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-17: NV-13 1.1.0, tasks T01–T10 (M-BE-073); cambio de librería aprobado el mismo día («Sí, usa SkiaSharp») |
-| Rama | `feat/nv-13-media` → PR pendiente de revisión |
-| Resultado | **🟡 EN CURSO**: T01–T06 completas y verificadas en local; T07–T10 esperan el secreto de la llave maestra, CI, despliegue y prueba HTTP real en Azure |
+| Rama | `feat/nv-13-media-v2` → PR #53, merge `011c2ad` (reemplazó a #52) |
+| Resultado | **✅ PASS WITH WARNINGS** — T01–T10 completas: CI 934/934, desplegado en `ca-thehouse-u2--c011c2ad-48-1`, prueba HTTP real en Azure 23/23 |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. La llave maestra de producción no existe todavía y nunca se escribe en el repositorio; las pruebas usan una llave de prueba propia.
 
@@ -48,8 +48,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R04 Revisión y retención de documentos | `Publication_requires_files_and_reviewers_see_photos_and_documents` (revisor lee el original, bitácora `document.viewed`, dueño 403, retención al aprobar), `Documents_expire_90_days_after_the_review_decision` |
 | R05 Integración con NV-12, NV-14 y NV-21 | `Publication_needs_the_building_photo_and_both_documents`, `Snapshot_groups_building_and_room_photos`, `Publication_requires_files_and_reviewers_see_photos_and_documents`, `Deleting_a_room_removes_its_photos_and_the_store_fails_closed`, pruebas de NV-12/NV-14/NV-21 con el campo nuevo |
 | R06 Validación, límites y privacidad | `Files_are_validated_by_content_size_and_type` (SVG y ejecutable 415, `kind` inválido 400, JSON 415, 5 MB + 1 → 413, sin modo arrendador 403), `Huge_images_are_rejected_from_the_header_and_garbage_is_unsupported`, `Media_codes_have_a_spanish_detail`, BOLA en `Owner_uploads...` |
-| R07 Contrato para Mobile y despliegue | Pendiente: secreto de la llave maestra, CI, despliegue y prueba HTTP real en Azure |
-| R08 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+| R07 Contrato para Mobile y despliegue | Secreto creado; CD run 44200967522; prueba HTTP real en Azure 23/23 (§6); contrato entregado (§7) |
+| R08 Pruebas, seguridad y evidencia | TRX del CI run 44200564148: 934/934; `TheHouse.SecurityTests` 115/115; cobertura en §5; esta evidencia |
 
 ## 4. Seguridad y coherencia
 
@@ -71,12 +71,52 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Retención | La tarea corre cada 6 horas con candado de Redis; solo `approve` y `reject` fijan la retención |
 | Llave de prueba | Se genera al iniciar las pruebas (32 bytes aleatorios); el primer PR (#52) la tenía fija y Gitleaks la marcó en el historial, por eso la implementación se re-subió en una rama nueva sin esa llave |
 
-## 5. Pendiente para cerrar 1.1.0
+## 5. Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#51](https://github.com/thehouse-team/TheHouse-Backend/pull/51) (spec 1.1.0) y [#53](https://github.com/thehouse-team/TheHouse-Backend/pull/53) (aprobación e implementación), aprobados y mezclados por `IsaiAxel` (merge `011c2ad`). [#52](https://github.com/thehouse-team/TheHouse-Backend/pull/52) se cerró: su CI falló por una llave de prueba fija en el historial (Gitleaks) y por un método de SkiaSharp obsoleto en Release; #53 rehízo la rama sin esa llave. La rama remota de #52 se borró con autorización de Victor para que el escaneo de todo el historial pasara |
+| CI de `main` (`011c2ad`, run 44200564148) | 7/7 checks obligatorios en verde (incluidos Gitleaks y `container-security` con la imagen que trae SkiaSharp); mutación semanal omitida |
+| Pruebas en CI | 934/934: unitarias 353, integración 466, seguridad 115 |
+| Cobertura de líneas (CI) | 68.0 % total (ramas 72.0 %). `MediaServices` 94.4 %, `MediaEndpoint` 90.9 %, `MediaAdapters` 79.2 % (ramas de orientación EXIF no ejercitadas), `MediaConfiguration` 55.6 % (el ciclo de la tarea de retención no corre en pruebas; su lógica está en `MediaPort` y sí se prueba). `MongoMediaRepository` en 0 %, como los demás adaptadores Mongo: se verifica en Azure |
+| Secreto de la llave maestra (M-BE-038) | Creado por Victor el 2026-11-17 con `az containerapp secret set` (`media-document-master-key`) y la variable `Media__DocumentMasterKey=secretref:...`; la llave se generó en su terminal sin imprimirse y nunca pasó por el repositorio ni por esta sesión. Se verificó solo el nombre del secreto y la referencia, y que la variable siguió presente tras el despliegue |
+| CD (run 44200967522) | resolve, publish, verify-ephemeral, deploy aprobado por Victor, DAST y resumen: todo en verde |
+| Azure | revisión `ca-thehouse-u2--c011c2ad-48-1`, 100 % del tráfico, Healthy |
+| Rol admin temporal (M-BE-065) | Autorizado por Victor el 2026-11-17 («autorizo rol»). `--grant-role` a la cuenta admin de prueba y `--revoke-role` al terminar (usuario `6afceb67b516a1f9f65bae98`), vía `az containerapp exec` en esa revisión |
+
+## 6. Prueba HTTP real en Azure
+
+`.azure-check/nv13_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-17 con tres cuentas `@example.com` nuevas; solo imprime códigos, campos, tamaños y huellas, nunca tokens, contraseñas ni el contenido de los documentos.
+
+- **Primera corrida (incompleta):** P1–F6 en verde; en F7 (archivo de 5 MB + 1) el servidor respondió 413 sin leer el cuerpo y cerró la conexión, y Python lo reportó como error de SSL. Los logs del contenedor confirman `Solicitud rechazada: HTTP 413`. Se ajustó el script para aceptar ese cierre; quedó un edificio de prueba en borrador con dos fotos (no público).
+- **Segunda corrida: 22/23 PASS.** D3 falló por el propio script: comprobaba que la respuesta no contuviera la palabra `content`, que forma parte del campo de metadatos `contentType`. D1 de la misma corrida muestra que el documento responde solo `id, kind, contentType, bytes, uploadedAt`, y la prueba de integración verifica lo mismo; se corrigió D3 para comparar el conjunto exacto de campos. Resultado efectivo: **23/23**.
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| Crear el secreto `media-document-master-key` y la variable `Media__DocumentMasterKey` en Container Apps (autorización aparte) | Victor | Pendiente |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv13_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Preparación y publicación | Edificio creado; pasos `building_photo` y `documents`; publicar sin archivos 409 `publication_incomplete` | 3/3 |
+| Fotos | Foto de 2400×1600 re-codificada a 1600 de ancho (**SkiaSharp funciona en el contenedor Linux**); foto de cuarto 201; miniatura privada WebP con `no-store`; otra cuenta 404; sin verificar no es pública; SVG disfrazado 415 `unsupported_media`; más de 5 MB rechazado con 413 antes de leer el cuerpo | 7/7 |
+| Documentos | INE (PDF) y comprobante (PNG) 200; el dueño ve solo metadatos (D3 corregido, ver arriba) | 3/3 |
+| Revisión | Publicar con archivos 202; el revisor ve foto, fotos del cuarto y 2 documentos; descarga la INE descifrada con SHA-256 igual al original; el dueño 403; aprobar 200 | 5/5 |
+| Foto pública | 200 con `public, max-age=31536000, immutable` y `ETag`; 304 con `If-None-Match`; el detalle público trae `thumbnailUrl` y `photos` | 3/3 |
+| Limpieza | Edificio suspendido; su foto deja de ser pública (404) | 2/2 |
+
+## 7. Contrato entregable a Mobile
+
+Entregado el 2026-11-17 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` (validado por Mobile antes de ejecutar) con la URL y las pruebas reales; las 9 rutas son nuevas y las respuestas anteriores solo agregan campos (`photo`, `photos`, `documents`; `thumbnailUrl` ahora se llena).
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 44200564148): 934/934 (unitarias 353, integración 466, seguridad 115); prueba HTTP real en Azure 23/23 (22 PASS + D3 corregido, 2026-11-17)
+```
+
+## 8. Hallazgos y resultado
+
+| # | Hallazgo | Severidad | Estado |
+| --- | --- | --- | --- |
+| H1 | ImageSharp 3.2.0 exige llave de licencia para compilar en Release | Media | Resuelto: SkiaSharp 4.154.0, cambio aprobado por Victor (M-BE-073) |
+| H2 | Llave de prueba fija en el historial del primer PR (Gitleaks) | Media | Resuelto: llave generada en tiempo de prueba, rama rehecha (#53) y rama vieja borrada con autorización |
+| H3 | Dos falsos negativos del script de Azure (F7 por cierre de conexión, D3 por coincidencia de texto) | Baja | Resuelto en el script; el API respondió bien en ambos (logs y D1) |
+| H4 | Edificio de prueba en borrador con dos fotos de la primera corrida | Información | No es público; ocupa la cuota de la cuenta de prueba |
+| H5 | Adaptadores Mongo y la tarea de retención sin cobertura en CI | Baja | Aceptado: se verifican en Azure; la lógica de retención está probada en `MediaPort` |
+
+Resultado: **PASS WITH WARNINGS**. Costo: sin recursos nuevos de pago; colecciones `media_items` y `verification_documents` y buckets GridFS en MongoDB Atlas M0 con cuota de 60 MB por arrendador; un secreto más en Container Apps. Revisión de coherencia: spec, plan, tasks, README, memoria (M-BE-073 con el cambio de librería) y esta evidencia indican 1.1.0 completa 10/10.
