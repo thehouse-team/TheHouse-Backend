@@ -4,56 +4,55 @@
 | --- | --- |
 | ID | NV-20 |
 | Documento | `spec.md` |
-| Versión | 1.1.0-borrador |
-| Fecha | 2026-11-12 |
-| Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-12 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
-| Estado de ejecución | **✅ COMPLETA — 1.1.0 T01–T11 (2026-11-13): PASS WITH WARNINGS, ver `evidence.md`** |
+| Versión | 1.2.0-borrador |
+| Fecha | 2026-11-17 |
+| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
+| Aprobación humana | Pendiente |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Requerimientos de origen | RF-75 (`Requerimientos_TheHouse_v2`) |
-| No funcionales | RNF-02, RNF-09 |
-| Plan | `plan.md` 1.1.0-borrador |
-| Tasks | `task.md` 1.1.0-borrador |
+| Requerimientos de origen | Requisito del curso §16 (notificaciones push de los procesos principales); RF-75 (bandeja) (`Requerimientos_TheHouse_v2`) |
+| No funcionales | RNF-01, RNF-02, RNF-09 |
+| Plan | `plan.md` 1.2.0-borrador |
+| Tasks | `task.md` 1.2.0-borrador |
 | Módulo | Notifications |
-| Precondición | NV-16, NV-17 1.3.0, NV-18 1.1.0 y NV-21 desplegadas |
-| Relación | Recibe avisos de NV-16 (solicitudes y chat), NV-17 (visitas), NV-18 (convenios) y NV-21 (revisión de edificios); el menú de la app muestra el contador de no leídas (RF-74) |
+| Precondición | NV-20 1.1.0 desplegada; proyecto de Firebase de la app Android (Mobile) y su cuenta de servicio |
+| Relación | Agrega un canal al puerto `INotificationSink` de NV-20; los eventos siguen naciendo en Messaging (NV-16, incluido el chat de compañero de NV-22), Visits (NV-17), Rentals (NV-18) y Moderation (NV-21); NV-10 1.2.0 borra los dispositivos al eliminar la cuenta |
 
 Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
 
-**Cambio 1.1.0-borrador (2026-11-12):** se adapta a lo ya desplegado (NV-16, NV-17 1.3.0, NV-18 1.1.0 y NV-21). Como todavía no hay bus de eventos (M-BE-070), los casos de uso que ya existen llaman a un puerto `INotificationSink` después de guardar su cambio; si la notificación falla, la acción principal no se deshace. El catálogo de tipos queda cerrado y cada uno con su destinatario y su categoría (`requests`, `visits`, `system`, como las pestañas del prototipo). Los mensajes de chat se agrupan por conversación y nunca copian el texto del mensaje. Las rutas usan subrutas (`/read`, `/read-all`) como NV-16. Push (FCM), correo y el aviso de baja de precio de un favorito quedan fuera de esta versión.
+**Cambio 1.2.0-borrador (2026-11-17):** la versión 1.1.0 (bandeja en la app, M-BE-071) quedó completa y desplegada (ver `evidence.md`). El curso pide **notificaciones push para los procesos principales** (§16 Móvil), así que esta versión agrega el canal push con **Firebase Cloud Messaging (FCM)** sobre la misma bandeja: cada notificación que ya se guarda en la bandeja también se envía al teléfono. La app registra su token de FCM por instalación y lo borra al cerrar sesión. El envío es posterior a guardar y nunca deshace la acción principal; la bandeja sigue siendo la fuente de verdad. No se agregan correo ni SMS. Requiere una decisión M-BE nueva (proveedor FCM y un secreto nuevo) que reemplaza la parte «sin push» de M-BE-071.
 
 ## 1. Contexto
 
-Hoy el estudiante y el arrendador solo se enteran de una solicitud aceptada, una visita confirmada, un convenio aceptado o un edificio aprobado si abren cada pantalla. RF-75 pide una bandeja de notificaciones con filtro de no leídas y la opción de marcarlas como leídas; el prototipo tiene la pantalla para el arrendador (pestañas Todas, Solicitudes, Visitas y Sistema, con «Marcar leídas») y para el estudiante (Todas y Sin leer). Las acciones que generan los avisos ya existen en NV-16, NV-17, NV-18 y NV-21.
+Hoy las notificaciones solo existen en la bandeja: el usuario se entera de una solicitud, una visita o un mensaje hasta que abre la app. El curso pide push para los procesos principales y Mobile ya tiene FCM integrado; falta que el backend sepa a qué dispositivos enviar y que mande el aviso. M-BE-071 dejó el push fuera hasta elegir proveedor.
 
 ## 2. Objetivo
 
-Que cada usuario tenga una bandeja de notificaciones con contador de no leídas, alimentada por las acciones de solicitudes, chat, visitas, convenios y revisión de edificios, sin exponer datos personales.
+Que cada notificación de la bandeja llegue también como push a los teléfonos donde el usuario tiene la sesión abierta, sin exponer contenido privado en la pantalla de bloqueo y sin que una falla de FCM afecte la acción que la originó.
 
 ## 3. Precondiciones
 
-1. NV-16, NV-17 1.3.0, NV-18 1.1.0 y NV-21 desplegadas.
-2. Validación del contrato §6.1 con el responsable de Mobile.
-3. Autorización «EJECUTA».
+1. NV-20 1.1.0 desplegada.
+2. Proyecto de Firebase de la app Android y una cuenta de servicio con permiso solo para enviar mensajes de FCM.
+3. Decisión M-BE: FCM como proveedor y el secreto `FIREBASE_SERVICE_ACCOUNT` en la Container App (fuera de Terraform, M-BE-038).
+4. Validación del contrato §6.1 con el responsable de Mobile.
+5. Autorización «EJECUTA».
 
 ## 4. Alcance
 
-1. Puerto `INotificationSink` y su implementación: crea la notificación del catálogo para el destinatario correcto, de forma idempotente.
-2. Llamadas al puerto desde los casos de uso existentes de NV-16, NV-17, NV-18 y NV-21 (después de guardar).
-3. Bandeja paginada con filtros `unread` y `category`.
-4. Contador de no leídas (total y por categoría) con `ETag` y 304.
-5. Marcar una como leída y marcar todas (o todas de una categoría).
-6. Agrupación de mensajes de chat: una notificación no leída por conversación con su contador.
-7. Retención de 90 días.
-8. Contrato para Mobile y despliegue verificado en Azure.
+1. Registro, actualización y borrado del token de FCM por instalación de la app.
+2. Envío push de los 16 tipos de la bandeja (solicitudes, mensajes de chat y de compañero, visitas, convenios y sistema).
+3. Textos de push en español sin contenido privado (sin el texto de los mensajes).
+4. Limpieza de tokens inválidos que reporta FCM y de los dispositivos al cerrar sesión, al suspender y al eliminar la cuenta.
+5. Contrato para Mobile y despliegue verificado en Azure con un teléfono real.
 
 ## 5. Fuera de alcance
 
-- Notificaciones push (FCM), correo y SMS: requieren un proveedor nuevo y una decisión M-BE aparte.
-- Aviso de baja de precio de un favorito (texto del prototipo): versión posterior.
-- Preferencias para silenciar tipos de notificación.
-- Borrar notificaciones: vencen solas a los 90 días.
-- Bus de eventos u outbox: se agregará cuando haya más consumidores.
+- Correo y SMS (RF-70 sigue BLOCKED por COST-001).
+- iOS y web push.
+- Preferencias de push por categoría en el backend (el usuario puede silenciar la app desde Android).
+- Garantía de entrega: si el envío falla, la notificación sigue en la bandeja.
+- Envíos masivos o de marketing.
 
 ## 6. Contrato HTTP
 
@@ -61,70 +60,67 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 | Método | Ruta | Acceso | Descripción | Respuestas |
 | --- | --- | --- | --- | --- |
-| GET | `/api/v1/users/me/notifications` | Autenticado | Bandeja; filtros `unread` y `category` | 200, 400, 401, 429, 503 |
-| GET | `/api/v1/users/me/notifications/unread-count` | Autenticado | No leídas: total y por categoría; `ETag` y 304 | 200, 304, 401, 429, 503 |
-| POST | `/api/v1/users/me/notifications/{id}/read` | Autenticado (dueño) | Marca una como leída (idempotente) | 204, 400, 401, 404, 429, 503 |
-| POST | `/api/v1/users/me/notifications/read-all` | Autenticado | Marca todas, o las de `{ category }`, como leídas | 204, 400, 401, 429, 503 |
+| PUT | `/api/v1/users/me/devices/{installationId}` | Usuario | Registrar o actualizar el token de FCM de esta instalación | 200, 201, 400, 401, 409, 429, 503 |
+| DELETE | `/api/v1/users/me/devices/{installationId}` | Usuario | Borrar el dispositivo (antes del logout) | 204, 401, 404, 429, 503 |
+| GET | `/api/v1/users/me/devices` | Usuario | Dispositivos registrados (sin tokens) | 200, 401, 429, 503 |
 
-- Notificación: `{ id, type, category: "requests" | "visits" | "system", title, body, target: { kind: "request" | "conversation" | "visit" | "agreement" | "rental" | "building", id }, count, read, createdAt, updatedAt }`. `title` y `body` ya vienen en español; `count` es 1 salvo en mensajes agrupados; `target` indica a qué pantalla lleva.
-- Catálogo cerrado (tipo → destinatario, categoría, destino): `request_received` → arrendador, requests, request; `request_cancelled` → arrendador, requests, request; `request_accepted` → estudiante, requests, request; `request_rejected` → estudiante, requests, request (incluye el rechazo automático al rentarse el cuarto); `message_received` → el otro participante, requests, conversation; `visit_requested` → arrendador, visits, visit; `visit_confirmed` → estudiante, visits, visit; `visit_rescheduled` → estudiante, visits, visit; `visit_cancelled` → la otra parte, visits, visit; `agreement_activated` → arrendador, requests, agreement; `agreement_ended` → estudiante, requests, rental; `building_approved`, `building_changes_requested`, `building_rejected`, `building_suspended`, `building_unsuspended` → arrendador, system, building.
-- Textos: nombre del perfil sin apellidos y título del cuarto (`Casa Azul · Cuarto 101`), fecha y hora en `America/Mexico_City`; nunca dirección exacta, teléfono, correo, texto del chat, notas de rechazo o de moderación, ni ids de usuario.
-- Bandeja: `unread=true` (opcional), `category` (`requests`, `visits`, `system`), `page`, `pageSize` ≤ 50; orden `updatedAt` desc e id.
-- Contador: `{ unread, requests, visits, system }`. Responde `ETag` débil y `Cache-Control: private, no-cache`; con `If-None-Match` igual responde 304 sin cuerpo. La app puede consultarlo cada 30 segundos o al volver a primer plano.
-- Marcar todas: cuerpo opcional `{ category }`; sin cuerpo marca todas.
-- El resto de las respuestas lleva `no-store`.
+- `installationId` es un UUID que la app genera una vez por instalación. Cuerpo del PUT: `{ fcmToken, platform: "android", appVersion, locale }`; respuesta `{ installationId, platform, appVersion, registeredAt, updatedAt }` (201 la primera vez, 200 después). El token de FCM nunca se devuelve.
+- La app llama al PUT después del login, al abrir la app y cuando FCM rota el token (`onNewToken`); y al DELETE antes del logout. Máximo 5 dispositivos por usuario: el sexto reemplaza al más antiguo.
+- Si el mismo token de FCM ya está en otra cuenta (teléfono compartido), se mueve a la cuenta actual; la anterior deja de recibir push en ese teléfono.
+- Mensaje push: `notification { title, body } + data { notificationId, type, category, targetKind, targetId }`. El título y el cuerpo usan los mismos textos cortos de la bandeja; `message_received` dice «Nuevo mensaje de Ana» sin el texto. Al tocarlo, la app abre el destino con `targetKind`/`targetId` y marca leída la notificación con NV-20 1.1.0.
+- Android: prioridad alta solo para `message_received`, `visit_confirmed`, `visit_cancelled` y `request_accepted`; el resto normal. Canal de Android por categoría (`requests`, `visits`, `system`).
 
 ## 6.1 Contrato para Mobile
 
 Entregable acordado con Mobile: se envía junto con el aviso de despliegue. `DEPLOYED URL` y `TESTS` se completan en `evidence.md` al desplegar por el CD.
 
 ```text
-ENDPOINT     /api/v1/users/me/notifications?unread=true&category=requests&page=1&pageSize=20
-METHOD       GET
+ENDPOINT     /api/v1/users/me/devices/{installationId}
+METHOD       PUT
 AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
 HEADERS      —
-REQUEST      unread (true|false), category (requests|visits|system), page, pageSize
-RESPONSE     200 { items: [{ id, type, category: "requests" | "visits" | "system", title, body, target: { kind: "request" | "conversation" | "visit" | "agreement" | "rental" | "building", id }, count, read, createdAt, updatedAt }], page, pageSize, totalItems, totalPages }
-STATUS CODES 200, 400, 401, 429, 503
-PAGINATION   Sí: orden updatedAt desc, id desc
+REQUEST      { fcmToken, platform: "android", appVersion, locale }
+RESPONSE     201 o 200 { installationId, platform, appVersion, registeredAt, updatedAt }
+STATUS CODES 200, 201, 400, 401, 409, 429, 503
+PAGINATION   No
 ```
 
 ```text
-ENDPOINT     /api/v1/users/me/notifications/unread-count
-METHOD       GET
+ENDPOINT     /api/v1/users/me/devices/{installationId}
+METHOD       DELETE
 AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
-HEADERS      If-None-Match: <ETag> (opcional)
+HEADERS      —
 REQUEST      —
-RESPONSE     200 { unread, requests, visits, system } con ETag | 304
-STATUS CODES 200, 304, 401, 429, 503
+RESPONSE     204
+STATUS CODES 204, 401, 404, 429, 503
 PAGINATION   No
 ```
 
 ```text
-ENDPOINT     /api/v1/users/me/notifications/{id}/read
-METHOD       POST
+ENDPOINT     /api/v1/users/me/devices
+METHOD       GET
 AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
 HEADERS      —
-REQUEST      sin cuerpo
-RESPONSE     204
-STATUS CODES 204, 400, 401, 404 ajena, 429, 503
+REQUEST      —
+RESPONSE     200 { items: [{ installationId, platform, appVersion, registeredAt, updatedAt }] }
+STATUS CODES 200, 401, 429, 503
 PAGINATION   No
 ```
 
 ```text
-ENDPOINT     /api/v1/users/me/notifications/read-all
-METHOD       POST
-AUTH         Bearer JWT (usuario tomado del token; nunca `userId` del cliente)
+ENDPOINT     Push de FCM (no es una ruta)
+METHOD       —
+AUTH         Firebase (cuenta de servicio en el backend)
 HEADERS      —
-REQUEST      sin cuerpo o { category }
-RESPONSE     204
-STATUS CODES 204, 400, 401, 429, 503
+REQUEST      —
+RESPONSE     notification { title, body } + data { notificationId, type, category, targetKind, targetId }
+STATUS CODES —
 PAGINATION   No
 ```
 
 ```text
-DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
-TESTS        CI de main (run 43524705152): 893/893 (unitarias 337, integración 458, seguridad 98); prueba HTTP real en Azure 25/25 (2026-11-13)
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io (pendiente de despliegue)
+TESTS        pendiente: unitarias, integración, seguridad y prueba HTTP real en Azure
 ```
 
 ## 7. Módulo, datos propios e integración
@@ -133,27 +129,27 @@ Módulo **Notifications** del monolito modular (constitution §6): es propietari
 
 | Aspecto | Detalle |
 | --- | --- |
-| Colecciones propias | `notifications` |
+| Colecciones propias | `notifications`, `push_devices` |
 | Usa (puertos de otros módulos) | Listings `IRoomRepository`, `IBuildingRepository` e `ILandlordProfileRepository` (NV-12) para el título del cuarto y el nombre del arrendador; Profile `IProfileRepository` (NV-11) para el nombre del estudiante |
 | Publica (eventos de dominio) | — |
-| Consume (eventos de dominio) | Llamadas al puerto `INotificationSink` desde Messaging (NV-16), Visits (NV-17), Rentals (NV-18) y Moderation (NV-21); sin bus de eventos todavía (M-BE-070) |
+| Consume (eventos de dominio) | `Llamadas al puerto `INotificationSink` desde Messaging (NV-16 y el chat de NV-22), Visits (NV-17), Rentals (NV-18) y Moderation (NV-21)`, `Puerto `IAccountDeletionParticipant` de Identity (NV-10 1.2.0) para borrar bandeja y dispositivos al eliminar la cuenta` |
 
 Los eventos se procesan en el mismo proceso y de forma idempotente; si una réplica falla a mitad del procesamiento, el evento se reintenta sin duplicar efectos (constitution §14 y §15). Ningún estado necesario para la corrección queda en memoria local.
 
 ## 8. Modelo de datos
 
-- `notifications` (colección nueva del módulo Notifications): `userId`, `type`, `category`, `title`, `body`, `targetKind`, `targetId`, `dedupeKey`, `count`, `unread`, `readAt`, `createdAt`, `updatedAt`.
-- Índices: `{ userId, updatedAt: -1 }` para la bandeja; `{ userId, unread, category }` para el contador; único parcial `{ userId, dedupeKey }` en no leídas (idempotencia y agrupación); TTL de 90 días sobre `createdAt`.
-- `dedupeKey` identifica el hecho: por ejemplo `request_accepted:<requestId>`, `visit_rescheduled:<visitId>:<updatedAt>`, `message:<conversationId>`. Repetir el mismo hecho no crea otra notificación; un mensaje nuevo en una conversación con aviso no leído suma `count` y actualiza `updatedAt`.
-- Sin migraciones: las acciones anteriores a NV-20 no generan notificaciones retroactivas.
+- `push_devices` (colección nueva de Notifications): `userId`, `installationId`, `fcmToken`, `platform`, `appVersion`, `locale`, `registeredAt`, `updatedAt`, `lastErrorAt`.
+- Índices: único `{ userId, installationId }`; único `{ fcmToken }` (un token pertenece a una sola cuenta); `{ updatedAt }` con TTL de 270 días (FCM considera inactivo un token sin uso por mucho tiempo).
+- El envío lee los dispositivos del usuario al guardar la notificación; no hay cola persistente: si la réplica se reinicia antes de enviar, la notificación sigue en la bandeja.
 
 ## 9. Reglas de negocio
 
-1. Cada caso de uso emisor llama al puerto solo después de guardar su cambio; si crear la notificación falla (MongoDB caído), la acción principal responde igual y se registra una advertencia sin datos personales.
-2. El destinatario sale del recurso (dueño del cuarto o estudiante de la solicitud, visita o convenio), nunca del cliente; quien hizo la acción no se notifica a sí mismo.
-3. Mensajes: mientras la notificación de una conversación siga sin leer, cada mensaje nuevo suma `count`; al leerla, el siguiente mensaje crea otra. Leer los mensajes en el chat (NV-16 `/read`) también marca leída la notificación de esa conversación.
-4. Marcar como leída es idempotente; marcar una ajena responde 404.
-5. Las notificaciones vencen a los 90 días.
+1. Toda notificación guardada en la bandeja se envía como push a los dispositivos del destinatario; nunca al actor que la provocó.
+2. El envío corre después de guardar, fuera de la respuesta HTTP (cola en memoria acotada); un error de FCM se registra sin datos personales y no cambia la respuesta.
+3. Token que FCM reporta como `UNREGISTERED` o inválido → se borra el dispositivo; otros errores → se reintenta una vez con espera exponencial.
+4. La app borra su dispositivo antes del logout; si no lo hace, el siguiente usuario que registre el mismo token en ese teléfono se queda con él. La eliminación de cuenta (NV-10 1.2.0) borra todos los dispositivos del usuario mediante `IAccountDeletionParticipant`.
+5. Mensajes agrupados por conversación: un push por mensaje nuevo, con `collapseKey` por conversación para que Android muestre solo el último.
+6. Con dos réplicas cada notificación se envía una sola vez, porque la envía la réplica que la guardó.
 
 ## 10. Seguridad
 
@@ -168,11 +164,12 @@ Comunes a todas las specs funcionales:
 
 Específicas de esta spec:
 
-- BOLA: cada consulta filtra por el `sub`; una notificación ajena responde 404.
-- Textos sin datos sensibles (RNF-02): sin dirección exacta, teléfono, correo, texto del chat ni notas; prueba que lo verifica para cada tipo.
-- El contador usa `ETag` con `Cache-Control: private, no-cache` para que ninguna caché compartida lo guarde (constitution §23).
-- Rate limit 60/min por usuario en la bandeja y las marcas, y 30/min en el contador; Redis caído → 503.
-- Entradas con campos desconocidos → 400.
+- Autenticación a FCM con la cuenta de servicio por OAuth 2.0 (JWT firmado con RS256 con la criptografía de .NET, sin paquete nuevo); el token de acceso se guarda en memoria y se renueva antes de vencer.
+- Secreto `FIREBASE_SERVICE_ACCOUNT` solo en la Container App; nunca en el repositorio, en Terraform, en logs ni en respuestas. La cuenta de servicio solo tiene el rol de enviar mensajes de FCM.
+- Los tokens de FCM son datos personales: no se devuelven, no se registran en logs y solo se usan para enviar.
+- BOLA: un usuario solo ve y borra sus dispositivos; `installationId` ajeno → 404.
+- Push sin contenido privado: ni el texto de los mensajes, ni direcciones, ni teléfonos.
+- Rate limit: 30 registros por hora por usuario; Redis caído → 503.
 
 ## 11. Errores
 
@@ -181,8 +178,10 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | Caso | Status | `title` |
 | --- | --- | --- |
 | Validación | 400 | Validación fallida |
+| Token de FCM con formato inválido | 400 | Validación fallida |
 | Sin autenticación o token revocado | 401 | No autorizado |
 | Recurso inexistente o ajeno | 404 | Recurso no encontrado |
+| `installationId` ya usado por otra cuenta | 409 | Conflicto (`installation_conflict`) |
 | Rate limit | 429 | Demasiadas solicitudes |
 | Interno | 500 | Error interno del servidor |
 | MongoDB o Redis no disponible | 503 | Servicio no disponible |
@@ -191,15 +190,12 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 
 | ID | Requisito | Criterio de aceptación | Fase | Tasks |
 | --- | --- | --- | --- | --- |
-| NV-20-R01 | Generación desde las acciones | Cada tipo del catálogo se crea para el destinatario correcto cuando ocurre su acción en NV-16, NV-17, NV-18 o NV-21; repetir el hecho no duplica; quien actúa no se notifica; si MongoDB falla la acción principal no se deshace. | F1 | T01 |
-| NV-20-R02 | Textos sin datos sensibles | Cada tipo produce `title` y `body` en español con nombre sin apellidos y título del cuarto; ninguno contiene dirección, teléfono, correo, texto del chat, notas ni ids. | F1 | T02 |
-| NV-20-R03 | Bandeja y filtros | Lista paginada por `updatedAt` desc con filtros `unread` y `category`; validación de parámetros. | F2 | T03 |
-| NV-20-R04 | Marcar como leídas | Una (idempotente; ajena 404) o todas, opcionalmente por categoría; leer el chat marca la notificación de esa conversación. | F2 | T04 |
-| NV-20-R05 | Contador eficiente | Total y por categoría con índice; `ETag` débil, `private, no-cache` y 304 cuando no cambió. | F2 | T05 |
-| NV-20-R06 | Agrupación de mensajes y retención | Una notificación no leída por conversación con `count`; TTL de 90 días. | F2 | T06 |
-| NV-20-R07 | Privacidad, autorización y límites | Pruebas con dos usuarios; rate limits 429; Redis caído 503; campos desconocidos 400. | F3 | T07 |
-| NV-20-R08 | Contrato para Mobile y despliegue | Contrato §6.1 entregado a Mobile; desplegado por el CD; prueba HTTP real en Azure (solicitud, aceptación, mensaje agrupado, visita confirmada, convenio, contador con 304 y marcar leídas). | F4 | T08 |
-| NV-20-R09 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T09, T10, T11 |
+| NV-20-R01 | Registro de dispositivos | PUT idempotente por instalación, máximo 5, un token por cuenta, DELETE y lista sin tokens; limpieza al logout, suspensión y eliminación. | F1 | T01 |
+| NV-20-R02 | Envío push de la bandeja | Los 16 tipos se envían a los dispositivos del destinatario con título, cuerpo y datos de destino; nunca al actor; agrupados por conversación. | F2 | T02 |
+| NV-20-R03 | Cliente de FCM | OAuth 2.0 con la cuenta de servicio, renovación del token de acceso, API HTTP v1, borrado de tokens inválidos y un reintento; un fallo nunca rompe la acción principal. | F2 | T03 |
+| NV-20-R04 | Privacidad, seguridad y límites | Sin contenido privado en push, sin tokens en logs ni respuestas, BOLA, rate limit, secreto solo en la Container App. | F3 | T04 |
+| NV-20-R05 | Contrato para Mobile y despliegue | Contrato §6.1 entregado a Mobile; secreto cargado por Victor; desplegado por el CD; prueba real en Azure con un teléfono: solicitud, mensaje y visita llegan como push. | F4 | T05 |
+| NV-20-R06 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T06, T07, T08 |
 
 ## 13. Decisiones pendientes
 
@@ -207,19 +203,18 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Canal | Solo bandeja en la app (RF-75); push con FCM, correo y SMS fuera hasta una decisión M-BE con proveedor | APROBADO (M-BE-071) |
-| Emisión | Puerto `INotificationSink` llamado por los casos de uso tras guardar; si falla, se registra y la acción principal no se deshace (sin outbox ni bus de eventos todavía) | APROBADO (M-BE-071) |
-| Catálogo | 16 tipos cerrados con destinatario y categoría (`requests`, `visits`, `system`) como las pestañas del prototipo | APROBADO (M-BE-071) |
-| Mensajes | Agrupados por conversación con `count`; sin texto del mensaje (el prototipo mostraba una cita) | APROBADO (M-BE-071) |
-| Contador | `ETag` débil con `private, no-cache` y 304; la app consulta cada 30 segundos o al volver a primer plano | APROBADO (M-BE-071) |
-| Retención | 90 días con TTL; sin borrar a mano | APROBADO (M-BE-071) |
-| Baja de precio de favoritos | Fuera de 1.1.0; versión posterior | APROBADO (M-BE-071) |
+| Proveedor | Firebase Cloud Messaging, API HTTP v1, del proyecto de Firebase que ya usa Mobile; reemplaza la parte «sin push» de M-BE-071 | PROPUESTO |
+| Credencial | Cuenta de servicio con permiso solo de envío, como secreto `FIREBASE_SERVICE_ACCOUNT` en la Container App (fuera de Terraform) | PROPUESTO |
+| Paquetes | Sin `FirebaseAdmin`: JWT RS256 y HTTP con lo que trae .NET | PROPUESTO |
+| Entrega | Mejor esfuerzo después de guardar, cola en memoria; la bandeja es la fuente de verdad | PROPUESTO |
+| Alcance | Los 16 tipos actuales; sin preferencias por categoría en el backend | PROPUESTO |
 
 ## 14. Costo — COST-001
 
 | Componente | Costo | Condición |
 | --- | --- | --- |
-| MongoDB Atlas M0 y Redis Upstash | $0 | Una colección nueva con TTL de 90 días; sin proveedores nuevos |
+| Firebase Cloud Messaging | $0 | FCM no cobra por mensaje |
+| MongoDB Atlas M0 | $0 | Una colección pequeña (`push_devices`) |
 
 Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
 
@@ -227,28 +222,28 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
-| NV-20-RK01 | Notificación perdida si MongoDB falla justo después de la acción | Aviso que no llega | Advertencia registrada; la información sigue en la pantalla de origen; outbox en una versión posterior |
-| NV-20-RK02 | Fuga de datos en los textos | Privacidad | Plantillas fijas por tipo y prueba sin dirección, teléfono, correo ni texto del chat |
-| NV-20-RK03 | Notificaciones duplicadas | Ruido | `dedupeKey` con índice único parcial |
-| NV-20-RK04 | Sondeo del contador muy frecuente | Costo en M0 | `ETag` y 304, rate limit 30/min e índice por usuario y categoría |
+| NV-20-RK01 | Fuga del secreto de Firebase | Envío de push falsos | Solo en la Container App, permiso mínimo, rotación documentada |
+| NV-20-RK02 | Push en la pantalla de bloqueo | Exponer conversaciones | Textos sin contenido privado |
+| NV-20-RK03 | Réplica reiniciada antes de enviar | Push perdido | La bandeja lo conserva; aceptado en el piloto |
+| NV-20-RK04 | Teléfono compartido | Push a la cuenta equivocada | Un token pertenece a una sola cuenta y el logout borra el dispositivo |
 
 ## 16. Dependencias
 
-- NV-16, NV-17 1.3.0, NV-18 1.1.0 y NV-21 (emisores).
-- RF-74 (menú con contador) en Mobile.
+- Proyecto de Firebase y cuenta de servicio (Mobile y Victor).
+- NV-06 (logout) y NV-21 (suspensión) para borrar dispositivos; NV-10 1.2.0 para la eliminación de cuenta.
 
 ## 17. Trazabilidad y cobertura
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 9 |
+| Requisitos | 6 |
 | Fases del plan | 4 |
-| Tasks | 11 |
+| Tasks | 8 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 11 |
-| Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **✅ COMPLETA — 1.1.0 T01–T11 (2026-11-13): PASS WITH WARNINGS, ver `evidence.md`** |
+| Tasks completadas | 0 |
+| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
 ## 18. Aprobación pendiente
 
