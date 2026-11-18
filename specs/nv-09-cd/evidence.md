@@ -4,11 +4,11 @@
 | --- | --- |
 | ID | NV-09 |
 | Documento | `evidence.md` |
-| Versión | 1.0.0-u2 |
-| Fecha | 2026-11-05 |
-| Autorización | «EJECUTA NV-09 1.0.0-u2, tasks T01–T14» — Victor Manuel Jose Jose, 2026-11-05 (M-BE-051) |
+| Versión | 1.1.0-u2 |
+| Fecha | 2026-11-17 |
+| Autorización | «EJECUTA NV-09 1.0.0-u2, tasks T01–T14» — Victor Manuel Jose Jose, 2026-11-05 (M-BE-051); T13, T18 y T20 el 2026-11-07 (M-BE-059); «EJECUTA T17 y T19» el 2026-11-17 (M-BE-076) |
 | Rama | `feat/nv-09-cd` |
-| Resultado | **🟡 CD EN PRODUCCIÓN**: run `42180858665` en verde y versión de `main` desplegada; 13 de 14 tasks autorizadas completas; falta T13 (rollback controlado) |
+| Resultado | **✅ PASS WITH WARNINGS (2026-11-17)**: 18 de 20 tasks; 14 despliegues de `main` en verde del 2026-11-07 al 2026-11-17, registrados en `VERSIONING.md`; costo 0.00 USD; T15 y T16 abiertas (§13) |
 
 Esta evidencia no incluye valores de secretos, cadenas de conexión, llaves ni identificadores de suscripción. No se leyeron ni mostraron `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -152,8 +152,10 @@ Límite del escaneo: los límites por endpoint de propiedades y universidades (6
 | T08 | ✅ Completada | PR #4 integrado: `u2-ghcr-publish.yml` retirado, `VERSIONING.md` actualizado |
 | T09, T10 | ✅ Completadas | §11 (`verify-ephemeral` con el digest publicado) |
 | T11, T12 | ✅ Completadas | §11 (`deploy`) |
-| T13 | 🟡 Abierta | El rollback se ejecutó en §10, pero con la espera defectuosa; falta la prueba controlada con `simulate_smoke_failure` |
+| T13 | ✅ Completada | §12 (rollback controlado, run `42349310343`) |
 | T14 | ✅ Completada | §11 (`dast-baseline`) |
+| T17 | ✅ Completada | §13 |
+| T19 | ✅ Completada | §13 |
 
 ## 9. Primer run real de `cd.yml` — `42174853458` (commit `84c526e`, merge del PR #4)
 
@@ -250,3 +252,96 @@ Autorizado por Victor el 2026-11-07 (M-BE-059). Ejecución única con `--allow-p
 | PR #30 (`14f4ff2`, 2026-11-09) | Código de Application, Infrastructure, API y pruebas | `42680553139` | Flujo completo: `resolve`, `publish`, `verify-ephemeral`, `deploy` (aprobado por Victor), `dast-baseline` y `cd-summary` ✅ |
 
 - Resultado: **PASS**. Los merges de solo documentación ya no publican imagen ni piden aprobación; los de código siguen el flujo completo.
+
+## 13. Cierre de T17 y T19 (2026-11-17) — ✅ PASS WITH WARNINGS
+
+Autorización: «EJECUTA T17 y T19» — Victor Manuel Jose Jose, 2026-11-17 (M-BE-076). Solo documentación: sin cambios en Azure, Terraform, workflows, paquetes ni secretos.
+
+### T17 — Primer despliegue real y registro ✅
+
+| Criterio | Evidencia |
+| --- | --- |
+| `main` con el PR #3 integrado, desplegado por el pipeline con aprobación registrada | Run [`42180858665`](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42180858665) (2026-11-06, §11): primer despliegue de `main` con aprobación de `vicmanujo` en el Environment `production`; desde entonces cada despliegue pasa por el mismo flujo |
+| `deployment-record.json` | Artefacto del job `cd-summary` en cada despliegue (`.github/workflows/cd.yml`, línea 621). Se descargaron los 14 registros de los despliegues del 2026-11-07 al 2026-11-17: los 14 con `result: PASS`, `rolled_back: false`, firma `cd.yml@refs/heads/main` y aprobador registrado |
+| `VERSIONING.md` actualizado por pull request | §11 completado en este pull request con los 14 despliegues (commit, digest completo, run, aprobador, revisión y PR). La cadena `previous_image` de cada registro coincide con la imagen del despliegue anterior: no hay despliegues fuera del pipeline |
+
+### Despliegues registrados (2026-11-07 a 2026-11-17)
+
+| Fecha | PR | Run del CD | Revisión | Digest |
+| --- | --- | --- | --- | --- |
+| 2026-11-07 | PR #15 | [42354881476](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42354881476) | `ca-thehouse-u2--c32f9ea0-13-1` | `sha256:27b71e88ecaf…` |
+| 2026-11-07 | PR #18 | [42393781540](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42393781540) | `ca-thehouse-u2--c88599c2-16-1` | `sha256:660118cf994a…` |
+| 2026-11-07 | PR #21 | [42400488050](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42400488050) | `ca-thehouse-u2--c13db0e6-19-1` | `sha256:9d55034fa825…` |
+| 2026-11-07 | PR #24 | [42403433110](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42403433110) | `ca-thehouse-u2--c7310ab0-22-1` | `sha256:f37ff11f16cd…` |
+| 2026-11-07 | PR #27 | [42407348366](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42407348366) | `ca-thehouse-u2--cf39aa59-25-1` | `sha256:be6ac4f66f44…` |
+| 2026-11-09 | PR #30 | [42680553139](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42680553139) | `ca-thehouse-u2--c14f4ff2-29-1` | `sha256:8b7261623b69…` |
+| 2026-11-10 | PR #36 | [42932081749](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/42932081749) | `ca-thehouse-u2--c00839f8-35-1` | `sha256:2948a64f2fe5…` |
+| 2026-11-12 | PR #40 | [43272131477](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/43272131477) | `ca-thehouse-u2--c00405b3-38-1` | `sha256:ae07ab6d1a10…` |
+| 2026-11-12 | PR #43 | [43308222051](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/43308222051) | `ca-thehouse-u2--c6dcf73d-41-1` | `sha256:d0a2b641a95c…` |
+| 2026-11-13 | PR #46 | [43525078903](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/43525078903) | `ca-thehouse-u2--cebb8deb-43-1` | `sha256:11d7f6122ef9…` |
+| 2026-11-17 | PR #49 | [44179627187](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/44179627187) | `ca-thehouse-u2--c4f677e2-45-1` | `sha256:31f2ccf1c09e…` |
+| 2026-11-17 | PR #53 | [44200967522](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/44200967522) | `ca-thehouse-u2--c011c2ad-48-1` | `sha256:988c0f5c12d9…` |
+| 2026-11-17 | PR #56 | [44210636026](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/44210636026) | `ca-thehouse-u2--c31614c5-51-1` | `sha256:aa1a56f7b8c7…` |
+| 2026-11-17 | PR #59 | [44222853524](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/44222853524) | `ca-thehouse-u2--caeb40ef-54-1` | `sha256:b852c1a5ab64…` |
+
+Todos con aprobación de `vicmanujo` (*Prevent self-review*: Isai hace los merges y Victor aprueba). Los merges de solo documentación se omiten en `resolve` (T20) y no aparecen. Antes de esta tabla: 4 despliegues del 2026-11-06 y 2 del 2026-11-07, incluido el rollback controlado de T13 (§9 a §12).
+
+### T19 — Evidencia, costo y revisión final ✅
+
+**Duración** (jobs de los 14 despliegues, desde la API de GitHub):
+
+| Job | Mediana | Máximo |
+| --- | --- | --- |
+| `resolve` | 0.1 min | 0.1 min |
+| `publish` (build, Trivy, SBOM, firma) | 1.4 min | 2.2 min |
+| `verify-ephemeral` (smoke `full` y ZAP) | 1.4 min | 2.4 min |
+| `deploy` (firma, OIDC, revisión, smoke y salud) | 1.5 min | 2.2 min |
+| `dast-baseline` | 1.1 min | 1.2 min |
+| `cd-summary` | 0.1 min | 0.2 min |
+| **Total automático por despliegue** | **5.5 min** | **7.0 min** |
+
+La espera de aprobación humana (de `verify-ephemeral` a `deploy`) tuvo mediana de 1.1 min y máximo de 53.1 min; no cuenta como tiempo del pipeline. Un merge de solo documentación termina en ~0.1 min sin pedir aprobación.
+
+**Costo (NV-09-R16):**
+
+| Componente | Costo | Evidencia |
+| --- | --- | --- |
+| Azure (`rg-thehouse-u2`: Container App 0–2, entorno, Log Analytics, identidad del CD) | **0.00 USD** | Cost Management, `ActualCost` del 2026-11-01 al 2026-11-17 agrupado por servicio: única fila Log Analytics 0.00 USD. Log Analytics con tope de 0.1 GB/día y 30 días de retención |
+| GitHub Actions (CI y CD) | 0 USD | Repositorio público: minutos de runners estándar sin costo |
+| GHCR | 0 USD | Paquete público (VERSIONING.md §8) |
+| Sigstore (Cosign keyless), Trivy, OWASP ZAP | 0 USD | Servicios y herramientas de código abierto, sin cuenta de pago |
+| MongoDB Atlas M0 y Upstash Redis | 0 USD | Planes gratuitos (NV-03) |
+
+**Enlaces a NV-03 (NV-09-R15):**
+
+| Task de NV-03 | Estado en NV-03 | Aporte de NV-09 |
+| --- | --- | --- |
+| T14 · Handoff de imagen a NV-02 | Futuro (no U2), abierta | Cada despliegue entrega digest, SBOM CycloneDX atestado y firma Cosign verificada dos veces (`publish` y `deploy`); el registro está en `deployment-record.json` y en esta tabla |
+| T19 · Verificación de despliegue, escalado, fallos y TLS | Abierta: diferida a la ventana del 3 y 4 de diciembre (M-BE-059, opción B) | El smoke `readonly` en producción (health, catálogos con caché y 304, 404, HSTS, 400, 401) y el smoke `full` efímero (rate limit 429, logout y reuso del token revocado 401) corren en cada despliegue. Réplicas ≥ 2 sigue pendiente de la ventana con «OK PARA APPLY» |
+| T22 · Publicación GHCR y `VERSIONING.md` | Abierta | Su aceptación queda cubierta por `VERSIONING.md` §5 y §11 (imagen por tag `sha-<commit>` y digest, sin token impreso, fecha, commit, revisión, URL y estado). Cerrarla en NV-03 requiere su propio «EJECUTA» |
+| T25 · Evidencia de observabilidad y costo | Completada (2026-11-07) | Costo actualizado al 2026-11-17: 0.00 USD |
+
+**Hallazgos (actualización de §6):**
+
+| ID | Estado al 2026-11-17 |
+| --- | --- |
+| H-01 `nosniff` | **CERRADO**: NV-01 1.2.0-u2 (M-BE-059); verificado hoy en producción, `X-Content-Type-Options: nosniff` en `/api/v1/universities` |
+| H-02 CORP en `/openapi/v1.json` | ACEPTADO: el documento no se expone en Production |
+| H-03 falso positivo 90022/10023 | CERRADO |
+| H-04 (nuevo) | **Baja**: `terraform plan` del 2026-11-17 no cambia recursos; solo actualizaría el output `container_app_fqdn` (FQDN de la última revisión, que cambia en cada despliegue por diseño de `ignore_changes`). Igual que en T02; se refresca en el próximo `apply` autorizado |
+| H-05 (nuevo) | **Información**: los 14 DAST pasivos en producción terminaron en verde (0 High) |
+
+**Excepciones vigentes:**
+
+1. T15 (RESTler) y T16 (pruebas de rendimiento) siguen abiertas; requieren su propia autorización (T16 además la licencia de NBomber o una decisión por k6, y el levantamiento de acciones protegidas).
+2. La ventana de dos réplicas de NV-03 sigue en pausa (decisión de Victor, 2026-11-17); el CD despliega sobre la escala 0–2 actual.
+3. Las fallas de Redis y MongoDB se demuestran con pruebas automatizadas y el entorno efímero, no en producción (M-BE-059).
+
+**Revisión de seguridad y coherencia:**
+
+- Ningún despliegue usó credenciales de larga duración: GHCR con `GITHUB_TOKEN`, Azure por OIDC con el *subject* inmutable y el rol mínimo `TheHouse CD Deployer` (sin `delete` ni `listSecrets`).
+- Todos los despliegues fueron por digest firmado y verificado, con aprobación humana y *Prevent self-review*; no hubo rollbacks fuera de la prueba controlada de T13.
+- `VERSIONING.md` §11, los 14 `deployment-record.json` y Azure (`ca-thehouse-u2--caeb40ef-54-1`, Healthy, 100 % del tráfico) coinciden.
+- spec, plan, task, README y esta evidencia indican 18 de 20 tasks; los requisitos R15 y R16 quedan cubiertos; R13 sigue abierto con T15 y T16.
+
+**Resultado de NV-09 al 2026-11-17: ✅ PASS WITH WARNINGS** (warnings: T15 y T16 abiertas, ventana de dos réplicas de NV-03 pendiente y H-04).
