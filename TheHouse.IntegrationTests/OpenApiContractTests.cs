@@ -147,6 +147,12 @@ public sealed class OpenApiContractTests
             Assert.True(paths.TryGetProperty(roommatePath, out _), roommatePath);
         }
 
+        // NV-25: las 3 rutas de estadísticas del arrendador están publicadas.
+        foreach (var statsPath in new[] { LandlordStatsEndpoint.SummaryPath, LandlordStatsEndpoint.RoomsPath, LandlordStatsEndpoint.RecommendationsPath })
+        {
+            Assert.True(paths.TryGetProperty(statsPath, out _), statsPath);
+        }
+
         Assert.True(
             paths.TryGetProperty(
                 PropertyEndpoint.ListPath,

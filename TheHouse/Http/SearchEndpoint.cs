@@ -94,7 +94,7 @@ public static class SearchEndpoint
         UserEndpointSupport.RunAsync(context, async userId =>
         {
             await UserEndpointSupport.EnforceAsync(context, store, RateLimitKeys.RoomDetailUser(userId), limits.RoomDetailPerWindow, limits.Window, limits.RetryAfterSeconds);
-            return Results.Json(await search.DetailAsync(id, context.RequestAborted), statusCode: 200);
+            return Results.Json(await search.DetailAsync(id, userId, context.RequestAborted), statusCode: 200);
         });
 
     private static SearchCriteria Criteria(HttpContext context) =>

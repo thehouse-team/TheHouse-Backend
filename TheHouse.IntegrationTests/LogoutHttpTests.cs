@@ -429,7 +429,10 @@ public sealed class LogoutHttpTests
                     or "/api/v1/users/me/roommate-profile"
                     or "/api/v1/roommates"
                     or "/api/v1/roommates/{id}"
-                    or "/api/v1/roommates/{id}/contact",
+                    or "/api/v1/roommates/{id}/contact"
+                    or "/api/v1/landlord/stats"
+                    or "/api/v1/landlord/stats/rooms"
+                    or "/api/v1/landlord/stats/recommendations",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------
