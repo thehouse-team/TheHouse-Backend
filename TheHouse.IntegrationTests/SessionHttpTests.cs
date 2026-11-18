@@ -74,8 +74,10 @@ public sealed class SessionHttpTests
         Assert.Contains("no-store", response.Headers.CacheControl?.ToString());
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         Assert.Equal(
-            new[] { "id", "email", "createdAt" },
+            new[] { "id", "email", "createdAt", "legal", "legalUpToDate" },
             document.RootElement.EnumerateObject().Select(property => property.Name));
+        Assert.Equal(JsonValueKind.Null, document.RootElement.GetProperty("legal").ValueKind);
+        Assert.False(document.RootElement.GetProperty("legalUpToDate").GetBoolean());
         Assert.Equal(UserId, document.RootElement.GetProperty("id").GetString());
         Assert.Equal("session-user@example.com", document.RootElement.GetProperty("email").GetString());
         Assert.DoesNotContain("password", await response.Content.ReadAsStringAsync(), StringComparison.OrdinalIgnoreCase);

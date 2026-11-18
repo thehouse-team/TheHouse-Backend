@@ -83,7 +83,10 @@ public sealed class OpenApiContractTests
                 path.Name == ReviewsEndpoint.MinePath ||
                 path.Name.StartsWith(ApiConventions.Prefix + "/media/", StringComparison.Ordinal) ||
                 path.Name == RoommatesEndpoint.MinePath ||
-                path.Name.StartsWith(RoommatesEndpoint.ListPath, StringComparison.Ordinal),
+                path.Name.StartsWith(RoommatesEndpoint.ListPath, StringComparison.Ordinal) ||
+                path.Name == AccountEndpoint.DeletionPath ||
+                path.Name == AccountEndpoint.AcceptLegalPath ||
+                path.Name == AccountEndpoint.LegalPath,
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 
@@ -151,6 +154,12 @@ public sealed class OpenApiContractTests
         foreach (var statsPath in new[] { LandlordStatsEndpoint.SummaryPath, LandlordStatsEndpoint.RoomsPath, LandlordStatsEndpoint.RecommendationsPath })
         {
             Assert.True(paths.TryGetProperty(statsPath, out _), statsPath);
+        }
+
+        // NV-10 1.2.0: eliminación de cuenta y aviso legal.
+        foreach (var accountPath in new[] { AccountEndpoint.DeletionPath, AccountEndpoint.AcceptLegalPath, AccountEndpoint.LegalPath })
+        {
+            Assert.True(paths.TryGetProperty(accountPath, out _), accountPath);
         }
 
         Assert.True(

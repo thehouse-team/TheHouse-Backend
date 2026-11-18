@@ -37,4 +37,7 @@ public interface IAgreementRepository
 
     // NV-19: convenios activos o terminados del estudiante en ese cuarto.
     Task<bool> HasRentedAsync(string studentId, string roomId, CancellationToken cancellationToken);
+
+    // NV-10 1.2.0: convenios `pending` o `active` donde el usuario es dueño o estudiante.
+    Task<IReadOnlyList<Agreement>> ListOpenForUserAsync(string userId, CancellationToken cancellationToken);
 }

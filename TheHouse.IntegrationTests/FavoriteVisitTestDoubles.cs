@@ -340,6 +340,18 @@ public sealed class InMemoryProfileRepository : IProfileRepository
         }
     }
 
+    // NV-10 1.2.0: solo queda el nombre de marcador, sin universidad.
+    public Task AnonymizeAsync(string userId, string displayName, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            Profiles[userId] = new UserProfile { UserId = userId, Name = displayName, UpdatedAt = now };
+        }
+
+        return Task.CompletedTask;
+    }
+
     public Task SaveNameAsync(string userId, string name, DateTimeOffset now, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
@@ -389,6 +401,17 @@ public sealed class InMemoryPreferencesRepository : IPreferencesRepository
         {
             return Task.FromResult(Preferences.GetValueOrDefault(userId));
         }
+    }
+
+    public Task DeleteAsync(string userId, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            Preferences.Remove(userId);
+        }
+
+        return Task.CompletedTask;
     }
 
     public Task<UserPreferences> ReplaceAsync(UserPreferences preferences, CancellationToken cancellationToken)

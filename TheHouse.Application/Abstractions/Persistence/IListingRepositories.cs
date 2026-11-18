@@ -9,6 +9,9 @@ public interface ILandlordProfileRepository
 
     // false si el usuario ya tenía perfil (índice único).
     Task<bool> CreateAsync(LandlordProfile profile, CancellationToken cancellationToken);
+
+    // NV-10 1.2.0: sin nombre real, teléfono ni RFC; idempotente.
+    Task AnonymizeAsync(string userId, string displayName, DateTimeOffset now, CancellationToken cancellationToken);
 }
 
 // NV-12: `buildings`. Las escrituras usan concurrencia optimista: solo

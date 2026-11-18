@@ -68,6 +68,8 @@ public static class ProblemResponses
             LogoutProblems.Normalize(problem, status);
         else if (SessionProblems.IsRefresh(context))
             SessionProblems.NormalizeRefresh(problem, status);
+        else if (AccountEndpoint.IsAccount(context))
+            UserResourceProblems.NormalizeAccount(problem, status);
         else if (SessionProblems.IsMe(context))
             SessionProblems.NormalizeMe(problem, status);
         else if (UserResourceProblems.IsLandlord(context))

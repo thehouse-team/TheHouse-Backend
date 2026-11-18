@@ -249,6 +249,18 @@ public sealed class MongoAgreementRepository(IMongoDatabase database) : IAgreeme
             return document is null ? null : Map(document);
         });
 
+    public Task<IReadOnlyList<Agreement>> ListOpenForUserAsync(string userId, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            await EnsureIndexesAsync(cancellationToken);
+            string[] open = [Wire(AgreementStatus.Pending), Wire(AgreementStatus.Active)];
+            var documents = await Collection
+                .Find(item => (item.OwnerId == userId || item.StudentId == userId) && open.Contains(item.Status))
+                .Limit(1000)
+                .ToListAsync(cancellationToken);
+            return (IReadOnlyList<Agreement>)documents.Select(Map).ToList();
+        });
+
     public Task<bool> HasRentedAsync(string studentId, string roomId, CancellationToken cancellationToken) =>
         MongoCalls.Run(async () =>
         {
@@ -429,4 +441,6 @@ public sealed class UnavailableAgreementRepository : IAgreementRepository
     public Task<Agreement?> GetActiveForStudentAsync(string studentId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<bool> HasRentedAsync(string studentId, string roomId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task<IReadOnlyList<Agreement>> ListOpenForUserAsync(string userId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 }

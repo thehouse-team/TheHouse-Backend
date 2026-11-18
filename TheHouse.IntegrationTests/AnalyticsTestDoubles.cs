@@ -43,6 +43,17 @@ public sealed class InMemoryRoomViewRepository : IRoomViewRepository
         }
     }
 
+    public Task DeleteByOwnerAsync(string ownerId, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            Items.RemoveAll(item => item.OwnerId == ownerId);
+        }
+
+        return Task.CompletedTask;
+    }
+
     // Agrega vistas de prueba sin pasar por el detalle (p. ej. días pasados).
     public void Seed(Room room, string day, int count)
     {

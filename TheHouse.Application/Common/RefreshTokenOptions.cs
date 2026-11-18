@@ -5,7 +5,9 @@ public sealed class RefreshTokenOptions
 {
     public const int DefaultTokenLifetimeDays = 30;
 
-    public const int DefaultSessionLifetimeDays = 90;
+    // NV-10 1.2.0: ventana de inactividad (deslizante), no tope absoluto:
+    // la sesión vence solo si pasan estos días sin usar el refresh.
+    public const int DefaultSessionLifetimeDays = 30;
 
     public int TokenLifetimeDays { get; init; } =
         DefaultTokenLifetimeDays;

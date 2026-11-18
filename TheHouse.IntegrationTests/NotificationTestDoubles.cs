@@ -81,6 +81,17 @@ public sealed class InMemoryNotificationRepository : INotificationRepository
         }
     }
 
+    public Task DeleteAllAsync(string userId, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            Items.RemoveAll(item => item.UserId == userId);
+        }
+
+        return Task.CompletedTask;
+    }
+
     public Task MarkAllReadAsync(string userId, string? category, DateTimeOffset now, CancellationToken cancellationToken) =>
         MarkWhere(item => item.UserId == userId && (category is null || item.Category == category), now, cancellationToken);
 

@@ -703,3 +703,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-17.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** solo documentación (`VERSIONING.md`, `specs/nv-09-cd/`, `specs/README.md` y esta memoria); sin cambios en Azure, Terraform, workflows, paquetes ni secretos. Costo del grupo `rg-thehouse-u2` en noviembre (1 al 17): 0.00 USD.
+
+## M-BE-077 — NV-10 1.2.0 aprobada: eliminar cuenta, sesión siempre viva y aviso de privacidad
+
+- **ID:** M-BE-077
+- **Decisión:** aprobar NV-10 1.2.0 con sus decisiones: eliminación inmediata e irreversible, con vista previa, contraseña actual y la palabra `ELIMINAR`; una renta activa (como estudiante o arrendador) o un rol de staff la impiden; se borran los datos personales (cuenta, perfil, preferencias, favoritos, notificaciones, perfil de arrendador, documentos, fotos, perfil de compañero y vistas) y se cancelan visitas futuras, solicitudes abiertas y convenios pendientes; conversaciones, convenios terminados y reseñas se conservan con «Usuario eliminado»; edificios y cuartos se retiran; Identity publica el puerto `IAccountDeletionParticipant` y cada módulo lo implementa (sin ciclos); la sesión ya no tiene tope absoluto de 90 días y vence tras 30 días sin uso (requisito del curso); versiones legales y URLs en configuración con la aceptación registrada en `users`; el correo queda libre al eliminar.
+- **Estado:** APROBADO — Victor, 2026-11-17 («apruebo y EJECUTA NV-10», T01–T09). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-17.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** colección nueva `deleted_accounts` y campo `legal` en `users` (módulo Identity); cada módulo agrega su participante de eliminación; configuración `Legal__*` sin secretos; sin paquetes, secretos, migraciones ni comandos en Production. NV-20 1.2.0 y NV-21 1.2.0 siguen en borrador.

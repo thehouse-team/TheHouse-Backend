@@ -110,6 +110,7 @@ public static partial class ListingRules
         BuildingStatus.Verified => "verified",
         BuildingStatus.Rejected => "rejected",
         BuildingStatus.Suspended => "suspended",
+        BuildingStatus.Deleted => "deleted",
         _ => throw new ArgumentOutOfRangeException(nameof(status)),
     };
 

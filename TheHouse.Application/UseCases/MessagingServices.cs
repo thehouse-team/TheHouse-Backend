@@ -73,6 +73,12 @@ public static class MessagingRules
     // Primer nombre del arrendador (NV-12); nunca apellidos ni teléfono.
     public static string FirstName(string? fullName)
     {
+        // NV-10 1.2.0: una cuenta eliminada se muestra completa, no «Usuario».
+        if (fullName == AccountDeletionRules.DisplayName)
+        {
+            return AccountDeletionRules.DisplayName;
+        }
+
         var first = (fullName ?? string.Empty).Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
         return string.IsNullOrEmpty(first) ? "Arrendador" : first;
     }

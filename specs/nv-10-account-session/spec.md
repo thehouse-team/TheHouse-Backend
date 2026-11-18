@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.2.0-borrador |
 | Fecha | 2026-11-17 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T09; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-10-account-session/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | Requisitos del curso §16 (eliminar cuenta, sesión siempre viva, aviso de privacidad); RF-01 (términos y aviso de privacidad), RF-02 (sesión persistente), RF-05 (ajustes de la cuenta); política de Google Play para apps con cuentas (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-02, RNF-09 |
@@ -226,13 +226,13 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Momento | Eliminación inmediata e irreversible, sin periodo de gracia | PROPUESTO |
-| Confirmación | Contraseña actual y la palabra `ELIMINAR` | PROPUESTO |
-| Bloqueos | Una renta activa (como estudiante o arrendador) impide eliminar hasta terminarla; staff primero pierde el rol | PROPUESTO |
-| Datos compartidos | Conversaciones, convenios terminados y reseñas se conservan con «Usuario eliminado» y el texto original; lo demás se borra | PROPUESTO |
-| Sesión | Sin tope absoluto de 90 días; vence tras 30 días sin uso (requisito del curso: sesión viva salvo logout) | PROPUESTO |
-| Legal | Versiones y URLs en configuración; los textos viven en la landing page; aceptación registrada en `users` | PROPUESTO |
-| Correo | Queda libre al eliminar; registrarse de nuevo crea una cuenta nueva sin relación | PROPUESTO |
+| Momento | Eliminación inmediata e irreversible, sin periodo de gracia | APROBADO (M-BE-077) |
+| Confirmación | Contraseña actual y la palabra `ELIMINAR` | APROBADO (M-BE-077) |
+| Bloqueos | Una renta activa (como estudiante o arrendador) impide eliminar hasta terminarla; staff primero pierde el rol | APROBADO (M-BE-077) |
+| Datos compartidos | Conversaciones, convenios terminados y reseñas se conservan con «Usuario eliminado» y el texto original; lo demás se borra | APROBADO (M-BE-077) |
+| Sesión | Sin tope absoluto de 90 días; vence tras 30 días sin uso (requisito del curso: sesión viva salvo logout) | APROBADO (M-BE-077) |
+| Legal | Versiones y URLs en configuración; los textos viven en la landing page; aceptación registrada en `users` | APROBADO (M-BE-077) |
+| Correo | Queda libre al eliminar; registrarse de nuevo crea una cuenta nueva sin relación | APROBADO (M-BE-077) |
 
 ## 14. Costo — COST-001
 
@@ -266,9 +266,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 9 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Tasks completadas | 5 |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T05 completas; T06–T09 esperan CI, despliegue y Azure** |
 
 ## 18. Aprobación pendiente
 
