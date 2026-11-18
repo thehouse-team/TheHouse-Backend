@@ -8,7 +8,7 @@
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-13-media-documents/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan secreto, CI, despliegue y Azure** |
+| Estado de ejecución | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-76, RF-77 (foto del edificio, fotos de cuartos e identificación); RNF-19 (documentos sensibles) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09, RNF-19 |
@@ -163,8 +163,8 @@ PAGINATION   No
 ```
 
 ```text
-DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io (pendiente de despliegue)
-TESTS        pendiente: unitarias, integración, seguridad y prueba HTTP real en Azure
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 44200564148): 934/934 (unitarias 353, integración 466, seguridad 115); prueba HTTP real en Azure 23/23 (22 PASS + D3 corregido, 2026-11-17)
 ```
 
 ## 7. Módulo, datos propios e integración
@@ -296,9 +296,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 10 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 6 |
+| Tasks completadas | 10 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan secreto, CI, despliegue y Azure** |
+| Estado de ejecución | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** |
 
 ## 18. Aprobación pendiente
 
