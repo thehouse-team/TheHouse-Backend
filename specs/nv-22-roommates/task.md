@@ -6,14 +6,14 @@
 | Documento | `task.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-17 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-22-roommates/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.1.0-borrador |
 | Plan | `plan.md` 1.1.0-borrador |
 | Tasks totales | 10 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
@@ -25,18 +25,18 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Mi perfil de compañero** — Requisito: NV-22-R01 · Fase: F1 · Aceptación: PUT crea (201) o actualiza (200) con validación de presupuesto, zona, mes, duración, hábitos y `about`; usa la universidad de NV-11 (409 `university_required`); renueva `expiresAt`; GET y DELETE. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T02 · Lista y coincidencias** — Requisito: NV-22-R02 · Fase: F1 · Aceptación: Solo perfiles visibles, vigentes, de mi universidad, no propios y no suspendidos; filtros; `matches` = hábitos iguales + traslape de presupuesto; orden por `matches` y `updatedAt`; sin perfil propio 403. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Mi perfil de compañero** — Requisito: NV-22-R01 · Fase: F1 · Aceptación: PUT crea (201) o actualiza (200) con validación de presupuesto, zona, mes, duración, hábitos y `about`; usa la universidad de NV-11 (409 `university_required`); renueva `expiresAt`; GET y DELETE. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Lista y coincidencias** — Requisito: NV-22-R02 · Fase: F1 · Aceptación: Solo perfiles visibles, vigentes, de mi universidad, no propios y no suspendidos; filtros; `matches` = hábitos iguales + traslape de presupuesto; orden por `matches` y `updatedAt`; sin perfil propio 403. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T03 · Detalle del compañero** — Requisito: NV-22-R03 · Fase: F2 · Aceptación: Tarjeta con el id del perfil, primer nombre y universidad; ajeno de otra universidad, oculto o vencido 404. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T04 · Contacto por chat** — Requisito: NV-22-R04 · Fase: F2 · Aceptación: Abre una conversación `roommate` de NV-16 con el primer mensaje (201) o la reutiliza (200); no a uno mismo; suspensión 409; NV-20 avisa con `message_received`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
-- [ ] **T05 · Compatibilidad con NV-16** — Requisito: NV-22-R05 · Fase: F2 · Aceptación: `kind` en las conversaciones; las de renta siguen igual; las `roommate` sin cuarto ni solicitud; leer, enviar y marcar leído funcionan igual. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T03 · Detalle del compañero** — Requisito: NV-22-R03 · Fase: F2 · Aceptación: Tarjeta con el id del perfil, primer nombre y universidad; ajeno de otra universidad, oculto o vencido 404. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T04 · Contacto por chat** — Requisito: NV-22-R04 · Fase: F2 · Aceptación: Abre una conversación `roommate` de NV-16 con el primer mensaje (201) o la reutiliza (200); no a uno mismo; suspensión 409; NV-20 avisa con `message_received`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
+- [x] **T05 · Compatibilidad con NV-16** — Requisito: NV-22-R05 · Fase: F2 · Aceptación: `kind` en las conversaciones; las de renta siguen igual; las `roommate` sin cuarto ni solicitud; leer, enviar y marcar leído funcionan igual. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T06 · Privacidad, autorización y límites** — Requisito: NV-22-R06 · Fase: F3 · Aceptación: Sin id de usuario, correo, teléfono ni apellidos en ninguna respuesta; rate limits 429; Redis caído 503; campos desconocidos 400. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T06 · Privacidad, autorización y límites** — Requisito: NV-22-R06 · Fase: F3 · Aceptación: Sin id de usuario, correo, teléfono ni apellidos en ninguna respuesta; rate limits 429; Redis caído 503; campos desconocidos 400. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05.
 
 ## F4 — Pruebas y evidencia
 
@@ -49,12 +49,12 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F2 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F2 | ABIERTA |
-| T06 | R06 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F2 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F2 | COMPLETA |
+| T06 | R06 | F3 | COMPLETA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R08 | F4 | ABIERTA |
@@ -79,11 +79,11 @@
 | --- | --- |
 | Requisitos | 8 |
 | Tasks | 10 |
-| Tasks abiertas | 10 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 6 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T06 completas; T07–T10 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

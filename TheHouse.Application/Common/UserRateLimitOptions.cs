@@ -74,6 +74,11 @@ public sealed class UserRateLimitOptions
 
     public int MediaReadsPerWindow { get; init; } = 120;
 
+    // NV-22: 60/min en perfil y lista; 10 contactos nuevos al día.
+    public int RoommatesPerWindow { get; init; } = 60;
+
+    public int RoommateContactsPerDay { get; init; } = 10;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

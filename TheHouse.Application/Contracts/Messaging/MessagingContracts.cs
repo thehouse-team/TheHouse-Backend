@@ -74,11 +74,12 @@ public sealed record ConversationCounterpart(string Name, string Role);
 public sealed record ConversationResponse(
     string Id,
     string RequestId,
-    ConversationRoomSummary Room,
+    ConversationRoomSummary? Room,
     ConversationCounterpart Counterpart,
     string Status,
     DateTimeOffset LastMessageAt,
-    int UnreadCount);
+    int UnreadCount,
+    string Kind = "rental");
 
 public sealed record ConversationListResponse(
     IReadOnlyList<ConversationResponse> Items,

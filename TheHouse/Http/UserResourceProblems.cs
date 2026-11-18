@@ -235,6 +235,26 @@ public static class UserResourceProblems
         };
     }
 
+    // NV-22: compañero de vivienda.
+    public static void NormalizeRoommates(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "Los datos del perfil de compañero o los filtros no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            403 => "Activa tu perfil de compañero para ver a otros estudiantes.",
+            404 => "El perfil de compañero no existe.",
+            409 => "La solicitud entra en conflicto con el estado actual.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de solicitudes de compañeros.",
+            503 => "La búsqueda de compañero no está disponible temporalmente.",
+            504 => "La búsqueda de compañero no respondió a tiempo.",
+            _ => "No fue posible procesar la solicitud.",
+        };
+    }
+
     public static string? DetailFor(string code) => code switch
     {
         "favorites_limit" => "Se alcanzó el máximo de 200 favoritos.",
@@ -271,6 +291,9 @@ public static class UserResourceProblems
         "publication_incomplete" => "Faltan pasos para enviar el edificio a revisión.",
         "own_room" => "No puedes enviar una solicitud ni calificar un cuarto propio.",
         "no_stay" => "Solo califica quien visitó o rentó el cuarto.",
+        "roommate_profile_required" => "Activa tu perfil de compañero para ver a otros estudiantes.",
+        "university_required" => "Elige tu universidad en tu perfil antes de buscar compañero.",
+        "own_profile" => "No puedes contactarte a ti mismo.",
         "unsupported_media" => "El archivo no es una imagen JPEG, PNG o WebP, o un PDF, válido.",
         "image_too_large" => "La imagen supera los 40 megapíxeles.",
         "photos_limit" => "El cuarto ya tiene 4 fotos.",

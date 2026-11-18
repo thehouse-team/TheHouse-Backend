@@ -54,6 +54,8 @@ public static class ProblemResponses
             UserResourceProblems.NormalizeReviews(problem, status);
         else if (MediaEndpoint.IsMedia(context))
             UserResourceProblems.NormalizeMedia(problem, status);
+        else if (RoommatesEndpoint.IsRoommates(context))
+            UserResourceProblems.NormalizeRoommates(problem, status);
         else if (UserResourceProblems.IsAdmin(context))
             UserResourceProblems.NormalizeAdmin(problem, status);
         else if (RegistrationProblems.IsRegistration(context))

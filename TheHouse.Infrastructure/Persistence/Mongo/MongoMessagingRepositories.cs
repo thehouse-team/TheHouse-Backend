@@ -65,6 +65,11 @@ public sealed class ConversationDocument
     [BsonElement("requestId")]
     public string RequestId { get; set; } = string.Empty;
 
+    // NV-22: ausente en las conversaciones anteriores (= `rental`).
+    [BsonElement("kind")]
+    [BsonIgnoreIfNull]
+    public string? Kind { get; set; }
+
     [BsonElement("roomId")]
     public string RoomId { get; set; } = string.Empty;
 
@@ -337,6 +342,7 @@ public sealed class MongoConversationRepository(IMongoDatabase database) : IConv
             {
                 Id = ObjectId.TryParse(conversation.Id, out var id) ? id : ObjectId.GenerateNewId(),
                 RequestId = conversation.RequestId,
+                Kind = conversation.IsRoommate ? conversation.Kind : null,
                 RoomId = conversation.RoomId,
                 StudentId = conversation.StudentId,
                 OwnerId = conversation.OwnerId,
@@ -346,6 +352,29 @@ public sealed class MongoConversationRepository(IMongoDatabase database) : IConv
             };
             await Conversations.InsertOneAsync(document, cancellationToken: cancellationToken);
             return Map(document);
+        });
+
+    public async Task<(Conversation Conversation, bool Created)> CreateIfAbsentAsync(Conversation conversation, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return (await CreateAsync(conversation, cancellationToken), true);
+        }
+        catch (DependencyUnavailableException)
+        {
+            // Ya existía (índice único de `requestId`): se usa esa; si no hay
+            // ninguna, MongoDB sí está caído.
+            return await FindByRequestAsync(conversation.RequestId, cancellationToken) is { } existing
+                ? (existing, false)
+                : throw new DependencyUnavailableException();
+        }
+    }
+
+    private Task<Conversation?> FindByRequestAsync(string requestId, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            var document = await Conversations.Find(item => item.RequestId == requestId).FirstOrDefaultAsync(cancellationToken);
+            return document is null ? null : Map(document);
         });
 
     public Task<Conversation?> GetAsync(string id, CancellationToken cancellationToken) =>
@@ -549,6 +578,7 @@ public sealed class MongoConversationRepository(IMongoDatabase database) : IConv
         {
             Id = document.Id.ToString(),
             RequestId = document.RequestId,
+            Kind = document.Kind ?? ConversationKinds.Rental,
             RoomId = document.RoomId,
             StudentId = document.StudentId,
             OwnerId = document.OwnerId,
@@ -598,6 +628,8 @@ public sealed class UnavailableRentalRequestRepository : IRentalRequestRepositor
 public sealed class UnavailableConversationRepository : IConversationRepository
 {
     public Task<Conversation> CreateAsync(Conversation conversation, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task<(Conversation Conversation, bool Created)> CreateIfAbsentAsync(Conversation conversation, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<Conversation?> GetAsync(string id, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 

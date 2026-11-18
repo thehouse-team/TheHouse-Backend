@@ -122,6 +122,13 @@ public static class RateLimitKeys
     public static string MediaRetentionLock() =>
         "thehouse:u2:media:retention:lock:v1";
 
+    // NV-22: perfil y lista por usuario; contactos nuevos por día.
+    public static string RoommatesUser(string userId) =>
+        "thehouse:u2:roommates:user:v1:" + Hash(userId);
+
+    public static string RoommateContactsUser(string userId) =>
+        "thehouse:u2:roommates:contact:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

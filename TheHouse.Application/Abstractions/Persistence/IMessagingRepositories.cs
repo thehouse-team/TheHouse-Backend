@@ -39,6 +39,10 @@ public interface IConversationRepository
 {
     Task<Conversation> CreateAsync(Conversation conversation, CancellationToken cancellationToken);
 
+    // NV-22: crea la conversación o, si ya existe una con el mismo `requestId`,
+    // devuelve esa (índice único `ux_conversations_request`).
+    Task<(Conversation Conversation, bool Created)> CreateIfAbsentAsync(Conversation conversation, CancellationToken cancellationToken);
+
     Task<Conversation?> GetAsync(string id, CancellationToken cancellationToken);
 
     Task CloseAsync(string id, CancellationToken cancellationToken);

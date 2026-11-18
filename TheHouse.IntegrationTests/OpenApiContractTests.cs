@@ -81,7 +81,9 @@ public sealed class OpenApiContractTests
                 path.Name.StartsWith(NotificationsEndpoint.BasePath, StringComparison.Ordinal) ||
                 path.Name.StartsWith(ReviewsEndpoint.ReviewsPath + "/", StringComparison.Ordinal) ||
                 path.Name == ReviewsEndpoint.MinePath ||
-                path.Name.StartsWith(ApiConventions.Prefix + "/media/", StringComparison.Ordinal),
+                path.Name.StartsWith(ApiConventions.Prefix + "/media/", StringComparison.Ordinal) ||
+                path.Name == RoommatesEndpoint.MinePath ||
+                path.Name.StartsWith(RoommatesEndpoint.ListPath, StringComparison.Ordinal),
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 
@@ -137,6 +139,12 @@ public sealed class OpenApiContractTests
                  })
         {
             Assert.True(paths.TryGetProperty(mediaPath, out _), mediaPath);
+        }
+
+        // NV-22: las 4 rutas de compañero de vivienda están publicadas.
+        foreach (var roommatePath in new[] { RoommatesEndpoint.MinePath, RoommatesEndpoint.ListPath, RoommatesEndpoint.DetailPath, RoommatesEndpoint.ContactPath })
+        {
+            Assert.True(paths.TryGetProperty(roommatePath, out _), roommatePath);
         }
 
         Assert.True(

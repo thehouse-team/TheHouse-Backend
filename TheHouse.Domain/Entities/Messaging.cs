@@ -54,6 +54,9 @@ public sealed record Conversation
 
     public string RequestId { get; init; } = string.Empty;
 
+    // NV-22: `rental` (solicitud de un cuarto) o `roommate` (dos estudiantes).
+    public string Kind { get; init; } = ConversationKinds.Rental;
+
     public string RoomId { get; init; } = string.Empty;
 
     public string StudentId { get; init; } = string.Empty;
@@ -75,6 +78,8 @@ public sealed record Conversation
     public bool IsParticipant(string userId) => userId == StudentId || userId == OwnerId;
 
     public string CounterpartOf(string userId) => userId == StudentId ? OwnerId : StudentId;
+
+    public bool IsRoommate => Kind == ConversationKinds.Roommate;
 }
 
 public static class MessageRoles

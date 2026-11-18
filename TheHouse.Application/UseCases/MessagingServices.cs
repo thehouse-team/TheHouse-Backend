@@ -541,7 +541,7 @@ public sealed class ConversationService(
             {
                 ConversationId = conversation.Id,
                 SenderId = userId,
-                SenderRole = userId == conversation.StudentId ? MessageRoles.Student : MessageRoles.Landlord,
+                SenderRole = conversation.IsRoommate || userId == conversation.StudentId ? MessageRoles.Student : MessageRoles.Landlord,
                 Text = text,
                 ClientMessageId = clientId.ToString("D"),
                 CreatedAt = timeProvider.GetUtcNow(),
@@ -550,14 +550,14 @@ public sealed class ConversationService(
         if (created && notifications is not null)
         {
             // NV-20: un aviso no leído por conversación; sin texto del mensaje.
-            var fromStudent = userId == conversation.StudentId;
+            var fromStudent = conversation.IsRoommate || userId == conversation.StudentId;
             await notifications.NotifyAsync(
                 new NotificationEvent(
                     NotificationTypes.MessageReceived,
                     conversation.CounterpartOf(userId),
                     conversation.Id,
                     NotificationService.MessageKey(conversation.Id),
-                    RoomId: conversation.RoomId,
+                    RoomId: conversation.IsRoommate ? null : conversation.RoomId,
                     StudentId: fromStudent ? userId : null,
                     LandlordId: fromStudent ? null : userId),
                 cancellationToken);
@@ -594,6 +594,23 @@ public sealed class ConversationService(
     private async Task<ConversationResponse> ToResponseAsync(string userId, Conversation conversation, CancellationToken cancellationToken)
     {
         var isStudent = userId == conversation.StudentId;
+        if (conversation.IsRoommate)
+        {
+            // NV-22: entre dos estudiantes; sin cuarto ni solicitud.
+            var other = await profiles.GetAsync(conversation.CounterpartOf(userId), cancellationToken);
+            var unreadRoommate = await conversations.CountUnreadAsync(
+                conversation.Id, userId, isStudent ? conversation.StudentLastReadId : conversation.OwnerLastReadId, MessagingRules.UnreadCap, cancellationToken);
+            return new ConversationResponse(
+                conversation.Id,
+                string.Empty,
+                null,
+                new ConversationCounterpart(string.IsNullOrWhiteSpace(other?.Name) ? "Estudiante" : MessagingRules.FirstName(other!.Name), MessageRoles.Student),
+                conversation.Status.ToString().ToLowerInvariant(),
+                conversation.LastMessageAt,
+                unreadRoommate,
+                ConversationKinds.Roommate);
+        }
+
         var room = await rooms.GetAsync(conversation.RoomId, cancellationToken);
         var building = room is null ? null : await buildings.GetAsync(room.BuildingId, cancellationToken);
         var title = building is null || room is null ? "Cuarto" : $"{building.Name} · Cuarto {room.Number}";

@@ -66,7 +66,7 @@ public sealed class MessagingHttpTests
         {
             var item = Assert.Single(document.RootElement.GetProperty("items").EnumerateArray().ToArray());
             Assert.Equal(
-                new[] { "id", "requestId", "room", "counterpart", "status", "lastMessageAt", "unreadCount" },
+                new[] { "id", "requestId", "room", "counterpart", "status", "lastMessageAt", "unreadCount", "kind" },
                 item.EnumerateObject().Select(property => property.Name));
             Assert.Equal(1, item.GetProperty("unreadCount").GetInt32());
             Assert.Equal("student", item.GetProperty("counterpart").GetProperty("role").GetString());
