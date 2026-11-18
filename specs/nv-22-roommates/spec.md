@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.1.0-borrador |
 | Fecha | 2026-11-17 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-17 («Apruebo y EJECUTA»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-22-roommates/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-46, RF-47 (compañero de vivienda); RF-74 (menú «Buscar compañero») (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-02, RNF-09 |
@@ -224,12 +224,12 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Modelo | Perfil de compañero voluntario por usuario (como el prototipo) en lugar de publicaciones sueltas; cambia la propuesta de 1.0.0 | PROPUESTO |
-| Reciprocidad | Para ver a otros hay que tener el perfil propio visible; solo la misma universidad | PROPUESTO |
-| Orden | Coincidencias de hábitos y presupuesto calculadas con una regla simple; el porcentaje de afinidad del prototipo queda para Smart Match (NV-23) | PROPUESTO |
-| Contacto | Conversación de NV-16 de tipo `roommate` (sin cuarto), una por pareja; cambio aditivo en NV-16 (`kind`) | PROPUESTO |
-| Vencimiento | 60 días desde la última actualización; se renueva con PUT | PROPUESTO |
-| Datos mostrados | Primer nombre y universidad; sin carrera ni insignia hasta que NV-11 los tenga | PROPUESTO |
+| Modelo | Perfil de compañero voluntario por usuario (como el prototipo) en lugar de publicaciones sueltas; cambia la propuesta de 1.0.0 | APROBADO (M-BE-074) |
+| Reciprocidad | Para ver a otros hay que tener el perfil propio visible; solo la misma universidad | APROBADO (M-BE-074) |
+| Orden | Coincidencias de hábitos y presupuesto calculadas con una regla simple; el porcentaje de afinidad del prototipo queda para Smart Match (NV-23) | APROBADO (M-BE-074) |
+| Contacto | Conversación de NV-16 de tipo `roommate` (sin cuarto), una por pareja; cambio aditivo en NV-16 (`kind`) | APROBADO (M-BE-074) |
+| Vencimiento | 60 días desde la última actualización; se renueva con PUT | APROBADO (M-BE-074) |
+| Datos mostrados | Primer nombre y universidad; sin carrera ni insignia hasta que NV-11 los tenga | APROBADO (M-BE-074) |
 
 ## 14. Costo — COST-001
 
@@ -263,8 +263,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.1.0: T01–T10 autorizadas** |
 
 ## 18. Aprobación pendiente
 

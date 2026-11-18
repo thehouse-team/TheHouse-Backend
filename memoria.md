@@ -676,3 +676,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Cambio (2026-11-17):** SixLabors.ImageSharp 3.2.0 exige una llave de licencia de Six Labors para compilar en Release, así que, con aprobación de Victor («Sí, usa SkiaSharp»), las fotos se procesan con **SkiaSharp 4.154.0** y `SkiaSharp.NativeAssets.Linux.NoDependencies` 4.154.0 (MIT, sin vulnerabilidades publicadas, publicados el 2026-10-28), la alternativa ya prevista en la spec. ImageSharp 2.1.x se descartó por 5 vulnerabilidades publicadas.
 - **Impacto:** colecciones nuevas (`media_items`, `verification_documents` y los buckets GridFS) del módulo Media; NV-12, NV-14 y NV-21 agregan campos y pasos sin quitar ninguno; paquete NuGet nuevo; un secreto nuevo en Container Apps antes del despliegue.
+
+## M-BE-074 — NV-22 1.1.0 aprobada: búsqueda de compañero de vivienda
+
+- **ID:** M-BE-074
+- **Decisión:** aprobar NV-22 1.1.0 con sus decisiones: perfil de compañero voluntario por usuario (presupuesto, zona, mes de llegada, duración, si tiene lugar y 6 hábitos) en lugar de publicaciones; reciprocidad (para ver a otros hay que tener el perfil propio visible) y solo la misma universidad de NV-11; orden por coincidencias de hábitos y traslape de presupuesto con una regla simple, sin porcentaje (el porcentaje queda para NV-23); contacto por una conversación de NV-16 de tipo `roommate` sin cuarto, una por pareja (cambio aditivo `kind` en NV-16); vencimiento de 60 días desde la última actualización; solo primer nombre y universidad.
+- **Estado:** APROBADO — Victor, 2026-11-17 («Apruebo y EJECUTA», T01–T10). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-17.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** colección nueva `roommate_profiles` (módulo Roommates); `conversations` de NV-16 agrega `kind` y `pairKey` sin migración; sin paquetes, secretos ni comandos en Production.
