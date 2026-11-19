@@ -16,7 +16,7 @@ public sealed class InMemoryNotificationRepository : INotificationRepository
 
     public bool Unavailable { get; set; }
 
-    public Task UpsertAsync(Notification notification, bool group, CancellationToken cancellationToken)
+    public Task<Notification> UpsertAsync(Notification notification, bool group, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
         lock (gate)
@@ -25,15 +25,17 @@ public sealed class InMemoryNotificationRepository : INotificationRepository
             if (index < 0)
             {
                 Items.Add(notification with { Count = 1 });
+                return Task.FromResult(Items[^1]);
             }
-            else if (group)
+
+            if (group)
             {
                 var current = Items[index];
                 Items[index] = current with { Count = current.Count + 1, Title = notification.Title, Body = notification.Body, UpdatedAt = notification.UpdatedAt };
             }
-        }
 
-        return Task.CompletedTask;
+            return Task.FromResult(Items[index]);
+        }
     }
 
     public Task<(IReadOnlyList<Notification> Items, long TotalItems)> ListAsync(

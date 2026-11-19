@@ -48,6 +48,8 @@ public static class ProblemResponses
             UserResourceProblems.NormalizeVisits(problem, status);
         else if (RentalsEndpoint.IsRentals(context))
             UserResourceProblems.NormalizeRentals(problem, status);
+        else if (PushDevicesEndpoint.IsDevices(context))
+            UserResourceProblems.NormalizeDevices(problem, status);
         else if (NotificationsEndpoint.IsNotifications(context))
             UserResourceProblems.NormalizeNotifications(problem, status);
         else if (ReviewsEndpoint.IsReviews(context))

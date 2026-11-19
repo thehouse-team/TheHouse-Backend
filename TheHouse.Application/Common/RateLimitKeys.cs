@@ -140,6 +140,10 @@ public static class RateLimitKeys
     public static string LegalIp(string ipAddress) =>
         "thehouse:u2:legal:ip:v1:" + Hash(ipAddress);
 
+    // NV-20 1.2.0: registros de dispositivos para push por usuario.
+    public static string PushDevicesUser(string userId) =>
+        "thehouse:u2:push-devices:user:v1:" + Hash(userId);
+
     // NV-25: estadísticas del arrendador por usuario.
     public static string LandlordStatsUser(string userId) =>
         "thehouse:u2:landlord-stats:user:v1:" + Hash(userId);

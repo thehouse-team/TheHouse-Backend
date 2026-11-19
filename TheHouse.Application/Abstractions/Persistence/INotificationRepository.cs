@@ -8,7 +8,9 @@ public interface INotificationRepository
 {
     // Crea la notificación si no hay una no leída con el mismo `dedupeKey`.
     // Con `group`, si ya existe suma 1 a `count` y actualiza textos y fecha.
-    Task UpsertAsync(Notification notification, bool group, CancellationToken cancellationToken);
+    // NV-20 1.2.0: devuelve la notificación guardada (en mensajes agrupados,
+    // la no leída que ya existía) para que el push lleve su id.
+    Task<Notification> UpsertAsync(Notification notification, bool group, CancellationToken cancellationToken);
 
     // Orden: updatedAt desc, id desc.
     Task<(IReadOnlyList<Notification> Items, long TotalItems)> ListAsync(

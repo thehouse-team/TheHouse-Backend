@@ -184,6 +184,24 @@ public static class UserResourceProblems
     }
 
     // NV-20: bandeja de notificaciones.
+    // NV-20 1.2.0: dispositivos para push.
+    public static void NormalizeDevices(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "El token de FCM, la plataforma o los datos del dispositivo no son válidos.",
+            401 => "Se requiere una sesión válida.",
+            404 => "El dispositivo no existe.",
+            409 => "Esta instalación ya está registrada en otra cuenta.",
+            413 => "La solicitud supera el tamaño permitido.",
+            415 => "El tipo de contenido no está admitido.",
+            429 => "Se superó el límite de registros de dispositivos.",
+            503 => "Los dispositivos no están disponibles temporalmente.",
+            _ => "No fue posible procesar el dispositivo.",
+        };
+    }
+
     public static void NormalizeNotifications(ProblemDetails problem, int status)
     {
         problem.Title = ProblemResponses.TitleFor(status);
@@ -295,6 +313,7 @@ public static class UserResourceProblems
     public static string? DetailFor(string code) => code switch
     {
         "password_mismatch" => "La contraseña no es correcta.",
+        "installation_conflict" => "Esta instalación ya está registrada en otra cuenta; cierra sesión en ella o reinstala la app.",
         "deletion_blocked" => "No se puede eliminar la cuenta todavía: termina tu renta activa o pide que te retiren el rol de staff.",
         "deletion_incomplete" => "No se pudo terminar de eliminar la cuenta; intenta de nuevo para completarla.",
         "legal_version_outdated" => "Hay una versión más reciente de los términos o del aviso de privacidad; acéptala para continuar.",

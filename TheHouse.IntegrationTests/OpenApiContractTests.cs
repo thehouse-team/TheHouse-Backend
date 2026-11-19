@@ -86,7 +86,8 @@ public sealed class OpenApiContractTests
                 path.Name.StartsWith(RoommatesEndpoint.ListPath, StringComparison.Ordinal) ||
                 path.Name == AccountEndpoint.DeletionPath ||
                 path.Name == AccountEndpoint.AcceptLegalPath ||
-                path.Name == AccountEndpoint.LegalPath,
+                path.Name == AccountEndpoint.LegalPath ||
+                path.Name.StartsWith(PushDevicesEndpoint.BasePath, StringComparison.Ordinal),
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 

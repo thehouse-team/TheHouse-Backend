@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using TheHouse.Application.Abstractions.Analytics;
+using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.Security;
 using TheHouse.Application.Common;
@@ -98,6 +99,11 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
 
     public InMemoryViewSaltStore ViewSalts { get; } = new();
 
+    // NV-20 1.2.0: dispositivos y emisor de push falsos.
+    public InMemoryPushDeviceRepository PushDevices { get; } = new();
+
+    public FakePushSender PushSender { get; } = new();
+
     // NV-11: el catálogo real del seed (10 universidades con coordenadas).
     public UniversityTestStore Universities { get; } = SeededUniversities();
 
@@ -132,6 +138,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.RemoveAll<IRoommateProfileRepository>();
             services.RemoveAll<IRoomViewRepository>();
             services.RemoveAll<IViewSaltStore>();
+            services.RemoveAll<IPushDeviceRepository>();
+            services.RemoveAll<IPushSender>();
 
             services.AddSingleton<IUserRepository>(Users);
             services.AddSingleton<IRateLimitStore>(RateLimit);
@@ -157,6 +165,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.AddSingleton<IRoommateProfileRepository>(Roommates);
             services.AddSingleton<IRoomViewRepository>(RoomViews);
             services.AddSingleton<IViewSaltStore>(ViewSalts);
+            services.AddSingleton<IPushDeviceRepository>(PushDevices);
+            services.AddSingleton<IPushSender>(PushSender);
             services.AddSingleton<ILoggerProvider>(new CaptureProvider(Logs));
 
             if (limits is not null)

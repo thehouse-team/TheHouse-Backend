@@ -66,7 +66,7 @@ public sealed class MongoNotificationRepository(IMongoDatabase database) : INoti
     private IMongoCollection<NotificationDocument> Collection =>
         database.GetCollection<NotificationDocument>("notifications");
 
-    public async Task UpsertAsync(Notification notification, bool group, CancellationToken cancellationToken)
+    public async Task<Notification> UpsertAsync(Notification notification, bool group, CancellationToken cancellationToken)
     {
         for (var attempt = 0; ; attempt++)
         {
@@ -92,14 +92,14 @@ public sealed class MongoNotificationRepository(IMongoDatabase database) : INoti
                         .SetOnInsert(item => item.Title, notification.Title)
                         .SetOnInsert(item => item.Body, notification.Body)
                         .SetOnInsert(item => item.UpdatedAt, MongoDates.ToUtc(notification.UpdatedAt));
-                await Collection.UpdateOneAsync(
+                var stored = await Collection.FindOneAndUpdateAsync(
                     filter.Eq(item => item.UserId, notification.UserId) &
                     filter.Eq(item => item.DedupeKey, notification.DedupeKey) &
                     filter.Eq(item => item.Unread, true),
                     update,
-                    new UpdateOptions { IsUpsert = true },
+                    new FindOneAndUpdateOptions<NotificationDocument> { IsUpsert = true, ReturnDocument = ReturnDocument.After },
                     cancellationToken);
-                return;
+                return stored is null ? notification : Map(stored);
             }
             catch (MongoWriteException exception) when (exception.WriteError?.Category == ServerErrorCategory.DuplicateKey && attempt == 0)
             {
@@ -108,7 +108,7 @@ public sealed class MongoNotificationRepository(IMongoDatabase database) : INoti
             }
             catch (MongoWriteException exception) when (exception.WriteError?.Category == ServerErrorCategory.DuplicateKey)
             {
-                return;
+                return notification;
             }
             catch (OperationCanceledException)
             {
@@ -272,7 +272,7 @@ public sealed class MongoNotificationRepository(IMongoDatabase database) : INoti
 
 public sealed class UnavailableNotificationRepository : INotificationRepository
 {
-    public Task UpsertAsync(Notification notification, bool group, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+    public Task<Notification> UpsertAsync(Notification notification, bool group, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task<(IReadOnlyList<Notification> Items, long TotalItems)> ListAsync(
         string userId,

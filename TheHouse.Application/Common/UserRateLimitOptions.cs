@@ -90,6 +90,9 @@ public sealed class UserRateLimitOptions
 
     public int LegalPerWindow { get; init; } = 60;
 
+    // NV-20 1.2.0: 30 registros de dispositivo por hora por usuario.
+    public int PushDeviceRegistrationsPerHour { get; init; } = 30;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);
