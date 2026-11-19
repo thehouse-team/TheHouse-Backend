@@ -83,11 +83,17 @@ public sealed class ContainerAppsIdentityTokenSource(HttpClient http, string? id
 // Cliente de Azure AI Content Safety (REST, versión GA 2023-10-01).
 // Tiempo máximo de 3 s y un reintento; si no responde o se agota el cupo
 // (429), lanza DependencyUnavailableException y el caso de uso falla cerrado.
-public sealed class AzureContentSafetyClient(HttpClient http, Uri endpoint, IManagedIdentityTokenSource tokens) : IContentSafetyClient
+//
+// `failure` recibe el motivo de cada falla (sin contenido ni tokens) para que
+// la API lo registre: token, timeout, quota, status-NNN o invalid-response.
+public sealed class AzureContentSafetyClient(HttpClient http, Uri endpoint, IManagedIdentityTokenSource tokens, Action<string>? failure = null) : IContentSafetyClient
 {
     public const string ApiVersion = "2023-10-01";
 
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(3);
+
+    // El token de la identidad tarda más en frío: tiene su propio límite.
+    public static readonly TimeSpan TokenTimeout = TimeSpan.FromSeconds(10);
 
     public bool Enabled => true;
 
@@ -100,6 +106,7 @@ public sealed class AzureContentSafetyClient(HttpClient http, Uri endpoint, IMan
     private async Task<IReadOnlyList<ContentSafetyScore>> AnalyzeAsync(string operation, object body, CancellationToken cancellationToken)
     {
         var url = new Uri(endpoint, $"contentsafety/{operation}?api-version={ApiVersion}");
+        var token = await TokenAsync(cancellationToken);
         for (var attempt = 0; ; attempt++)
         {
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -107,7 +114,7 @@ public sealed class AzureContentSafetyClient(HttpClient http, Uri endpoint, IMan
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = JsonContent.Create(body) };
-                request.Headers.Authorization = new("Bearer", await tokens.GetTokenAsync(timeout.Token));
+                request.Headers.Authorization = new("Bearer", token);
                 using var response = await http.SendAsync(request, timeout.Token);
                 if (response.IsSuccessStatusCode)
                 {
@@ -117,17 +124,37 @@ public sealed class AzureContentSafetyClient(HttpClient http, Uri endpoint, IMan
                 // 429 (cupo F0 agotado) o 4xx de configuración: no tiene caso reintentar.
                 if (response.StatusCode == HttpStatusCode.TooManyRequests || (int)response.StatusCode < 500 || attempt > 0)
                 {
-                    throw new DependencyUnavailableException();
+                    throw Fail(response.StatusCode == HttpStatusCode.TooManyRequests ? "quota" : $"status-{(int)response.StatusCode}");
                 }
             }
             catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException or InvalidOperationException && !cancellationToken.IsCancellationRequested)
             {
                 if (attempt > 0)
                 {
-                    throw new DependencyUnavailableException();
+                    throw Fail(exception is TaskCanceledException ? "timeout" : exception is HttpRequestException ? "network" : "invalid-response");
                 }
             }
         }
+    }
+
+    private async Task<string> TokenAsync(CancellationToken cancellationToken)
+    {
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(TokenTimeout);
+        try
+        {
+            return await tokens.GetTokenAsync(timeout.Token);
+        }
+        catch (Exception exception) when (exception is DependencyUnavailableException or OperationCanceledException && !cancellationToken.IsCancellationRequested)
+        {
+            throw Fail("token");
+        }
+    }
+
+    private DependencyUnavailableException Fail(string reason)
+    {
+        failure?.Invoke(reason);
+        return new DependencyUnavailableException();
     }
 
     public static IReadOnlyList<ContentSafetyScore> Parse(string json)

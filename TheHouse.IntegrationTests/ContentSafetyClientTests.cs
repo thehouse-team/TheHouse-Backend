@@ -40,10 +40,12 @@ public sealed class ContentSafetyClientTests
         var handler = new FakeServer();
         using var http = new HttpClient(handler);
         using var identity = new ContainerAppsIdentityTokenSource(http, "http://localhost:42356/msi/token", "test-header", null, new ManualTimeProvider(DateTimeOffset.UtcNow));
-        var client = new AzureContentSafetyClient(http, Endpoint, identity);
+        var reasons = new List<string>();
+        var client = new AzureContentSafetyClient(http, Endpoint, identity, reasons.Add);
 
         handler.Next.Enqueue(HttpStatusCode.TooManyRequests);
         await Assert.ThrowsAsync<DependencyUnavailableException>(() => client.AnalyzeTextAsync("hola", CancellationToken.None));
+        Assert.Equal(["quota"], reasons);
 
         handler.Next.Enqueue(HttpStatusCode.InternalServerError);
         Assert.NotEmpty(await client.AnalyzeTextAsync("hola", CancellationToken.None));
@@ -52,8 +54,12 @@ public sealed class ContentSafetyClientTests
         handler.Next.Enqueue(HttpStatusCode.InternalServerError);
         await Assert.ThrowsAsync<DependencyUnavailableException>(() => client.AnalyzeTextAsync("hola", CancellationToken.None));
 
+        Assert.Equal(["quota", "status-500"], reasons);
+
         using var none = new ContainerAppsIdentityTokenSource(http, null, null, null, TimeProvider.System);
-        await Assert.ThrowsAsync<DependencyUnavailableException>(() => new AzureContentSafetyClient(http, Endpoint, none).AnalyzeTextAsync("hola", CancellationToken.None));
+        await Assert.ThrowsAsync<DependencyUnavailableException>(() => new AzureContentSafetyClient(http, Endpoint, none, reasons.Add).AnalyzeTextAsync("hola", CancellationToken.None));
+        Assert.Equal("token", reasons[^1]);
+        Assert.True(AzureContentSafetyClient.TokenTimeout > AzureContentSafetyClient.Timeout);
     }
 
     [Theory]

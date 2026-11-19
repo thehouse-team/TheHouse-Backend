@@ -19,11 +19,13 @@ public static class ContentModerationConfiguration
         var options = new ContentModerationOptions
         {
             Threshold = section.GetValue("Threshold", 4),
+            Thresholds = section.GetSection("Thresholds").Get<Dictionary<string, int>>() ?? [],
             Blocklist = section.GetSection("Blocklist").Get<string[]>() ?? [],
         };
         var endpoint = section["Endpoint"];
         var clientId = section["IdentityClientId"];
         if (options.Threshold is not (2 or 4 or 6) ||
+            options.Thresholds.Any(pair => pair.Key is not ("Hate" or "Sexual" or "Violence" or "SelfHarm") || pair.Value is not (2 or 4 or 6)) ||
             (!string.IsNullOrEmpty(endpoint) && !IsContentSafetyEndpoint(endpoint)) ||
             (!string.IsNullOrEmpty(clientId) && !Guid.TryParse(clientId, out _)))
         {
@@ -50,10 +52,15 @@ public static class ContentModerationConfiguration
                 Environment.GetEnvironmentVariable("IDENTITY_HEADER"),
                 section["IdentityClientId"],
                 provider.GetRequiredService<TimeProvider>()));
-            builder.Services.AddSingleton<IContentSafetyClient>(provider => new AzureContentSafetyClient(
-                http,
-                new Uri(endpoint.TrimEnd('/') + "/"),
-                provider.GetRequiredService<IManagedIdentityTokenSource>()));
+            builder.Services.AddSingleton<IContentSafetyClient>(provider =>
+            {
+                var logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger("TheHouse.ContentSafety");
+                return new AzureContentSafetyClient(
+                    http,
+                    new Uri(endpoint.TrimEnd('/') + "/"),
+                    provider.GetRequiredService<IManagedIdentityTokenSource>(),
+                    reason => logger.LogWarning("Content Safety no disponible ({Reason}); la escritura respondió 503.", reason));
+            });
         }
 
         builder.Services.AddSingleton<IModerationRejectionRepository>(provider =>

@@ -13,6 +13,12 @@ public sealed class ContentModerationOptions
     // Severidad mínima que se rechaza (escala 0, 2, 4, 6).
     public int Threshold { get; init; } = 4;
 
+    // Umbral por categoría de Content Safety (Hate, Sexual, Violence, SelfHarm);
+    // la que no aparezca usa `Threshold`.
+    public IReadOnlyDictionary<string, int> Thresholds { get; init; } = new Dictionary<string, int>(StringComparer.Ordinal);
+
+    public int ThresholdFor(string category) => Thresholds.TryGetValue(category, out var value) ? value : Threshold;
+
     // Lista corta de términos prohibidos en español (configuración).
     public IReadOnlyList<string> Blocklist { get; init; } = [];
 }
@@ -58,8 +64,9 @@ public static class ContentModerationRules
             return false;
         }
 
+        // Palabra completa, también en plural (-s, -es): «pendejos», «cabrones».
         var words = Normalize(text).Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet(StringComparer.Ordinal);
-        return normalizedTerms.Any(words.Contains);
+        return normalizedTerms.Any(term => words.Contains(term) || words.Contains(term + "s") || words.Contains(term + "es"));
     }
 }
 
@@ -120,7 +127,7 @@ public sealed class ContentModerationService(
 
     private Task JudgeAsync(string userId, string kind, string field, string source, IReadOnlyList<ContentSafetyScore> scores, CancellationToken cancellationToken)
     {
-        var flagged = scores.Where(score => score.Severity >= options.Threshold).ToArray();
+        var flagged = scores.Where(score => score.Severity > 0 && score.Severity >= options.ThresholdFor(score.Category)).ToArray();
         return flagged.Length == 0
             ? Task.CompletedTask
             : RejectAsync(
