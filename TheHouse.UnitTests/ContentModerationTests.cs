@@ -43,6 +43,19 @@ public sealed class ContentModerationTests
     }
 
     [Fact]
+    public async Task Category_thresholds_override_the_default()
+    {
+        var service = new ContentModerationService(
+            new FixedClient(new ContentSafetyScore("Violence", 2), new ContentSafetyScore("Sexual", 2)),
+            rejections,
+            new ContentModerationOptions { Thresholds = new Dictionary<string, int> { ["Violence"] = 2 } },
+            new ManualTimeProvider(Now));
+
+        var error = await Assert.ThrowsAsync<ContentRejectedException>(() => service.CheckTextAsync(User, "profile.name", [new ModerationText("name", "x")], CancellationToken.None));
+        Assert.Equal(["violence"], error.Categories);
+    }
+
+    [Fact]
     public async Task Blocklist_matches_whole_words_without_accents_or_case()
     {
         var client = new FixedClient();
@@ -50,6 +63,8 @@ public sealed class ContentModerationTests
 
         await Assert.ThrowsAsync<ContentRejectedException>(() => service.CheckTextAsync(User, "profile.name", [new ModerationText("name", "Eres un PENDÉJO!")], CancellationToken.None));
         await Assert.ThrowsAsync<ContentRejectedException>(() => service.CheckTextAsync(User, "profile.name", [new ModerationText("name", "qué cabron")], CancellationToken.None));
+        await Assert.ThrowsAsync<ContentRejectedException>(() => service.CheckTextAsync(User, "building.name", [new ModerationText("name", "Edificio de pendejos")], CancellationToken.None));
+        await Assert.ThrowsAsync<ContentRejectedException>(() => service.CheckTextAsync(User, "building.name", [new ModerationText("name", "puros cabrones")], CancellationToken.None));
         await service.CheckTextAsync(User, "profile.name", [new ModerationText("name", "Calle Pendejosa 12")], CancellationToken.None);
         Assert.Equal(["blocklist"], rejections.Items[0].Categories);
         Assert.Equal(1, client.Calls);

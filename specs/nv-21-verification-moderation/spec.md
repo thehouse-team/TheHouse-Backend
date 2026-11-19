@@ -183,7 +183,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | --- | --- | --- |
 | Proveedor | Azure AI Content Safety (misma nube que el backend), plan F0 | APROBADO (M-BE-079) |
 | Autenticación | Identidad administrada de la Container App con rol `Cognitive Services User`; sin llave ni secreto | APROBADO (M-BE-079) |
-| Umbral | Severidad 4 o más en odio, sexual, violencia o autolesión, para texto e imágenes | APROBADO (M-BE-079) |
+| Umbral | Severidad 4 o más en sexual y autolesión; **2 o más en violencia y odio** (ajuste del 2026-11-19 tras la prueba en Azure, donde una amenaza explícita salió con severidad 2), para texto e imágenes | APROBADO (M-BE-079, actualizado) |
 | Falla | Falla cerrado (503) si la API no responde o se agota el cupo, como pide el curso | APROBADO (M-BE-079) |
 | Alcance | Todo texto que ven otras personas y las fotos de edificios y cuartos; documentos de verificación excluidos | APROBADO (M-BE-079) |
 | Rechazos | Registro sin contenido con TTL de 180 días; sin suspensión automática | APROBADO (M-BE-079) |
