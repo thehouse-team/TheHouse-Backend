@@ -167,3 +167,26 @@ variable "github_environment" {
     error_message = "Only the protected production Environment may deploy (NV-09)."
   }
 }
+
+variable "content_safety_name" {
+  description = "NV-21 1.2.0: Azure AI Content Safety account (also its custom subdomain)."
+  type        = string
+  default     = "cs-thehouse-u2"
+}
+
+variable "content_safety_sku" {
+  description = "NV-21 1.2.0: F0 is the free tier; it stops at its quota instead of billing."
+  type        = string
+  default     = "F0"
+
+  validation {
+    condition     = var.content_safety_sku == "F0"
+    error_message = "COST-001: only the free F0 tier is allowed."
+  }
+}
+
+variable "app_identity_name" {
+  description = "NV-21 1.2.0: user-assigned identity of the Container App (Content Safety only)."
+  type        = string
+  default     = "id-thehouse-u2-app"
+}

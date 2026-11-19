@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
 using TheHouse.Application.Contracts.Landlord;
@@ -17,11 +18,13 @@ public sealed class LandlordOptions
 public sealed class LandlordService(
     ILandlordProfileRepository profiles,
     LandlordOptions options,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IContentModerator? moderator = null)
 {
     public async Task<LandlordProfileResponse> CreateAsync(string userId, CreateLandlordProfileRequest request, CancellationToken cancellationToken)
     {
         var fullName = ListingRules.Text("fullName", request.FullName, 2, 120);
+        await moderator.TextAsync(userId, "landlord.fullName", cancellationToken, new ModerationText("fullName", fullName));
         if (!ListingRules.IsValidPhone(request.Phone))
         {
             throw new RequestValidationException("phone", "phone must be +52 followed by 10 digits.");

@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using System.Security.Cryptography;
 using TheHouse.Application.Abstractions.Media;
 using TheHouse.Application.Abstractions.Persistence;
@@ -69,7 +70,8 @@ public sealed class MediaService(
     IRoomRepository rooms,
     ILandlordProfileRepository landlords,
     StaffService staff,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IContentModerator? moderator = null)
 {
     public async Task<PhotoResponse> SetBuildingPhotoAsync(string ownerId, string? buildingId, UploadedFile file, CancellationToken cancellationToken)
     {
@@ -221,6 +223,9 @@ public sealed class MediaService(
         }
 
         var processed = images.Process(file.Content);
+
+        // NV-21 1.2.0: la foto ya procesada (JPEG reducido) se revisa antes de guardarla.
+        await moderator.ImageAsync(ownerId, roomId is null ? "building.photo" : "room.photo", "file", processed.Full, cancellationToken);
         var bytes = (long)processed.Full.Length + processed.Thumb.Length;
         await EnsureQuotaAsync(ownerId, bytes, replacedBytes, cancellationToken);
         var now = timeProvider.GetUtcNow();

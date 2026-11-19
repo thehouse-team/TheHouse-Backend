@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
 using TheHouse.Application.Contracts.Profile;
@@ -10,7 +11,8 @@ public sealed class ProfileService(
     IProfileRepository profiles,
     IPreferencesRepository preferences,
     IUniversityRepository universities,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IContentModerator? moderator = null)
 {
     public const int MaximumNameLength = 80;
 
@@ -43,6 +45,7 @@ public sealed class ProfileService(
             throw new RequestValidationException("name", "name must have 1 to 80 characters.");
         }
 
+        await moderator.TextAsync(userId, "profile.name", cancellationToken, new ModerationText("name", name));
         await profiles.SaveNameAsync(userId, name, timeProvider.GetUtcNow(), cancellationToken);
         return await GetAsync(userId, cancellationToken);
     }

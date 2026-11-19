@@ -62,3 +62,13 @@ output "cd_azure_subscription_id" {
   description = "Subscription ID for azure/login (not a secret)."
   value       = data.azurerm_client_config.current.subscription_id
 }
+
+output "content_safety_endpoint" {
+  description = "NV-21 1.2.0: set as ContentSafety__Endpoint in the Container App (not a secret)."
+  value       = azurerm_cognitive_account.content_safety.endpoint
+}
+
+output "content_safety_identity_client_id" {
+  description = "NV-21 1.2.0: set as ContentSafety__IdentityClientId in the Container App (not a secret)."
+  value       = azurerm_user_assigned_identity.app.client_id
+}

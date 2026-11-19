@@ -19,6 +19,7 @@ builder.AddMessaging();
 builder.AddRentals();
 builder.AddNotifications();
 builder.AddPush();
+builder.AddContentModeration();
 builder.AddReviews();
 builder.AddMedia();
 builder.AddRoommates();

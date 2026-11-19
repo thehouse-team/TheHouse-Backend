@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.Security;
@@ -97,7 +98,8 @@ public sealed class RentalRequestService(
     IAccountSuspensionQuery suspensions,
     IUserLock userLock,
     TimeProvider timeProvider,
-    INotificationSink? notifications = null)
+    INotificationSink? notifications = null,
+    IContentModerator? moderator = null)
 {
     private static readonly TimeSpan LockTtl = TimeSpan.FromSeconds(10);
 
@@ -127,6 +129,8 @@ public sealed class RentalRequestService(
         {
             throw new RequestValidationException("message", "Send at least one quick question or a message.");
         }
+
+        await moderator.TextAsync(studentId, "request.message", cancellationToken, new ModerationText("message", message));
 
         var room = await rooms.GetAsync(roomId, cancellationToken) ?? throw new NotFoundException("room");
         var building = await buildings.GetAsync(room.BuildingId, cancellationToken) ?? throw new NotFoundException("room");
@@ -312,6 +316,8 @@ public sealed class RentalRequestService(
             throw new RequestValidationException("note", "note must have at most 300 characters.");
         }
 
+        await moderator.TextAsync(ownerId, "request.rejectionNote", cancellationToken, new ModerationText("note", note));
+
         if (body.Reason == "other" && note is null)
         {
             throw new RequestValidationException("note", "note is required when reason is other.");
@@ -466,7 +472,8 @@ public sealed class ConversationService(
     IProfileRepository profiles,
     IAccountSuspensionQuery suspensions,
     TimeProvider timeProvider,
-    INotificationSink? notifications = null)
+    INotificationSink? notifications = null,
+    IContentModerator? moderator = null)
 {
     public async Task<ConversationListResponse> ListAsync(string userId, int page, int pageSize, CancellationToken cancellationToken)
     {
@@ -524,6 +531,8 @@ public sealed class ConversationService(
         {
             throw new RequestValidationException("text", "text must have between 1 and 1000 characters.");
         }
+
+        await moderator.TextAsync(userId, "chat.text", cancellationToken, new ModerationText("text", text));
 
         if (!Guid.TryParseExact(body.ClientMessageId, "D", out var clientId))
         {

@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using System.Globalization;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.Security;
@@ -119,7 +120,8 @@ public sealed class RoommateService(
     IConversationRepository conversations,
     ConversationService chat,
     IAccountSuspensionQuery suspensions,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IContentModerator? moderator = null)
 {
     public async Task<(MyRoommateProfileResponse Profile, bool Created)> UpsertAsync(string userId, RoommateProfileInput body, CancellationToken cancellationToken)
     {
@@ -133,6 +135,7 @@ public sealed class RoommateService(
         var current = await profiles.GetByUserAsync(userId, cancellationToken)
             ?? new RoommateProfile { Id = MessagingIds.New(now), UserId = userId, CreatedAt = now };
         var updated = RoommateRules.Apply(current, body, now) with { UniversityId = universityId };
+        await moderator.TextAsync(userId, "roommate.about", cancellationToken, new ModerationText("about", updated.About));
         var (saved, created) = await profiles.UpsertAsync(updated, cancellationToken);
         return (await ToMineAsync(saved, cancellationToken), created);
     }
@@ -220,6 +223,7 @@ public sealed class RoommateService(
         }
 
         var now = timeProvider.GetUtcNow();
+        await moderator.TextAsync(userId, "roommate.contact", cancellationToken, new ModerationText("message", message));
         var (conversation, created) = await conversations.CreateIfAbsentAsync(
             new Conversation
             {
