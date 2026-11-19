@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Media;
 using System.Globalization;
 using TheHouse.Application.Abstractions.Persistence;
@@ -16,7 +17,8 @@ public sealed class BuildingService(
     IRoomRepository rooms,
     IUniversityRepository universities,
     TimeProvider timeProvider,
-    IMediaPort? media = null)
+    IMediaPort? media = null,
+    IContentModerator? moderator = null)
 {
     public async Task<BuildingResponse> CreateAsync(string userId, BuildingRequest request, CancellationToken cancellationToken)
     {
@@ -36,6 +38,7 @@ public sealed class BuildingService(
         var (distance, minutes) = ListingRules.Walking(latitude, longitude, university.Latitude!.Value, university.Longitude!.Value);
         var now = timeProvider.GetUtcNow();
 
+        await moderator.TextAsync(userId, "building.name", cancellationToken, new ModerationText("name", request.Name));
         var created = await buildings.CreateAsync(
             new Building
             {
@@ -116,6 +119,7 @@ public sealed class BuildingService(
 
         if (request.Name is not null)
         {
+            await moderator.TextAsync(userId, "building.name", cancellationToken, new ModerationText("name", request.Name));
             updated = updated with { Name = ListingRules.Text("name", request.Name, 2, 120) };
         }
 

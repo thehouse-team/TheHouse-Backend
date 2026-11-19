@@ -74,3 +74,16 @@ public sealed record AccountStatusResponse(string UserId, bool Suspended, string
 public sealed record AuditEventResponse(string Id, string ActorId, string Action, string TargetType, string TargetId, string? Reason, DateTimeOffset CreatedAt);
 
 public sealed record AuditListResponse(IReadOnlyList<AuditEventResponse> Items, int Page, int PageSize, long TotalItems, int TotalPages);
+
+// NV-21 1.2.0: rechazos de la revisión automática (sin el contenido).
+public sealed record ModerationRejectionResponse(
+    string Id,
+    string UserId,
+    string Kind,
+    string Field,
+    string Source,
+    IReadOnlyList<string> Categories,
+    int MaxSeverity,
+    DateTimeOffset CreatedAt);
+
+public sealed record ModerationRejectionListResponse(IReadOnlyList<ModerationRejectionResponse> Items, int Page, int PageSize, long TotalItems, int TotalPages);

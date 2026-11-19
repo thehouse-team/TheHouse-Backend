@@ -28,6 +28,7 @@ public static class AdminEndpoint
         Route(app.MapGet(BasePath + "/reports", ReportsAsync), "ListReports", "Reports by status", 200);
         Route(app.MapPost(BasePath + "/reports/{id}/resolve", ResolveAsync), "ResolveReport", "Resolve a report with an action", 200);
         Route(app.MapGet(BasePath + "/audit", AuditAsync), "ListAuditEvents", "Audit log", 200);
+        Route(app.MapGet(BasePath + "/moderation/rejections", RejectionsAsync), "ListModerationRejections", "Automatic moderation rejections (without the content)", 200);
 
         app.MapPost(ReportsPath, CreateReportAsync)
             .WithName("CreateReport")
@@ -123,6 +124,18 @@ public static class AdminEndpoint
             var pageSize = UserEndpointSupport.QueryInteger(context, "pageSize", PropertyQueryValidation.DefaultPageSize);
             return Results.Json(await staff.AuditLogAsync(userId, page, pageSize, context.RequestAborted), statusCode: 200);
         });
+
+    // NV-21 1.2.0: rechazos de la revisión automática; revisor o admin.
+    private static Task<IResult> RejectionsAsync(HttpContext context, ModerationRejectionService rejections, IRateLimitStore store, UserRateLimitOptions limits) =>
+        Admin(context, store, limits, async userId => Results.Json(
+            await rejections.ListAsync(
+                userId,
+                UserEndpointSupport.QueryText(context, "userId"),
+                UserEndpointSupport.QueryText(context, "kind"),
+                UserEndpointSupport.QueryInteger(context, "page", PropertyQueryValidation.DefaultPage),
+                UserEndpointSupport.QueryInteger(context, "pageSize", PropertyQueryValidation.DefaultPageSize),
+                context.RequestAborted),
+            statusCode: 200));
 
     private static Task<IResult> CreateReportAsync(HttpContext context, ReportService reports, IRateLimitStore store, UserRateLimitOptions limits) =>
         UserEndpointSupport.RunAsync(context, async userId =>

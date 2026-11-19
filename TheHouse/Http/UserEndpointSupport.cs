@@ -70,6 +70,19 @@ public static class UserEndpointSupport
         {
             return Error(context, 422, exception.Rule);
         }
+        catch (TheHouse.Application.Abstractions.Moderation.ContentRejectedException exception)
+        {
+            // NV-21 1.2.0: contenido inapropiado; no se guardó nada.
+            context.Items[UserResourceProblems.FieldItem] = exception.Field;
+            context.Items[UserResourceProblems.CategoriesItem] = exception.Categories;
+            return Error(context, 422, "content_rejected");
+        }
+        catch (TheHouse.Application.Abstractions.Moderation.ModerationUnavailableException)
+        {
+            // Falla cerrado: sin revisión no se guarda.
+            context.Response.Headers.RetryAfter = "30";
+            return Error(context, 503, "moderation_unavailable");
+        }
         catch (RateLimitExceededException exception)
         {
             context.Response.Headers.RetryAfter =

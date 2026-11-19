@@ -10,6 +10,11 @@ public static class UserResourceProblems
 
     public const string DetailItem = "thehouse.problem.detail";
 
+    // NV-21 1.2.0: campo y categorías del contenido rechazado (422).
+    public const string FieldItem = "thehouse.problem.field";
+
+    public const string CategoriesItem = "thehouse.problem.categories";
+
     // Agrega `code` y su `detail` si el endpoint lo indicó para este status.
     public static void ApplyCode(HttpContext context, ProblemDetails problem, int status)
     {
@@ -22,6 +27,12 @@ public static class UserResourceProblems
             problem.Detail = context.Items.TryGetValue(DetailItem, out var specific) && specific is string text
                 ? text
                 : detail;
+        }
+
+        if (status == 422 && context.Items.TryGetValue(FieldItem, out var field) && field is string name)
+        {
+            problem.Extensions["field"] = name;
+            problem.Extensions["categories"] = context.Items.TryGetValue(CategoriesItem, out var categories) ? categories : Array.Empty<string>();
         }
 
         // NV-10 1.2.0: qué impide eliminar la cuenta (409 `deletion_blocked`).
@@ -313,6 +324,8 @@ public static class UserResourceProblems
     public static string? DetailFor(string code) => code switch
     {
         "password_mismatch" => "La contraseña no es correcta.",
+        "content_rejected" => "El contenido no cumple las reglas de la comunidad; corrígelo e intenta de nuevo.",
+        "moderation_unavailable" => "No pudimos revisar el contenido en este momento; intenta de nuevo en unos segundos.",
         "installation_conflict" => "Esta instalación ya está registrada en otra cuenta; cierra sesión en ella o reinstala la app.",
         "deletion_blocked" => "No se puede eliminar la cuenta todavía: termina tu renta activa o pide que te retiren el rol de staff.",
         "deletion_incomplete" => "No se pudo terminar de eliminar la cuenta; intenta de nuevo para completarla.",

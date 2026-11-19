@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using TheHouse.Application.Abstractions.Analytics;
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.Security;
@@ -104,6 +105,11 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
 
     public FakePushSender PushSender { get; } = new();
 
+    // NV-21 1.2.0: Content Safety falso y rechazos en memoria.
+    public FakeContentSafetyClient ContentSafety { get; } = new();
+
+    public InMemoryModerationRejectionRepository Rejections { get; } = new();
+
     // NV-11: el catálogo real del seed (10 universidades con coordenadas).
     public UniversityTestStore Universities { get; } = SeededUniversities();
 
@@ -140,6 +146,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.RemoveAll<IViewSaltStore>();
             services.RemoveAll<IPushDeviceRepository>();
             services.RemoveAll<IPushSender>();
+            services.RemoveAll<IContentSafetyClient>();
+            services.RemoveAll<IModerationRejectionRepository>();
 
             services.AddSingleton<IUserRepository>(Users);
             services.AddSingleton<IRateLimitStore>(RateLimit);
@@ -167,6 +175,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.AddSingleton<IViewSaltStore>(ViewSalts);
             services.AddSingleton<IPushDeviceRepository>(PushDevices);
             services.AddSingleton<IPushSender>(PushSender);
+            services.AddSingleton<IContentSafetyClient>(ContentSafety);
+            services.AddSingleton<IModerationRejectionRepository>(Rejections);
             services.AddSingleton<ILoggerProvider>(new CaptureProvider(Logs));
 
             if (limits is not null)

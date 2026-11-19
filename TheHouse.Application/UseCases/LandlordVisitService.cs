@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
@@ -17,7 +18,8 @@ public sealed class LandlordVisitService(
     IProfileRepository profiles,
     IUniversityRepository universities,
     TimeProvider timeProvider,
-    INotificationSink? notifications = null)
+    INotificationSink? notifications = null,
+    IContentModerator? moderator = null)
 {
     public static readonly TimeSpan DefaultRange = TimeSpan.FromDays(30);
 
@@ -103,6 +105,7 @@ public sealed class LandlordVisitService(
     {
         await RequireLandlordAsync(ownerId, cancellationToken);
         var note = Note(body.Note, required: false);
+        await moderator.TextAsync(ownerId, "visit.rescheduleNote", cancellationToken, new ModerationText("note", note));
         var scheduledAt = VisitSchedulePolicy.ParseScheduledAt(body.ScheduledAt);
         var (visit, room) = await LoadOwnedAsync(ownerId, id, cancellationToken);
         await EnsurePublishedAsync(room, cancellationToken);
@@ -135,6 +138,7 @@ public sealed class LandlordVisitService(
         }
 
         var note = Note(body.Note, required: body.Reason == "other");
+        await moderator.TextAsync(ownerId, "visit.cancelNote", cancellationToken, new ModerationText("note", note));
         var (visit, room) = await LoadOwnedAsync(ownerId, id, cancellationToken);
         var cancelled = visit.CancelByLandlord(body.Reason, note, timeProvider.GetUtcNow());
         var response = await SaveAsync(visit, cancelled, room, cancellationToken);

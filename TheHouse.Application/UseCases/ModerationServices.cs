@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Media;
 using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
@@ -365,7 +366,8 @@ public sealed class ReportService(
     IUserRepository users,
     TimeProvider timeProvider,
     IReviewRepository? reviews = null,
-    ReviewModerationService? reviewModeration = null)
+    ReviewModerationService? reviewModeration = null,
+    IContentModerator? moderator = null)
 {
     public async Task<ReportCreatedResponse> CreateAsync(string userId, CreateReportRequest request, CancellationToken cancellationToken)
     {
@@ -373,6 +375,7 @@ public sealed class ReportService(
         var targetId = ModerationRules.ObjectId("targetId", request.TargetId);
         var reason = ListingRules.OneOf("reason", request.Reason, ModerationRules.ReportReasons);
         var details = request.Details is null ? null : ListingRules.Text("details", request.Details, 1, 500);
+        await moderator.TextAsync(userId, "report.details", cancellationToken, new ModerationText("details", details));
 
         if (targetType == "user" && targetId == userId)
         {

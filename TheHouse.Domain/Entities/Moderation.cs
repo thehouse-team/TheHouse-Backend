@@ -57,3 +57,15 @@ public sealed record AuditEvent(
     string TargetId,
     string? Reason,
     DateTimeOffset CreatedAt);
+
+// NV-21 1.2.0: contenido rechazado por la revisión automática, SIN el
+// contenido: solo quién, dónde, qué categorías y la severidad máxima.
+public sealed record ModerationRejection(
+    string Id,
+    string UserId,
+    string Kind,
+    string Field,
+    string Source,
+    IReadOnlyList<string> Categories,
+    int MaxSeverity,
+    DateTimeOffset CreatedAt);

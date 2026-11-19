@@ -437,7 +437,8 @@ public sealed class LogoutHttpTests
                     or "/api/v1/users/me/legal"
                     or "/api/v1/legal"
                     or "/api/v1/users/me/devices"
-                    or "/api/v1/users/me/devices/{installationId}",
+                    or "/api/v1/users/me/devices/{installationId}"
+                    or "/api/v1/admin/moderation/rejections",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

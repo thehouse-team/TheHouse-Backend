@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
 using TheHouse.Application.Contracts.Moderation;
@@ -84,7 +85,8 @@ public sealed class RoomReviewService(
     IRoomRepository rooms,
     IBuildingRepository buildings,
     IProfileRepository profiles,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IContentModerator? moderator = null)
 {
     public async Task<ReviewEligibilityResponse> EligibilityAsync(string userId, string? roomId, CancellationToken cancellationToken)
     {
@@ -98,6 +100,7 @@ public sealed class RoomReviewService(
         var landlord = ReviewRules.Landlord(body.Landlord ?? throw new RequestValidationException("landlord", "landlord is required."));
         var property = ReviewRules.Property(body.Property ?? throw new RequestValidationException("property", "property is required."));
         var comment = ReviewRules.Comment(body.Comment);
+        await moderator.TextAsync(userId, "review.comment", cancellationToken, new ModerationText("comment", comment));
         var room = await LoadRoomAsync(roomId, cancellationToken);
         var (basis, reason, _) = await CheckAsync(userId, room, cancellationToken);
         if (reason == "already_reviewed")
@@ -137,6 +140,7 @@ public sealed class RoomReviewService(
         var landlord = body.Landlord is null ? null : ReviewRules.Landlord(body.Landlord);
         var property = body.Property is null ? null : ReviewRules.Property(body.Property);
         var comment = ReviewRules.Comment(body.Comment);
+        await moderator.TextAsync(userId, "review.comment", cancellationToken, new ModerationText("comment", comment));
         if (landlord is null && property is null && body.Comment is null)
         {
             throw new RequestValidationException("body", "Send landlord, property or comment.");

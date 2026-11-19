@@ -28,7 +28,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-18 | [Cierre de trato con QR y renta](nv-18-deal-closing-rental/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T11 (2026-11-12): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-19 | [Reseñas y calificaciones](nv-19-reviews/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **✅ APROBADA** | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** | 7/8 |
-| NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** (1.2.0: moderación automática antes de guardar; 1.1.0 completa) | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/10 |
+| NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas (recurso aplicado); T07–T10 esperan CI, despliegue y Azure** | 6/10 |
 | NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T13 autorizadas** | 0/13 |
 | NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** | 0/11 |

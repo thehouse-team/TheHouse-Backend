@@ -1,3 +1,4 @@
+using TheHouse.Application.Abstractions.Moderation;
 using TheHouse.Application.Abstractions.Notifications;
 using System.Security.Cryptography;
 using System.Text;
@@ -23,7 +24,8 @@ public sealed class VisitService(
     ILandlordProfileRepository landlords,
     IUserLock userLock,
     TimeProvider timeProvider,
-    INotificationSink? notifications = null)
+    INotificationSink? notifications = null,
+    IContentModerator? moderator = null)
 {
     public const int MaximumActiveVisits = 5;
 
@@ -60,6 +62,8 @@ public sealed class VisitService(
         {
             throw new RequestValidationException("message", "message is too long.");
         }
+
+        await moderator.TextAsync(userId, "visit.message", cancellationToken, new ModerationText("message", message));
 
         var scheduledAt = VisitSchedulePolicy.ParseScheduledAt(request.ScheduledAt);
         var room = request.RoomId is not null

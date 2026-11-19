@@ -55,6 +55,13 @@ resource "azurerm_container_app" "this" {
   workload_profile_name        = "Consumption"
   revision_mode                = "Single"
 
+  # NV-21 1.2.0: identidad administrada (asignada por el usuario) para
+  # llamar a Azure AI Content Safety sin llave (rol en content_safety.tf).
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.app.id]
+  }
+
   # Los valores de secretos de Container Apps se administran fuera de
   # Terraform para impedir que credenciales MongoDB, Redis o JWT entren
   # en archivos .tf, tfvars o en el flujo normal de IaC.
