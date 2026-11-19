@@ -721,3 +721,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-18.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** colección nueva `push_devices` (módulo Notifications); un secreto nuevo en la Container App; la eliminación de cuenta (NV-10 1.2.0) también borra los dispositivos; sin paquetes, migraciones ni comandos en Production. Sin el secreto, el backend registra dispositivos y la bandeja funciona, pero no envía push.
+
+## M-BE-079 — NV-21 1.2.0 aprobada: moderación automática antes de guardar
+
+- **ID:** M-BE-079
+- **Decisión:** aprobar NV-21 1.2.0 con sus decisiones: Azure AI Content Safety (misma nube que el backend) en plan F0 para revisar, antes de guardar, todo texto que ven otras personas (perfil, edificios y cuartos, solicitudes y chat, mensaje de visita, reseñas, perfil de compañero y reportes) y las fotos de edificios y cuartos; documentos de verificación excluidos (privados) y sin videos (la app no los sube); autenticación con la identidad administrada de la Container App y rol `Cognitive Services User` sobre el recurso, sin llave ni secreto (`local_auth_enabled = false`); se rechaza con severidad 4 o más en odio, sexual, violencia o autolesión, más una lista corta de términos; 422 `content_rejected` sin guardar; falla cerrado con 503 `moderation_unavailable` si la API no responde o se agota el cupo; registro de rechazos sin contenido (`moderation_rejections`, TTL 180 días) y vista para admin o moderador, sin suspensión automática; puerto compartido `IContentModerator` (sin ciclos entre módulos).
+- **Estado:** APROBADO — Victor, 2026-11-19 («Ya lo validó, apruebo y EJECUTA NV-21», T01–T10). El responsable de Mobile validó antes el contrato §6.1. El `terraform apply` del recurso, la identidad y el rol requiere «OK PARA APPLY» por separado, con los cupos F0 verificados antes en el portal.
+- **Fecha:** 2026-11-19.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** recurso nuevo `azurerm_cognitive_account` (ContentSafety, F0), identidad administrada en `ca-thehouse-u2` y una asignación de rol (Terraform, con «OK PARA APPLY»); colección nueva `moderation_rejections`; las rutas que guardan texto o fotos agregan 422 y 503; sin paquetes ni secretos.
