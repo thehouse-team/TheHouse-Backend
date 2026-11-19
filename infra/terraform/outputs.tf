@@ -5,7 +5,7 @@ output "resource_group_name" {
 
 output "container_app_environment_name" {
   description = "Container Apps environment."
-  value       = azurerm_container_app_environment.this.name
+  value       = var.existing_environment_id == null ? one(azurerm_container_app_environment.this[*].name) : element(split("/", var.existing_environment_id), length(split("/", var.existing_environment_id)) - 1)
 }
 
 output "container_app_name" {
@@ -50,7 +50,7 @@ output "log_analytics_workspace_name" {
 # `production` de GitHub (AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID).
 output "cd_azure_client_id" {
   description = "Client ID of the CD managed identity (not a secret)."
-  value       = azurerm_user_assigned_identity.cd.client_id
+  value       = one(azurerm_user_assigned_identity.cd[*].client_id)
 }
 
 output "cd_azure_tenant_id" {
@@ -65,7 +65,7 @@ output "cd_azure_subscription_id" {
 
 output "content_safety_endpoint" {
   description = "NV-21 1.2.0: set as ContentSafety__Endpoint in the Container App (not a secret)."
-  value       = azurerm_cognitive_account.content_safety.endpoint
+  value       = one(azurerm_cognitive_account.content_safety[*].endpoint)
 }
 
 output "content_safety_identity_client_id" {

@@ -277,3 +277,60 @@ Cubierta por NV-09: cada despliegue publica `ghcr.io/thehouse-team/thehouse-back
 | T20 y T21 | Destrucción y costo del ciclo completo: se propone probarlo en un entorno desechable (otro grupo de recursos) con autorización y «OK PARA APPLY» |
 
 Resultado del cierre: **15 de 25** tasks completas.
+
+## T20 y T21 — Ciclo de vida: crear, verificar y destruir (2026-11-19)
+
+Autorización: «EJECUTA NV-03 T20 y T21» — Victor Manuel Jose Jose, 2026-11-19 (M-BE-082); cada `apply` con «OK PARA APPLY». Procedimiento repetible en `infra/terraform/LIFECYCLE.md`.
+
+### Diseño
+
+- Mismo Terraform de producción en el workspace `lifecycle` (state propio, fuera de git) con `lifecycle.tfvars` (todos los nombres `*-lifecycle`).
+- Variables nuevas, con valor por defecto igual a producción:
+  - `content_safety_enabled`: Azure admite un solo F0.
+  - `cd_identity_enabled`: el desechable no otorga roles sobre recursos compartidos.
+  - `existing_environment_id`: usar un entorno existente sin administrarlo.
+- Bloques `moved` para que el state de producción no destruya ni recree nada. `terraform plan` de producción después de cada cambio: **0 to add, 0 to change, 0 to destroy**.
+
+### Límites encontrados en la suscripción
+
+| Intento | Resultado |
+| --- | --- |
+| Entorno de Container Apps propio en `eastus2` | 409 `MaxNumberOfRegionalEnvironmentsInSubExceeded`: la suscripción admite un solo entorno (el de producción) |
+| Mismo entorno en `eastus` | Mismo 409; el límite aplica a toda la suscripción |
+| Aumento de cuota (`Microsoft.Quota` registrado con autorización de Victor; solicitud de `ManagedEnvironmentCount` = 2) | Rechazada: `ResourceNotAvailableForOffer` (la oferta de la suscripción no lo permite) |
+| Decisión de Victor (opción 1) | La app desechable se crea **dentro** del entorno de producción sin administrarlo (Terraform no lo crea, cambia ni destruye) y sin identidad del CD |
+
+Los recursos parciales de los dos primeros intentos (grupo, identidades, rol personalizado, credencial federada y Log Analytics, sin costo) se destruyeron con el mismo Terraform en el `apply` siguiente.
+
+### Crear y verificar
+
+| Paso | Resultado |
+| --- | --- |
+| Plan aprobado | `4 to add, 0 to change, 6 to destroy` (los 6 eran los parciales del desechable) |
+| `terraform apply` | **Apply complete! Resources: 4 added, 0 changed, 6 destroyed** (339 s) |
+| Inventario (`az`) | `rg-thehouse-lifecycle` (`eastus2`) con `id-thehouse-lifecycle-app`, `log-thehouse-lifecycle` y `ca-thehouse-lifecycle` (revisión `--4pa4xrz`, `Succeeded`, 0–1 réplicas) en el entorno compartido |
+| App desechable | Arrancó y respondió `400` en `/health/*`: el filtro de hosts (`AllowedHosts`) rechaza un host no configurado, que es el comportamiento seguro esperado |
+| Producción durante la prueba | `ca-thehouse-u2--cea10a4c-64-1` Healthy al 100 %, `/health/ready` 200 |
+
+### Destruir y comprobar
+
+| Paso | Resultado |
+| --- | --- |
+| Plan aprobado | `0 to add, 0 to change, 4 to destroy` (solo la app, Log Analytics, la identidad y el grupo del desechable; el entorno compartido no aparece) |
+| `terraform apply` | **Apply complete! Resources: 0 added, 0 changed, 4 destroyed** (126 s) |
+| Recursos residuales | `az group exists rg-thehouse-lifecycle` → `false`; 0 recursos y 0 roles personalizados con «lifecycle» en la suscripción; `terraform state list` del workspace vacío |
+| Producción después | Entorno `Succeeded`, revisión Healthy al 100 %, `/health/ready` 200, `terraform plan` sin cambios |
+
+### T21 — Costo del ciclo de vida
+
+| Fuente | Resultado |
+| --- | --- |
+| Cost Management (`ActualCost`, 2026-11-19 y 2026-11-20, por grupo de recursos) | Solo `rg-thehouse-u2` con 0.00 USD; `rg-thehouse-lifecycle` todavía **PENDIENTE DE REFLEJO** (Azure tarda hasta 24–48 h) |
+| Esperado | 0.00 USD: la app escaló a cero dentro de la concesión gratuita de Container Apps, Log Analytics sin ingesta (tope de 0.1 GB/día), identidades y roles sin costo |
+| Revisión posterior | Repetir la consulta el 2026-11-21; si aparece algún cargo se registra y se trata como hallazgo |
+
+### Observación
+
+En el entorno `cae-thehouse-u2` existe además la app `ca-thehouse-genai-u2`, que no creó este Terraform (por su nombre, del equipo de GenAI). Queda fuera del state del backend y no se tocó; se aclara con ese equipo, porque su guía de integración menciona Azure App Service.
+
+Resultado: **T20 y T21 completas** (T21 con el costo **PENDIENTE DE REFLEJO** según su criterio de aceptación). NV-03 queda en **17 de 25**.

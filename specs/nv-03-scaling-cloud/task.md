@@ -8,13 +8,13 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 15 de 25 tasks (cierre documental del 2026-11-19); abiertas: T07–T09, T11, T12, T14, T18–T21; ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 17 de 25 tasks (ciclo de vida demostrado el 2026-11-19); abiertas: T07–T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
 | Spec | `spec.md` 1.2.0-u2 |
 | Plan | `plan.md` 1.2.0-u2 |
 | Tasks totales | 25 |
 | Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
-| Tasks completadas | 15 (T01–T06, T10, T13, T15–T17, T22–T25; ver `evidence.md`) |
+| Tasks completadas | 17 (T01–T06, T10, T13, T15–T17, T20–T25; ver `evidence.md`) |
 
 ## Reglas de esta lista
 
@@ -67,8 +67,8 @@
 
 - [ ] **T18 · Plan y creación de infraestructura** — Requisitos: NV-03-R11, NV-03-R02, NV-03-R03, NV-03-R04, NV-03-R05, NV-03-R06, NV-03-R09 · Fase: F6 · **Alcance: U2** · Aceptación: plan aprobado con dos réplicas, HTTPS, Redis, MongoDB y observabilidad; apply solo tras `OK PARA APPLY`; inventario y costo inicial. · Evidencia: plan revisado, inventario y respuestas. · Depende de: T09, T10, T11, T15, T17, T22.
 - [ ] **T19 · Verificación de despliegue, escalado, fallos y TLS** — Requisitos: NV-03-R01, NV-03-R02, NV-03-R03, NV-03-R04, NV-03-R05, NV-03-R06, NV-03-R07 · Fase: F6 · **Alcance: U2** · Aceptación: smoke tests de 7 endpoints, health, rate limit 429, logout/reuso, réplicas >= 2, TLS y fallos Redis/MongoDB verificados. · Evidencia: reportes de prueba. · Depende de: T18.
-- [ ] **T20 · Destrucción y verificación de recursos residuales** — Requisitos: NV-03-R12, NV-03-R13, NV-03-R09 · Fase: F6 · **Alcance: U2** · Aceptación: inventario vacío o justificado, sin recursos facturables y con evidencia posterior; destroy solo con autorización humana. · Evidencia: plan de destrucción, inventario y facturación. · Depende de: T18, T19.
-- [ ] **T21 · Atestación de costo observado** — Requisito: NV-03-R13 · Fase: F6 · **Alcance: U2** · Aceptación: costo del ciclo de vida reportado con evidencia; si Azure no refleja datos, se registra PENDIENTE DE REFLEJO; cualquier duda se reporta BLOCKED. · Evidencia: informe final y revisión. · Depende de: T20.
+- [x] **T20 · Destrucción y verificación de recursos residuales** — Requisitos: NV-03-R12, NV-03-R13, NV-03-R09 · Fase: F6 · **Alcance: U2** · Aceptación: inventario vacío o justificado, sin recursos facturables y con evidencia posterior; destroy solo con autorización humana. · Evidencia: plan de destrucción, inventario y facturación. · Depende de: T18, T19.
+- [x] **T21 · Atestación de costo observado** — Requisito: NV-03-R13 · Fase: F6 · **Alcance: U2** · Aceptación: costo del ciclo de vida reportado con evidencia; si Azure no refleja datos, se registra PENDIENTE DE REFLEJO; cualquier duda se reporta BLOCKED. · Evidencia: informe final y revisión. · Depende de: T20.
 - [x] **T23 · Scale-to-zero y apagado operativo** — Requisitos: NV-03-R12, NV-03-R13 · Fase: F6 · **Alcance: U2** · Aceptación: reducción de `min replicas` a 0 con nombres reales, sin destruir datos ni recursos externos; comando exacto documentado. · Evidencia: comando, salida y estado. · Depende de: T18, T19.
 
 ## Matriz task → requisito
@@ -94,8 +94,8 @@
 | T17 | R10, R13 | F5 | U2 | COMPLETADA |
 | T18 | R11, R02, R03, R04, R05, R06, R09 | F6 | U2 | ABIERTA |
 | T19 | R01, R02, R03, R04, R05, R06, R07 | F6 | U2 | ABIERTA |
-| T20 | R12, R13, R09 | F6 | U2 | ABIERTA |
-| T21 | R13 | F6 | U2 | ABIERTA |
+| T20 | R12, R13, R09 | F6 | U2 | COMPLETADA |
+| T21 | R13 | F6 | U2 | COMPLETADA |
 | T22 | R08, R14 | F4 | U2 | COMPLETADA |
 | T23 | R12, R13 | F6 | U2 | COMPLETADA |
 | T24 | R15, R07, R13 | F4 | U2 | COMPLETADA |
@@ -129,11 +129,11 @@
 | Tasks | 25 |
 | Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
-| Tasks abiertas | 10 |
-| Tasks completadas | 15 |
+| Tasks abiertas | 8 |
+| Tasks completadas | 17 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 15 de 25 tasks (cierre documental del 2026-11-19); abiertas: T07–T09, T11, T12, T14, T18–T21; ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 17 de 25 tasks (ciclo de vida demostrado el 2026-11-19); abiertas: T07–T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
 
 Ninguna task puede ejecutarse hasta la aprobación de Fase B con versiones, IDs, rutas, proveedor, servicios y restricciones explícitas. `terraform apply` y `terraform destroy` requieren confirmación humana separada.
