@@ -8,7 +8,7 @@
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T04 completas; T05–T08 esperan CI, despliegue, secreto de Firebase y Azure** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | Requisito del curso §16 (notificaciones push de los procesos principales); RF-75 (bandeja) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-02, RNF-09 |
@@ -119,8 +119,8 @@ PAGINATION   No
 ```
 
 ```text
-DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io (pendiente de despliegue)
-TESTS        pendiente: unitarias, integración, seguridad y prueba HTTP real en Azure
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 44457497605): 1027/1027 (unitarias 395, integración 484, seguridad 148); prueba HTTP real de dispositivos en Azure 14/14 (2026-11-19); push en teléfono real pendiente con Mobile
 ```
 
 ## 7. Módulo, datos propios e integración
@@ -241,9 +241,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 8 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 4 |
+| Tasks completadas | 7 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T04 completas; T05–T08 esperan CI, despliegue, secreto de Firebase y Azure** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** |
 
 ## 18. Aprobación pendiente
 

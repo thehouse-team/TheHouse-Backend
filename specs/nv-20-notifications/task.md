@@ -8,12 +8,12 @@
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T04 completas; T05–T08 esperan CI, despliegue, secreto de Firebase y Azure** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Plan | `plan.md` 1.2.0-borrador |
 | Tasks totales | 8 |
-| Tasks completadas | 4 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
@@ -39,9 +39,9 @@
 ## F4 — Pruebas y evidencia
 
 - [ ] **T05 · Contrato para Mobile y despliegue** — Requisito: NV-20-R05 · Fase: F4 · Aceptación: Contrato §6.1 entregado a Mobile; secreto cargado por Victor; desplegado por el CD; prueba real en Azure con un teléfono: solicitud, mensaje y visita llegan como push. · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04.
-- [ ] **T06 · Pruebas unitarias y de integración** — Requisito: NV-20-R06 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05.
-- [ ] **T07 · Pruebas de seguridad** — Requisito: NV-20-R06 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05.
-- [ ] **T08 · Evidencia y revisión final** — Requisito: NV-20-R06 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T06, T07.
+- [x] **T06 · Pruebas unitarias y de integración** — Requisito: NV-20-R06 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T07 · Pruebas de seguridad** — Requisito: NV-20-R06 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05.
+- [x] **T08 · Evidencia y revisión final** — Requisito: NV-20-R06 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T06, T07.
 
 ## Matriz task → requisito
 
@@ -52,9 +52,9 @@
 | T03 | R03 | F2 | COMPLETA |
 | T04 | R04 | F3 | COMPLETA |
 | T05 | R05 | F4 | ABIERTA |
-| T06 | R06 | F4 | ABIERTA |
-| T07 | R06 | F4 | ABIERTA |
-| T08 | R06 | F4 | ABIERTA |
+| T06 | R06 | F4 | COMPLETA |
+| T07 | R06 | F4 | COMPLETA |
+| T08 | R06 | F4 | COMPLETA |
 
 ## Cobertura requisito → task
 
@@ -73,11 +73,11 @@
 | --- | --- |
 | Requisitos | 6 |
 | Tasks | 8 |
-| Tasks abiertas | 4 |
-| Tasks completadas | 4 |
+| Tasks abiertas | 1 |
+| Tasks completadas | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T04 completas; T05–T08 esperan CI, despliegue, secreto de Firebase y Azure** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
