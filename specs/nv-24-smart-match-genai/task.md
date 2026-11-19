@@ -4,14 +4,14 @@
 | --- | --- |
 | ID | NV-24 |
 | Documento | `task.md` |
-| Versión | 1.1.0-borrador |
-| Fecha | 2026-11-06 |
+| Versión | 1.2.0-borrador |
+| Fecha | 2026-11-19 |
 | Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA NV-16, NV-23 y NV-24»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-24-smart-match-genai/`; activar `TheHouse-GenAI` en Production requiere las decisiones M-BE de su hosting y de su proveedor) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo 1.2.0»: aprobación documental con las decisiones de la §13 y el contrato congelado de TheHouse-GenAI del 2026-11-18; el contrato §6.1 con Mobile no cambia respecto a 1.1.0. La ejecución requiere «EJECUTA» y NV-23 desplegada) |
+| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.1.0-borrador |
-| Plan | `plan.md` 1.1.0-borrador |
+| Spec | `spec.md` 1.2.0-borrador |
+| Plan | `plan.md` 1.2.0-borrador |
 | Tasks totales | 11 |
 | Tasks completadas | 0 |
 
@@ -31,8 +31,8 @@
 
 ## F2 — Persistencia e integración
 
-- [ ] **T04 · Cliente de TheHouse-GenAI** — Requisito: NV-24-R04 · Fase: F2 · Aceptación: `GenAiExplanationClient` con el contrato `v1` de la §6, credencial de servicio, 3 s de timeout, un reintento y circuit breaker; probado con un doble de GenAI, sin red. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T05 · Validación y degradación segura** — Requisito: NV-24-R05 · Fase: F2 · Aceptación: Respuestas con números, servicios o universidades ausentes, demasiado largas o con formato inválido usan la plantilla; con GenAI caído, lento, desactivado o con el circuito abierto responde 200 con `generatedBy=template`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [ ] **T04 · Cliente de TheHouse-GenAI** — Requisito: NV-24-R04 · Fase: F2 · Aceptación: `GenAiExplanationClient` con el contrato congelado (camelCase, sin campos extra, sin id del cuarto), `X-Service-Key`, `X-Request-ID`, 8 s de timeout, reintento solo en red/5xx, 429 con `Retry-After` y circuit breaker; mapeo de servicios; probado con un doble de GenAI que reproduce sus respuestas y errores, sin red. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [ ] **T05 · Validación y degradación segura** — Requisito: NV-24-R05 · Fase: F2 · Aceptación: `generated: false`, respuestas con números, servicios o universidades ausentes, demasiado largas o con formato inválido usan la plantilla; con GenAI caído, lento, desactivado, sin clave o con el circuito abierto responde 200 con `generatedBy=template`. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 - [ ] **T06 · Caché y límites** — Requisito: NV-24-R06 · Fase: F2 · Aceptación: Caché de 24 h por cuarto, preferencias y versiones; rate limits con 429; Redis caído 503. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 
 ## F3 — Seguridad, autorización y límites
@@ -41,7 +41,7 @@
 
 ## F4 — Pruebas y evidencia
 
-- [ ] **T08 · Contrato para Mobile y despliegue** — Requisito: NV-24-R08 · Fase: F4 · Aceptación: Contrato §6.1 entregado a Mobile; desplegado por el CD con GenAI desactivado; prueba HTTP real en Azure con plantilla; activar GenAI en Production solo con sus decisiones M-BE aprobadas y una prueba real adicional. · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06, T07.
+- [ ] **T08 · Contrato para Mobile y despliegue** — Requisito: NV-24-R08 · Fase: F4 · Aceptación: Contrato §6.1 entregado a Mobile; desplegado por el CD con GenAI desactivado; prueba HTTP real en Azure con plantilla; activar GenAI en Production con la URL, la clave como secreto y la evidencia de costo, y una prueba real adicional con `generatedBy=genai`. · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06, T07.
 - [ ] **T09 · Pruebas unitarias y de integración** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
 - [ ] **T10 · Pruebas de seguridad** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
 - [ ] **T11 · Evidencia y revisión final** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T09, T10.
@@ -87,6 +87,6 @@
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
+| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

@@ -741,3 +741,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-19.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** solo documentación (`specs/nv-03-scaling-cloud/`, `specs/README.md` y esta memoria); NV-03 pasa de 5 a 15 de 25 tasks; sin cambios de código, infraestructura ni secretos.
+
+## M-BE-081 — NV-24 1.2.0 aprobada: contrato congelado de TheHouse-GenAI
+
+- **ID:** M-BE-081
+- **Decisión:** aprobar NV-24 1.2.0, que alinea el cliente al contrato que el equipo de GenAI congeló el 2026-11-18 (`specs/nv-24-smart-match-genai/genai-contract.md`): `POST /api/v1/generative/explain-match` en camelCase, sin id del cuarto ni datos personales, respuesta `{ explanation, generated, promptVersion }`; encabezados `X-Service-Key` (secreto de Container Apps `genai-service-key` como `GenAI__ServiceKey`, entregado por canal privado) y `X-Request-ID`; timeout de 8 s, un reintento solo ante red o 5xx, 429 con `Retry-After`, circuit breaker; `generatedBy: genai` solo con `generated: true` y validación del backend; mapeo de servicios del catálogo a español; hosting en Azure App Service y proveedor Gemini por decisión del equipo de GenAI, con costo $0 demostrado por ellos antes de activar. Reemplaza el contrato `v1` de M-BE-068; el contrato con Mobile no cambia. `parse-search` sigue fuera (spec futura) y sus preguntas quedan respondidas en `genai-contract.md`.
+- **Estado:** APROBADO — Victor, 2026-11-19 («Apruebo 1.2.0»). La ejecución requiere «EJECUTA» y NV-23 desplegada.
+- **Fecha:** 2026-11-19.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** solo documentación por ahora; al ejecutar, un secreto nuevo (`genai-service-key`) y configuración `GenAI__*` en la Container App; sin paquetes.
