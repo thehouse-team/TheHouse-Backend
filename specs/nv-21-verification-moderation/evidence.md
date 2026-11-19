@@ -7,8 +7,8 @@
 | Versión | 1.2.0 (1.1.0 completa, ver «Historial 1.1.0») |
 | Fecha | 2026-11-19 |
 | Autorización | 1.2.0: «Ya lo validó, apruebo y EJECUTA NV-21» — Victor Manuel Jose Jose, 2026-11-19: tasks T01–T10 (M-BE-079), con el contrato §6.1 validado antes por Mobile; el `terraform apply` requiere «OK PARA APPLY». 1.1.0: «Apruebo y EJECUTA», 2026-11-07 (M-BE-065) |
-| Rama | 1.2.0: `feat/nv-21-content-moderation` → PR pendiente de revisión. 1.1.0: `feat/nv-21-moderation` (PR #24) |
-| Resultado | **🟡 EN CURSO (1.2.0)**: T01–T06 completas: código verificado en local y recurso de Azure aplicado con «OK PARA APPLY»; T07–T10 esperan CI, despliegue y la prueba real en Azure. 1.1.0: ✅ PASS WITH WARNINGS (23/23 en Azure) |
+| Rama | 1.2.0: `feat/nv-21-content-moderation` (PR #67), `fix/nv-21-moderation-tuning` (PR #68) y `fix/nv-21-threat-phrases` (PR #69); merge final `ea10a4c`. 1.1.0: `feat/nv-21-moderation` (PR #24) |
+| Resultado | **✅ PASS WITH WARNINGS (1.2.0)** — T01–T10 completas: CI 1058/1058, desplegado en `ca-thehouse-u2--cea10a4c-64-1` con Azure AI Content Safety, prueba HTTP real en Azure 10/10 (tercera corrida). 1.1.0: ✅ PASS WITH WARNINGS (23/23 en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. Motivos y detalles de reportes, teléfonos y correos no aparecen en logs.
 
@@ -51,8 +51,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R04 Registro de rechazos para el administrador | `Staff_see_rejections_without_content_and_others_cannot` (campos del §6.1 sin contenido, filtro inválido 400, estudiante 403), `Unavailable_cloud_fails_closed_and_a_failed_log_still_rejects` |
 | R05 Recurso de Azure con identidad administrada | `terraform plan` revisado, apply con «OK PARA APPLY» y verificación con `az` (arriba); costo $0 (F0 se detiene al llegar al cupo) |
 | R06 Seguridad, privacidad y límites | `Without_the_review_nothing_is_saved` (503 `moderation_unavailable` con `Retry-After`), `Rejections_never_carry_the_content`, `Rejected_exception_carries_only_field_and_categories`, `Codes_are_explained_in_spanish`, `Cloud_access_uses_the_managed_identity_and_the_ga_api` |
-| R07 Contrato para Mobile y despliegue | Pendiente: CI, apply, despliegue y prueba real en Azure |
-| R08 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+| R07 Contrato para Mobile y despliegue | CD run 44478006535; prueba HTTP real en Azure 10/10; contrato entregado |
+| R08 Pruebas, seguridad y evidencia | TRX del CI run 44476873486: 1058/1058; `TheHouse.SecurityTests` 154/154; cobertura en «Despliegue y CI»; esta evidencia |
 
 ### 1.2.0 · Decisiones de implementación (dentro de la spec)
 
@@ -64,15 +64,46 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Textos revisados | Perfil, nombre del arrendador, nombre del edificio, solicitud, nota de rechazo, chat (incluido el de compañero), mensaje y notas de visita, comentario de reseña, perfil y contacto de compañero, y detalles de reportes. Las direcciones y los datos estructurados (precios, tipos) no se envían |
 | Rol para la vista | `reviewer` o `admin` (`admin` incluye a `reviewer`, NV-21 1.1.0) |
 
-### 1.2.0 · Pendiente para cerrar
+### 1.2.0 · Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#67](https://github.com/thehouse-team/TheHouse-Backend/pull/67) (implementación, merge `d08f8b1`), [#68](https://github.com/thehouse-team/TheHouse-Backend/pull/68) (token, plurales y umbral, `e1259c0`) y [#69](https://github.com/thehouse-team/TheHouse-Backend/pull/69) (frases de amenaza tras la calibración, `ea10a4c`), mezclados por `IsaiAxel` |
+| CI de `main` (`ea10a4c`, run 44476873486) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI | 1058/1058: unitarias 408, integración 496, seguridad 154 |
+| Cobertura de líneas (CI) | 68.9 % total (ramas 72.8 %). `ContentModerationServices` 97.6 %, `AzureContentSafetyClient` 84.9 %, `ContentModerationConfiguration` 48.1 % (la rama con el recurso real solo corre en Azure), `MongoModerationRejectionRepository` 0 %, como los demás adaptadores Mongo |
+| CD (run 44478006535) | Todo en verde; el paso de build y push tardó 18 min en el runner de GitHub (normalmente ~1 min), sin errores |
+| Azure | revisión `ca-thehouse-u2--cea10a4c-64-1`, Healthy, 100 % del tráfico; `ContentSafety__Endpoint` y `ContentSafety__IdentityClientId` cargadas por Victor (no son secretos) |
+
+### 1.2.0 · Prueba HTTP real en Azure
+
+`.azure-check/nv21_azure_check.py` (fuera del repositorio), con dos cuentas `@example.com` nuevas en cada corrida, que el propio script elimina al final (NV-10). Solo imprime códigos, campos y categorías.
+
+| Corrida | Resultado | Hallazgo y corrección |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production (solo lista de términos hasta configurar el recurso) | Victor | Pendiente |
-| `ContentSafety__Endpoint` y `ContentSafety__IdentityClientId` en la Container App (salidas de Terraform, no son secretos) | Victor | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv21_azure_check.py`) | Victor | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| 1 (tras #67) | 5/9 | T1 503: el token de la identidad se pedía dentro de los 3 s del análisis (en frío tarda más) → límite propio de 10 s. F3: el plural «pendejos» pasaba → la lista acepta `-s`/`-es`. T3: una amenaza se guardó → umbral 2 en violencia y odio (decisión de Victor) |
+| 2 (tras #68) | 7/9 | T3 seguía pasando con el umbral en 2 y la configuración leída bien (prueba nueva). La calibración con un rol temporal mostró **Violence=0 para amenazas directas en español y en inglés**, mientras odio (**Hate=4**) y sexual (**Sexual=6**) sí se detectan → la lista acepta frases y agrega amenazas comunes |
+| 3 (tras #69) | **10/10 PASS** | Texto limpio 200 (la nube respondió); término de la lista 422 `blocklist`; odio 422 `hate` (Content Safety); amenaza 422 `blocklist` (frase); el perfil conserva el nombre limpio; edificio limpio 201; foto limpia 200 (imagen revisada en la nube); nombre de edificio con término 422; cuentas eliminadas 204 |
+
+### 1.2.0 · Contrato entregable a Mobile
+
+Entregado el 2026-11-19 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` (validado por Mobile antes de ejecutar) con la URL y las pruebas reales; las respuestas de éxito no cambian y las rutas que guardan texto o fotos agregan 422 `content_rejected` (con `field` y `categories`) y 503 `moderation_unavailable` (con `Retry-After`).
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 44476873486): 1058/1058 (unitarias 408, integración 496, seguridad 154); prueba HTTP real en Azure 10/10 con Azure AI Content Safety (2026-11-19)
+```
+
+### 1.2.0 · Hallazgos y resultado
+
+| # | Hallazgo | Severidad | Estado |
+| --- | --- | --- | --- |
+| H1 | Azure AI Content Safety no califica las amenazas directas (Violence=0 en español e inglés) | Media | Mitigado: frases de amenaza en la lista de términos; la lista es corta y no cubre todas las variantes |
+| H2 | La lista de términos se mantiene a mano en `appsettings.json` | Baja | Aceptado; se amplía con los reportes (NV-21 1.1.0) y los rechazos registrados |
+| H3 | El registro de rechazos (`moderation_rejections`) y su adaptador Mongo no tienen cobertura en CI | Baja | Aceptado: la ruta de administración se probó por HTTP con el doble en memoria |
+| H4 | El build de la imagen tardó 18 min una vez en el runner de GitHub | Información | Observación; si se repite, se revisa la caché del build |
+
+Resultado: **PASS WITH WARNINGS**. Costo: $0 (Content Safety F0, cupo de 30 000 llamadas cada 30 días que se detiene sin cobrar; identidad y rol sin costo; colección pequeña con TTL). Revisión de coherencia: spec, plan, tasks, README, `memoria.md` (M-BE-079 con su actualización y la calibración) y esta evidencia indican 1.2.0 completa 10/10.
 
 # Historial 1.1.0
 
