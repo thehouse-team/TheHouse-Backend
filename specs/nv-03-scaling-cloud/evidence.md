@@ -193,3 +193,87 @@ Ejecutado el 2026-11-05 en la rama `fix/u2-review` con la autorización humana �
 ### T08, T18 y T19 — diferidas a la ventana de evaluación (decisión de Victor, 2026-11-07)
 
 El plan de Terraform para la ventana de dos réplicas está revisado (`min_replicas` 0 → 2; `0 to add, 1 to change, 0 to destroy`; imagen, secretos y variables sin cambios por `ignore_changes`). Por decisión de Victor (opción B), la ventana 2–2, el smoke con dos instancias y su evidencia se ejecutan el 3 y 4 de diciembre (M-BE-039), con «OK PARA APPLY» para subir y para regresar a 0–2. Las fallas de Redis y MongoDB de T19 se demuestran con las pruebas automatizadas y el entorno efímero, no en producción.
+
+## Cierre documental 1.2.0-u2 (2026-11-19) — 10 tasks con evidencia existente
+
+Autorización: «EJECUTA cierre documental de NV-03» — Victor Manuel Jose Jose, 2026-11-19 (M-BE-080). Solo documentación: se cierran las tasks que el sistema desplegado ya cumple, con evidencia del código, de las specs NV-04 a NV-25 y de Azure; no se cambió código ni infraestructura. No se leyeron `terraform.tfvars`, `terraform.tfstate` ni `appsettings.Development.json`.
+
+### T01 y T02 — Inventario y externalización de estado
+
+| Estado | Dónde vive | Réplicas | Fuente |
+| --- | --- | --- | --- |
+| Sesiones (refresh tokens, solo hash) | MongoDB `refresh_tokens` | Compartido | NV-10 |
+| Revocación de JWT (`jti`) y de sesiones (`sid`) | Redis `thehouse:u2:auth:revoked:*` con TTL | Compartido; sin caché local (falla cerrado) | NV-06, NV-10 |
+| Cuotas y rate limit (≈40 llaves `thehouse:u2:<módulo>:<alcance>:v1:<hash>`) | Redis con TTL de ventana | Compartido; Redis caído → 503 | NV-05 a NV-25 |
+| Candados (visitas, mensajes, rentas, retención de documentos) | Redis `SET NX` con TTL | Compartido | NV-13, NV-16, NV-17, NV-18 |
+| Sal diaria de vistas | Redis `thehouse:u2:analytics:view-salt:v1:{día}`, `SET NX`, 48 h | Compartido | NV-25 |
+| Datos de negocio | MongoDB Atlas (colecciones por módulo) | Compartido | NV-07 a NV-25 |
+| Tarea de retención de documentos (cada 6 h) | `MediaRetentionWorker` con candado de Redis | Una réplica a la vez | NV-13 |
+| Cola de push | `Channel` acotado en memoria (1000) | **Local por diseño**: la envía la réplica que guardó la notificación; la bandeja en MongoDB es la fuente de verdad (M-BE-078) | NV-20 |
+| Caché HTTP | `ETag`/`Cache-Control` en el cliente; sin caché del servidor | Sin estado | NV-07, NV-08 |
+| Llaves de cifrado de documentos y firma JWT | Secretos de la Container App | Iguales en todas las réplicas | NV-13, NV-05 |
+
+Resultado: ningún estado de seguridad (revocación, cuotas, candados) vive en memoria de una réplica; el único estado local (cola de push) está justificado y no afecta la corrección.
+
+### T03 — Topología y claves Redis
+
+- Un solo Redis (Upstash, plan gratuito) con namespace `thehouse:u2:<módulo>:<alcance>:v1:`; los identificadores de usuario e IP van como hash (`RateLimitKeys.Hash`), nunca en claro.
+- TTL en toda llave (ventanas de rate limit, revocación igual a la vida del access token más tolerancia, candados de segundos, sal de 48 h).
+- TLS obligatorio para cualquier host que no sea loopback (`RedisAccess`: sin `Ssl` → configuración inválida); credencial como secreto `redis-connection` de la Container App (M-BE-038).
+
+### T04 y T05 — Fallas de Redis y estado distribuido de autenticación y límites
+
+- Redis no se usa como caché de datos, así que no hay invalidación tras escritura ni *stampede* (la caché pública es HTTP con `ETag`).
+- Ante timeout o caída: revocación, rate limit, candados y sal fallan **cerrado** (503, nunca se omite el control); `AbortOnConnectFail = false` para reconectar solo. Probado en cada spec con los dobles `Unavailable` (por ejemplo `Views_never_break_the_room_detail_and_stats_fail_closed`, `Deletion_attempts_are_limited...`) y en el smoke `full` del CD (429 de login, reuso del token revocado 401).
+- Sin fallback local de seguridad: la revocación por `sid` se consulta en Redis en cada solicitud autenticada en todas las réplicas.
+
+### T06 — Conexión MongoDB, pooling e índices
+
+- `MongoClientSettings`: TLS obligatorio fuera de loopback y `AllowInsecureTls` rechazado; `ConnectTimeout`, `ServerSelectionTimeout` y `SocketTimeout` de 5 s; `MaxConnectionPoolSize` 100; cancelación propagada en todas las llamadas.
+- Credencial solo en el secreto `mongodb-uri` (M-BE-038).
+- Índices creados por cada repositorio para sus consultas (únicos donde hay idempotencia y TTL donde hay retención), documentados en cada spec (por ejemplo `ux_room_views_room_day_actor`, `ux_push_devices_token`, `ttl_moderation_rejections_created`).
+
+### T10 — TLS, HSTS y confianza en el proxy
+
+| Verificación (2026-11-19) | Resultado |
+| --- | --- |
+| Certificado del dominio público | Administrado y renovado por Azure: `CN=grayisland-cb722b5f.eastus2.azurecontainerapps.io`, emisor `Microsoft TLS G2 RSA CA OCSP 02`, vence 2027-02-12 |
+| Protocolo | TLS 1.3 |
+| HTTP | `301` a HTTPS; ingress con `allowInsecure = false` |
+| HSTS | `Strict-Transport-Security: max-age=2592000` (30 días) en las respuestas |
+| Proxy | `ForwardedHeaders` solo con `Proxy__Enabled`, `RequireHeaderSymmetry`, `ForwardLimit` y redes del ingress de Container Apps; validación de certificados activa hacia MongoDB, Redis, FCM y Content Safety |
+
+La revisión con dos réplicas activas se repite en T19 (ventana del 3 y 4 de diciembre).
+
+### T16 y T17 — Costo y gate de apply
+
+| Componente | Plan | Costo observado |
+| --- | --- | --- |
+| Azure Container Apps (0–2 réplicas, consumo) | Concesión gratuita mensual de consumo | 0.00 USD |
+| Log Analytics | Tope de 0.1 GB/día y 30 días | 0.00 USD |
+| Azure AI Content Safety | F0 (30 000 llamadas cada 30 días; se detiene sin cobrar) | 0.00 USD |
+| Identidades administradas y roles | Sin costo | — |
+| GHCR | Paquete público | 0 USD |
+| GitHub Actions | Repositorio público | 0 USD |
+| MongoDB Atlas M0 y Upstash Redis | Planes gratuitos | 0 USD |
+| Firebase Cloud Messaging | Sin costo por mensaje | 0 USD |
+
+- Cost Management (`ActualCost`, `rg-thehouse-u2`, del 2026-11-01 al 2026-11-19, por servicio): **0.00 USD** (filas «Foundry Tools» y «Log Analytics»). Presupuesto `thehouse-budget` de 1 USD con alertas al 50 % y 100 %.
+- Gate cumplido en cada cambio de infraestructura: el plan se mostró y se aplicó solo tras «OK PARA APPLY» de Victor (NV-09 el 2026-11-06, observabilidad de NV-03 1.2.0-u2 y NV-21 el 2026-11-19 con `Plan: 3 to add, 1 to change, 0 to destroy`).
+
+### T22 — Publicación en GHCR y `VERSIONING.md`
+
+Cubierta por NV-09: cada despliegue publica `ghcr.io/thehouse-team/thehouse-backend:sha-<commit>` y se despliega por digest firmado (Cosign keyless, SBOM atestado), sin tokens impresos (`GITHUB_TOKEN` con `packages: write` solo en `publish`); `VERSIONING.md` §11 registra fecha, commit, digest, run, aprobador, revisión y estado (NV-09 T17, 2026-11-17).
+
+### Tasks que siguen abiertas
+
+| Task | Motivo |
+| --- | --- |
+| T07 Resiliencia y seguridad MongoDB | Falta verificar en Atlas la lista de acceso de red y el rol mínimo del usuario de la base (lo revisa Victor en el portal de Atlas) |
+| T08, T09 y T19 | Ventana de dos réplicas del 3 y 4 de diciembre con «OK PARA APPLY» (M-BE-059, opción B). Ya verificado: probes `/health/live` y `/health/ready` en Terraform y sin sesiones fijas |
+| T11 y T12 | La app usa OpenTelemetry con logs de consola correlacionados en Log Analytics, pero sin exportador de trazas ni métricas (`OtlpEnabled = false`); falta decidir el exportador con costo $0 |
+| T14 | Fuera de U2 |
+| T18 | Infraestructura creada y verificada, pero el criterio incluye el plan con dos réplicas (ventana) |
+| T20 y T21 | Destrucción y costo del ciclo completo: se propone probarlo en un entorno desechable (otro grupo de recursos) con autorización y «OK PARA APPLY» |
+
+Resultado del cierre: **15 de 25** tasks completas.
