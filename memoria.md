@@ -750,3 +750,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-19.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** solo documentación por ahora; al ejecutar, un secreto nuevo (`genai-service-key`) y configuración `GenAI__*` en la Container App; sin paquetes.
+
+## M-BE-082 — NV-03 T20 y T21: ciclo de vida de la infraestructura demostrado
+
+- **ID:** M-BE-082
+- **Decisión:** demostrar crear → verificar → destruir con el mismo Terraform en el workspace `lifecycle` (`infra/terraform/lifecycle.tfvars` y `LIFECYCLE.md`). Variables nuevas con valor por defecto igual a producción: `content_safety_enabled`, `cd_identity_enabled` y `existing_environment_id`, más bloques `moved` (producción sin cambios). La suscripción admite un solo entorno de Container Apps y no permite ampliar la cuota (`ResourceNotAvailableForOffer`), así que, por decisión de Victor (opción 1), la app desechable vive dentro del entorno de producción sin administrarlo y sin otorgar roles. Se registró el proveedor `Microsoft.Quota` (sin costo) con autorización de Victor.
+- **Estado:** EJECUTADO — Victor, 2026-11-19 («EJECUTA NV-03 T20 y T21», «autorizo registrar Microsoft.Quota y pedir la cuota», «opción 1» y tres «OK PARA APPLY»: dos de creación y uno de destrucción).
+- **Fecha:** 2026-11-19.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** sin recursos nuevos permanentes; el desechable se destruyó por completo (0 recursos residuales); costo esperado 0.00 USD, pendiente de reflejo en Cost Management.

@@ -31,6 +31,10 @@ resource "azurerm_log_analytics_workspace" "this" {
 }
 
 resource "azurerm_container_app_environment" "this" {
+  # NV-03 T20: la suscripción admite un solo entorno de Container Apps; el
+  # desechable usa el de producción sin administrarlo (no lo crea ni lo borra).
+  count = var.existing_environment_id == null ? 1 : 0
+
   name                = var.container_app_environment_name
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
@@ -50,7 +54,7 @@ resource "azurerm_container_app_environment" "this" {
 
 resource "azurerm_container_app" "this" {
   name                         = var.container_app_name
-  container_app_environment_id = azurerm_container_app_environment.this.id
+  container_app_environment_id = local.environment_id
   resource_group_name          = azurerm_resource_group.this.name
   workload_profile_name        = "Consumption"
   revision_mode                = "Single"
@@ -220,4 +224,13 @@ resource "azurerm_container_app" "this" {
       error_message = "Mutable container image references are forbidden."
     }
   }
+}
+
+locals {
+  environment_id = coalesce(var.existing_environment_id, one(azurerm_container_app_environment.this[*].id))
+}
+
+moved {
+  from = azurerm_container_app_environment.this
+  to   = azurerm_container_app_environment.this[0]
 }

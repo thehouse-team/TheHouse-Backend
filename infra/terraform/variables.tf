@@ -190,3 +190,26 @@ variable "app_identity_name" {
   type        = string
   default     = "id-thehouse-u2-app"
 }
+
+variable "content_safety_enabled" {
+  description = "NV-03 T20: false only in the disposable lifecycle environment (one F0 per subscription)."
+  type        = bool
+  default     = true
+}
+
+variable "existing_environment_id" {
+  description = "NV-03 T20: id of an existing Container Apps environment to reuse (disposable lifecycle env only); null creates its own."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.existing_environment_id == null || can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.App/managedEnvironments/[^/]+$", var.existing_environment_id))
+    error_message = "existing_environment_id must be a Microsoft.App/managedEnvironments resource id."
+  }
+}
+
+variable "cd_identity_enabled" {
+  description = "NV-03 T20: false in the disposable lifecycle env so it never grants roles on shared resources."
+  type        = bool
+  default     = true
+}
