@@ -4,13 +4,77 @@
 | --- | --- |
 | ID | NV-21 |
 | Documento | `evidence.md` |
-| Versión | 1.1.0 |
-| Fecha | 2026-11-07 |
-| Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-07: NV-21 1.1.0, decisiones de la §13 y tasks T01–T14 (M-BE-065). Contrato §6.1 validado antes por el responsable de Mobile |
-| Rama | `feat/nv-21-moderation` → PR #24, mezclado en `main` (`7310ab0`); spec y aprobación en PR #23 (`c770b1c`) |
-| Resultado | **✅ PASS WITH WARNINGS**: 14/14 tasks completas; desplegada en Azure y verificada con prueba HTTP real 23/23. Advertencia: adaptadores Mongo sin cobertura automatizada (verificados en Azure) |
+| Versión | 1.2.0 (1.1.0 completa, ver «Historial 1.1.0») |
+| Fecha | 2026-11-19 |
+| Autorización | 1.2.0: «Ya lo validó, apruebo y EJECUTA NV-21» — Victor Manuel Jose Jose, 2026-11-19: tasks T01–T10 (M-BE-079), con el contrato §6.1 validado antes por Mobile; el `terraform apply` requiere «OK PARA APPLY». 1.1.0: «Apruebo y EJECUTA», 2026-11-07 (M-BE-065) |
+| Rama | 1.2.0: `feat/nv-21-content-moderation` → PR pendiente de revisión. 1.1.0: `feat/nv-21-moderation` (PR #24) |
+| Resultado | **🟡 EN CURSO (1.2.0)**: T01–T06 completas: código verificado en local y recurso de Azure aplicado con «OK PARA APPLY»; T07–T10 esperan CI, despliegue y la prueba real en Azure. 1.1.0: ✅ PASS WITH WARNINGS (23/23 en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`. Motivos y detalles de reportes, teléfonos y correos no aparecen en logs.
+
+## 1.2.0 — Moderación automática antes de guardar
+
+### 1.2.0 · Cambios por capa
+
+| Capa | Archivo | Cambio |
+| --- | --- | --- |
+| Domain | `Entities/Moderation.cs` | `ModerationRejection` (quién, dónde, categorías y severidad; **sin el contenido**) |
+| Application | `Abstractions/Moderation/IContentModeration.cs` (nuevo) | Puerto compartido `IContentModerator` (como `INotificationSink`, sin dependencias entre módulos), `IContentSafetyClient`, `IModerationRejectionRepository`, `ContentRejectedException` (422) y `ModerationUnavailableException` (503) |
+| Application | `UseCases/ContentModerationServices.cs` (nuevo) | `ContentModerationService` (lista de términos sin acentos ni mayúsculas, umbral 4, registro del rechazo, falla cerrada) y `ModerationRejectionService` (vista de revisor o admin) |
+| Application | `ProfileService`, `LandlordService`, `BuildingService`, `MessagingServices` (solicitud, nota de rechazo y chat), `VisitService`, `LandlordVisitService` (notas), `ReviewServices`, `RoommateServices` (perfil y contacto), `ModerationServices` (detalles de reportes), `MediaServices` (fotos) | Revisión después de validar y antes de guardar; parámetro opcional `IContentModerator` (sin cambiar las demás dependencias) |
+| Infrastructure | `Moderation/AzureContentSafetyClient.cs` (nuevo) | REST GA `2023-10-01` (`text:analyze` e `image:analyze`); token de la identidad administrada de Container Apps (`IDENTITY_ENDPOINT`/`IDENTITY_HEADER`, `client_id` de la identidad de la app); 3 s y un reintento en 5xx; 429 (cupo F0) → 503 sin reintentar; `DisabledContentSafetyClient` sin el recurso |
+| Infrastructure | `Persistence/Mongo/MongoModerationRejectionRepository.cs` (nuevo) | `moderation_rejections` con `ix_moderation_rejections_user_created` y `ttl_moderation_rejections_created` (180 días) |
+| API | `Configuration/ContentModerationConfiguration.cs` (nuevo), `Program.cs`, `appsettings.json`, `UserEndpointSupport.cs`, `UserResourceProblems.cs`, `AdminEndpoint.cs` | `ContentSafety__Endpoint` (solo `https://*.cognitiveservices.azure.com`), `ContentSafety__IdentityClientId`, umbral y lista corta de términos; 422 `content_rejected` con `field` y `categories`; 503 `moderation_unavailable` con `Retry-After: 30`; `GET /api/v1/admin/moderation/rejections` |
+| Infra | `infra/terraform/content_safety.tf` (nuevo), `main.tf`, `variables.tf`, `outputs.tf` | `azurerm_cognitive_account` `ContentSafety` F0 con `local_auth_enabled = false`; identidad asignada por el usuario `id-thehouse-u2-app` en la Container App; rol `Cognitive Services User` solo sobre el recurso; salidas `content_safety_endpoint` y `content_safety_identity_client_id` |
+| Pruebas | `UnitTests/ContentModerationTests.cs`, `IntegrationTests/ContentModerationHttpTests.cs`, `IntegrationTests/ContentSafetyClientTests.cs`, `SecurityTests/ContentModerationSecurityTests.cs`, `IntegrationTests/ContentModerationTestDoubles.cs`; listas OpenAPI | 7 unitarias, 11 de integración y 6 de seguridad |
+
+### 1.2.0 · Comandos y resultados (local, 2026-11-19)
+
+| Comando | Resultado |
+| --- | --- |
+| `dotnet build TheHouse.slnx --configuration Release -warnaserror` | 0 advertencias, 0 errores |
+| `dotnet test TheHouse.slnx --configuration Release` (dos corridas seguidas, como el CI) | 1051/1051 en la primera corrida (unitarias 402, seguridad 154, integración 495); en la segunda falló 1 prueba ajena a NV-21 (HealthAndRateLimitTests de NV-01, la misma de tiempo que en NV-20); las pruebas de NV-21 pasaron en las dos corridas |
+| `terraform fmt -check` y `terraform validate` | Sin cambios de formato; configuración válida |
+| `terraform plan` (state local, sin aplicar) | **Plan: 3 to add, 1 to change, 0 to destroy**: `azurerm_cognitive_account.content_safety` (`ContentSafety`, `F0`, `local_auth_enabled = false`, subdominio `cs-thehouse-u2`), `azurerm_user_assigned_identity.app`, `azurerm_role_assignment.app_content_safety` (`Cognitive Services User`) y `azurerm_container_app.this` en sitio (solo el bloque `identity`; imagen, secretos y variables en `ignore_changes`) |
+| `az cognitiveservices account list-skus --kind ContentSafety --location eastus2` | F0 y S0 disponibles en la región del backend |
+| `az provider register --namespace Microsoft.CognitiveServices --wait` (autorizado por Victor, 2026-11-19) | `Registered` (sin costo ni recursos) |
+| `terraform apply` del plan guardado («OK PARA APPLY», Victor, 2026-11-19) | **Apply complete! Resources: 3 added, 1 changed, 0 destroyed** |
+| Verificación posterior con `az` | `cs-thehouse-u2`: `ContentSafety`, `F0`, `eastus2`, `Succeeded`, `disableLocalAuth = true`; cupo F0 **30 000 llamadas cada 30 días** (`list-usage`, sin cobro); única asignación sobre el recurso: `Cognitive Services User` de `id-thehouse-u2-app`; Container App con identidad `UserAssigned` y la misma imagen, revisión nueva `ca-thehouse-u2--0000011` Healthy al 100 %; `terraform plan` posterior sin cambios en recursos (solo el output `container_app_fqdn`, H-04 de NV-09) |
+
+### 1.2.0 · Trazabilidad requisito → prueba
+
+| Requisito | Pruebas |
+| --- | --- |
+| R01 Cliente de Content Safety | `Client_sends_text_and_images_with_the_managed_identity_token`, `Quota_errors_and_missing_identity_fail_closed_and_server_errors_retry_once`, `Only_azure_ai_endpoints_are_accepted` |
+| R02 Moderación de texto antes de guardar | `Offensive_text_is_rejected_before_saving_in_every_module` (perfil, edificio, reporte, solicitud y chat: 422 y nada guardado), `Blocklisted_words_are_rejected_even_when_the_cloud_says_it_is_clean`, `Severity_four_or_more_is_rejected` (0 y 2 pasan; 4 y 6 se rechazan), `Blocklist_matches_whole_words_without_accents_or_case` |
+| R03 Moderación de imágenes antes de guardar | `Photos_are_reviewed_before_saving_but_documents_never_leave` (foto de cuarto y de edificio 422 sin guardar; la INE no llama a la nube; foto limpia 201) |
+| R04 Registro de rechazos para el administrador | `Staff_see_rejections_without_content_and_others_cannot` (campos del §6.1 sin contenido, filtro inválido 400, estudiante 403), `Unavailable_cloud_fails_closed_and_a_failed_log_still_rejects` |
+| R05 Recurso de Azure con identidad administrada | `terraform plan` revisado, apply con «OK PARA APPLY» y verificación con `az` (arriba); costo $0 (F0 se detiene al llegar al cupo) |
+| R06 Seguridad, privacidad y límites | `Without_the_review_nothing_is_saved` (503 `moderation_unavailable` con `Retry-After`), `Rejections_never_carry_the_content`, `Rejected_exception_carries_only_field_and_categories`, `Codes_are_explained_in_spanish`, `Cloud_access_uses_the_managed_identity_and_the_ga_api` |
+| R07 Contrato para Mobile y despliegue | Pendiente: CI, apply, despliegue y prueba real en Azure |
+| R08 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+
+### 1.2.0 · Decisiones de implementación (dentro de la spec)
+
+| Tema | Decisión |
+| --- | --- |
+| Identidad | Asignada **por el usuario** (`id-thehouse-u2-app`) en lugar de la del sistema: con la del sistema Terraform no puede planear el rol en el mismo `apply` (su `principal_id` no existe todavía). Es exclusiva de la app y distinta de la identidad del CD |
+| Despliegue seguro | Sin `ContentSafety__Endpoint` solo aplica la lista de términos (no llama a la nube): el código puede desplegarse antes del apply sin bloquear escrituras; la revisión en la nube se activa al cargar `ContentSafety__Endpoint` y `ContentSafety__IdentityClientId` (no son secretos) |
+| Lista de términos | 12 términos en `appsettings.json` (`ContentSafety:Blocklist`), comparados por palabra completa sin acentos ni mayúsculas |
+| Textos revisados | Perfil, nombre del arrendador, nombre del edificio, solicitud, nota de rechazo, chat (incluido el de compañero), mensaje y notas de visita, comentario de reseña, perfil y contacto de compañero, y detalles de reportes. Las direcciones y los datos estructurados (precios, tipos) no se envían |
+| Rol para la vista | `reviewer` o `admin` (`admin` incluye a `reviewer`, NV-21 1.1.0) |
+
+### 1.2.0 · Pendiente para cerrar
+
+| Paso | Responsable | Estado |
+| --- | --- | --- |
+| CI del PR en verde y merge | CI / Isai | Pendiente |
+| Aprobación del CD a Production (solo lista de términos hasta configurar el recurso) | Victor | Pendiente |
+| `ContentSafety__Endpoint` y `ContentSafety__IdentityClientId` en la Container App (salidas de Terraform, no son secretos) | Victor | Pendiente |
+| Prueba HTTP real en Azure (`.azure-check/nv21_azure_check.py`) | Victor | Pendiente |
+| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+
+# Historial 1.1.0
 
 ## 1. Cambios por capa
 

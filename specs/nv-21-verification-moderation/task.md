@@ -8,12 +8,12 @@
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-21-verification-moderation/`; `infra/terraform/` solo hasta el `plan` (el `apply` requiere «OK PARA APPLY»); sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas (recurso aplicado); T07–T10 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Plan | `plan.md` 1.2.0-borrador |
 | Tasks totales | 10 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
@@ -25,18 +25,18 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T02 · Moderación de texto antes de guardar** — Requisito: NV-21-R02 · Fase: F1 · Aceptación: Cada campo de la lista del alcance pasa por la revisión antes de guardar; un texto inapropiado responde 422 y no se guarda; uno limpio se guarda como hoy (una prueba por módulo). · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
-- [ ] **T03 · Moderación de imágenes antes de guardar** — Requisito: NV-21-R03 · Fase: F1 · Aceptación: Foto del edificio y de los cuartos revisadas antes de guardar; documentos nunca enviados; imagen grande reducida antes de enviarla. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T02 · Moderación de texto antes de guardar** — Requisito: NV-21-R02 · Fase: F1 · Aceptación: Cada campo de la lista del alcance pasa por la revisión antes de guardar; un texto inapropiado responde 422 y no se guarda; uno limpio se guarda como hoy (una prueba por módulo). · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T03 · Moderación de imágenes antes de guardar** — Requisito: NV-21-R03 · Fase: F1 · Aceptación: Foto del edificio y de los cuartos revisadas antes de guardar; documentos nunca enviados; imagen grande reducida antes de enviarla. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T01 · Cliente de Content Safety** — Requisito: NV-21-R01 · Fase: F2 · Aceptación: Llamadas de texto e imagen con identidad administrada, umbral 4, tiempo máximo y un reintento; falla cerrado con 503; probado contra un servidor falso. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T02, T03.
-- [ ] **T04 · Registro de rechazos para el administrador** — Requisito: NV-21-R04 · Fase: F2 · Aceptación: Rechazo registrado sin contenido; vista paginada y filtrable solo para admin o moderador; TTL de 180 días. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T02, T03.
+- [x] **T01 · Cliente de Content Safety** — Requisito: NV-21-R01 · Fase: F2 · Aceptación: Llamadas de texto e imagen con identidad administrada, umbral 4, tiempo máximo y un reintento; falla cerrado con 503; probado contra un servidor falso. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T02, T03.
+- [x] **T04 · Registro de rechazos para el administrador** — Requisito: NV-21-R04 · Fase: F2 · Aceptación: Rechazo registrado sin contenido; vista paginada y filtrable solo para admin o moderador; TTL de 180 días. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T02, T03.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T05 · Recurso de Azure con identidad administrada** — Requisito: NV-21-R05 · Fase: F3 · Aceptación: Terraform del recurso F0, la identidad y el rol; plan revisado; apply con «OK PARA APPLY»; costo $0 verificado. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T02, T03, T01, T04.
-- [ ] **T06 · Seguridad, privacidad y límites** — Requisito: NV-21-R06 · Fase: F3 · Aceptación: Sin llaves ni contenido en logs; documentos excluidos; ruta admin protegida; Content Safety caído o sin cupo → 503 sin guardar. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T02, T03, T01, T04.
+- [x] **T05 · Recurso de Azure con identidad administrada** — Requisito: NV-21-R05 · Fase: F3 · Aceptación: Terraform del recurso F0, la identidad y el rol; plan revisado; apply con «OK PARA APPLY»; costo $0 verificado. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T02, T03, T01, T04.
+- [x] **T06 · Seguridad, privacidad y límites** — Requisito: NV-21-R06 · Fase: F3 · Aceptación: Sin llaves ni contenido en logs; documentos excluidos; ruta admin protegida; Content Safety caído o sin cupo → 503 sin guardar. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T02, T03, T01, T04.
 
 ## F4 — Pruebas y evidencia
 
@@ -49,12 +49,12 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F2 | ABIERTA |
-| T02 | R02 | F1 | ABIERTA |
-| T03 | R03 | F1 | ABIERTA |
-| T04 | R04 | F2 | ABIERTA |
-| T05 | R05 | F3 | ABIERTA |
-| T06 | R06 | F3 | ABIERTA |
+| T01 | R01 | F2 | COMPLETA |
+| T02 | R02 | F1 | COMPLETA |
+| T03 | R03 | F1 | COMPLETA |
+| T04 | R04 | F2 | COMPLETA |
+| T05 | R05 | F3 | COMPLETA |
+| T06 | R06 | F3 | COMPLETA |
 | T07 | R07 | F4 | ABIERTA |
 | T08 | R08 | F4 | ABIERTA |
 | T09 | R08 | F4 | ABIERTA |
@@ -79,11 +79,11 @@
 | --- | --- |
 | Requisitos | 8 |
 | Tasks | 10 |
-| Tasks abiertas | 10 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 6 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas (recurso aplicado); T07–T10 esperan CI, despliegue y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

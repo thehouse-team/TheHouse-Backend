@@ -8,7 +8,7 @@
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T10; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-21-verification-moderation/`; `infra/terraform/` solo hasta el `plan` (el `apply` requiere «OK PARA APPLY»); sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas (recurso aplicado); T07–T10 esperan CI, despliegue y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | Requisito del curso §16 (evaluar con una API de la nube antes de almacenar); RNF-03 (prevención de fraude: verificación, reporte y moderación); RF-39 a RF-44 siguen en 1.1.0 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-03, RNF-10 |
@@ -220,9 +220,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 10 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 6 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T10 autorizadas** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T06 completas (recurso aplicado); T07–T10 esperan CI, despliegue y Azure** |
 
 ## 18. Aprobación pendiente
 
