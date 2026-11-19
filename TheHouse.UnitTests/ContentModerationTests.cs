@@ -42,6 +42,26 @@ public sealed class ContentModerationTests
         }
     }
 
+    [Theory]
+    [InlineData("Voy a matarte y a quemar tu casa", true)]
+    [InlineData("Te voy a MATAR si no me pagas", true)]
+    [InlineData("te   voy a romper la cara", true)]
+    [InlineData("No te voy a mentir, el cuarto es chico", false)]
+    [InlineData("Para matar el tiempo hay un parque cerca", false)]
+    public async Task Threat_phrases_are_blocked_as_consecutive_words(string text, bool blocked)
+    {
+        var service = Service(new FixedClient(), "matarte", "te voy a matar", "te voy a romper");
+        var check = service.CheckTextAsync(User, "chat.text", [new ModerationText("text", text)], CancellationToken.None);
+        if (blocked)
+        {
+            await Assert.ThrowsAsync<ContentRejectedException>(() => check);
+        }
+        else
+        {
+            await check;
+        }
+    }
+
     [Fact]
     public async Task Category_thresholds_override_the_default()
     {
