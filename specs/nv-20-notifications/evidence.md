@@ -7,8 +7,8 @@
 | Versión | 1.2.0 (1.1.0 completa, ver «Historial 1.1.0») |
 | Fecha | 2026-11-18 |
 | Autorización | 1.2.0: «Ya lo validó, apruebo y EJECUTA NV-20» — Victor Manuel Jose Jose, 2026-11-18: tasks T01–T08 (M-BE-078), con el contrato §6.1 validado antes por Mobile. 1.1.0: «Apruebo y EJECUTA», 2026-11-12 (M-BE-071) |
-| Rama | 1.2.0: `feat/nv-20-push-fcm` → PR pendiente de revisión. 1.1.0: `feat/nv-20-notifications` (PR #46) |
-| Resultado | **🟡 EN CURSO (1.2.0)**: T01–T04 completas y verificadas en local; T05–T08 esperan CI, despliegue, el secreto de Firebase y la prueba real en Azure. 1.1.0: ✅ PASS WITH WARNINGS (25/25 en Azure) |
+| Rama | 1.2.0: `feat/nv-20-push-fcm` → PR #65, merge `7c24535`. 1.1.0: `feat/nv-20-notifications` (PR #46) |
+| Resultado | **🟡 PASS WITH WARNINGS (1.2.0), 7/8** — CI 1027/1027, desplegado en `ca-thehouse-u2--c7c24535-60-2` con el secreto de Firebase, prueba HTTP real de dispositivos 14/14; T05 espera el push en un teléfono real. 1.1.0: ✅ PASS WITH WARNINGS (25/25 en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
 
@@ -44,8 +44,8 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | R02 Envío push de la bandeja | `Notifications_are_pushed_to_the_recipient_and_never_to_the_actor` (solicitud real por HTTP → cola → push al arrendador con el id de la notificación guardada; nada al estudiante que la envió), `Push_uses_the_inbox_text_priority_and_collapse_key`, `Dispatcher_sends_to_every_device_drops_invalid_tokens_and_retries_once` |
 | R03 Cliente de FCM | `Fcm_client_signs_the_assertion_caches_the_token_and_maps_errors` (firma RS256 verificada con la llave pública, alcance y audiencia, token en caché, formato HTTP v1, 404 → token inválido, 500 → falla, 401 → renueva), `Service_account_is_parsed_from_json_or_base64_and_only_for_google` |
 | R04 Privacidad, seguridad y límites | `Device_responses_never_carry_the_token_or_the_user`, `Device_body_rejects_unknown_fields`, `Push_text_is_the_inbox_text_without_message_content`, `Credential_and_limits_are_bounded` (solo el endpoint OAuth de Google, sin SSRF por configuración) |
-| R05 Contrato para Mobile y despliegue | Pendiente: CI, despliegue, secreto y prueba real en Azure |
-| R06 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+| R05 Contrato para Mobile y despliegue | CD run 44458017269; secreto cargado; dispositivos en Azure 14/14; contrato entregado; **push en teléfono real pendiente** |
+| R06 Pruebas, seguridad y evidencia | TRX del CI run 44457497605: 1027/1027; `TheHouse.SecurityTests` 148/148; cobertura en «Despliegue y CI»; esta evidencia |
 
 ### 1.2.0 · Decisiones de implementación (dentro de la spec)
 
@@ -56,15 +56,48 @@ No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni
 | Suspensión (NV-21) | Los dispositivos se conservan: la cuenta suspendida debe recibir el aviso `building_suspended` |
 | Notificación repetida | Si ya había una no leída del mismo hecho y no se agrupa, no se vuelve a enviar push |
 
-### 1.2.0 · Pendiente para cerrar
+### 1.2.0 · Despliegue y CI
 
-| Paso | Responsable | Estado |
+| Paso | Resultado |
+| --- | --- |
+| PR | [#65](https://github.com/thehouse-team/TheHouse-Backend/pull/65), mezclado por `IsaiAxel` (merge `7c24535`) |
+| CI de `main` (`7c24535`, run 44457497605) | 7/7 checks obligatorios en verde; mutación semanal omitida |
+| Pruebas en CI | 1027/1027: unitarias 395, integración 484, seguridad 148 |
+| Cobertura de líneas (CI) | 68.9 % total (ramas 72.6 %). `PushServices` 100 %, `PushDevicesEndpoint` 100 %, `NotificationServices` 98.4 %, `FcmPushSender` 89.8 %, `PushConfiguration` 80.0 %. `MongoPushDeviceRepository` 3.2 %, como los demás adaptadores Mongo: se verifica en Azure |
+| CD (run 44458017269) | Intento 1: `verify-ephemeral` falló porque ZAP no pudo levantar su proxy en el runner («Address already in use»; no escaneó, ningún hallazgo). Intento 2 (solo los jobs fallidos): resolve, publish, verify-ephemeral (smoke y ZAP), deploy aprobado por Victor, DAST y resumen en verde |
+| Secreto | `firebase-service-account` cargado por Victor el 2026-11-19 desde la cuenta de servicio dedicada del proyecto de Firebase de la app; `FIREBASE_SERVICE_ACCOUNT` como `secretRef` (sin valor en texto plano); el archivo local se borró |
+| Azure | revisión `ca-thehouse-u2--c7c24535-60-2`, Healthy, 100 % del tráfico; logs de la revisión sin «Push deshabilitado» ni errores (la cuenta de servicio se leyó) |
+
+### 1.2.0 · Prueba HTTP real en Azure
+
+`.azure-check/nv20_azure_check.py` (fuera del repositorio), corrida por Victor el 2026-11-19 con dos cuentas `@example.com` nuevas y tokens de FCM generados al azar con el formato real (no de un teléfono); solo se imprimen códigos, campos y conteos. Resultado: **14/14 PASS**.
+
+| Grupo | Casos | Resultado |
 | --- | --- | --- |
-| CI del PR en verde y merge | CI / Isai | Pendiente |
-| Aprobación del CD a Production | Victor | Pendiente |
-| Secreto `FIREBASE_SERVICE_ACCOUNT` en la Container App (cuenta de servicio con permiso solo de envío) | Victor / Mobile | Pendiente |
-| Prueba HTTP real en Azure (`.azure-check/nv20_azure_check.py`) y push en un teléfono real con Mobile | Victor / Mobile | Pendiente |
-| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+| Dispositivos | Registrar 201 con los campos del §6.1 y `no-store`; sin token en la respuesta; actualizar el token 200; lista sin tokens | 5/5 |
+| BOLA, conflicto y validación | Otra cuenta no puede borrar mi instalación 404; otra cuenta con otro token 409 `installation_conflict`; plataforma no admitida 400; campo desconocido 400; `installationId` inválido 404; sin sesión 401 | 6/6 |
+| Límite | Con 6 registros quedan 5 y sale el más antiguo | 1/1 |
+| Limpieza | 5 dispositivos borrados; lista vacía | 2/2 |
+
+### 1.2.0 · Contrato entregable a Mobile
+
+Entregado el 2026-11-19 junto con el aviso de despliegue. Es el contrato del §6.1 de `spec.md` (validado por Mobile antes de ejecutar) con la URL y las pruebas reales; las 3 rutas son nuevas y las respuestas existentes no cambian.
+
+```text
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        CI de main (run 44457497605): 1027/1027 (unitarias 395, integración 484, seguridad 148); prueba HTTP real de dispositivos en Azure 14/14 (2026-11-19); push en teléfono real pendiente con Mobile
+```
+
+### 1.2.0 · Hallazgos y resultado
+
+| # | Hallazgo | Severidad | Estado |
+| --- | --- | --- | --- |
+| H1 | El envío real a FCM todavía no se probó con un teléfono (T05) | Media | Abierto: prueba con Mobile (solicitud, mensaje y visita deben llegar como push) |
+| H2 | ZAP falló una vez al iniciar en el runner de GitHub (puerto ocupado) | Baja | Reintento manual del job; si se repite, se ajusta el paso del workflow |
+| H3 | `HealthAndRateLimitTests.Slow_probe_has_bounded_readiness...` (NV-01) falló una vez en local con la máquina cargada (el cliente de la prueba espera 5 s); pasó en el CI y aislada | Baja | Observación; si se repite en el CI se amplía su tiempo |
+| H4 | Adaptador Mongo sin cobertura en CI | Baja | Aceptado: se verificó con la prueba real en Azure |
+
+Resultado parcial: **PASS WITH WARNINGS (7/8)**. Costo: $0 (FCM no cobra; una colección pequeña `push_devices` con TTL de 270 días en MongoDB Atlas M0). Revisión de coherencia: spec, plan, tasks, README y esta evidencia indican 7 de 8 con T05 pendiente.
 
 # Historial 1.1.0
 
