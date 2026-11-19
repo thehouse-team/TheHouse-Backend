@@ -4,13 +4,69 @@
 | --- | --- |
 | ID | NV-20 |
 | Documento | `evidence.md` |
-| Versión | 1.1.0 |
-| Fecha | 2026-11-13 |
-| Autorización | «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-12: NV-20 1.1.0, tasks T01–T11 (M-BE-071) |
-| Rama | `feat/nv-20-notifications` → PR #46, merge `ebb8deb` |
-| Resultado | **✅ PASS WITH WARNINGS** — T01–T11 completas: CI 893/893, desplegado en `ca-thehouse-u2--cebb8deb-43-1`, prueba HTTP real en Azure 25/25 |
+| Versión | 1.2.0 (1.1.0 completa, ver «Historial 1.1.0») |
+| Fecha | 2026-11-18 |
+| Autorización | 1.2.0: «Ya lo validó, apruebo y EJECUTA NV-20» — Victor Manuel Jose Jose, 2026-11-18: tasks T01–T08 (M-BE-078), con el contrato §6.1 validado antes por Mobile. 1.1.0: «Apruebo y EJECUTA», 2026-11-12 (M-BE-071) |
+| Rama | 1.2.0: `feat/nv-20-push-fcm` → PR pendiente de revisión. 1.1.0: `feat/nv-20-notifications` (PR #46) |
+| Resultado | **🟡 EN CURSO (1.2.0)**: T01–T04 completas y verificadas en local; T05–T08 esperan CI, despliegue, el secreto de Firebase y la prueba real en Azure. 1.1.0: ✅ PASS WITH WARNINGS (25/25 en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
+
+## 1.2.0 — Notificaciones push con Firebase Cloud Messaging
+
+### 1.2.0 · Cambios por capa
+
+| Capa | Archivo | Cambio |
+| --- | --- | --- |
+| Domain | `Entities/PushDevice.cs` (nuevo) | Instalación de la app con su token de FCM |
+| Application | `Abstractions/Notifications/IPushPorts.cs` (nuevo) | `IPushDeviceRepository`, `IPushSender`, `IPushQueue`, `PushMessage` y `PushResult` |
+| Application | `Abstractions/Persistence/INotificationRepository.cs` | `UpsertAsync` devuelve la notificación guardada (en mensajes agrupados, la no leída que ya existía) para que el push lleve su id |
+| Application | `UseCases/PushServices.cs` (nuevo) | `PushRules` (validación, prioridad alta en 4 tipos, `collapseKey` por conversación), `PushDeviceService` (registro idempotente, máximo 5, token que se mueve de cuenta, conflicto 409) y `PushDispatcher` (todos los dispositivos, token inválido → se borra, un reintento) |
+| Application | `UseCases/NotificationServices.cs` | `NotificationPublisher` encola el push después de guardar; un hecho repetido sin agrupar no vuelve a avisar |
+| Application | `UseCases/AccountDeletionServices.cs` (NV-10 1.2.0) | La eliminación de cuenta también borra los dispositivos |
+| Infrastructure | `Persistence/Mongo/MongoPushDeviceRepository.cs` (nuevo), `MongoNotificationRepository.cs` | `push_devices` con `ux_push_devices_user_installation`, `ux_push_devices_token` y `ttl_push_devices_updated` (270 días); `FindOneAndUpdate` en la bandeja |
+| Infrastructure | `Notifications/FcmPushSender.cs` (nuevo) | Cuenta de servicio (JSON o base64), JWT RS256 con `System.Security.Cryptography`, token de acceso en caché con renovación 5 min antes, API HTTP v1, 401 → renueva y reintenta; `DisabledPushSender` sin secreto |
+| API | `Http/PushDevicesEndpoint.cs`, `Configuration/PushConfiguration.cs` (nuevos), `Program.cs`, `ProblemResponses.cs`, `UserResourceProblems.cs`, `RateLimitKeys.cs`, `UserRateLimitOptions.cs` | 3 rutas; cola acotada (1000) con `PushWorker`; aviso en el log si falta el secreto; mensajes en español; 30 registros por hora |
+| Pruebas | `UnitTests/PushTests.cs`, `IntegrationTests/PushHttpTests.cs`, `IntegrationTests/FcmClientTests.cs`, `SecurityTests/PushSecurityTests.cs`, `IntegrationTests/PushTestDoubles.cs`; listas OpenAPI | 6 unitarias, 6 de integración (2 del cliente FCM con llave RSA generada al momento) y 5 de seguridad |
+
+### 1.2.0 · Comandos y resultados (local, 2026-11-18)
+
+| Comando | Resultado |
+| --- | --- |
+| `dotnet build TheHouse.slnx --configuration Release -warnaserror` | 0 advertencias, 0 errores |
+| `dotnet test TheHouse.slnx --configuration Release` (dos corridas seguidas, como el CI) | 1027/1027 en la segunda corrida (unitarias 395, seguridad 148, integración 484); en la primera falló 1 prueba ajena a NV-20 (HealthAndRateLimitTests de NV-01: el cliente de la prueba espera 5 s y la máquina estaba cargada), que pasó sola 7/7; las pruebas de NV-20 pasaron en todas las corridas |
+
+### 1.2.0 · Trazabilidad requisito → prueba
+
+| Requisito | Pruebas |
+| --- | --- |
+| R01 Registro de dispositivos | `Register_creates_then_updates_and_never_returns_the_token`, `Invalid_input_is_rejected`, `Sixth_device_replaces_the_oldest`, `Same_phone_moves_between_accounts_but_a_different_token_conflicts`, `Devices_are_registered_listed_and_deleted_without_exposing_tokens`, `Other_accounts_cannot_touch_my_installation`, `Invalid_tokens_are_removed_and_deleting_the_account_removes_devices` |
+| R02 Envío push de la bandeja | `Notifications_are_pushed_to_the_recipient_and_never_to_the_actor` (solicitud real por HTTP → cola → push al arrendador con el id de la notificación guardada; nada al estudiante que la envió), `Push_uses_the_inbox_text_priority_and_collapse_key`, `Dispatcher_sends_to_every_device_drops_invalid_tokens_and_retries_once` |
+| R03 Cliente de FCM | `Fcm_client_signs_the_assertion_caches_the_token_and_maps_errors` (firma RS256 verificada con la llave pública, alcance y audiencia, token en caché, formato HTTP v1, 404 → token inválido, 500 → falla, 401 → renueva), `Service_account_is_parsed_from_json_or_base64_and_only_for_google` |
+| R04 Privacidad, seguridad y límites | `Device_responses_never_carry_the_token_or_the_user`, `Device_body_rejects_unknown_fields`, `Push_text_is_the_inbox_text_without_message_content`, `Credential_and_limits_are_bounded` (solo el endpoint OAuth de Google, sin SSRF por configuración) |
+| R05 Contrato para Mobile y despliegue | Pendiente: CI, despliegue, secreto y prueba real en Azure |
+| R06 Pruebas, seguridad y evidencia | Pendiente: TRX y cobertura del CI |
+
+### 1.2.0 · Decisiones de implementación (dentro de la spec)
+
+| Tema | Decisión |
+| --- | --- |
+| Logout | La app borra su dispositivo con `DELETE` antes del logout (no se agregó encabezado a NV-06); si no lo hace, el siguiente usuario que registre el mismo token en ese teléfono se queda con él |
+| Conflicto | 409 `installation_conflict` solo si la instalación está en otra cuenta **con otro token**; con el mismo token es el mismo teléfono y se mueve |
+| Suspensión (NV-21) | Los dispositivos se conservan: la cuenta suspendida debe recibir el aviso `building_suspended` |
+| Notificación repetida | Si ya había una no leída del mismo hecho y no se agrupa, no se vuelve a enviar push |
+
+### 1.2.0 · Pendiente para cerrar
+
+| Paso | Responsable | Estado |
+| --- | --- | --- |
+| CI del PR en verde y merge | CI / Isai | Pendiente |
+| Aprobación del CD a Production | Victor | Pendiente |
+| Secreto `FIREBASE_SERVICE_ACCOUNT` en la Container App (cuenta de servicio con permiso solo de envío) | Victor / Mobile | Pendiente |
+| Prueba HTTP real en Azure (`.azure-check/nv20_azure_check.py`) y push en un teléfono real con Mobile | Victor / Mobile | Pendiente |
+| Contrato §6.1 entregado a Mobile y cierre de esta evidencia | Claude | Pendiente |
+
+# Historial 1.1.0
 
 ## 1. Cambios por capa
 
