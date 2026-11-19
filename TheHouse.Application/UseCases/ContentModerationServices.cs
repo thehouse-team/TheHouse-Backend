@@ -65,8 +65,13 @@ public static class ContentModerationRules
         }
 
         // Palabra completa, también en plural (-s, -es): «pendejos», «cabrones».
-        var words = Normalize(text).Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet(StringComparer.Ordinal);
-        return normalizedTerms.Any(term => words.Contains(term) || words.Contains(term + "s") || words.Contains(term + "es"));
+        // Una frase («te voy a matar») se busca como palabras seguidas.
+        var tokens = Normalize(text).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var words = tokens.ToHashSet(StringComparer.Ordinal);
+        var joined = " " + string.Join(' ', tokens) + " ";
+        return normalizedTerms.Any(term => term.Contains(' ', StringComparison.Ordinal)
+            ? joined.Contains(" " + term + " ", StringComparison.Ordinal)
+            : words.Contains(term) || words.Contains(term + "s") || words.Contains(term + "es"));
     }
 }
 
@@ -80,7 +85,7 @@ public sealed class ContentModerationService(
 {
     private readonly string[] blocked = [.. options.Blocklist
         .Select(ContentModerationRules.Normalize)
-        .Select(term => term.Trim())
+        .Select(term => string.Join(' ', term.Split(' ', StringSplitOptions.RemoveEmptyEntries)))
         .Where(term => term.Length > 0)
         .Distinct(StringComparer.Ordinal)];
 
