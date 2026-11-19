@@ -6,9 +6,9 @@
 | Documento | `task.md` |
 | Versión | 1.2.0-borrador |
 | Fecha | 2026-11-19 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo 1.2.0»: aprobación documental con las decisiones de la §13 y el contrato congelado de TheHouse-GenAI del 2026-11-18; el contrato §6.1 con Mobile no cambia respecto a 1.1.0. La ejecución requiere «EJECUTA» y NV-23 desplegada) |
+| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Plan | `plan.md` 1.2.0-borrador |
@@ -86,7 +86,7 @@
 | Tasks completadas | 0 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

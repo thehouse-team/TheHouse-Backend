@@ -6,9 +6,9 @@
 | Documento | `plan.md` |
 | Versión | 1.2.0-borrador |
 | Fecha | 2026-11-19 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo 1.2.0»: aprobación documental con las decisiones de la §13 y el contrato congelado de TheHouse-GenAI del 2026-11-18; el contrato §6.1 con Mobile no cambia respecto a 1.1.0. La ejecución requiere «EJECUTA» y NV-23 desplegada) |
+| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Tasks | `task.md` 1.2.0-borrador |
@@ -128,7 +128,7 @@ F4 Pruebas y evidencia
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0-Doc | Antes de ejecutar | Aprobación documental de 1.2.0-borrador | BLOCKED |
+| G0-Doc | Antes de ejecutar | Aprobación documental de 1.2.0-borrador | PASS (M-BE-081) |
 | G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | BLOCKED |
 | G1 | Fin F1 | Tasks de F1 cerradas con evidencia | No avanzar |
 | G2 | Fin F2 | Tasks de F2 cerradas con evidencia | No avanzar |
@@ -151,4 +151,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **⛔ NO EJECUTAR HASTA «EJECUTA»**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23**.

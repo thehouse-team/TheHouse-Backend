@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.2.0-borrador |
 | Fecha | 2026-11-19 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo 1.2.0»: aprobación documental con las decisiones de la §13 y el contrato congelado de TheHouse-GenAI del 2026-11-18; el contrato §6.1 con Mobile no cambia respecto a 1.1.0. La ejecución requiere «EJECUTA» y NV-23 desplegada) |
+| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-59, RF-60, RF-61, RF-62, RF-63 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-15, RNF-16 |
@@ -186,11 +186,11 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
 | Generador | Plantillas siempre; `TheHouse-GenAI` solo para el resumen, desactivado por defecto | APROBADO (M-BE-068) |
-| Contrato con GenAI | `explain-match` congelado por el equipo de GenAI el 2026-11-18 (camelCase, `generated`, `promptVersion`, sin id del cuarto); cambios con nueva versión en ambos repositorios | PROPUESTO |
-| Credencial de servicio | Encabezado `X-Service-Key`; secreto `genai-service-key` en la Container App del backend como `GenAI__ServiceKey`; entrega por canal privado y rotación manual | PROPUESTO |
-| Timeout | 8 s por llamada (GenAI responde plantilla a los 6 s); reintento solo en red/5xx; la caché de 24 h evita la espera en las siguientes consultas | PROPUESTO |
-| Hosting de TheHouse-GenAI | Azure App Service, decidido y operado por el equipo de GenAI; el backend solo necesita su URL https; costo $0 con su evidencia (§17) antes de activar | PROPUESTO |
-| Proveedor de IA de TheHouse-GenAI | Gemini (decisión del equipo de GenAI); costo $0 con su evidencia (§17) antes de activar | PROPUESTO |
+| Contrato con GenAI | `explain-match` congelado por el equipo de GenAI el 2026-11-18 (camelCase, `generated`, `promptVersion`, sin id del cuarto); cambios con nueva versión en ambos repositorios | APROBADO (M-BE-081) |
+| Credencial de servicio | Encabezado `X-Service-Key`; secreto `genai-service-key` en la Container App del backend como `GenAI__ServiceKey`; entrega por canal privado y rotación manual | APROBADO (M-BE-081) |
+| Timeout | 8 s por llamada (GenAI responde plantilla a los 6 s); reintento solo en red/5xx; la caché de 24 h evita la espera en las siguientes consultas | APROBADO (M-BE-081) |
+| Hosting de TheHouse-GenAI | Azure App Service, decidido y operado por el equipo de GenAI; el backend solo necesita su URL https; costo $0 con su evidencia (§17) antes de activar | APROBADO (M-BE-081) |
+| Proveedor de IA de TheHouse-GenAI | Gemini (decisión del equipo de GenAI); costo $0 con su evidencia (§17) antes de activar | APROBADO (M-BE-081) |
 | Idioma | Español de México (`locale: es-MX`) | APROBADO (M-BE-068) |
 
 ## 14. Costo — COST-001
@@ -230,8 +230,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
 
 ## 18. Aprobación pendiente
 
