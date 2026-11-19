@@ -4,14 +4,14 @@
 | --- | --- |
 | ID | NV-24 |
 | Documento | `plan.md` |
-| Versión | 1.1.0-borrador |
-| Fecha | 2026-11-06 |
-| Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA NV-16, NV-23 y NV-24»: aprobación de 1.1.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-24-smart-match-genai/`; activar `TheHouse-GenAI` en Production requiere las decisiones M-BE de su hosting y de su proveedor) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T11 autorizadas** |
+| Versión | 1.2.0-borrador |
+| Fecha | 2026-11-19 |
+| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
+| Aprobación humana | Pendiente |
+| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.1.0-borrador |
-| Tasks | `task.md` 1.1.0-borrador |
+| Spec | `spec.md` 1.2.0-borrador |
+| Tasks | `task.md` 1.2.0-borrador |
 
 Plan preparado para revisión. No crea código, colecciones ni índices hasta la autorización «EJECUTA».
 
@@ -48,8 +48,8 @@ Principios:
 
 ### F2 — Persistencia e integración
 
-- **T04 · Cliente de TheHouse-GenAI** (R04): `GenAiExplanationClient` con el contrato `v1` de la §6, credencial de servicio, 3 s de timeout, un reintento y circuit breaker; probado con un doble de GenAI, sin red.
-- **T05 · Validación y degradación segura** (R05): Respuestas con números, servicios o universidades ausentes, demasiado largas o con formato inválido usan la plantilla; con GenAI caído, lento, desactivado o con el circuito abierto responde 200 con `generatedBy=template`.
+- **T04 · Cliente de TheHouse-GenAI** (R04): `GenAiExplanationClient` con el contrato congelado (camelCase, sin campos extra, sin id del cuarto), `X-Service-Key`, `X-Request-ID`, 8 s de timeout, reintento solo en red/5xx, 429 con `Retry-After` y circuit breaker; mapeo de servicios; probado con un doble de GenAI que reproduce sus respuestas y errores, sin red.
+- **T05 · Validación y degradación segura** (R05): `generated: false`, respuestas con números, servicios o universidades ausentes, demasiado largas o con formato inválido usan la plantilla; con GenAI caído, lento, desactivado, sin clave o con el circuito abierto responde 200 con `generatedBy=template`.
 - **T06 · Caché y límites** (R06): Caché de 24 h por cuarto, preferencias y versiones; rate limits con 429; Redis caído 503.
 
 **Criterio de salida:** tasks de F2 con aceptación cumplida, pruebas verdes en CI y sin hallazgos de seguridad abiertos de severidad media o mayor.
@@ -62,7 +62,7 @@ Principios:
 
 ### F4 — Pruebas y evidencia
 
-- **T08 · Contrato para Mobile y despliegue** (R08): Contrato §6.1 entregado a Mobile; desplegado por el CD con GenAI desactivado; prueba HTTP real en Azure con plantilla; activar GenAI en Production solo con sus decisiones M-BE aprobadas y una prueba real adicional.
+- **T08 · Contrato para Mobile y despliegue** (R08): Contrato §6.1 entregado a Mobile; desplegado por el CD con GenAI desactivado; prueba HTTP real en Azure con plantilla; activar GenAI en Production con la URL, la clave como secreto y la evidencia de costo, y una prueba real adicional con `generatedBy=genai`.
 - **T09 · Pruebas unitarias y de integración** (R09): Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago.
 - **T10 · Pruebas de seguridad** (R09): BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs.
 - **T11 · Evidencia y revisión final** (R09): `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED.
@@ -121,14 +121,14 @@ F4 Pruebas y evidencia
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | Plantillas en el backend | $0 | Siempre disponibles |
-| `TheHouse-GenAI` (hosting y proveedor) | $0 solo con evidencia de §17 | PENDIENTE; mientras tanto desactivado y sin costo |
+| `TheHouse-GenAI` (App Service y Gemini) | $0 solo con la evidencia de su equipo (§17) | PENDIENTE; mientras tanto desactivado y sin costo |
 | Caché en MongoDB Atlas M0 | $0 | TTL de 24 h |
 
 ## 8. Puertas
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0-Doc | Antes de ejecutar | Aprobación documental de 1.1.0-borrador | BLOCKED |
+| G0-Doc | Antes de ejecutar | Aprobación documental de 1.2.0-borrador | BLOCKED |
 | G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | BLOCKED |
 | G1 | Fin F1 | Tasks de F1 cerradas con evidencia | No avanzar |
 | G2 | Fin F2 | Tasks de F2 cerradas con evidencia | No avanzar |
@@ -151,4 +151,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — T01–T11 autorizadas**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **⛔ NO EJECUTAR HASTA «EJECUTA»**.
