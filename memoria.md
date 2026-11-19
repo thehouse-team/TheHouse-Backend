@@ -733,6 +733,15 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Actualización 2026-11-19 (M-BE-079):** en la prueba HTTP real en Azure una amenaza explícita en español («Voy a matarte…») salió con severidad 2 en violencia y se guardó. Por decisión de Victor («Violencia y odio en 2») el umbral queda en 2 para violencia y odio y en 4 para sexual y autolesión (`ContentSafety:Thresholds` en `appsettings.json`). En la misma corrección: el token de la identidad administrada tiene su propio límite de 10 s (en frío superaba los 3 s del análisis y respondía 503), la lista de términos también rechaza plurales (-s, -es) y cada falla de Content Safety se registra con su motivo, sin contenido.
 - **Calibración 2026-11-19 (M-BE-079):** con un rol temporal `Cognitive Services User` para la cuenta de Victor («autorizo rol temporal de Content Safety», retirado al terminar; sobre el recurso solo queda la identidad de la app) se midieron 8 frases: las amenazas directas, en español y en inglés, salen con **Violence=0** (la categoría califica descripciones de violencia, no amenazas); odio en español **Hate=4** y contenido sexual **Sexual=6** sí se detectan. Por eso la lista de términos acepta **frases** (palabras seguidas, sin acentos ni mayúsculas) y agrega amenazas comunes («te voy a matar», «matarte», «te voy a golpear»…); la prueba en Azure usa odio para la nube y una amenaza para la lista.
 
+## M-BE-080 — Cierre documental de NV-03 con evidencia existente
+
+- **ID:** M-BE-080
+- **Decisión:** cerrar las tasks de NV-03 que el sistema desplegado ya cumple, con evidencia de NV-04 a NV-25 y de Azure: T01 y T02 (inventario y externalización de estado), T03 a T05 (Redis: claves, TLS, fallas y estado distribuido de autenticación y límites), T06 (MongoDB: pooling, timeouts, TLS e índices), T10 (TLS 1.3, certificado administrado, HSTS y proxy), T16 y T17 (costo observado 0.00 USD y gate «OK PARA APPLY») y T22 (GHCR y `VERSIONING.md`, cubierta por NV-09). Quedan abiertas T07 (lista de acceso y rol en Atlas), T08, T09, T18 y T19 (ventana de dos réplicas), T11 y T12 (exportador de telemetría), T14 (fuera de U2) y T20 y T21 (destrucción en un entorno desechable).
+- **Estado:** APROBADO — Victor, 2026-11-19 («EJECUTA cierre documental de NV-03»).
+- **Fecha:** 2026-11-19.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** solo documentación (`specs/nv-03-scaling-cloud/`, `specs/README.md` y esta memoria); NV-03 pasa de 5 a 15 de 25 tasks; sin cambios de código, infraestructura ni secretos.
+
 ## M-BE-081 — NV-24 1.2.0 aprobada: contrato congelado de TheHouse-GenAI
 
 - **ID:** M-BE-081
