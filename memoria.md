@@ -712,3 +712,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-17.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** colección nueva `deleted_accounts` y campo `legal` en `users` (módulo Identity); cada módulo agrega su participante de eliminación; configuración `Legal__*` sin secretos; sin paquetes, secretos, migraciones ni comandos en Production. NV-20 1.2.0 y NV-21 1.2.0 siguen en borrador.
+
+## M-BE-078 — NV-20 1.2.0 aprobada: notificaciones push con Firebase Cloud Messaging
+
+- **ID:** M-BE-078
+- **Decisión:** aprobar NV-20 1.2.0 con sus decisiones: Firebase Cloud Messaging (API HTTP v1) del proyecto de Firebase que ya usa Mobile como proveedor de push, lo que reemplaza la parte «sin push, correo ni SMS» de M-BE-071 solo para push (correo y SMS siguen fuera); cuenta de servicio con permiso solo de envío como secreto nuevo `FIREBASE_SERVICE_ACCOUNT` en la Container App, cargado por Victor fuera de Terraform (M-BE-038) y nunca en el repositorio; sin paquete nuevo (JWT RS256 y HTTP con lo que trae .NET); entrega de mejor esfuerzo después de guardar con cola en memoria (la bandeja sigue siendo la fuente de verdad); dispositivos por instalación (máximo 5, un token por cuenta); los 16 tipos actuales sin preferencias por categoría en el backend; push sin contenido privado.
+- **Estado:** APROBADO — Victor, 2026-11-18 («Ya lo validó, apruebo y EJECUTA NV-20», T01–T08). El responsable de Mobile validó antes el contrato §6.1.
+- **Fecha:** 2026-11-18.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** colección nueva `push_devices` (módulo Notifications); un secreto nuevo en la Container App; la eliminación de cuenta (NV-10 1.2.0) también borra los dispositivos; sin paquetes, migraciones ni comandos en Production. Sin el secreto, el backend registra dispositivos y la bandeja funciona, pero no envía push.

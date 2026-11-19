@@ -6,14 +6,14 @@
 | Documento | `task.md` |
 | Versión | 1.2.0-borrador |
 | Fecha | 2026-11-17 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T04 completas; T05–T08 esperan CI, despliegue, secreto de Firebase y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0-borrador |
 | Plan | `plan.md` 1.2.0-borrador |
 | Tasks totales | 8 |
-| Tasks completadas | 0 |
+| Tasks completadas | 4 |
 
 ## Reglas de esta lista
 
@@ -25,16 +25,16 @@
 
 ## F1 — Contrato y dominio
 
-- [ ] **T01 · Registro de dispositivos** — Requisito: NV-20-R01 · Fase: F1 · Aceptación: PUT idempotente por instalación, máximo 5, un token por cuenta, DELETE y lista sin tokens; limpieza al logout, suspensión y eliminación. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
+- [x] **T01 · Registro de dispositivos** — Requisito: NV-20-R01 · Fase: F1 · Aceptación: PUT idempotente por instalación, máximo 5, un token por cuenta, DELETE y lista sin tokens; limpieza al logout, suspensión y eliminación. · Evidencia: contrato OpenAPI, DTOs y pruebas unitarias del dominio. · Depende de: autorización «EJECUTA».
 
 ## F2 — Persistencia e integración
 
-- [ ] **T02 · Envío push de la bandeja** — Requisito: NV-20-R02 · Fase: F2 · Aceptación: Los 16 tipos se envían a los dispositivos del destinatario con título, cuerpo y datos de destino; nunca al actor; agrupados por conversación. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01.
-- [ ] **T03 · Cliente de FCM** — Requisito: NV-20-R03 · Fase: F2 · Aceptación: OAuth 2.0 con la cuenta de servicio, renovación del token de acceso, API HTTP v1, borrado de tokens inválidos y un reintento; un fallo nunca rompe la acción principal. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01.
+- [x] **T02 · Envío push de la bandeja** — Requisito: NV-20-R02 · Fase: F2 · Aceptación: Los 16 tipos se envían a los dispositivos del destinatario con título, cuerpo y datos de destino; nunca al actor; agrupados por conversación. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01.
+- [x] **T03 · Cliente de FCM** — Requisito: NV-20-R03 · Fase: F2 · Aceptación: OAuth 2.0 con la cuenta de servicio, renovación del token de acceso, API HTTP v1, borrado de tokens inválidos y un reintento; un fallo nunca rompe la acción principal. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T04 · Privacidad, seguridad y límites** — Requisito: NV-20-R04 · Fase: F3 · Aceptación: Sin contenido privado en push, sin tokens en logs ni respuestas, BOLA, rate limit, secreto solo en la Container App. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03.
+- [x] **T04 · Privacidad, seguridad y límites** — Requisito: NV-20-R04 · Fase: F3 · Aceptación: Sin contenido privado en push, sin tokens en logs ni respuestas, BOLA, rate limit, secreto solo en la Container App. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03.
 
 ## F4 — Pruebas y evidencia
 
@@ -47,10 +47,10 @@
 
 | Task | Requisito(s) | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
-| T02 | R02 | F2 | ABIERTA |
-| T03 | R03 | F2 | ABIERTA |
-| T04 | R04 | F3 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA |
+| T02 | R02 | F2 | COMPLETA |
+| T03 | R03 | F2 | COMPLETA |
+| T04 | R04 | F3 | COMPLETA |
 | T05 | R05 | F4 | ABIERTA |
 | T06 | R06 | F4 | ABIERTA |
 | T07 | R06 | F4 | ABIERTA |
@@ -73,11 +73,11 @@
 | --- | --- |
 | Requisitos | 6 |
 | Tasks | 8 |
-| Tasks abiertas | 8 |
-| Tasks completadas | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 4 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T04 completas; T05–T08 esperan CI, despliegue, secreto de Firebase y Azure** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

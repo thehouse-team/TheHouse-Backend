@@ -32,6 +32,7 @@
     <Compile Include="..\TheHouse.IntegrationTests\MediaTestDoubles.cs" Link="Shared\MediaTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\RoommateTestDoubles.cs" Link="Shared\RoommateTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\AnalyticsTestDoubles.cs" Link="Shared\AnalyticsTestDoubles.cs" />
+    <Compile Include="..\TheHouse.IntegrationTests\PushTestDoubles.cs" Link="Shared\PushTestDoubles.cs" />
   </ItemGroup>
 
   <ItemGroup>

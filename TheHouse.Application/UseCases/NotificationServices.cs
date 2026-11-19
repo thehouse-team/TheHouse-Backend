@@ -63,7 +63,8 @@ public sealed class NotificationPublisher(
     IBuildingRepository buildings,
     ILandlordProfileRepository landlords,
     IProfileRepository profiles,
-    TimeProvider timeProvider) : INotificationSink
+    TimeProvider timeProvider,
+    IPushQueue? push = null) : INotificationSink
 {
     public async Task NotifyAsync(NotificationEvent notification, CancellationToken cancellationToken)
     {
@@ -81,10 +82,12 @@ public sealed class NotificationPublisher(
         var place = await PlaceAsync(notification, cancellationToken);
         var (title, body) = NotificationTemplates.Render(notification.Type, actor, place, notification.At);
         var now = timeProvider.GetUtcNow();
-        await notifications.UpsertAsync(
+        var id = MessagingIds.New(now);
+        var group = notification.Type == NotificationTypes.MessageReceived;
+        var stored = await notifications.UpsertAsync(
             new Notification
             {
-                Id = MessagingIds.New(now),
+                Id = id,
                 UserId = notification.RecipientId,
                 Type = notification.Type,
                 Category = entry.Category,
@@ -97,8 +100,15 @@ public sealed class NotificationPublisher(
                 CreatedAt = now,
                 UpdatedAt = now,
             },
-            group: notification.Type == NotificationTypes.MessageReceived,
+            group,
             cancellationToken);
+
+        // NV-20 1.2.0: push después de guardar, fuera de la respuesta. Un hecho
+        // repetido que no se agrupa (ya había una no leída) no vuelve a avisar.
+        if (push is not null && (group || stored.Id == id))
+        {
+            push.TryEnqueue(new PushRequest(notification.RecipientId, PushRules.Message(stored)));
+        }
     }
 
     public Task ClearAsync(string userId, string dedupeKey, CancellationToken cancellationToken) =>

@@ -375,14 +375,21 @@ public sealed class ReviewsDeletionParticipant(IReviewRepository reviews) : IAcc
     public Task EraseAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken) => Task.CompletedTask;
 }
 
-// Notifications (NV-20): la bandeja se borra.
-public sealed class NotificationsDeletionParticipant(INotificationRepository notifications) : IAccountDeletionParticipant
+// Notifications (NV-20): la bandeja y los dispositivos de push se borran.
+public sealed class NotificationsDeletionParticipant(INotificationRepository notifications, IPushDeviceRepository? devices = null) : IAccountDeletionParticipant
 {
     public Task<AccountDeletionCheck> CheckAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken) =>
         Task.FromResult(AccountDeletionCheck.None);
 
-    public Task EraseAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken) =>
-        notifications.DeleteAllAsync(userId, cancellationToken);
+    public async Task EraseAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        if (devices is not null)
+        {
+            await devices.DeleteAllAsync(userId, cancellationToken);
+        }
+
+        await notifications.DeleteAllAsync(userId, cancellationToken);
+    }
 }
 
 // Moderation (NV-21): staff primero pierde el rol; reportes y auditoría

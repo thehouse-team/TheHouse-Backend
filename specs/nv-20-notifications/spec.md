@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.2.0-borrador |
 | Fecha | 2026-11-17 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T04 completas; T05–T08 esperan CI, despliegue, secreto de Firebase y Azure** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | Requisito del curso §16 (notificaciones push de los procesos principales); RF-75 (bandeja) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-02, RNF-09 |
@@ -203,11 +203,11 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Proveedor | Firebase Cloud Messaging, API HTTP v1, del proyecto de Firebase que ya usa Mobile; reemplaza la parte «sin push» de M-BE-071 | PROPUESTO |
-| Credencial | Cuenta de servicio con permiso solo de envío, como secreto `FIREBASE_SERVICE_ACCOUNT` en la Container App (fuera de Terraform) | PROPUESTO |
-| Paquetes | Sin `FirebaseAdmin`: JWT RS256 y HTTP con lo que trae .NET | PROPUESTO |
-| Entrega | Mejor esfuerzo después de guardar, cola en memoria; la bandeja es la fuente de verdad | PROPUESTO |
-| Alcance | Los 16 tipos actuales; sin preferencias por categoría en el backend | PROPUESTO |
+| Proveedor | Firebase Cloud Messaging, API HTTP v1, del proyecto de Firebase que ya usa Mobile; reemplaza la parte «sin push» de M-BE-071 | APROBADO (M-BE-078) |
+| Credencial | Cuenta de servicio con permiso solo de envío, como secreto `FIREBASE_SERVICE_ACCOUNT` en la Container App (fuera de Terraform) | APROBADO (M-BE-078) |
+| Paquetes | Sin `FirebaseAdmin`: JWT RS256 y HTTP con lo que trae .NET | APROBADO (M-BE-078) |
+| Entrega | Mejor esfuerzo después de guardar, cola en memoria; la bandeja es la fuente de verdad | APROBADO (M-BE-078) |
+| Alcance | Los 16 tipos actuales; sin preferencias por categoría en el backend | APROBADO (M-BE-078) |
 
 ## 14. Costo — COST-001
 
@@ -241,9 +241,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 8 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Tasks completadas | 4 |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T04 completas; T05–T08 esperan CI, despliegue, secreto de Firebase y Azure** |
 
 ## 18. Aprobación pendiente
 
