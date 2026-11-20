@@ -4,14 +4,14 @@
 | --- | --- |
 | ID | NV-26 |
 | Documento | `task.md` |
-| Versión | 1.0.0-borrador |
+| Versión | 1.0.0 |
 | Fecha | 2026-11-20 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo y EJECUTA NV-26»: aprobación de 1.0.0 con las decisiones de la §13 y «EJECUTA» de T01–T07; rutas `scripts/db/`, `TheHouse.IntegrationTests/` y `specs/nv-26-database-script/`; sin cambios en el código de la API ni comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.0.0: T01–T07 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.0.0-borrador |
-| Plan | `plan.md` 1.0.0-borrador |
+| Spec | `spec.md` 1.0.0 |
+| Plan | `plan.md` 1.0.0 |
 | Tasks totales | 7 |
 | Tasks completadas | 0 |
 
@@ -71,7 +71,7 @@
 | Tasks completadas | 0 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.0.0: T01–T07 autorizadas** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

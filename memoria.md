@@ -760,11 +760,11 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** sin recursos nuevos permanentes; el desechable se destruyó por completo (0 recursos residuales); costo esperado 0.00 USD, pendiente de reflejo en Cost Management.
 
-## M-BE-083 — NV-26 en borrador: script de la base de datos para la entrega
+## M-BE-083 — NV-26 1.0.0 aprobada: script de la base de datos para la entrega
 
 - **ID:** M-BE-083
-- **Decisión:** redactar NV-26 1.0.0-borrador para cubrir el punto 20 del PDF del curso (entregar el script de la base de datos), hueco encontrado en la matriz de requisitos del curso. Propone dos scripts de `mongosh` en `scripts/db/` (esquema: 31 colecciones, todos los índices y los buckets `media` y `documents`; catálogos: 10 universidades, 12 propiedades y 60 lugares), idempotentes, sin datos personales ni secretos, y una prueba que los compara con el código.
-- **Estado:** BORRADOR — pendiente de «Apruebo» y «EJECUTA» de Victor.
+- **Decisión:** aprobar NV-26 1.0.0 para cubrir el punto 20 del PDF del curso (entregar el script de la base de datos), hueco encontrado en la matriz de requisitos del curso. Propone dos scripts de `mongosh` en `scripts/db/` (esquema: 31 colecciones, todos los índices y los buckets `media` y `documents`; catálogos: 10 universidades, 12 propiedades y 60 lugares), idempotentes, sin datos personales ni secretos, y una prueba que los compara con el código.
+- **Estado:** APROBADO — Victor, 2026-11-20 («Apruebo y EJECUTA NV-26», T01–T07; decisiones de la §13 aceptadas: dos scripts de `mongosh` y README, el código como fuente de verdad, catálogos generados desde el código sin cuartos demo y sin `$jsonSchema`).
 - **Fecha:** 2026-11-20.
-- **Aprobador:** Victor Manuel Jose Jose (pendiente).
-- **Impacto:** solo documentación; sin código, recursos ni costo.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** archivos nuevos en `scripts/db/` y pruebas; sin cambios en la API, recursos ni costo.

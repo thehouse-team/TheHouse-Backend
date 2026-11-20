@@ -4,23 +4,23 @@
 | --- | --- |
 | ID | NV-26 |
 | Documento | `spec.md` |
-| Versión | 1.0.0-borrador |
+| Versión | 1.0.0 |
 | Fecha | 2026-11-20 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo y EJECUTA NV-26»: aprobación de 1.0.0 con las decisiones de la §13 y «EJECUTA» de T01–T07; rutas `scripts/db/`, `TheHouse.IntegrationTests/` y `specs/nv-26-database-script/`; sin cambios en el código de la API ni comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.0.0: T01–T07 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | PDF del curso, punto 20 (entregar el script de la base de datos); punto 14 (base de datos NoSQL) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-08, RNF-09 |
-| Plan | `plan.md` 1.0.0-borrador |
-| Tasks | `task.md` 1.0.0-borrador |
+| Plan | `plan.md` 1.0.0 |
+| Tasks | `task.md` 1.0.0 |
 | Módulo | DatabaseScript |
 | Precondición | NV-01 a NV-25 en `main` (colecciones e índices actuales) |
 | Relación | Documenta y reproduce el esquema que crean los repositorios de MongoDB de NV-04 a NV-25 y los catálogos de NV-07, NV-08 y NV-14; no cambia el código de acceso a datos |
 
-Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
+Spec aprobada y autorizada («Apruebo y EJECUTA NV-26», 2026-11-20) para T01–T07 en las rutas indicadas.
 
-**Spec nueva 1.0.0-borrador (2026-11-20):** el punto 20 del PDF del curso pide entregar «el script de la base de datos». Hoy las colecciones e índices los crea cada repositorio de MongoDB al primer uso y los catálogos se cargan con `--seed-*`; no existe un archivo entregable. Esta spec agrega un script de `mongosh` reproducible e idempotente que crea las 31 colecciones, sus ~60 índices (únicos, TTL y compuestos con los mismos nombres y opciones que el código) y los 2 buckets de GridFS, y un segundo script que carga los catálogos públicos. Una prueba automática impide que el script y el código se desalineen.
+**Spec nueva 1.0.0 (2026-11-20):** el punto 20 del PDF del curso pide entregar «el script de la base de datos». Hoy las colecciones e índices los crea cada repositorio de MongoDB al primer uso y los catálogos se cargan con `--seed-*`; no existe un archivo entregable. Esta spec agrega un script de `mongosh` reproducible e idempotente que crea las 31 colecciones, sus ~60 índices (únicos, TTL y compuestos con los mismos nombres y opciones que el código) y los 2 buckets de GridFS, y un segundo script que carga los catálogos públicos. Una prueba automática impide que el script y el código se desalineen.
 
 ## 1. Contexto
 
@@ -123,10 +123,10 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Formato | Dos scripts de `mongosh` (esquema y catálogos) más README | PROPUESTO |
-| Fuente de verdad | El código; el script se comprueba contra él con una prueba automática | PROPUESTO |
-| Catálogos | Generados desde los datos del código con un comando de exportación; sin cuartos demo | PROPUESTO |
-| Validadores | Sin `$jsonSchema` | PROPUESTO |
+| Formato | Dos scripts de `mongosh` (esquema y catálogos) más README | APROBADO (M-BE-083) |
+| Fuente de verdad | El código; el script se comprueba contra él con una prueba automática | APROBADO (M-BE-083) |
+| Catálogos | Generados desde los datos del código con un comando de exportación; sin cuartos demo | APROBADO (M-BE-083) |
+| Validadores | Sin `$jsonSchema` | APROBADO (M-BE-083) |
 
 ## 14. Costo — COST-001
 
@@ -159,8 +159,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.0.0: T01–T07 autorizadas** |
 
 ## 18. Aprobación pendiente
 
