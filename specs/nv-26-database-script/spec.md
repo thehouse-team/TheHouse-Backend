@@ -8,7 +8,7 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo y EJECUTA NV-26»: aprobación de 1.0.0 con las decisiones de la §13 y «EJECUTA» de T01–T07; rutas `scripts/db/`, `TheHouse.IntegrationTests/` y `specs/nv-26-database-script/`; sin cambios en el código de la API ni comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.0.0: T01–T07 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — 1.0.0 T01–T07 (2026-11-20): PASS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | PDF del curso, punto 20 (entregar el script de la base de datos); punto 14 (base de datos NoSQL) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-08, RNF-09 |
@@ -158,9 +158,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 7 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.0.0: T01–T07 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — 1.0.0 T01–T07 (2026-11-20): PASS, ver `evidence.md`** |
 
 ## 18. Aprobación pendiente
 
