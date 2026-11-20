@@ -5,7 +5,7 @@
 | Fuente | «Requerimientos para el desarrollo del proyecto Móvil» v3 (cuatrimestre septiembre–diciembre 2026) |
 | Fecha | 2026-11-20 |
 | Evaluación | 3 y 4 de diciembre de 2026 (último día para registrar calificaciones: 4 de diciembre) |
-| Avance del backend | 240/276 tasks (87 %); 95 % sin Smart Match (NV-23/NV-24) |
+| Avance del backend | 247/283 tasks (87 %); 95 % sin Smart Match (NV-23/NV-24) |
 | URL | https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io |
 
 Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · ➖ fuera del backend (Mobile, Landing o ML/GenAI).
@@ -39,6 +39,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Requisito | Estado | Evidencia |
 | --- | --- | --- |
 | NoSQL | ✅ | MongoDB Atlas M0 (`thehouse_u2`, Azure eastus2) y Redis |
+| Esquema reproducible | ✅ | `scripts/db/01-schema.mongodb.js`: 31 colecciones, 65 índices (únicos, TTL, compuestos, parciales y `2dsphere`) y 2 buckets de GridFS, generados desde el código (NV-26) |
 
 ## 4. Backend (punto 15)
 
@@ -82,14 +83,13 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Requisito | Estado | Nota |
 | --- | --- | --- |
 | Proyectos en `.rar` | 🟡 | Se arma al final desde `main` (sin `bin/`, `obj/`, `.azure-check/` ni archivos de Terraform con state o variables) |
-| **Script de la base de datos** | ❌ | Hoy las colecciones e índices se crean desde el código y los catálogos con `--seed-universities --seed-properties`. **Falta un script entregable** (ver §8) |
+| Script de la base de datos | ✅ | NV-26: `scripts/db/01-schema.mongodb.js` (esquema) y `02-catalogs.mongodb.js` (10 universidades, 12 propiedades y 60 lugares), con `README.md`. Se generan desde el código y una prueba del CI falla si no coinciden; idempotentes y sin secretos ni datos personales. Ejecución real en `mongo:7.0.45` con índices y catálogos idénticos a los del código (`specs/nv-26-database-script/evidence.md`) |
 
 ## 8. Brechas y propuestas
 
 | Brecha | Riesgo en la evaluación | Propuesta |
 | --- | --- | --- |
 | Imágenes sin CDN de la nube | Medio: el PDF lo pide explícito | Opción A: documentar la decisión por COST-001 (caché HTTP `immutable` de un año que sirve como caché en el cliente y en proxies). Opción B: spec para Azure Blob Storage con CDN, si se demuestra costo $0 |
-| Script de la base de datos | Alto: es parte de la entrega | Spec corta: un script de `mongosh` (`scripts/db/`) que cree las colecciones, todos los índices (incluidos TTL y únicos) y cargue los catálogos de universidades y propiedades; generado a partir de los repositorios para que coincida con el código |
 | Dos instancias | Bajo: ventana agendada | 3 de diciembre con «OK PARA APPLY» (NV-03 T08/T09/T19) |
 | ML (NV-23) y GenAI (NV-24) | Alto: el PDF pide ambas funciones | Seguir con los compañeros; conectar `parse-search` si ML se retrasa |
 | Caché de datos del backend | Bajo | La caché HTTP cumple el punto 9; opcional: caché en Redis para catálogos |
