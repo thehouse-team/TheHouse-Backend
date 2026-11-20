@@ -8,7 +8,7 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo y EJECUTA NV-26»: aprobación de 1.0.0 con las decisiones de la §13 y «EJECUTA» de T01–T07; rutas `scripts/db/`, `TheHouse.IntegrationTests/` y `specs/nv-26-database-script/`; sin cambios en el código de la API ni comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.0.0: T01–T07 autorizadas** |
+| Estado de ejecución | **✅ COMPLETA — 1.0.0 T01–T07 (2026-11-20): PASS, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.0.0 |
 | Tasks | `task.md` 1.0.0 |
@@ -122,4 +122,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.0.0: T01–T07 autorizadas**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **✅ COMPLETA — 1.0.0 T01–T07 (2026-11-20): PASS, ver `evidence.md`**.
