@@ -4,14 +4,14 @@
 | --- | --- |
 | ID | NV-23 |
 | Documento | `plan.md` |
-| Versión | 1.2.0-borrador |
+| Versión | 1.2.0 |
 | Fecha | 2026-11-20 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA — 1.2.0** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.2.0-borrador |
-| Tasks | `task.md` 1.2.0-borrador |
+| Spec | `spec.md` 1.2.0 |
+| Tasks | `task.md` 1.2.0 |
 
 Plan preparado para revisión. No crea código, colecciones ni índices hasta la autorización «EJECUTA».
 
@@ -138,8 +138,8 @@ F4 Pruebas y evidencia
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0-Doc | Antes de ejecutar | Aprobación documental de 1.2.0-borrador | BLOCKED |
-| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | BLOCKED |
+| G0-Doc | Antes de ejecutar | Aprobación documental de 1.2.0 | PASS (M-BE-085) |
+| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | PASS (M-BE-068, trasladada por M-BE-085) |
 | G1 | Fin F1 | Tasks de F1 cerradas con evidencia | No avanzar |
 | G2 | Fin F2 | Tasks de F2 cerradas con evidencia | No avanzar |
 | G3 | Fin F3 | Tasks de F3 cerradas con evidencia | No avanzar |
@@ -164,4 +164,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **⛔ NO EJECUTAR HASTA «EJECUTA»**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML**.

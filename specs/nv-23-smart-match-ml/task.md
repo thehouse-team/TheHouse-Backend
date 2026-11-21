@@ -4,14 +4,14 @@
 | --- | --- |
 | ID | NV-23 |
 | Documento | `task.md` |
-| Versión | 1.2.0-borrador |
+| Versión | 1.2.0 |
 | Fecha | 2026-11-20 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA — 1.2.0** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.2.0-borrador |
-| Plan | `plan.md` 1.2.0-borrador |
+| Spec | `spec.md` 1.2.0 |
+| Plan | `plan.md` 1.2.0 |
 | Tasks totales | 14 |
 | Tasks completadas | 0 |
 
@@ -95,7 +95,7 @@
 | Tasks completadas | 0 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA — 1.2.0** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

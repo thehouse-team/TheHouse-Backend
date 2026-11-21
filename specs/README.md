@@ -30,7 +30,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **✅ APROBADA** | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** | 7/8 |
 | NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-19): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
-| NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **🟡 BORRADOR 1.2.0 — PENDIENTE DE APROBACIÓN** (1.1.0 aprobada, M-BE-068) | **⏸ EN ESPERA — sin código; al aprobar 1.2.0, «EJECUTA» de M-BE-068 pasa a T01–T14 (T06 y T07 esperan a TheHouse-ML)** | 0/14 |
+| NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA — 1.2.0** | **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML** | 0/14 |
 | NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **✅ APROBADA** | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** | 0/11 |
 | NV-25 | [Estadísticas del arrendador](nv-25-metrics-stats/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T09 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 9/9 |
 | NV-26 | [Script de la base de datos para la entrega](nv-26-database-script/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.0.0 T01–T07 (2026-11-20): PASS, ver `evidence.md`** | 7/7 |

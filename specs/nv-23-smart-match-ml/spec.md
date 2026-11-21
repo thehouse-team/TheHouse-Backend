@@ -4,23 +4,23 @@
 | --- | --- |
 | ID | NV-23 |
 | Documento | `spec.md` |
-| Versión | 1.2.0-borrador |
+| Versión | 1.2.0 |
 | Fecha | 2026-11-20 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA — 1.2.0** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-48 a RF-58, RF-64, RF-65, RF-66 (métricas, desde NV-25 1.1.0), RF-68 (uso sin cuenta) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-13, RNF-14 |
-| Plan | `plan.md` 1.2.0-borrador |
-| Tasks | `task.md` 1.2.0-borrador |
+| Plan | `plan.md` 1.2.0 |
+| Tasks | `task.md` 1.2.0 |
 | Módulo | SmartMatch |
 | Precondición | Constitution 1.2.0 (M-BE-062); NV-11, NV-12, NV-14 y NV-21 desplegadas; `TheHouse-ML` ML-04 T01–T03 en `main` |
 | Relación | Reproduce el modelo base de `TheHouse-ML` ML-04 1.0.0 (`baseline-1.0.0`, esquema 2.0.0) y cargará su ONNX (ML-06); NV-24 explica los resultados; NV-10 borra sus datos con la cuenta; NV-26 incluye sus colecciones |
 
-Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
+Spec aprobada (1.2.0, M-BE-085); la autorización «EJECUTA» de M-BE-068 cubre T01–T14 en las rutas indicadas.
 
-**Cambio 1.2.0-borrador (2026-11-20):** `TheHouse-ML` aprobó e implementó ML-04 1.0.0 después de NV-23 1.1.0 (`baseline_params.json` `baseline-1.0.0`, `feature_schema.json` **2.0.0** y `baseline_score.py`, merge #25 de `TheHouse-ML`). Para que el backend dé exactamente el mismo puntaje que ML, esta versión: (1) adopta los nombres de factores, las 10 features, las curvas y el **redondeo de ML-04** (cada factor con 1 decimal y el total con `floor(round6(Σ) + 0.5)`, mitad hacia arriba), que reemplazan el redondeo a entero de 1.1.0; (2) adopta las restricciones duras HC01–HC03 de ML-03 (**convivencia estricta** y mascotas como restricción con dato desconocido = no excluye); (3) exige universidad, `budget.max`, `livingWith` y `placeType` para calcular (perfil mínimo de ML) y aplica sus valores por omisión; (4) **cambia el contrato con Mobile**: `matchScore`, `breakdown` con `maxPoints` y `excludedBy` como lista (Mobile aceptó el cambio; valida la versión final de la §6.1); (5) agrega las métricas básicas de Smart Match para el administrador (RF-66, que NV-25 1.1.0 pasó a NV-23, M-BE-075); (6) borra la retroalimentación y los descartes al eliminar la cuenta (NV-10) y (7) suma las colecciones nuevas al script de la base de datos (NV-26). Mientras 1.2.0 no se apruebe sigue vigente 1.1.0 (autorizada, sin código escrito); al aprobarse, la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 de 1.2.0.
+**Cambio 1.2.0 (2026-11-20):** `TheHouse-ML` aprobó e implementó ML-04 1.0.0 después de NV-23 1.1.0 (`baseline_params.json` `baseline-1.0.0`, `feature_schema.json` **2.0.0** y `baseline_score.py`, merge #25 de `TheHouse-ML`). Para que el backend dé exactamente el mismo puntaje que ML, esta versión: (1) adopta los nombres de factores, las 10 features, las curvas y el **redondeo de ML-04** (cada factor con 1 decimal y el total con `floor(round6(Σ) + 0.5)`, mitad hacia arriba), que reemplazan el redondeo a entero de 1.1.0; (2) adopta las restricciones duras HC01–HC03 de ML-03 (**convivencia estricta** y mascotas como restricción con dato desconocido = no excluye); (3) exige universidad, `budget.max`, `livingWith` y `placeType` para calcular (perfil mínimo de ML) y aplica sus valores por omisión; (4) **cambia el contrato con Mobile**: `matchScore`, `breakdown` con `maxPoints` y `excludedBy` como lista (Mobile aceptó el cambio; valida la versión final de la §6.1); (5) agrega las métricas básicas de Smart Match para el administrador (RF-66, que NV-25 1.1.0 pasó a NV-23, M-BE-075); (6) borra la retroalimentación y los descartes al eliminar la cuenta (NV-10) y (7) suma las colecciones nuevas al script de la base de datos (NV-26). Mientras 1.2.0 no se apruebe sigue vigente 1.1.0 (autorizada, sin código escrito); al aprobarse, la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 de 1.2.0.
 
 ## 1. Contexto
 
@@ -244,13 +244,13 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Pesos iniciales | Presupuesto 30, distancia 25, servicios esenciales 20, tipo de lugar 10, tipo de inmueble 10, extras 5 (iguales a ML-04) | APROBADO (M-BE-068) |
 | Distribución del artefacto | Release de `TheHouse-ML` descargado en el build de la imagen y verificado con `SHA256SUMS`; versión y hash fijados en el repositorio | APROBADO (M-BE-068) |
 | Métrica de promoción | NDCG@10, decidida y medida en `TheHouse-ML` (ML-05) | APROBADO (M-BE-068) |
-| Alineación con ML-04 1.0.0 | Nombres de factores, 10 features del esquema 2.0.0, curvas, orden del ranking y redondeo de ML-04 (1 decimal por factor y `floor(round6(Σ) + 0.5)`), en lugar del redondeo a entero de 1.1.0 | PROPUESTO |
-| Convivencia | Regla estricta de ML-03 (HC02) en Smart Match: `women` solo con `women`, `men` solo con `men`, `any` con todos; reemplaza la regla de NV-14 en esta spec (el filtro de búsqueda no cambia) | PROPUESTO |
-| Mascotas | HC03 implementada; mientras NV-12 no registre el dato, el cuarto cuenta como que sí admite mascotas (no excluye), igual al «neutral» de 1.1.0 | PROPUESTO |
-| Distancia | `distance_km` = distancia publicada de NV-14 desde la celda aproximada (radio 6371.0088 km); la paridad con ML se mide sobre el vector de features de los casos dorados | PROPUESTO |
-| Perfil mínimo | Universidad, `budget.max`, `livingWith` y `placeType` obligatorios (422 con `missing`) y valores por omisión del esquema 2.0.0 (`maxDistanceKm` nulo → 30) | PROPUESTO |
-| Contrato con Mobile | `matchScore`, `breakdown` `{ factor, label, points, maxPoints }`, `excludedBy` como lista, `dismissed` y `featureSchemaVersion`; sin los valores de las features (los usa NV-24 dentro del backend) | PROPUESTO |
-| Métricas RF-66 | Contadores diarios agregados con `$inc` (sin ids, TTL 400 días) más conteos de retroalimentación y descartes al consultar; solo rol `admin` | PROPUESTO |
+| Alineación con ML-04 1.0.0 | Nombres de factores, 10 features del esquema 2.0.0, curvas, orden del ranking y redondeo de ML-04 (1 decimal por factor y `floor(round6(Σ) + 0.5)`), en lugar del redondeo a entero de 1.1.0 | APROBADO (M-BE-085) |
+| Convivencia | Regla estricta de ML-03 (HC02) en Smart Match: `women` solo con `women`, `men` solo con `men`, `any` con todos; reemplaza la regla de NV-14 en esta spec (el filtro de búsqueda no cambia) | APROBADO (M-BE-085) |
+| Mascotas | HC03 implementada; mientras NV-12 no registre el dato, el cuarto cuenta como que sí admite mascotas (no excluye), igual al «neutral» de 1.1.0 | APROBADO (M-BE-085) |
+| Distancia | `distance_km` = distancia publicada de NV-14 desde la celda aproximada (radio 6371.0088 km); la paridad con ML se mide sobre el vector de features de los casos dorados | APROBADO (M-BE-085) |
+| Perfil mínimo | Universidad, `budget.max`, `livingWith` y `placeType` obligatorios (422 con `missing`) y valores por omisión del esquema 2.0.0 (`maxDistanceKm` nulo → 30) | APROBADO (M-BE-085) |
+| Contrato con Mobile | `matchScore`, `breakdown` `{ factor, label, points, maxPoints }`, `excludedBy` como lista, `dismissed` y `featureSchemaVersion`; sin los valores de las features (los usa NV-24 dentro del backend) | APROBADO (M-BE-085) |
+| Métricas RF-66 | Contadores diarios agregados con `$inc` (sin ids, TTL 400 días) más conteos de retroalimentación y descartes al consultar; solo rol `admin` | APROBADO (M-BE-085) |
 
 ## 14. Costo — COST-001
 
@@ -291,8 +291,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA — 1.2.0** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML** |
 
 ## 18. Aprobación pendiente
 
