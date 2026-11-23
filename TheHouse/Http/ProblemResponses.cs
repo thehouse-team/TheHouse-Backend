@@ -58,6 +58,8 @@ public static class ProblemResponses
             UserResourceProblems.NormalizeMedia(problem, status);
         else if (RoommatesEndpoint.IsRoommates(context))
             UserResourceProblems.NormalizeRoommates(problem, status);
+        else if (SmartMatchEndpoint.IsSmartMatch(context))
+            UserResourceProblems.NormalizeSmartMatch(problem, status);
         else if (LandlordStatsEndpoint.IsStats(context))
             UserResourceProblems.NormalizeStats(problem, status);
         else if (UserResourceProblems.IsAdmin(context))

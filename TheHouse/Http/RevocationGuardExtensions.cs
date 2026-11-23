@@ -7,4 +7,10 @@ public static class RevocationGuardExtensions
         this TBuilder builder)
         where TBuilder : IEndpointConventionBuilder =>
         builder.WithMetadata(RevocationGuard.Instance);
+
+    // NV-23: endpoint público que acepta una sesión opcional.
+    public static TBuilder AllowOptionalToken<TBuilder>(
+        this TBuilder builder)
+        where TBuilder : IEndpointConventionBuilder =>
+        builder.WithMetadata(RevocationGuard.OptionalInstance);
 }

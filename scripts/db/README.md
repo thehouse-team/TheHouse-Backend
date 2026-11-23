@@ -4,7 +4,7 @@ Scripts de `mongosh` que crean desde cero la base de datos de TheHouse en MongoD
 
 | Archivo | Qué hace |
 | --- | --- |
-| `01-schema.mongodb.js` | Crea las 31 colecciones, sus 65 índices (únicos, TTL, compuestos, parciales y `2dsphere`, con los mismos nombres y opciones que los repositorios) y los buckets `media` y `documents` de GridFS con sus 4 índices |
+| `01-schema.mongodb.js` | Crea las 34 colecciones, sus 71 índices (únicos, TTL, compuestos, parciales y `2dsphere`, con los mismos nombres y opciones que los repositorios) y los buckets `media` y `documents` de GridFS con sus 4 índices |
 | `02-catalogs.mongodb.js` | Carga los catálogos públicos: 10 universidades, 12 propiedades y 60 lugares de búsqueda (43 localidades y 17 colonias), con *upsert* por su clave natural |
 
 No contienen cadenas de conexión, usuarios, contraseñas ni datos personales. Los datos de usuarios nunca se exportan.

@@ -38,6 +38,7 @@ public static class AccountConfiguration
         builder.Services.AddSingleton<IAccountDeletionParticipant, ReviewsDeletionParticipant>();
         builder.Services.AddSingleton<IAccountDeletionParticipant, RoommatesDeletionParticipant>();
         builder.Services.AddSingleton<IAccountDeletionParticipant, AnalyticsDeletionParticipant>();
+        builder.Services.AddSingleton<IAccountDeletionParticipant, SmartMatchDeletionParticipant>();
         builder.Services.AddSingleton<IAccountDeletionParticipant, ListingsDeletionParticipant>();
         builder.Services.AddSingleton<IAccountDeletionParticipant, NotificationsDeletionParticipant>();
         builder.Services.AddSingleton<IAccountDeletionParticipant, ProfileDeletionParticipant>();

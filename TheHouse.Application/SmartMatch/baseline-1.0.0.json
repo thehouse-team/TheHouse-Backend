@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "model_version": "baseline-1.0.0",
+    "spec": "ML-04 1.0.0",
+    "decision": "M-ML-029 (APROBADO); cargador y compatibilidad del esquema: M-ML-030 (APROBADO)",
+    "generated_by": "ML-04 T01 (ML-04-R01); escrito a mano y validado por thehouse_ml.models.baseline_config",
+    "feature_schema_version": "2.0.0",
+    "schema_compatibility": "Misma versión mayor del esquema y versión del esquema ≥ feature_schema_version (semver).",
+    "weights_fixed_before_labels": "Pesos, curvas y redondeo se fijan antes de generar las etiquetas sintéticas y no se ajustan con ellas (spec ML-04 §7 reglas 2 y 3); cambiarlos requiere una versión baseline-x.y.z nueva.",
+    "sensitive_attributes": "Ningún factor usa género, edad u origen; el género no existe en el esquema (constitution §11.2).",
+    "changelog": [
+      {"version": "baseline-1.0.0", "date": "2026-11-20", "decision": "M-ML-029, M-ML-030", "change": "Versión inicial: factores, pesos, curvas y redondeo de la spec ML-04 §6.2–6.3."},
+      {"version": "baseline-1.0.0", "date": "2026-11-20", "decision": "M-ML-031 (T03-H1)", "change": "Corrección antes de publicar (sin cambio de versión: baseline-1.0.0 no se ha publicado): los puntos de cada factor también se redondean a 6 decimales antes de 1 decimal, floor(round6(puntos) × 10 + 0.5) / 10, igual que el total, para absorber el error de punto flotante (30 × (1 − 0.555) = 13.349999999999998 → 13.4, como a mano)."}
+    ]
+  },
+  "total_points": 100,
+  "curve_semantics": {
+    "type": "piecewise_linear",
+    "description": "Puntos (x, y) con x estrictamente creciente e y en [0, 1]; interpolación lineal entre puntos consecutivos; fuera del primer o del último x, el valor del extremo (constante).",
+    "extrapolation": "constant"
+  },
+  "factors": [
+    {
+      "id": "budget",
+      "label": "Presupuesto",
+      "weight": 30,
+      "feature": "price_below_min",
+      "curve": {"type": "piecewise_linear", "points": [[0, 1.0], [1, 0.0]]},
+      "description": "1 − price_below_min: 1.0 con la renta en [budget.min, budget.max]; decae linealmente por debajo de budget.min hasta 0 con renta 0."
+    },
+    {
+      "id": "distance",
+      "label": "Distancia",
+      "weight": 25,
+      "feature": "distance_ratio",
+      "curve": {"type": "piecewise_linear", "points": [[0, 1.0], [0.5, 1.0], [1, 0.0]]},
+      "description": "1.0 hasta distance_ratio 0.5; 2 × (1 − distance_ratio) entre 0.5 y 1; 0 después de 1 (extremo constante)."
+    },
+    {
+      "id": "essential_services",
+      "label": "Servicios esenciales",
+      "weight": 20,
+      "feature": "services_coverage",
+      "curve": {"type": "piecewise_linear", "points": [[0, 0.0], [1, 1.0]]},
+      "description": "Identidad: proporción de los servicios pedidos que tiene el cuarto (1 si no pidió servicios)."
+    },
+    {
+      "id": "place_type",
+      "label": "Tipo de lugar",
+      "weight": 10,
+      "feature": "place_type_match",
+      "curve": {"type": "piecewise_linear", "points": [[0, 0.0], [1, 1.0]]},
+      "description": "Identidad (0 o 1)."
+    },
+    {
+      "id": "property_type",
+      "label": "Tipo de inmueble",
+      "weight": 10,
+      "feature": "property_type_match",
+      "curve": {"type": "piecewise_linear", "points": [[0, 0.0], [1, 1.0]]},
+      "description": "Identidad (0 o 1; 1 si propertyTypes es nulo o vacío). Es la «modalidad» de la constitution §12."
+    },
+    {
+      "id": "extras",
+      "label": "Extras",
+      "weight": 5,
+      "feature": "extra_services_ratio",
+      "curve": {"type": "piecewise_linear", "points": [[0, 0.0], [1, 1.0]]},
+      "description": "Identidad: servicios del cuarto que el estudiante no pidió entre los del catálogo que no pidió."
+    }
+  ],
+  "non_scoring_features": [
+    {"feature": "distance_km", "reason": "El factor de distancia usa distance_ratio (distancia real entre maxDistanceKm); la distancia en km queda en el esquema para ML-05."},
+    {"feature": "effective_distance_km", "reason": "El factor de distancia usa distance_ratio, que ya refleja el transporte porque maxDistanceKm lo elige el estudiante según su transporte."},
+    {"feature": "price_to_budget", "reason": "HC01 ya excluye la renta sobre budget.max y el factor de presupuesto usa price_below_min."},
+    {"feature": "pets_compatible", "reason": "Constante (1) en los candidatos: HC03 ya es restricción dura (M-ML-028)."}
+  ],
+  "rounding": {
+    "factor_points": {
+      "pre_round_decimals": 6,
+      "decimals": 1,
+      "mode": "half_up",
+      "formula": "floor(round6(puntos sin redondear) * 10 + 0.5) / 10",
+      "description": "Puntos de cada factor en el desglose: se redondean a 6 decimales (absorbe el error de punto flotante, igual que el total) y después a 1 decimal, mitad hacia arriba."
+    },
+    "total": {
+      "pre_round_decimals": 6,
+      "mode": "half_up",
+      "formula": "floor(round6(Σ puntos sin redondear) + 0.5)",
+      "range": [0, 100],
+      "description": "matchScore entero 0–100: la suma sin redondear se redondea a 6 decimales (absorbe el error de punto flotante) y después a entero, mitad hacia arriba."
+    },
+    "ranking": {"order_by": "unrounded_sum", "direction": "desc", "tie_breaker": "room_id", "tie_breaker_direction": "asc"},
+    "tolerances": {"total_vs_unrounded_sum": 0.5, "reported_sum_vs_unrounded_sum": 0.3},
+    "dotnet": "En .NET, con double o con decimal, aplicar round6 antes de redondear: total = Math.Round(Math.Round(sum, 6, MidpointRounding.AwayFromZero), MidpointRounding.AwayFromZero); cada factor = Math.Round(Math.Round(points, 6, MidpointRounding.AwayFromZero), 1, MidpointRounding.AwayFromZero). El Math.Round por omisión (mitad al par, ToEven) NO es compatible."
+  }
+}
