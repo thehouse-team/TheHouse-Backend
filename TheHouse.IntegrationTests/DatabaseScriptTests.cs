@@ -27,7 +27,7 @@ public sealed partial class DatabaseScriptTests(ITestOutputHelper output)
     {
         var schema = DatabaseScriptGenerator.RecordSchema(Root);
 
-        Assert.Equal(31, schema.Collections.Count);
+        Assert.Equal(34, schema.Collections.Count);
         Assert.Equal(["documents", "media"], schema.Buckets);
         Assert.All(schema.Indexes, index => Assert.Contains(index.Collection, schema.Collections));
         Assert.Equal(

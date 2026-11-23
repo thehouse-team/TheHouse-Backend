@@ -87,7 +87,8 @@ public sealed class OpenApiContractTests
                 path.Name == AccountEndpoint.DeletionPath ||
                 path.Name == AccountEndpoint.AcceptLegalPath ||
                 path.Name == AccountEndpoint.LegalPath ||
-                path.Name.StartsWith(PushDevicesEndpoint.BasePath, StringComparison.Ordinal),
+                path.Name.StartsWith(PushDevicesEndpoint.BasePath, StringComparison.Ordinal) ||
+                path.Name.StartsWith(SmartMatchEndpoint.BasePath + "/", StringComparison.Ordinal),
                 $"Unexpected OpenAPI path: {path.Name}");
         }
 
@@ -155,6 +156,17 @@ public sealed class OpenApiContractTests
         foreach (var statsPath in new[] { LandlordStatsEndpoint.SummaryPath, LandlordStatsEndpoint.RoomsPath, LandlordStatsEndpoint.RecommendationsPath })
         {
             Assert.True(paths.TryGetProperty(statsPath, out _), statsPath);
+        }
+
+        // NV-23 1.2.0: las 7 rutas de Smart Match están publicadas.
+        foreach (var smartMatchPath in new[]
+                 {
+                     SmartMatchEndpoint.ScoresPath, SmartMatchEndpoint.RecommendationsPath, SmartMatchEndpoint.QueryPath,
+                     SmartMatchEndpoint.FeedbackPath, SmartMatchEndpoint.DismissalsPath, SmartMatchEndpoint.DismissalPath,
+                     SmartMatchEndpoint.MetricsPath,
+                 })
+        {
+            Assert.True(paths.TryGetProperty(smartMatchPath, out _), smartMatchPath);
         }
 
         // NV-10 1.2.0: eliminación de cuenta y aviso legal.

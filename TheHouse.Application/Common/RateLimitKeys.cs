@@ -148,6 +148,16 @@ public static class RateLimitKeys
     public static string LandlordStatsUser(string userId) =>
         "thehouse:u2:landlord-stats:user:v1:" + Hash(userId);
 
+    // NV-23: Smart Match por usuario, por IP (invitados) y métricas del admin.
+    public static string SmartMatchUser(string userId) =>
+        "thehouse:u2:smart-match:user:v1:" + Hash(userId);
+
+    public static string SmartMatchIp(string ipAddress) =>
+        "thehouse:u2:smart-match:ip:v1:" + Hash(ipAddress);
+
+    public static string SmartMatchMetricsUser(string userId) =>
+        "thehouse:u2:smart-match-metrics:user:v1:" + Hash(userId);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

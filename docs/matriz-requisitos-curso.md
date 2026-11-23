@@ -39,7 +39,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Requisito | Estado | Evidencia |
 | --- | --- | --- |
 | NoSQL | ✅ | MongoDB Atlas M0 (`thehouse_u2`, Azure eastus2) y Redis |
-| Esquema reproducible | ✅ | `scripts/db/01-schema.mongodb.js`: 31 colecciones, 65 índices (únicos, TTL, compuestos, parciales y `2dsphere`) y 2 buckets de GridFS, generados desde el código (NV-26) |
+| Esquema reproducible | ✅ | `scripts/db/01-schema.mongodb.js`: 34 colecciones, 71 índices (únicos, TTL, compuestos, parciales y `2dsphere`) y 2 buckets de GridFS, generados desde el código (NV-26; incluye las 3 de Smart Match de NV-23) |
 
 ## 4. Backend (punto 15)
 

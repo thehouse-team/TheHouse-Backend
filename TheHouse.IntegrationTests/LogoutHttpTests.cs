@@ -438,7 +438,14 @@ public sealed class LogoutHttpTests
                     or "/api/v1/legal"
                     or "/api/v1/users/me/devices"
                     or "/api/v1/users/me/devices/{installationId}"
-                    or "/api/v1/admin/moderation/rejections",
+                    or "/api/v1/admin/moderation/rejections"
+                    or "/api/v1/smart-match/scores"
+                    or "/api/v1/smart-match/recommendations"
+                    or "/api/v1/smart-match/recommendations/query"
+                    or "/api/v1/smart-match/feedback"
+                    or "/api/v1/smart-match/dismissals"
+                    or "/api/v1/smart-match/dismissals/{roomId}"
+                    or "/api/v1/admin/smart-match/metrics",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

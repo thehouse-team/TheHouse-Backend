@@ -161,7 +161,34 @@ public sealed class SearchService(
 
     // NV-13: la primera foto del cuarto o, si no tiene, la del edificio.
     private static string? Thumbnail(MediaSnapshot snapshot, Room room) =>
-        snapshot.Room(room.Id).FirstOrDefault()?.ThumbUrl ?? snapshot.Building(room.BuildingId)?.ThumbUrl;
+        Thumbnail(snapshot, room.Id, room.BuildingId);
+
+    private static string? Thumbnail(MediaSnapshot snapshot, string roomId, string buildingId) =>
+        snapshot.Room(roomId).FirstOrDefault()?.ThumbUrl ?? snapshot.Building(buildingId)?.ThumbUrl;
+
+    // NV-23: cuartos publicados cerca de la universidad, sin filtros de la
+    // búsqueda, con la distancia sin redondear (celda aproximada → campus).
+    public async Task<IReadOnlyList<SmartMatchCandidate>> SmartMatchCandidatesAsync(string universityId, double maxDistanceKm, CancellationToken cancellationToken)
+    {
+        var criteria = new SearchCriteria
+        {
+            UniversityId = universityId,
+            MaxDistanceKm = maxDistanceKm.ToString("R", CultureInfo.InvariantCulture),
+        };
+        return [.. (await CandidatesAsync(criteria, cancellationToken)).Select(item => new SmartMatchCandidate(ToItem(item), item.DistanceKm))];
+    }
+
+    // NV-23: miniaturas solo para los cuartos de la página que se devuelve.
+    public async Task<IReadOnlyList<RoomSearchItem>> WithThumbnailsAsync(IReadOnlyList<RoomSearchItem> items, CancellationToken cancellationToken)
+    {
+        if (media is null || items.Count == 0)
+        {
+            return items;
+        }
+
+        var snapshot = await media.SnapshotAsync(items.Select(item => item.BuildingId).Distinct(StringComparer.Ordinal).ToArray(), publicUrls: true, cancellationToken);
+        return [.. items.Select(item => item with { ThumbnailUrl = Thumbnail(snapshot, item.Id, item.BuildingId) })];
+    }
 
     public async Task<PlaceSearchResponse> PlacesAsync(string? query, string? universityId, CancellationToken cancellationToken)
     {
@@ -334,6 +361,9 @@ public sealed class SearchService(
 
     private sealed record Candidate(Room Room, Building Building, double CellLatitude, double CellLongitude, double DistanceKm);
 }
+
+// NV-23: candidato de Smart Match (item público de NV-14 y distancia sin redondear).
+public sealed record SmartMatchCandidate(RoomSearchItem Item, double DistanceKm);
 
 // NV-14: seeds autorizados de colonias y de demostración.
 public sealed class PlaceSeedOptions

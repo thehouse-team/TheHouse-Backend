@@ -8,7 +8,7 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA — 1.2.0** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: 9 de 14 (T01–T05, T09, T10, T12, T13); T08, T11 y T14 esperan el despliegue; T06 y T07 BLOCKED por TheHouse-ML; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.0 |
 | Tasks | `task.md` 1.2.0 |
@@ -164,4 +164,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.2.0: T01–T14 autorizadas; T06 y T07 esperan a TheHouse-ML**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.2.0: 9 de 14 (T01–T05, T09, T10, T12, T13); T08, T11 y T14 esperan el despliegue; T06 y T07 BLOCKED por TheHouse-ML; ver `evidence.md`**.

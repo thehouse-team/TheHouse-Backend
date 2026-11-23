@@ -34,9 +34,37 @@ public static class UserEndpointSupport
             return Error(context, 401);
         }
 
+        return await ExecuteAsync(context, () => action(userId));
+    }
+
+    // NV-23: endpoint público que acepta sesión opcional. Un encabezado
+    // Authorization sin token válido responde 401 (no se trata como invitado).
+    public static async Task<IResult> RunOptionalAsync(
+        HttpContext context,
+        Func<string?, Task<IResult>> action)
+    {
+        context.Response.Headers.CacheControl = "no-store";
+        context.Response.Headers.Pragma = "no-cache";
+
+        var userId = context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            if (context.Request.Headers.Authorization.Count > 0)
+            {
+                return Error(context, 401);
+            }
+
+            userId = null;
+        }
+
+        return await ExecuteAsync(context, () => action(userId));
+    }
+
+    private static async Task<IResult> ExecuteAsync(HttpContext context, Func<Task<IResult>> action)
+    {
         try
         {
-            return await action(userId);
+            return await action();
         }
         catch (Exception exception) when (exception is RequestValidationException or JsonException)
         {
@@ -69,6 +97,12 @@ public static class UserEndpointSupport
         catch (BusinessRuleException exception)
         {
             return Error(context, 422, exception.Rule);
+        }
+        catch (TheHouse.Application.UseCases.SmartMatchProfileIncompleteException exception)
+        {
+            // NV-23 1.2.0: qué falta en el perfil para calcular la compatibilidad.
+            context.Items[UserResourceProblems.MissingItem] = exception.Missing;
+            return Error(context, 422, SmartMatchRules.ProfileIncomplete);
         }
         catch (TheHouse.Application.Abstractions.Moderation.ContentRejectedException exception)
         {

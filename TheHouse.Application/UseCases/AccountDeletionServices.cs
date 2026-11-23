@@ -423,3 +423,14 @@ public sealed class AnalyticsDeletionParticipant(IRoomViewRepository views) : IA
     public Task EraseAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken) =>
         views.DeleteByOwnerAsync(userId, cancellationToken);
 }
+
+// SmartMatch (NV-23 1.2.0): retroalimentación y descartes del usuario. No se
+// muestra en el resumen previo (el contrato de NV-10 con Mobile no cambia).
+public sealed class SmartMatchDeletionParticipant(ISmartMatchRepository smartMatch) : IAccountDeletionParticipant
+{
+    public Task<AccountDeletionCheck> CheckAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken) =>
+        Task.FromResult(AccountDeletionCheck.None);
+
+    public Task EraseAsync(string userId, DateTimeOffset now, CancellationToken cancellationToken) =>
+        smartMatch.DeleteUserAsync(userId, cancellationToken);
+}

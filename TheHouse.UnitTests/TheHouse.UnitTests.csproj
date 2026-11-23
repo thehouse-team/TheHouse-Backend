@@ -8,6 +8,11 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
+  <!-- NV-23: corpus de paridad generado con TheHouse-ML (commit 85d1e4b). -->
+  <ItemGroup>
+    <None Include="Fixtures\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
@@ -32,6 +37,7 @@
     <Compile Include="..\TheHouse.IntegrationTests\MediaTestDoubles.cs" Link="Shared\MediaTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\RoommateTestDoubles.cs" Link="Shared\RoommateTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\AnalyticsTestDoubles.cs" Link="Shared\AnalyticsTestDoubles.cs" />
+    <Compile Include="..\TheHouse.IntegrationTests\SmartMatchTestDoubles.cs" Link="Shared\SmartMatchTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\PushTestDoubles.cs" Link="Shared\PushTestDoubles.cs" />
     <Compile Include="..\TheHouse.IntegrationTests\ContentModerationTestDoubles.cs" Link="Shared\ContentModerationTestDoubles.cs" />
   </ItemGroup>
