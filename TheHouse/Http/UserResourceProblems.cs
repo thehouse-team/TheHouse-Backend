@@ -15,6 +15,9 @@ public static class UserResourceProblems
 
     public const string CategoriesItem = "thehouse.problem.categories";
 
+    // NV-23 1.2.0: campos del perfil que faltan para calcular Smart Match (422).
+    public const string MissingItem = "thehouse.problem.missing";
+
     // Agrega `code` y su `detail` si el endpoint lo indicó para este status.
     public static void ApplyCode(HttpContext context, ProblemDetails problem, int status)
     {
@@ -33,6 +36,11 @@ public static class UserResourceProblems
         {
             problem.Extensions["field"] = name;
             problem.Extensions["categories"] = context.Items.TryGetValue(CategoriesItem, out var categories) ? categories : Array.Empty<string>();
+        }
+
+        if (status == 422 && context.Items.TryGetValue(MissingItem, out var missing) && missing is not null)
+        {
+            problem.Extensions["missing"] = missing;
         }
 
         // NV-10 1.2.0: qué impide eliminar la cuenta (409 `deletion_blocked`).
@@ -290,6 +298,24 @@ public static class UserResourceProblems
         };
     }
 
+    public static void NormalizeSmartMatch(ProblemDetails problem, int status)
+    {
+        problem.Title = ProblemResponses.TitleFor(status);
+        problem.Detail = status switch
+        {
+            400 => "La solicitud de Smart Match no es válida.",
+            401 => "Se requiere una sesión válida.",
+            404 => "El cuarto o la universidad no existe.",
+            413 => "La solicitud es demasiado grande.",
+            415 => "El cuerpo debe ser JSON.",
+            422 => "El perfil no tiene los datos necesarios para calcular la compatibilidad.",
+            429 => "Se superó el límite de consultas de Smart Match.",
+            503 => "Smart Match no está disponible temporalmente.",
+            504 => "Smart Match no respondió a tiempo.",
+            _ => "No fue posible procesar la solicitud.",
+        };
+    }
+
     public static void NormalizeStats(ProblemDetails problem, int status)
     {
         problem.Title = ProblemResponses.TitleFor(status);
@@ -324,6 +350,7 @@ public static class UserResourceProblems
     public static string? DetailFor(string code) => code switch
     {
         "password_mismatch" => "La contraseña no es correcta.",
+        "smart_match_profile_incomplete" => "Para calcular la compatibilidad indica tu universidad, tu presupuesto máximo, con quién quieres vivir y el tipo de lugar.",
         "content_rejected" => "El contenido no cumple las reglas de la comunidad; corrígelo e intenta de nuevo.",
         "moderation_unavailable" => "No pudimos revisar el contenido en este momento; intenta de nuevo en unos segundos.",
         "installation_conflict" => "Esta instalación ya está registrada en otra cuenta; cierra sesión en ella o reinstala la app.",

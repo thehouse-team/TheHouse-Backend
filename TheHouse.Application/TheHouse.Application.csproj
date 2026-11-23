@@ -10,4 +10,9 @@
     <ProjectReference Include="..\TheHouse.Domain\TheHouse.Domain.csproj" />
   </ItemGroup>
 
+  <!-- NV-23: parámetros de baseline-1.0.0 copiados de TheHouse-ML (ML-04). -->
+  <ItemGroup>
+    <EmbeddedResource Include="SmartMatch\baseline-1.0.0.json" LogicalName="TheHouse.Application.SmartMatch.baseline-1.0.0.json" />
+  </ItemGroup>
+
 </Project>

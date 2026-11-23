@@ -17,8 +17,9 @@ public sealed class TokenRevocationMiddleware(
     public async Task InvokeAsync(
         HttpContext context)
     {
-        if (context.GetEndpoint()?.Metadata
-                .GetMetadata<RevocationGuard>() is null)
+        var guard = context.GetEndpoint()?.Metadata
+            .GetMetadata<RevocationGuard>();
+        if (guard is null)
         {
             await next(context);
             return;
@@ -26,6 +27,13 @@ public sealed class TokenRevocationMiddleware(
 
         var authorization =
             context.Request.Headers.Authorization.ToString();
+
+        // NV-23: sin encabezado, un endpoint con sesión opcional sigue como invitado.
+        if (guard.Optional && !context.Request.Headers.ContainsKey("Authorization"))
+        {
+            await next(context);
+            return;
+        }
 
         if (authorization.Length == 0 ||
             !authorization.StartsWith(

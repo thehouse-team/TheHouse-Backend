@@ -98,6 +98,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
 
     public InMemoryRoomViewRepository RoomViews { get; } = new();
 
+    public InMemorySmartMatchRepository SmartMatch { get; } = new();
+
     public InMemoryViewSaltStore ViewSalts { get; } = new();
 
     // NV-20 1.2.0: dispositivos y emisor de push falsos.
@@ -143,6 +145,7 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.RemoveAll<IReviewRepository>();
             services.RemoveAll<IRoommateProfileRepository>();
             services.RemoveAll<IRoomViewRepository>();
+            services.RemoveAll<ISmartMatchRepository>();
             services.RemoveAll<IViewSaltStore>();
             services.RemoveAll<IPushDeviceRepository>();
             services.RemoveAll<IPushSender>();
@@ -172,6 +175,7 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.AddSingleton<IReviewRepository>(Reviews);
             services.AddSingleton<IRoommateProfileRepository>(Roommates);
             services.AddSingleton<IRoomViewRepository>(RoomViews);
+            services.AddSingleton<ISmartMatchRepository>(SmartMatch);
             services.AddSingleton<IViewSaltStore>(ViewSalts);
             services.AddSingleton<IPushDeviceRepository>(PushDevices);
             services.AddSingleton<IPushSender>(PushSender);
