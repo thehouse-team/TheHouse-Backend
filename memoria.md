@@ -768,3 +768,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-20.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** archivos nuevos en `scripts/db/` y pruebas; sin cambios en la API, recursos ni costo.
+
+## M-BE-085 — NV-23 1.2.0 aprobada: alineación con ML-04 de TheHouse-ML y métricas RF-66
+
+- **ID:** M-BE-085
+- **Decisión:** aprobar NV-23 1.2.0 porque `TheHouse-ML` aprobó e implementó ML-04 1.0.0 (`baseline-1.0.0`, esquema de features 2.0.0) después de NV-23 1.1.0. Propone: nombres de factores, 10 features, curvas y redondeo de ML-04 (1 decimal por factor; total `floor(round6(Σ) + 0.5)`); restricciones HC01–HC03 de ML-03 con convivencia estricta y mascotas desconocidas = no excluye; perfil mínimo (universidad, `budget.max`, `livingWith`, `placeType`) con 422 `missing`; contrato con Mobile con `matchScore`, `breakdown` `{ factor, label, points, maxPoints }`, `excludedBy` como lista y `dismissed`; métricas RF-66 para el rol `admin` con contadores diarios sin ids; borrado con la cuenta (NV-10) y colecciones en el script de NV-26. Pasa de 13 a 14 tasks; T06 (ONNX) y T07 (casos dorados) siguen esperando a `TheHouse-ML`.
+- **Estado:** APROBADO — Victor, 2026-11-20 («Apruebo NV-23 1.2.0», con las 11 decisiones de la §13); Mobile aceptó el cambio de contrato. La autorización «EJECUTA» de M-BE-068 pasa a T01–T14 de 1.2.0.
+- **Fecha:** 2026-11-20.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** se implementa NV-23 1.2.0 (14 tasks); T06 y T07 quedan BLOCKED hasta que `TheHouse-ML` publique ML-06 y los casos dorados de ML-04 T05.
+
