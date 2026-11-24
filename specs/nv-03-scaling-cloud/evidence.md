@@ -327,10 +327,10 @@ Los recursos parciales de los dos primeros intentos (grupo, identidades, rol per
 | --- | --- |
 | Cost Management (`ActualCost`, 2026-11-19 y 2026-11-20, por grupo de recursos) | Solo `rg-thehouse-u2` con 0.00 USD; `rg-thehouse-lifecycle` todavía **PENDIENTE DE REFLEJO** (Azure tarda hasta 24–48 h) |
 | Esperado | 0.00 USD: la app escaló a cero dentro de la concesión gratuita de Container Apps, Log Analytics sin ingesta (tope de 0.1 GB/día), identidades y roles sin costo |
-| Revisión posterior | Repetir la consulta el 2026-11-21; si aparece algún cargo se registra y se trata como hallazgo |
+| Revisión posterior (2026-11-24) | Cost Management `ActualCost` del 2026-11-19 al 2026-11-23 por grupo de recursos: solo `rg-thehouse-u2` con 0.00 USD cada día; `rg-thehouse-lifecycle` **sin ningún cargo** pasadas más de 48 h de reflejo, y el grupo ya no existe. **Costo observado del ciclo de vida: 0.00 USD** |
 
 ### Observación
 
 En el entorno `cae-thehouse-u2` existe además la app `ca-thehouse-genai-u2`, que no creó este Terraform (por su nombre, del equipo de GenAI). Queda fuera del state del backend y no se tocó; se aclara con ese equipo, porque su guía de integración menciona Azure App Service.
 
-Resultado: **T20 y T21 completas** (T21 con el costo **PENDIENTE DE REFLEJO** según su criterio de aceptación). NV-03 queda en **17 de 25**.
+Resultado: **T20 y T21 completas**; el costo de T21 quedó confirmado en **0.00 USD** el 2026-11-24. NV-03 queda en **17 de 25**.
