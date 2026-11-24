@@ -162,8 +162,11 @@ public static partial class SmartMatchExplanationRules
         return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(canonical)));
     }
 
-    public static string CacheKey(string roomId, string preferencesHash, string modelVersion) =>
-        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes($"{roomId}|{preferencesHash}|{modelVersion}|{ExplanationVersion}")));
+    // El generador activo forma parte de la llave: una plantilla guardada con
+    // GenAI apagado no se reutiliza al encenderlo (y viceversa).
+    public static string CacheKey(string roomId, string preferencesHash, string modelVersion, bool genAiEnabled) =>
+        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(
+            $"{roomId}|{preferencesHash}|{modelVersion}|{ExplanationVersion}|{(genAiEnabled ? GeneratedByGenAi : GeneratedByTemplate)}")));
 
     // Validación adicional del texto de GenAI (§9 regla 4): texto plano de
     // máximo 600 caracteres; cada número, servicio o universidad debe estar en
