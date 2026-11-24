@@ -24,6 +24,17 @@ public sealed class SmartMatchQueryRequest
     public PreferencesRequest? Preferences { get; init; }
 }
 
+// NV-24 1.2.1: explicación para invitados (no se guarda).
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+public sealed class SmartMatchExplanationQueryRequest
+{
+    public string? RoomId { get; init; }
+
+    public string? UniversityId { get; init; }
+
+    public PreferencesRequest? Preferences { get; init; }
+}
+
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed class SmartMatchFeedbackRequest
 {
@@ -92,3 +103,14 @@ public sealed record SmartMatchMetricsResponse(
     string To,
     SmartMatchMetricsTotals Totals,
     IReadOnlyList<SmartMatchModelMetrics> ByModelVersion);
+
+// NV-24 §6.1 (contrato validado por Mobile): sin porcentajes por factor (RF-63).
+public sealed record SmartMatchExplanationResponse(
+    string RoomId,
+    int Score,
+    string Summary,
+    IReadOnlyList<string> Pros,
+    IReadOnlyList<string> Cons,
+    string GeneratedBy,
+    string ModelVersion,
+    string ExplanationVersion);

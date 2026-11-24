@@ -46,6 +46,7 @@ public sealed class SmartMatchSecurityTests
     [InlineData(typeof(SmartMatchQueryRequest))]
     [InlineData(typeof(SmartMatchFeedbackRequest))]
     [InlineData(typeof(SmartMatchDismissalRequest))]
+    [InlineData(typeof(SmartMatchExplanationQueryRequest))]
     public void Request_contracts_reject_unknown_fields(Type type)
     {
         var attribute = type.GetCustomAttribute<JsonUnmappedMemberHandlingAttribute>();
@@ -61,5 +62,38 @@ public sealed class SmartMatchSecurityTests
         Assert.False(RevocationGuard.Instance.Optional);
         Assert.True(RevocationGuard.OptionalInstance.Optional);
         Assert.NotSame(RevocationGuard.Instance, RevocationGuard.OptionalInstance);
+    }
+
+    // NV-24 (RF-63): la explicación no trae porcentajes ni puntos por factor ni datos internos.
+    [Fact]
+    public void Explanation_response_has_no_factor_points_or_internals()
+    {
+        var fields = typeof(SmartMatchExplanationResponse).GetProperties().Select(property => property.Name).ToArray();
+
+        foreach (var forbidden in new[] { "Breakdown", "Points", "MaxPoints", "Features", "Prompt", "PromptVersion", "Facts", "UserId", "Email" })
+        {
+            Assert.DoesNotContain(forbidden, fields);
+        }
+    }
+
+    // NV-24: la clave de servicio de GenAI nunca está en appsettings.
+    [Fact]
+    public void Genai_service_key_is_not_in_appsettings()
+    {
+        var root = AppContext.BaseDirectory;
+        while (!File.Exists(Path.Combine(root, "TheHouse.slnx")))
+        {
+            root = Directory.GetParent(root)!.FullName;
+        }
+
+        foreach (var file in Directory.EnumerateFiles(Path.Combine(root, "TheHouse"), "appsettings*.json").Where(path => !path.EndsWith("appsettings.Development.json", StringComparison.Ordinal)))
+        {
+            using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(file));
+            if (document.RootElement.TryGetProperty("GenAI", out var genAi))
+            {
+                Assert.False(genAi.TryGetProperty("ServiceKey", out _), file);
+                Assert.False(genAi.GetProperty("Enabled").GetBoolean(), file);
+            }
+        }
     }
 }

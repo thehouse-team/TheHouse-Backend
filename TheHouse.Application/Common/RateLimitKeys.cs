@@ -158,6 +158,13 @@ public static class RateLimitKeys
     public static string SmartMatchMetricsUser(string userId) =>
         "thehouse:u2:smart-match-metrics:user:v1:" + Hash(userId);
 
+    // NV-24: explicaciones por usuario y por IP (invitados).
+    public static string ExplanationsUser(string userId) =>
+        "thehouse:u2:smart-match-explanations:user:v1:" + Hash(userId);
+
+    public static string ExplanationsIp(string ipAddress) =>
+        "thehouse:u2:smart-match-explanations:ip:v1:" + Hash(ipAddress);
+
     public static string PropertyIp(string ipAddress) =>
         "thehouse:u2:properties:ip:v1:" + Hash(ipAddress);
 

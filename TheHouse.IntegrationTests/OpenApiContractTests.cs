@@ -163,7 +163,7 @@ public sealed class OpenApiContractTests
                  {
                      SmartMatchEndpoint.ScoresPath, SmartMatchEndpoint.RecommendationsPath, SmartMatchEndpoint.QueryPath,
                      SmartMatchEndpoint.FeedbackPath, SmartMatchEndpoint.DismissalsPath, SmartMatchEndpoint.DismissalPath,
-                     SmartMatchEndpoint.MetricsPath,
+                     SmartMatchEndpoint.MetricsPath, SmartMatchEndpoint.ExplanationPath, SmartMatchEndpoint.ExplanationQueryPath,
                  })
         {
             Assert.True(paths.TryGetProperty(smartMatchPath, out _), smartMatchPath);

@@ -26,6 +26,13 @@ public static class SmartMatchEndpoint
 
     public const string MetricsPath = AdminEndpoint.BasePath + "/smart-match/metrics";
 
+    // NV-24 1.2.1: explicaciones del puntaje.
+    public const string ExplanationsPath = BasePath + "/explanations";
+
+    public const string ExplanationPath = ExplanationsPath + "/{roomId}";
+
+    public const string ExplanationQueryPath = ExplanationsPath + "/query";
+
     // 50 ids y las preferencias de un invitado caben con holgura.
     private const int MaximumBodyBytes = 8192;
 
@@ -50,6 +57,12 @@ public static class SmartMatchEndpoint
             .Produces(204);
         Route(app.MapDelete(DismissalPath, UndismissAsync), "UndoDismissal", "Undo a dismissal (idempotent)")
             .Produces(204);
+
+        Route(app.MapGet(ExplanationPath, ExplainAsync), "ExplainRoom", "Why a room has its compatibility, with the saved preferences")
+            .Produces<SmartMatchExplanationResponse>(200);
+        Route(app.MapPost(ExplanationQueryPath, ExplainQueryAsync), "ExplainRoomForGuest", "Explanation for a guest with preferences in the body", optionalToken: true)
+            .Accepts<SmartMatchExplanationQueryRequest>("application/json")
+            .Produces<SmartMatchExplanationResponse>(200);
 
         app.MapGet(MetricsPath, MetricsAsync)
             .WithName("GetSmartMatchMetrics")
@@ -142,6 +155,33 @@ public static class SmartMatchEndpoint
                 context.RequestAborted);
             return Results.Json(metrics, statusCode: 200);
         });
+
+    private static Task<IResult> ExplainAsync(string roomId, HttpContext context, SmartMatchExplanationService explanations, IRateLimitStore store, UserRateLimitOptions limits) =>
+        UserEndpointSupport.RunAsync(context, async userId =>
+        {
+            await UserEndpointSupport.EnforceAsync(context, store, RateLimitKeys.ExplanationsUser(userId), limits.ExplanationsPerWindow, limits.Window, limits.RetryAfterSeconds);
+            return Results.Json(await explanations.ExplainAsync(userId, roomId, context.TraceIdentifier, context.RequestAborted), statusCode: 200);
+        });
+
+    // Público: siempre con el límite por IP, aunque llegue un token.
+    private static Task<IResult> ExplainQueryAsync(HttpContext context, SmartMatchExplanationService explanations, IRateLimitStore store, UserRateLimitOptions limits) =>
+        UserEndpointSupport.RunOptionalAsync(context, async _ =>
+        {
+            await UserEndpointSupport.EnforceAsync(context, store, RateLimitKeys.ExplanationsIp(ClientIp(context)), limits.ExplanationsGuestPerWindow, limits.Window, limits.RetryAfterSeconds);
+            var request = (await UserEndpointSupport.ReadJsonAsync<SmartMatchExplanationQueryRequest>(context, optional: false, MaximumBodyBytes))!;
+            return Results.Json(await explanations.QueryAsync(request, context.TraceIdentifier, context.RequestAborted), statusCode: 200);
+        });
+
+    private static string ClientIp(HttpContext context)
+    {
+        var address = context.Connection.RemoteIpAddress;
+        if (address?.IsIPv4MappedToIPv6 == true)
+        {
+            address = address.MapToIPv4();
+        }
+
+        return address?.ToString() ?? "unknown";
+    }
 
     private static (int Page, int PageSize) Page(HttpContext context) =>
         (UserEndpointSupport.QueryInteger(context, "page", PropertyQueryValidation.DefaultPage),

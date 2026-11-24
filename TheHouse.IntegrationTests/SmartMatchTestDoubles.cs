@@ -161,3 +161,64 @@ public sealed class InMemorySmartMatchRepository : ISmartMatchRepository
         }
     }
 }
+
+// NV-24 1.2.1: caché de explicaciones en memoria (misma llave y vigencia de 24 h).
+public sealed class InMemorySmartMatchExplanationCache : TheHouse.Application.Abstractions.SmartMatch.ISmartMatchExplanationCache
+{
+    private readonly object gate = new();
+
+    public Dictionary<string, (TheHouse.Application.Abstractions.SmartMatch.CachedExplanation Value, DateTimeOffset CreatedAt)> Items { get; } = [];
+
+    public bool Unavailable { get; set; }
+
+    public Task<TheHouse.Application.Abstractions.SmartMatch.CachedExplanation?> GetAsync(string key, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult(Items.TryGetValue(key, out var item) && item.CreatedAt > now - SmartMatchExplanationRules.CacheDuration ? item.Value : null);
+        }
+    }
+
+    public Task SetAsync(string key, TheHouse.Application.Abstractions.SmartMatch.CachedExplanation explanation, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            Items[key] = (explanation, now);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void Guard(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Unavailable)
+        {
+            throw new DependencyUnavailableException();
+        }
+    }
+}
+
+// TheHouse-GenAI falso: devuelve el resultado configurado y guarda los hechos
+// enviados para comprobar la minimización (sin red).
+public sealed class FakeGenAiExplanationClient : TheHouse.Application.Abstractions.SmartMatch.IGenAiExplanationClient
+{
+    public bool Enabled { get; set; }
+
+    public List<(GenAiFacts Facts, string? RequestId)> Calls { get; } = [];
+
+    public Func<GenAiFacts, TheHouse.Application.Abstractions.SmartMatch.GenAiExplanationResult> Respond { get; set; } =
+        facts => new(TheHouse.Application.Abstractions.SmartMatch.GenAiOutcome.Generated, $"Te queda a {facts.DistanceKm} km de la {facts.University} y cuesta ${facts.Price} MXN al mes.", "explain_match_v3");
+
+    public Task<TheHouse.Application.Abstractions.SmartMatch.GenAiExplanationResult> ExplainAsync(GenAiFacts facts, string? requestId, CancellationToken cancellationToken)
+    {
+        lock (Calls)
+        {
+            Calls.Add((facts, requestId));
+        }
+
+        return Task.FromResult(Respond(facts));
+    }
+}

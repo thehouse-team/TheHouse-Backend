@@ -445,7 +445,9 @@ public sealed class LogoutHttpTests
                     or "/api/v1/smart-match/feedback"
                     or "/api/v1/smart-match/dismissals"
                     or "/api/v1/smart-match/dismissals/{roomId}"
-                    or "/api/v1/admin/smart-match/metrics",
+                    or "/api/v1/admin/smart-match/metrics"
+                    or "/api/v1/smart-match/explanations/{roomId}"
+                    or "/api/v1/smart-match/explanations/query",
                 $"Unexpected OpenAPI path: {path}"));
     }
     // --- Soportes -------------------------------------------------

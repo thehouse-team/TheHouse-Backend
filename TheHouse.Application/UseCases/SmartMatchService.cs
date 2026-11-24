@@ -114,6 +114,38 @@ public sealed class SmartMatchService(
     public Task UndismissAsync(string userId, string? roomId, CancellationToken cancellationToken) =>
         store.RemoveDismissalAsync(userId, RoomId(roomId), cancellationToken);
 
+    // NV-24: puntaje y desglose de un solo cuarto con el mismo cálculo de
+    // NV-23. 400 id inválido; 422 perfil incompleto; 404 cuarto no publicado
+    // o no elegible (sin revelar cuál de los dos).
+    public async Task<SmartMatchExplanationContext> ExplanationContextAsync(
+        string? userId,
+        string? roomId,
+        string? universityId,
+        PreferencesRequest? preferences,
+        CancellationToken cancellationToken)
+    {
+        var id = RoomId(roomId);
+        var (student, university) = userId is null
+            ? await GuestAsync(universityId, preferences, cancellationToken)
+            : await UserAsync(userId, cancellationToken);
+        var room = await rooms.GetAsync(id, cancellationToken);
+        var building = room is null ? null : await buildings.GetAsync(room.BuildingId, cancellationToken);
+        if (room is not { Status: RoomStatus.Available, Price: not null } || building is not { Status: BuildingStatus.Verified })
+        {
+            throw new NotFoundException("room");
+        }
+
+        var (cellLat, cellLng) = ApproximateLocation.Cell(building.Latitude, building.Longitude);
+        var distance = ListingRules.DistanceKm(cellLat, cellLng, university.Latitude!.Value, university.Longitude!.Value);
+        var candidate = SmartMatchRules.Translate(room, building, distance);
+        if (SmartMatchRules.Violations(student, candidate).Count > 0)
+        {
+            throw new NotFoundException("room");
+        }
+
+        return new SmartMatchExplanationContext(student, university, room, candidate, model.Score(SmartMatchRules.Features(student, candidate)));
+    }
+
     // RF-66: solo staff con rol `admin`.
     public async Task<SmartMatchMetricsResponse> MetricsAsync(string actorId, string? from, string? to, CancellationToken cancellationToken)
     {
@@ -314,3 +346,11 @@ public sealed class SmartMatchService(
 
     private static double? Average(long sum, long count) => count == 0 ? null : Math.Round(sum / (double)count, 1, MidpointRounding.AwayFromZero);
 }
+
+// NV-24: lo que necesita la explicación de un cuarto (nunca textos del arrendador).
+public sealed record SmartMatchExplanationContext(
+    SmartMatchStudent Student,
+    University University,
+    Room Room,
+    SmartMatchRoom Candidate,
+    SmartMatchScore Score);
