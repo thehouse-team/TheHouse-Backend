@@ -100,6 +100,10 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
 
     public InMemorySmartMatchRepository SmartMatch { get; } = new();
 
+    public InMemorySmartMatchExplanationCache Explanations { get; } = new();
+
+    public FakeGenAiExplanationClient GenAi { get; } = new();
+
     public InMemoryViewSaltStore ViewSalts { get; } = new();
 
     // NV-20 1.2.0: dispositivos y emisor de push falsos.
@@ -146,6 +150,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.RemoveAll<IRoommateProfileRepository>();
             services.RemoveAll<IRoomViewRepository>();
             services.RemoveAll<ISmartMatchRepository>();
+            services.RemoveAll<TheHouse.Application.Abstractions.SmartMatch.ISmartMatchExplanationCache>();
+            services.RemoveAll<TheHouse.Application.Abstractions.SmartMatch.IGenAiExplanationClient>();
             services.RemoveAll<IViewSaltStore>();
             services.RemoveAll<IPushDeviceRepository>();
             services.RemoveAll<IPushSender>();
@@ -176,6 +182,8 @@ public sealed class UserResourceFactory(UserRateLimitOptions? limits = null, boo
             services.AddSingleton<IRoommateProfileRepository>(Roommates);
             services.AddSingleton<IRoomViewRepository>(RoomViews);
             services.AddSingleton<ISmartMatchRepository>(SmartMatch);
+            services.AddSingleton<TheHouse.Application.Abstractions.SmartMatch.ISmartMatchExplanationCache>(Explanations);
+            services.AddSingleton<TheHouse.Application.Abstractions.SmartMatch.IGenAiExplanationClient>(GenAi);
             services.AddSingleton<IViewSaltStore>(ViewSalts);
             services.AddSingleton<IPushDeviceRepository>(PushDevices);
             services.AddSingleton<IPushSender>(PushSender);

@@ -100,6 +100,11 @@ public sealed class UserRateLimitOptions
 
     public int SmartMatchMetricsPerWindow { get; init; } = 30;
 
+    // NV-24: explicaciones 20/min por usuario y 10/min por IP para invitados.
+    public int ExplanationsPerWindow { get; init; } = 20;
+
+    public int ExplanationsGuestPerWindow { get; init; } = 10;
+
     public TimeSpan Window { get; init; } = TimeSpan.FromSeconds(60);
 
     public TimeSpan CreateWindow { get; init; } = TimeSpan.FromDays(1);

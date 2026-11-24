@@ -1,7 +1,9 @@
 using MongoDB.Driver;
 using TheHouse.Application.Abstractions.Persistence;
+using TheHouse.Application.Abstractions.SmartMatch;
 using TheHouse.Application.Common;
 using TheHouse.Application.UseCases;
+using TheHouse.Infrastructure.GenAi;
 using TheHouse.Infrastructure.Persistence.Mongo;
 
 namespace TheHouse.Configuration;
@@ -22,7 +24,66 @@ public static class SmartMatchConfiguration
                 ? new UnavailableSmartMatchRepository()
                 : new MongoSmartMatchRepository(database);
         });
+
+        // NV-24 1.2.1: explicaciones; GenAI solo con URL https y clave (si no, plantilla).
+        builder.Services.AddSingleton<SmartMatchExplanationService>();
+        builder.Services.AddSingleton<ISmartMatchExplanationEvents, LoggingExplanationEvents>();
+        builder.Services.AddSingleton<ISmartMatchExplanationCache>(provider =>
+        {
+            var database = provider.GetService<IMongoDatabase>();
+            return database is null
+                ? new UnavailableSmartMatchExplanationCache()
+                : new MongoSmartMatchExplanationCache(database);
+        });
+
+        var genAi = builder.Configuration.GetSection("GenAI").Get<GenAiOptions>() ?? new GenAiOptions();
+        if (genAi.IsUsable(out _))
+        {
+            var http = new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(15) })
+            {
+                BaseAddress = new Uri(genAi.BaseUrl!.TrimEnd('/') + "/"),
+                Timeout = Timeout.InfiniteTimeSpan,
+            };
+            builder.Services.AddSingleton<IGenAiExplanationClient>(provider => new GenAiExplanationClient(
+                http,
+                genAi,
+                provider.GetRequiredService<TimeProvider>(),
+                provider.GetRequiredService<ILogger<GenAiExplanationClient>>()));
+        }
+        else
+        {
+            builder.Services.AddSingleton<IGenAiExplanationClient, DisabledGenAiExplanationClient>();
+        }
+
+        builder.Services.AddHostedService(provider => new GenAiStartupNotice(genAi, provider.GetRequiredService<ILogger<GenAiStartupNotice>>()));
     }
+}
+
+// Sin texto ni datos del usuario: solo el motivo del rechazo.
+public sealed class LoggingExplanationEvents(ILogger<LoggingExplanationEvents> logger) : ISmartMatchExplanationEvents
+{
+    public void Rejected(string reason) =>
+        logger.LogWarning("NV-24: resumen de TheHouse-GenAI rechazado por la validación ({Reason}); se usa la plantilla.", reason);
+}
+
+// Aviso al iniciar: si GenAI no está activo, las explicaciones usan plantilla.
+public sealed class GenAiStartupNotice(GenAiOptions options, ILogger<GenAiStartupNotice> logger) : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        if (options.IsUsable(out var problem))
+        {
+            logger.LogInformation("NV-24: TheHouse-GenAI activo para las explicaciones.");
+        }
+        else
+        {
+            logger.LogInformation("NV-24: explicaciones con plantilla; TheHouse-GenAI {Problem}.", problem);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
 
 // Las métricas (RF-66) nunca hacen fallar la respuesta al usuario: si el
