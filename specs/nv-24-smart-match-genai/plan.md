@@ -4,14 +4,14 @@
 | --- | --- |
 | ID | NV-24 |
 | Documento | `plan.md` |
-| Versión | 1.2.0-borrador |
-| Fecha | 2026-11-19 |
-| Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo 1.2.0»: aprobación documental con las decisiones de la §13 y el contrato congelado de TheHouse-GenAI del 2026-11-18; el contrato §6.1 con Mobile no cambia respecto a 1.1.0. La ejecución requiere «EJECUTA» y NV-23 desplegada) |
-| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
+| Versión | 1.2.1 |
+| Fecha | 2026-11-24 |
+| Estado documental | **✅ APROBADA — 1.2.1** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-24 («Apruebo NV-24 1.2.1 y EJECUTA»: hosting en Container Apps interno, costo $0 con la evidencia del equipo de GenAI del 2026-11-22 y privacidad del nivel gratuito; «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-24-smart-match-genai/`; la clave de servicio la carga Victor como secreto; sin paquetes nuevos) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.1: T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.2.0-borrador |
-| Tasks | `task.md` 1.2.0-borrador |
+| Spec | `spec.md` 1.2.1 |
+| Tasks | `task.md` 1.2.1 |
 
 Plan preparado para revisión. No crea código, colecciones ni índices hasta la autorización «EJECUTA».
 
@@ -114,6 +114,8 @@ F4 Pruebas y evidencia
 - Sin datos personales hacia GenAI (RNF-11) y sin prompts ni explicaciones completas en logs.
 - Rate limit 20/min por usuario y 10/min por IP de invitado; caché para no repetir llamadas.
 - Si GenAI no está disponible el endpoint sigue respondiendo 200 con plantilla (RNF-16); 503 solo si fallan MongoDB o Redis.
+- Nivel gratuito de Gemini: Google puede usar lo enviado; por eso solo viajan hechos públicos del cuarto (precio, distancia aproximada, servicios y tipos) y las preferencias de búsqueda, sin ids, nombres ni textos libres.
+- La URL de GenAI es interna del entorno `cae-thehouse-u2` y solo HTTPS; la clave de métricas de GenAI no se guarda en el backend.
 - Revisión de seguridad (OWASP API Top 10) al cierre de cada fase.
 
 ## 7. Costo
@@ -121,15 +123,16 @@ F4 Pruebas y evidencia
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | Plantillas en el backend | $0 | Siempre disponibles |
-| `TheHouse-GenAI` (App Service y Gemini) | $0 solo con la evidencia de su equipo (§17) | PENDIENTE; mientras tanto desactivado y sin costo |
+| `TheHouse-GenAI` (Container Apps) | $0 | Escala a cero (0–1 réplicas, 0.25 vCPU / 0.5 GiB) dentro de la concesión gratuita del entorno compartido |
+| Gemini (`thehouse-genai-prod`) | $0 | Nivel gratuito sin facturación configurada; capturas del 2026-11-22; al agotar la cuota responde plantilla |
 | Caché en MongoDB Atlas M0 | $0 | TTL de 24 h |
 
 ## 8. Puertas
 
 | Puerta | Momento | Criterio | Si falla |
 | --- | --- | --- | --- |
-| G0-Doc | Antes de ejecutar | Aprobación documental de 1.2.0-borrador | PASS (M-BE-081) |
-| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | BLOCKED |
+| G0-Doc | Antes de ejecutar | Aprobación documental de 1.2.1 | PASS (M-BE-086) |
+| G0-Ejec | Inicio | «EJECUTA» con tasks y rutas; decisiones de la §13 de la spec resueltas o aceptadas | PASS (2026-11-24) |
 | G1 | Fin F1 | Tasks de F1 cerradas con evidencia | No avanzar |
 | G2 | Fin F2 | Tasks de F2 cerradas con evidencia | No avanzar |
 | G3 | Fin F3 | Tasks de F3 cerradas con evidencia | No avanzar |
@@ -151,4 +154,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.2.1: T01–T11 autorizadas**.

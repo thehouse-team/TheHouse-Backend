@@ -4,23 +4,23 @@
 | --- | --- |
 | ID | NV-24 |
 | Documento | `spec.md` |
-| Versión | 1.2.0-borrador |
-| Fecha | 2026-11-19 |
-| Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo 1.2.0»: aprobación documental con las decisiones de la §13 y el contrato congelado de TheHouse-GenAI del 2026-11-18; el contrato §6.1 con Mobile no cambia respecto a 1.1.0. La ejecución requiere «EJECUTA» y NV-23 desplegada) |
-| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
+| Versión | 1.2.1 |
+| Fecha | 2026-11-24 |
+| Estado documental | **✅ APROBADA — 1.2.1** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-24 («Apruebo NV-24 1.2.1 y EJECUTA»: hosting en Container Apps interno, costo $0 con la evidencia del equipo de GenAI del 2026-11-22 y privacidad del nivel gratuito; «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-24-smart-match-genai/`; la clave de servicio la carga Victor como secreto; sin paquetes nuevos) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.1: T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-59, RF-60, RF-61, RF-62, RF-63 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-15, RNF-16 |
-| Plan | `plan.md` 1.2.0-borrador |
-| Tasks | `task.md` 1.2.0-borrador |
+| Plan | `plan.md` 1.2.1 |
+| Tasks | `task.md` 1.2.1 |
 | Módulo | SmartMatchExplanations |
 | Precondición | Constitution 1.2.0 (M-BE-062) y NV-23 |
-| Relación | Explica los puntajes de NV-23; consume `TheHouse-GenAI` (`explain-match`, contrato congelado del 2026-11-18); si no está disponible, responde con plantilla (RNF-16) |
+| Relación | Explica los puntajes de NV-23 1.2.0; consume `TheHouse-GenAI` (`explain-match`, contrato congelado del 2026-11-18) por su URL interna; si no está disponible, responde con plantilla (RNF-16) |
 
-Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
+Spec aprobada (1.2.1, M-BE-086) y autorizada («EJECUTA», T01–T11) en las rutas indicadas.
 
-**Cambio 1.2.0-borrador (2026-11-19):** el equipo de GenAI congeló su contrato (guía de integración del 2026-11-18, ver `genai-contract.md`). Esta versión alinea el cliente del backend: campos en camelCase, `university` como texto, preferencias con moneda, distancia y servicios, **sin id del cuarto**; respuesta `{ explanation, generated, promptVersion }` (ya no hay `facts_used`); encabezados `X-Service-Key` y `X-Request-ID`; timeout de 8 s porque GenAI corta su llamada a la IA a los 6 s y devuelve plantilla; un reintento solo ante error de red o 5xx; 429 respeta `Retry-After`. El contrato con Mobile (§6.1) **no cambia**: `generatedBy` es `genai` solo si GenAI respondió `generated: true` y su texto pasa la validación del backend. GenAI se hospeda en Azure App Service (decisión de su equipo). La búsqueda en lenguaje natural (`parse-search`) sigue fuera de esta spec.
+**Cambio 1.2.1 (2026-11-24):** actualización de hechos del equipo de GenAI (mensaje y guía del 2026-11-22) y de NV-23 1.2.0, sin cambiar el contrato con GenAI. (1) **Hosting:** `TheHouse-GenAI` corre en Azure Container Apps (`ca-thehouse-genai-u2`) dentro del mismo entorno `cae-thehouse-u2`, con ingreso **interno** y solo HTTPS (`https://ca-thehouse-genai-u2.internal.grayisland-cb722b5f.eastus2.azurecontainerapps.io`), 0–1 réplicas (se apaga tras 5 min sin uso); ya no App Service. (2) **Costo $0 con evidencia:** proyecto de Gemini `thehouse-genai-prod` en nivel gratuito sin facturación configurada (15 RPM, ~250 K TPM, 500 RPD; al agotarse GenAI responde plantilla) y Container Apps dentro de la concesión gratuita. (3) **Privacidad:** en el nivel gratuito Google puede usar lo enviado para mejorar sus productos; NV-24 solo envía hechos públicos del cuarto y las preferencias de búsqueda, con un título neutro armado por el backend (nunca el nombre ni textos del arrendador). (4) Con NV-23 1.2.0 el puntaje y su desglose usan los factores de ML-04 y el perfil mínimo; `explanations/query` responde 422 con `missing` igual que NV-23. El contrato de la §6.1 con Mobile no cambia salvo ese 422. La primera llamada tras el apagado de GenAI puede pasar de 8 s: se responde con plantilla, como en cualquier timeout.
 
 ## 1. Contexto
 
@@ -33,10 +33,10 @@ Explicar en lenguaje sencillo el puntaje de un cuarto con ventajas y desventajas
 ## 3. Precondiciones
 
 1. Constitution 1.2.0 aprobada (M-BE-062).
-2. NV-23 desplegada (el puntaje lo calcula TheHouse-ML).
-3. El contrato §6.1 con Mobile no cambia respecto a 1.1.0 (ya validado).
-4. Autorización «Apruebo» de 1.2.0 y «EJECUTA».
-5. Para activar GenAI en Production (T08): URL de `TheHouse-GenAI` desplegado, clave de servicio entregada por canal privado y cargada como secreto, y evidencia de costo $0 de su hosting y su proveedor (§17); sin ellas GenAI queda desactivado y NV-24 funciona con plantillas.
+2. NV-23 1.2.0 desplegada (2026-11-24).
+3. El contrato §6.1 con Mobile no cambia respecto a 1.1.0 salvo el 422 de `explanations/query`, igual que NV-23 1.2.0 (aceptado por Mobile).
+4. «Apruebo NV-24 1.2.1 y EJECUTA».
+5. Para activar GenAI en Production (T08): la clave de servicio entregada por canal privado y cargada por Victor como secreto; URL interna y evidencia de costo ya disponibles (2026-11-22).
 
 ## 4. Alcance
 
@@ -68,7 +68,7 @@ Prefijo `/api/v1` (`ApiConventions.Prefix`). Cuerpos JSON en camelCase; fechas I
 
 - Respuesta: `{ roomId, score, summary, pros: [..], cons: [..], generatedBy: "genai" | "template", modelVersion, explanationVersion }`. `summary` máximo 600 caracteres; `pros` y `cons` de 0 a 4 frases cortas; sin porcentajes por factor (RF-63).
 - `generatedBy: "genai"` solo si GenAI respondió 200 con `generated: true` y su texto pasa la validación; en cualquier otro caso (desactivado, sin URL o clave, timeout, 4xx, 5xx, 429, circuito abierto, `generated: false` o texto rechazado) `generatedBy: "template"`. El puntaje y las ventajas y desventajas son los mismos en ambos casos.
-- `explanations/query`: `{ roomId, universityId, preferences }` con el formato de NV-11 (no se guarda). Un cuarto no publicado o no elegible responde 404.
+- `explanations/query`: `{ roomId, universityId, preferences }` con el formato de NV-11 (no se guarda). Un cuarto no publicado o no elegible responde 404; un perfil sin universidad, `budget.max`, `livingWith` o `placeType` responde 422 `smart_match_profile_incomplete` con `missing` (igual que NV-23).
 - Contrato con `TheHouse-GenAI` (congelado el 2026-11-18): `POST {GenAI__BaseUrl}/api/v1/generative/explain-match` con `X-Service-Key`, `Content-Type: application/json` y `X-Request-ID` (id de correlación del backend). Cuerpo en camelCase, sin campos extra (si no, 422): `{ matchScore (0–100), locale: "es-MX", university (≤120), property: { title (≤120), price (≥0, 2 decimales), currency: "MXN", distanceKm (≥0), services: [≤20, cada uno ≤40] }, preferences: { budgetMax (≥0), currency (igual a la del cuarto), maxDistanceKm (≥0), essentialServices: [..] } }`. Respuesta 200: `{ explanation, generated, promptVersion }`. Errores con el sobre `{ error: { code, message, request_id } }`: 401, 413, 422, 429 (`Retry-After`) y 500. Nunca se envían id del cuarto, dirección, coordenadas, dueño, descripción libre, datos del estudiante ni tokens.
 
 ## 6.1 Contrato para Mobile
@@ -93,7 +93,7 @@ AUTH         Público (sin token); rate limit 10/min por IP
 HEADERS      —
 REQUEST      { roomId, universityId, preferences }
 RESPONSE     200 { roomId, score, summary, pros: [..], cons: [..], generatedBy: "genai" | "template", modelVersion, explanationVersion }
-STATUS CODES 200, 400, 404, 429, 503
+STATUS CODES 200, 400, 404, 422 code=smart_match_profile_incomplete (missing), 429, 503
 PAGINATION   No
 ```
 
@@ -109,7 +109,7 @@ Módulo **SmartMatchExplanations** del monolito modular (constitution §6): es p
 | Aspecto | Detalle |
 | --- | --- |
 | Colecciones propias | `smart_match_explanations (caché)` |
-| Usa (puertos de otros módulos) | SmartMatch `ICompatibilityModel` y el cálculo de NV-23 para el puntaje y el desglose; Search `SearchService` (NV-14) para los datos públicos del cuarto; TheHouse-GenAI (servicio auxiliar fuera del monolito, constitution §6.1) con el contrato `explain-match` congelado del 2026-11-18 |
+| Usa (puertos de otros módulos) | SmartMatch `SmartMatchService` (NV-23 1.2.0) para el perfil, el cuarto, el puntaje y el desglose; Search `SearchService` (NV-14) para los datos públicos del cuarto; TheHouse-GenAI (servicio auxiliar fuera del monolito, constitution §6.1) con el contrato `explain-match` congelado del 2026-11-18, por su URL interna |
 | Publica (eventos de dominio) | — |
 | Consume (eventos de dominio) | — |
 
@@ -120,7 +120,7 @@ Los eventos se procesan en el mismo proceso y de forma idempotente; si una répl
 - Hechos de entrada: puntaje y desglose de NV-23, precio, presupuesto, distancia aproximada, minutos a pie, servicios del cuarto y esenciales del usuario, tipo de cuarto y de edificio, nombre de la universidad. Nunca la descripción libre del arrendador ni datos personales.
 - `smart_match_explanations` (caché): clave `{ roomId, preferencesHash, modelVersion, explanationVersion }`, TTL de 24 h; guarda solo `summary`, `pros`, `cons` y `generatedBy`.
 - Puerto `IExplanationWriter` con dos adaptadores: `TemplateExplanationWriter` (siempre disponible) y `GenAiExplanationClient` (HTTP a `TheHouse-GenAI` con clave de servicio).
-- Configuración `GenAI`: `Enabled` (falso por defecto), `BaseUrl` (https), `TimeoutSeconds` 8; la clave como secreto de Container Apps `genai-service-key` expuesto como `GenAI__ServiceKey` (constitution §31; nunca en el repositorio ni en `appsettings.json`).
+- Configuración `GenAI`: `Enabled` (falso por defecto), `BaseUrl` (https; en Production `https://ca-thehouse-genai-u2.internal.grayisland-cb722b5f.eastus2.azurecontainerapps.io`), `TimeoutSeconds` 8; la clave como secreto de Container Apps `genai-service-key` expuesto como `GenAI__ServiceKey` (constitution §31; nunca en el repositorio ni en `appsettings.json`). El backend no usa la clave de métricas de GenAI.
 - Mapeo de servicios para GenAI: `wifi`→«internet», `water`→«agua», `electricity`→«luz», `gas`→«gas», `parking`→«estacionamiento», `laundry`→«lavadora», `furnished`→«amueblado», `hot_water`→«agua caliente», `kitchen`→«cocina», `security`→«seguridad», `cleaning`→«limpieza»; baño propio del cuarto→«baño privado».
 
 ## 9. Reglas de negocio
@@ -130,7 +130,8 @@ Los eventos se procesan en el mismo proceso y de forma idempotente; si una répl
 3. GenAI: un intento con 8 s de timeout (GenAI corta su llamada a la IA a los 6 s y responde con plantilla); un reintento solo ante error de red o 5xx, nunca ante timeout ni 4xx; 429 abre el circuito durante `Retry-After`; circuit breaker que abre tras 5 fallas seguidas durante 60 s; 401 y 422 se registran como error de configuración o de código (sin el cuerpo).
 4. Validación de la respuesta de GenAI (defensa adicional a la suya): texto plano de máximo 600 caracteres; todo número, precio, distancia, servicio o nombre de universidad que aparezca debe estar en los hechos enviados; si no, se usa la plantilla y se cuenta el rechazo (sin registrar el texto).
 5. El texto se devuelve como texto plano: sin HTML, Markdown ni enlaces.
-6. Cambiar las preferencias cambia `preferencesHash` y por tanto la explicación; la caché de 24 h evita repetir llamadas (GenAI limita a 60 por minuto).
+6. Cambiar las preferencias cambia `preferencesHash` y por tanto la explicación. La caché de 24 h guarda las explicaciones de GenAI y las de plantilla cuando GenAI está desactivado; una plantilla por falla de GenAI no se guarda, para reintentar en la siguiente consulta (el circuit breaker evita insistir).
+7. Título enviado a GenAI: neutro y armado por el backend desde catálogos (tipo de cuarto y de inmueble y el código de la universidad); nunca el nombre del edificio ni otro texto del arrendador.
 
 ## 10. Seguridad
 
@@ -150,6 +151,8 @@ Específicas de esta spec:
 - Sin datos personales hacia GenAI (RNF-11) y sin prompts ni explicaciones completas en logs.
 - Rate limit 20/min por usuario y 10/min por IP de invitado; caché para no repetir llamadas.
 - Si GenAI no está disponible el endpoint sigue respondiendo 200 con plantilla (RNF-16); 503 solo si fallan MongoDB o Redis.
+- Nivel gratuito de Gemini: Google puede usar lo enviado; por eso solo viajan hechos públicos del cuarto (precio, distancia aproximada, servicios y tipos) y las preferencias de búsqueda, sin ids, nombres ni textos libres.
+- La URL de GenAI es interna del entorno `cae-thehouse-u2` y solo HTTPS; la clave de métricas de GenAI no se guarda en el backend.
 
 ## 11. Errores
 
@@ -189,8 +192,8 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Contrato con GenAI | `explain-match` congelado por el equipo de GenAI el 2026-11-18 (camelCase, `generated`, `promptVersion`, sin id del cuarto); cambios con nueva versión en ambos repositorios | APROBADO (M-BE-081) |
 | Credencial de servicio | Encabezado `X-Service-Key`; secreto `genai-service-key` en la Container App del backend como `GenAI__ServiceKey`; entrega por canal privado y rotación manual | APROBADO (M-BE-081) |
 | Timeout | 8 s por llamada (GenAI responde plantilla a los 6 s); reintento solo en red/5xx; la caché de 24 h evita la espera en las siguientes consultas | APROBADO (M-BE-081) |
-| Hosting de TheHouse-GenAI | Azure App Service, decidido y operado por el equipo de GenAI; el backend solo necesita su URL https; costo $0 con su evidencia (§17) antes de activar | APROBADO (M-BE-081) |
-| Proveedor de IA de TheHouse-GenAI | Gemini (decisión del equipo de GenAI); costo $0 con su evidencia (§17) antes de activar | APROBADO (M-BE-081) |
+| Hosting de TheHouse-GenAI | Azure Container Apps `ca-thehouse-genai-u2` en `cae-thehouse-u2`, ingreso interno solo HTTPS (`https://ca-thehouse-genai-u2.internal.grayisland-cb722b5f.eastus2.azurecontainerapps.io`), 0–1 réplicas; operado por el equipo de GenAI | APROBADO (M-BE-086) |
+| Proveedor de IA de TheHouse-GenAI | Gemini 3.5 Flash Lite en el proyecto `thehouse-genai-prod`, nivel gratuito sin facturación (evidencia del 2026-11-22) | APROBADO (M-BE-086) |
 | Idioma | Español de México (`locale: es-MX`) | APROBADO (M-BE-068) |
 
 ## 14. Costo — COST-001
@@ -198,7 +201,8 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Componente | Costo | Condición |
 | --- | --- | --- |
 | Plantillas en el backend | $0 | Siempre disponibles |
-| `TheHouse-GenAI` (App Service y Gemini) | $0 solo con la evidencia de su equipo (§17) | PENDIENTE; mientras tanto desactivado y sin costo |
+| `TheHouse-GenAI` (Container Apps) | $0 | Escala a cero (0–1 réplicas, 0.25 vCPU / 0.5 GiB) dentro de la concesión gratuita del entorno compartido |
+| Gemini (`thehouse-genai-prod`) | $0 | Nivel gratuito sin facturación configurada; capturas del 2026-11-22; al agotar la cuota responde plantilla |
 | Caché en MongoDB Atlas M0 | $0 | TTL de 24 h |
 
 Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí solos costo $0 (constitution §17): antes de usar cualquier servicio se exige evidencia vigente de elegibilidad, cuotas, duración, tarjeta y riesgo de cobro. Todo proveedor externo nuevo requiere además una decisión M-BE con análisis frente a constitution §30 (proveedores permitidos; precedente: M-BE-034). Si algún componente no puede demostrarse en $0, la task correspondiente queda **BLOCKED**.
@@ -213,12 +217,14 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | NV-24-RK04 | GenAI caído o lento | Explicación más lenta (hasta 8 s la primera vez) | Caché de 24 h, circuit breaker, 429 respetado y plantilla |
 | NV-24-RK05 | Contratos desalineados entre repositorios | Errores al integrar (422) | Contrato congelado copiado en `genai-contract.md` y doble de prueba con sus fixtures |
 | NV-24-RK06 | Filtración de la clave de servicio | Uso indebido de GenAI | Solo como secreto de Container Apps, entrega por canal privado, rotación documentada |
+| NV-24-RK07 | Uso de datos por el nivel gratuito de Gemini | Contenido enviado usado por Google | Solo hechos públicos y preferencias de búsqueda, título neutro, sin ids ni textos libres; prueba de minimización |
+| NV-24-RK08 | Arranque en frío de GenAI (se apaga tras 5 min) | Primera explicación sin IA | Plantilla en el timeout de 8 s y caché solo de respuestas válidas |
 
 ## 16. Dependencias
 
 - Constitution 1.2.0.
-- NV-23 (TheHouse-ML).
-- `TheHouse-GenAI` desplegado con su contrato congelado del 2026-11-18.
+- NV-23 1.2.0 (desplegada el 2026-11-24).
+- `TheHouse-GenAI` desplegado en `cae-thehouse-u2` con su contrato congelado del 2026-11-18.
 
 ## 17. Trazabilidad y cobertura
 
@@ -230,8 +236,8 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
+| Estado documental | **✅ APROBADA — 1.2.1** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.1: T01–T11 autorizadas** |
 
 ## 18. Aprobación pendiente
 

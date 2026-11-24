@@ -787,3 +787,11 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** se implementa NV-23 1.2.0 (14 tasks); T06 y T07 quedan BLOCKED hasta que `TheHouse-ML` publique ML-06 y los casos dorados de ML-04 T05.
 
+## M-BE-086 — NV-24 1.2.1 aprobada y en ejecución: GenAI en Container Apps interno a costo $0
+
+- **ID:** M-BE-086
+- **Decisión:** aprobar NV-24 1.2.1 con los hechos entregados por el equipo de GenAI el 2026-11-22: `TheHouse-GenAI` corre en Azure Container Apps (`ca-thehouse-genai-u2`) dentro de `cae-thehouse-u2`, con ingreso interno solo HTTPS y 0–1 réplicas (reemplaza la mención a App Service de M-BE-081); Gemini 3.5 Flash Lite en el proyecto `thehouse-genai-prod` en nivel gratuito sin facturación (15 RPM, ~250 K TPM, 500 RPD) como evidencia de costo $0; por el uso de datos del nivel gratuito, NV-24 solo envía hechos públicos del cuarto y preferencias de búsqueda con un título neutro armado por el backend. `explanations/query` responde 422 con `missing` igual que NV-23 1.2.0. El backend no guarda la clave de métricas de GenAI. Orden acordado: `explain-match` ahora (el puntaje de NV-23 ya está en producción); `parse-search` queda para una spec futura porque Mobile lo dejó fuera de esta etapa.
+- **Estado:** APROBADO — Victor, 2026-11-24 («Apruebo NV-24 1.2.1 y EJECUTA», T01–T11).
+- **Fecha:** 2026-11-24.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** cliente HTTP a la URL interna de GenAI, desactivado por defecto; colección de caché `smart_match_explanations` (TTL 24 h); la clave se carga como secreto `genai-service-key` cuando el código esté desplegado; sin paquetes nuevos ni costo.

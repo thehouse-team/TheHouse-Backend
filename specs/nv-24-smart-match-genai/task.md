@@ -4,14 +4,14 @@
 | --- | --- |
 | ID | NV-24 |
 | Documento | `task.md` |
-| Versión | 1.2.0-borrador |
-| Fecha | 2026-11-19 |
-| Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-19 («Apruebo 1.2.0»: aprobación documental con las decisiones de la §13 y el contrato congelado de TheHouse-GenAI del 2026-11-18; el contrato §6.1 con Mobile no cambia respecto a 1.1.0. La ejecución requiere «EJECUTA» y NV-23 desplegada) |
-| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
+| Versión | 1.2.1 |
+| Fecha | 2026-11-24 |
+| Estado documental | **✅ APROBADA — 1.2.1** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-24 («Apruebo NV-24 1.2.1 y EJECUTA»: hosting en Container Apps interno, costo $0 con la evidencia del equipo de GenAI del 2026-11-22 y privacidad del nivel gratuito; «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-24-smart-match-genai/`; la clave de servicio la carga Victor como secreto; sin paquetes nuevos) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.1: T01–T11 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.2.0-borrador |
-| Plan | `plan.md` 1.2.0-borrador |
+| Spec | `spec.md` 1.2.1 |
+| Plan | `plan.md` 1.2.1 |
 | Tasks totales | 11 |
 | Tasks completadas | 0 |
 
@@ -86,7 +86,7 @@
 | Tasks completadas | 0 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **⏸ EN ESPERA — 1.2.0 aprobada; falta «EJECUTA» y que TheHouse-ML entregue NV-23** |
+| Estado documental | **✅ APROBADA — 1.2.1** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.1: T01–T11 autorizadas** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
