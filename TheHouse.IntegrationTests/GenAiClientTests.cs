@@ -39,12 +39,35 @@ public sealed class GenAiClientTests
         Assert.DoesNotContain("roomId", request.Body, StringComparison.OrdinalIgnoreCase);
     }
 
+    // El registro de `generated: false` lleva el id para correlacionar con GenAI, nunca el texto.
     [Fact]
-    public async Task Generated_false_is_reported_as_not_generated()
+    public async Task Generated_false_is_reported_and_logged_with_the_request_id_only()
     {
-        var client = Client(new GenAiHandler(_ => Ok("Plantilla de GenAI.", generated: false)));
+        var logger = new ListLogger();
+        var client = Client(new GenAiHandler(_ => Ok("Plantilla de GenAI con datos.", generated: false)), logger: logger);
 
-        Assert.Equal(GenAiOutcome.NotGenerated, (await client.ExplainAsync(Facts, null, default)).Outcome);
+        Assert.Equal(GenAiOutcome.NotGenerated, (await client.ExplainAsync(Facts, "trace-xyz", default)).Outcome);
+
+        var message = Assert.Single(logger.Messages);
+        Assert.Contains("generated=false", message, StringComparison.Ordinal);
+        Assert.Contains("trace-xyz", message, StringComparison.Ordinal);
+        Assert.Contains("explain_match_v3", message, StringComparison.Ordinal);
+        Assert.DoesNotContain("Plantilla de GenAI", message, StringComparison.Ordinal);
+        Assert.DoesNotContain("clave-de-prueba", message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Failures_are_logged_with_the_request_id_and_without_the_key()
+    {
+        var logger = new ListLogger();
+        var client = Client(new GenAiHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized)), logger: logger);
+
+        await client.ExplainAsync(Facts, "trace-401", default);
+
+        var message = Assert.Single(logger.Messages);
+        Assert.Contains("401", message, StringComparison.Ordinal);
+        Assert.Contains("trace-401", message, StringComparison.Ordinal);
+        Assert.DoesNotContain("clave-de-prueba", message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -131,12 +154,24 @@ public sealed class GenAiClientTests
         Assert.Equal(usable, new GenAiOptions { Enabled = enabled, BaseUrl = url, ServiceKey = key }.IsUsable(out _));
     }
 
-    private static GenAiExplanationClient Client(GenAiHandler handler, TimeProvider? time = null) =>
+    private static GenAiExplanationClient Client(GenAiHandler handler, TimeProvider? time = null, Microsoft.Extensions.Logging.ILogger<GenAiExplanationClient>? logger = null) =>
         new(
             new HttpClient(handler) { BaseAddress = new Uri("https://genai.test/") },
             new GenAiOptions { Enabled = true, BaseUrl = "https://genai.test", ServiceKey = "clave-de-prueba", TimeoutSeconds = 8 },
             time ?? TimeProvider.System,
-            NullLogger<GenAiExplanationClient>.Instance);
+            logger ?? NullLogger<GenAiExplanationClient>.Instance);
+
+    private sealed class ListLogger : Microsoft.Extensions.Logging.ILogger<GenAiExplanationClient>
+    {
+        public List<string> Messages { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel) => true;
+
+        public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+            Messages.Add(formatter(state, exception));
+    }
 
     private static HttpResponseMessage Ok(string explanation, bool generated) =>
         new(HttpStatusCode.OK)
