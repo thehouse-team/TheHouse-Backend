@@ -61,6 +61,27 @@ public sealed class SmartMatchExplanationHttpTests
         Assert.False(string.IsNullOrWhiteSpace(call.RequestId));
     }
 
+    // Encender GenAI no reutiliza las plantillas guardadas mientras estaba apagado.
+    [Fact]
+    public async Task Enabling_genai_skips_templates_cached_while_it_was_off()
+    {
+        using var factory = await SeededAsync();
+        await SaveProfileAsync(factory, AliceId);
+        using var alice = await factory.ClientForAsync(AliceId);
+        var room = RoomIds(factory)[0];
+
+        Assert.Equal("template", (await ExplainAsync(alice, room)).GetProperty("generatedBy").GetString());
+        Assert.Single(factory.Explanations.Items);
+
+        factory.GenAi.Enabled = true;
+        Assert.Equal("genai", (await ExplainAsync(alice, room)).GetProperty("generatedBy").GetString());
+        Assert.Single(factory.GenAi.Calls);
+
+        factory.GenAi.Enabled = false;
+        Assert.Equal("template", (await ExplainAsync(alice, room)).GetProperty("generatedBy").GetString());
+        Assert.Single(factory.GenAi.Calls);
+    }
+
     [Theory]
     [InlineData(GenAiOutcome.Generated, "Cuesta solo $999 y tiene alberca.")]
     [InlineData(GenAiOutcome.NotGenerated, "Plantilla de GenAI.")]

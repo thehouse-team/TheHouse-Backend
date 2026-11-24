@@ -34,7 +34,7 @@ public sealed class SmartMatchExplanationService(
         var context = await smartMatch.ExplanationContextAsync(userId, roomId, guest?.UniversityId, guest?.Preferences, cancellationToken);
         var score = context.Score;
         var now = timeProvider.GetUtcNow();
-        var key = SmartMatchExplanationRules.CacheKey(context.Room.Id, SmartMatchExplanationRules.PreferencesHash(context.Student), score.ModelVersion);
+        var key = SmartMatchExplanationRules.CacheKey(context.Room.Id, SmartMatchExplanationRules.PreferencesHash(context.Student), score.ModelVersion, genAi.Enabled);
 
         if (await cache.GetAsync(key, now, cancellationToken) is { } cached)
         {

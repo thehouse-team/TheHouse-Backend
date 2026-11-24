@@ -77,8 +77,11 @@ public sealed class SmartMatchExplanationTests
         Assert.NotEqual(hashA, SmartMatchExplanationRules.PreferencesHash(b));
         Assert.Matches("^[0-9a-f]{64}$", hashA);
         Assert.NotEqual(
-            SmartMatchExplanationRules.CacheKey("room1", hashA, "baseline-1.0.0"),
-            SmartMatchExplanationRules.CacheKey("room1", hashA, "model-1.0.0"));
+            SmartMatchExplanationRules.CacheKey("room1", hashA, "baseline-1.0.0", genAiEnabled: true),
+            SmartMatchExplanationRules.CacheKey("room1", hashA, "model-1.0.0", genAiEnabled: true));
+        Assert.NotEqual(
+            SmartMatchExplanationRules.CacheKey("room1", hashA, "baseline-1.0.0", genAiEnabled: false),
+            SmartMatchExplanationRules.CacheKey("room1", hashA, "baseline-1.0.0", genAiEnabled: true));
     }
 
     [Theory]
