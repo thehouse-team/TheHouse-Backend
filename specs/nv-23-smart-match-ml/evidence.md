@@ -5,7 +5,7 @@
 | Spec | `spec.md` 1.2.0 (M-BE-085) |
 | Autorización | «EJECUTA» de M-BE-068 trasladada a T01–T14 por «Apruebo NV-23 1.2.0» (Victor, 2026-11-20) |
 | Rama | `feat/nv-23-smart-match` |
-| Resultado parcial | **9 de 14** — T01–T05, T09, T10, T12 y T13 completas en local; T08, T11 y T14 esperan el despliegue; T06 y T07 **BLOCKED** por `TheHouse-ML` |
+| Resultado | **PASS WITH WARNINGS — 12 de 14** (2026-11-24); T06 y T07 **BLOCKED** por `TheHouse-ML` |
 
 ## 1. Qué se implementó
 
@@ -60,3 +60,48 @@ Suite completa en Release (`dotnet build -warnaserror`: 0 advertencias, 0 errore
 | NV-10 | El resumen previo de eliminación no cambia (el contrato con Mobile sigue igual); el borrado es idempotente |
 | NV-26 | Script regenerado por su propia prueba |
 | Costo | $0: mismo contenedor y tres colecciones pequeñas en Atlas M0 |
+
+## 6. Despliegue y prueba real en Azure (T08, T11, T14) — 2026-11-24
+
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#80](https://github.com/thehouse-team/TheHouse-Backend/pull/80) (spec 1.2.0) y [#81](https://github.com/thehouse-team/TheHouse-Backend/pull/81) (implementación), mezclados en `main` |
+| CI de `main` | Verde en `f73beb1` (merge del #81) y `6ee59bf` |
+| Hallazgo del CD | El CD del #81 quedó en cola detrás de un CD antiguo que esperaba aprobación desde el 2026-11-20 (#71) y se canceló; el siguiente (#76, merge del #79) **omitió el despliegue** porque la regla NV-09-R17 compara solo contra el commit anterior y ese merge solo cambiaba documentación. Se resolvió con un CD manual desde `main` |
+| CD manual #77 (`workflow_dispatch`, `6ee59bf`) | resolve, publish, verify-ephemeral, deploy, dast-baseline y cd-summary en verde; despliegue aprobado por un integrante distinto de quien lo lanzó |
+| Revisión activa | `ca-thehouse-u2--c6ee59bf-77-1`, Healthy, 100 % del tráfico; `/health/ready` 200 |
+| Rol admin temporal (M-BE-065) | Autorizado por Victor el 2026-11-24 («Autorizo rol»): `--grant-role` a la cuenta de prueba de admin (usuario `6b05aa6c…`) antes de las métricas y `--revoke-role` al terminar, vía `az containerapp exec`; ambos en la bitácora con actor `cli`. El archivo local con las credenciales de prueba se borró |
+
+### Prueba HTTP real (`.azure-check/nv23_azure_check.py`, fuera de git): **30/30 PASS**
+
+| Bloque | Resultado |
+| --- | --- |
+| Invitado (G1–G9) | Contrato con `no-store`; `baseline-1.0.0`, esquema 2.0.0 y 6 factores en orden (ejemplo: 95 = 30 + 25 + 20 + 10 + 10 + 0); id inexistente `unavailable`; convivencia estricta (`any` excluido para `women`); 11 recomendaciones ordenadas (96 … 68); 422 `smart_match_profile_incomplete` con `missing`; 400 por campo extra; 401 con token inválido |
+| Con cuenta (U1–U13) | 422 con perfil vacío (4 campos); recomendaciones y puntajes con las preferencias guardadas; 400 si se mezclan preferencias con sesión; feedback 204 que reemplaza; descarte al final y deshacer; otro usuario no toca ni ve descartes ajenos (BOLA); 404 en un cuarto no publicado |
+| Métricas RF-66 (M1–M4) | 403 sin rol admin; 200 con rol admin: `scoreRequests` 3, `recommendationRequests` 5, `feedbackNotUseful` 1, promedio 82.3; sin correos ni ids |
+| Tiempos (T1–T2) | Ver abajo |
+| Limpieza (Z) | Las cuentas de prueba del estudiante y del otro usuario se eliminaron con NV-10 (204), lo que borra su retroalimentación y descartes |
+
+Hay 11 cuartos publicados cerca de la UTTT (12 sembrados; uno ya no está disponible).
+
+### T08 — Rendimiento: **PASS WITH WARNINGS**
+
+| Medición (desde la computadora de Victor, 20 llamadas cada una) | p95 | Mediana |
+| --- | --- | --- |
+| `POST /smart-match/scores` con 50 ids | 498 ms | 399 ms |
+| `GET /smart-match/recommendations` (11 candidatos) | 445 ms | 303 ms |
+| `/health/live` (solo red) | 226 ms | — |
+
+Restando la ida y vuelta de la red (~226 ms), el tiempo del servidor queda en ~272 ms (p95) para 50 cuartos, debajo de los 300 ms de RNF-14, y en ~219 ms para recomendaciones, debajo de 500 ms. **Advertencia:** la medición es desde el cliente y la producción tiene 11 candidatos, no 500; la prueba con 500 candidatos queda para una prueba de carga (NV-09 T16).
+
+### T11 — Contrato con Mobile
+
+Contrato §6.1 de 1.2.0 entregado a Mobile (el responsable aceptó el cambio el 2026-11-20); `DEPLOYED URL` y `TESTS` completados en la spec.
+
+### Costo
+
+$0: el mismo contenedor (escala 0–2) y tres colecciones pequeñas en Atlas M0. Cost Management del 2026-11-19 al 2026-11-23: solo `rg-thehouse-u2`, 0.00 USD por día.
+
+## 7. Resultado
+
+**PASS WITH WARNINGS — 12 de 14.** Advertencias: T08 medido desde el cliente con 11 candidatos. **T06 y T07 siguen BLOCKED** hasta que `TheHouse-ML` publique el ONNX (ML-06) y los casos dorados (ML-04 T05); mientras tanto la paridad provisional de §2 (2,000 casos, bit a bit) cubre el modelo base.

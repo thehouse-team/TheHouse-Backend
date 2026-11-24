@@ -8,7 +8,7 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA — 1.2.0** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: 9 de 14 (T01–T05, T09, T10, T12, T13); T08, T11 y T14 esperan el despliegue; T06 y T07 BLOCKED por TheHouse-ML; ver `evidence.md`** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) BLOCKED por TheHouse-ML; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-48 a RF-58, RF-64, RF-65, RF-66 (métricas, desde NV-25 1.1.0), RF-68 (uso sin cuenta) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-13, RNF-14 |
@@ -143,8 +143,8 @@ PAGINATION   No
 ```
 
 ```text
-DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io (pendiente de despliegue)
-TESTS        pendiente: unitarias, integración, seguridad y prueba HTTP real en Azure
+DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io
+TESTS        1,125/1,125 (unitarias 440, integración 519, seguridad 166); prueba HTTP real en Azure 30/30 (2026-11-24)
 ```
 
 ## 7. Módulo, datos propios e integración
@@ -290,9 +290,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 14 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 9 |
+| Tasks completadas | 12 |
 | Estado documental | **✅ APROBADA — 1.2.0** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: 9 de 14 (T01–T05, T09, T10, T12, T13); T08, T11 y T14 esperan el despliegue; T06 y T07 BLOCKED por TheHouse-ML; ver `evidence.md`** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) BLOCKED por TheHouse-ML; ver `evidence.md`** |
 
 ## 18. Aprobación pendiente
 
