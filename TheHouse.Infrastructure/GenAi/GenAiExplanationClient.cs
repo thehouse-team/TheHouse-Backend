@@ -109,14 +109,14 @@ public sealed class GenAiExplanationClient(
                     openUntil = timeProvider.GetUtcNow() + wait;
                 }
 
-                logger.LogWarning("NV-24: TheHouse-GenAI respondió 429; se usa la plantilla durante {Seconds} s.", (int)wait.TotalSeconds);
+                logger.LogWarning("NV-24: TheHouse-GenAI respondió 429; se usa la plantilla durante {Seconds} s (request {RequestId}).", (int)wait.TotalSeconds, Id(requestId));
                 return (new GenAiExplanationResult(GenAiOutcome.Failed), false);
             }
 
             if ((int)response.StatusCode >= 500)
             {
                 Fail();
-                logger.LogWarning("NV-24: TheHouse-GenAI respondió {Status}.", (int)response.StatusCode);
+                logger.LogWarning("NV-24: TheHouse-GenAI respondió {Status} (request {RequestId}).", (int)response.StatusCode, Id(requestId));
                 return (new GenAiExplanationResult(GenAiOutcome.Failed), true);
             }
 
@@ -124,12 +124,19 @@ public sealed class GenAiExplanationClient(
             {
                 // 401 o 422: error de configuración o de código; sin el cuerpo.
                 Fail();
-                logger.LogError("NV-24: TheHouse-GenAI rechazó la solicitud con {Status} (revisar la clave o el contrato).", (int)response.StatusCode);
+                logger.LogError("NV-24: TheHouse-GenAI rechazó la solicitud con {Status} (revisar la clave o el contrato; request {RequestId}).", (int)response.StatusCode, Id(requestId));
                 return (new GenAiExplanationResult(GenAiOutcome.Failed), false);
             }
 
             var body = await response.Content.ReadFromJsonAsync<ExplainMatchResponse>(Json, timeout.Token);
             Succeed();
+            if (body is { Explanation: not null, Generated: false })
+            {
+                // GenAI usó su propia plantilla (IA caída, lenta, cuota o validación). Sin el texto:
+                // el id permite al equipo de GenAI encontrar el motivo en sus registros.
+                logger.LogInformation("NV-24: TheHouse-GenAI respondió generated=false ({PromptVersion}; request {RequestId}); se usa la plantilla del backend.", body.PromptVersion ?? "sin versión", Id(requestId));
+            }
+
             return body is { Explanation: not null }
                 ? (new GenAiExplanationResult(body.Generated ? GenAiOutcome.Generated : GenAiOutcome.NotGenerated, body.Explanation, body.PromptVersion), false)
                 : (new GenAiExplanationResult(GenAiOutcome.Failed), false);
@@ -138,19 +145,19 @@ public sealed class GenAiExplanationClient(
         {
             // Timeout (incluye el arranque en frío de GenAI): sin reintento.
             Fail();
-            logger.LogWarning("NV-24: TheHouse-GenAI no respondió en {Seconds} s.", options.TimeoutSeconds);
+            logger.LogWarning("NV-24: TheHouse-GenAI no respondió en {Seconds} s (request {RequestId}).", options.TimeoutSeconds, Id(requestId));
             return (new GenAiExplanationResult(GenAiOutcome.Failed), false);
         }
         catch (HttpRequestException exception)
         {
             Fail();
-            logger.LogWarning("NV-24: TheHouse-GenAI no disponible ({Reason}).", exception.HttpRequestError);
+            logger.LogWarning("NV-24: TheHouse-GenAI no disponible ({Reason}; request {RequestId}).", exception.HttpRequestError, Id(requestId));
             return (new GenAiExplanationResult(GenAiOutcome.Failed), true);
         }
         catch (JsonException)
         {
             Fail();
-            logger.LogWarning("NV-24: TheHouse-GenAI devolvió un JSON inesperado.");
+            logger.LogWarning("NV-24: TheHouse-GenAI devolvió un JSON inesperado (request {RequestId}).", Id(requestId));
             return (new GenAiExplanationResult(GenAiOutcome.Failed), false);
         }
     }
@@ -163,6 +170,9 @@ public sealed class GenAiExplanationClient(
             facts.University,
             new PropertyFacts(facts.Title, facts.Price, "MXN", facts.DistanceKm, facts.Services),
             new PreferenceFacts(facts.BudgetMax, "MXN", facts.MaxDistanceKm, facts.EssentialServices));
+
+    // El id de correlación que se envía en X-Request-ID (no es dato personal).
+    private static string Id(string? requestId) => string.IsNullOrWhiteSpace(requestId) || requestId.Length > 128 ? "sin id" : requestId;
 
     private void Fail()
     {
