@@ -50,7 +50,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Todas las funciones de la API en la nube | ✅ | 122 rutas en Container Apps | `/openapi` en el entorno efímero o la lista de rutas |
 | Endpoints eficientes | ✅ | Paginación, índices, caché HTTP, compresión y proyecciones | Tiempo de respuesta en vivo |
 | API o microservicios | ✅ | Monolito modular (constitution §6) más servicios auxiliares (TheHouse-GenAI y TheHouse-ML) | Diagrama de módulos |
-| **Imágenes en el CDN de la nube** | ❌ | Las fotos se guardan en MongoDB (GridFS) y se sirven por la API con `Cache-Control: public, max-age=31536000, immutable` (NV-13, por COST-001). **No hay Azure CDN/Front Door** | Ver §8 |
+| Imágenes en el CDN de la nube | 🟡 | **Alternativa documentada por costo cero (M-BE-084).** Las fotos se guardan en MongoDB (GridFS) y `GET /api/v1/media/{id}` las sirve con `Cache-Control: public, max-age=31536000, immutable` y `ETag` (NV-13): el teléfono y cualquier proxy las guardan un año y no vuelven a pedirlas. Azure no tiene CDN gratis: el CDN clásico ya no admite perfiles nuevos y Front Door Standard cobra US$35 al mes más uso (ver §8) | `curl -I` de una foto pública: `Cache-Control … immutable` y `ETag`; repetir con `If-None-Match` → 304 |
 | Observabilidad (logs de eventos y errores) | 🟡 | Log Analytics con logs de consola correlacionados (NV-03 T24/T25); trazas y métricas OTel sin exportador (T11/T12 abiertas) | Consulta KQL en Log Analytics |
 | JWT y Redis distribuido | ✅ | JWT con revocación por `jti` y `sid` en Redis; rate limit, candados y sal en Redis (NV-05, NV-06, NV-10) | Login → token; logout → 401 |
 | API performance: caching, rate limit, middleware, paginación, indexing, serializers, compresión | ✅ | `ETag`/304; rate limit en Redis (429 con `Retry-After`); middlewares de correlación, seguridad, revocación y límites de cuerpo; paginación `page`/`pageSize`; índices por repositorio; System.Text.Json en camelCase; `PublicResponseCompressionMiddleware` | `curl` con `Accept-Encoding: gzip` y 429 |
@@ -89,7 +89,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 
 | Brecha | Riesgo en la evaluación | Propuesta |
 | --- | --- | --- |
-| Imágenes sin CDN de la nube | Medio: el PDF lo pide explícito | Opción A: documentar la decisión por COST-001 (caché HTTP `immutable` de un año que sirve como caché en el cliente y en proxies). Opción B: spec para Azure Blob Storage con CDN, si se demuestra costo $0 |
+| Imágenes sin CDN de la nube | Medio: el PDF lo pide explícito | **Decidido (M-BE-084): opción A, costo cero.** Se evaluó la opción B (2026-11-20): el CDN clásico de Azure ya no admite perfiles nuevos (retiro el 30 de septiembre de 2027) y Front Door Standard, el CDN vigente, cobra US$35 al mes de base más solicitudes y tráfico; un Front Door temporal para la evaluación costaría unos US$2–3 del crédito, que no cuenta como costo cero (constitución §17). Se defiende con la caché HTTP `immutable` de un año y su demostración con `curl -I` |
 | Dos instancias | Bajo: ventana agendada | 3 de diciembre con «OK PARA APPLY» (NV-03 T08/T09/T19) |
 | ML (NV-23) y GenAI (NV-24) | Alto: el PDF pide ambas funciones | Seguir con los compañeros; conectar `parse-search` si ML se retrasa |
 | Caché de datos del backend | Bajo | La caché HTTP cumple el punto 9; opcional: caché en Redis para catálogos |
@@ -101,7 +101,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 1. **Nube y HTTPS:** la URL, `/health/ready` 200, `http://` → 301, certificado TLS 1.3.
 2. **Dos réplicas** (3 de diciembre): `az containerapp replica list` con 2 Healthy y el balanceo del ingress.
 3. **Cuenta:** registro → login (JWT y refresh) → `/users/me` → logout → el mismo token responde 401.
-4. **Rendimiento:** catálogo con `ETag` → 304; respuesta comprimida; login repetido → 429 con `Retry-After`.
+4. **Rendimiento:** catálogo con `ETag` → 304; foto pública con `Cache-Control … immutable` y 304 (alternativa al CDN, M-BE-084); respuesta comprimida; login repetido → 429 con `Retry-After`.
 5. **Moderación:** un texto con un término prohibido → 422 `content_rejected`; una foto limpia se guarda.
 6. **Push:** una solicitud de otra cuenta → llega el push al teléfono (con Mobile).
 7. **Eliminar cuenta:** vista previa → eliminación → login 401.

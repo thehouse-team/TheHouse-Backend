@@ -769,6 +769,15 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** archivos nuevos en `scripts/db/` y pruebas; sin cambios en la API, recursos ni costo.
 
+## M-BE-084 — Imágenes sin CDN de Azure: caché HTTP `immutable` por costo cero
+
+- **ID:** M-BE-084
+- **Decisión:** no usar CDN de Azure para las fotos (opción A de la matriz del curso). Se mantienen en GridFS y `GET /api/v1/media/{id}` las sirve con `Cache-Control: public, max-age=31536000, immutable` y `ETag`/304 (NV-13), lo que permite guardarlas un año en el teléfono y en cualquier proxy. Evaluación de la opción B del 2026-11-20: Azure CDN Standard from Microsoft (classic) ya no admite perfiles nuevos y se retira el 30 de septiembre de 2027; Azure Front Door Standard cobra US$35 al mes de base más solicitudes y tráfico; un Front Door temporal solo para la evaluación costaría unos US$2–3 del crédito, que no cuenta como costo cero (constitución §17); migrar las fotos a Blob Storage no cierra la brecha porque Blob no es un CDN y cambiaría NV-13 a días de la evaluación.
+- **Estado:** APROBADO — Victor, 2026-11-20 («lo hacemos así como dices, sin gastar»).
+- **Fecha:** 2026-11-20.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** sin cambios en código, infraestructura ni costo; la matriz del curso marca el punto como 🟡 alternativa documentada. Se reabre solo si aparece un CDN de costo cero o el curso lo exige con penalización.
+
 ## M-BE-085 — NV-23 1.2.0 aprobada: alineación con ML-04 de TheHouse-ML y métricas RF-66
 
 - **ID:** M-BE-085
