@@ -82,4 +82,50 @@ La conexión backend → GenAI funciona por la URL interna y solo HTTPS, con la 
 
 ## 6. Estado
 
-**9 de 11 — desplegada con plantilla.** NV-24 ya cumple RNF-16 en producción: explica el puntaje de NV-23 con plantilla y usará el texto de GenAI en cuanto responda `generated: true`, sin cambiar el contrato con Mobile. Pendiente: T08 (prueba con `generatedBy: genai` y contrato a Mobile) y T11 (cierre de la evidencia).
+**9 de 11 — desplegada con plantilla** (estado al 2026-11-24; ver la §8). NV-24 ya cumple RNF-16 en producción: explica el puntaje de NV-23 con plantilla y usará el texto de GenAI en cuanto responda `generated: true`, sin cambiar el contrato con Mobile. Pendiente: T08 (prueba con `generatedBy: genai` y contrato a Mobile) y T11 (cierre de la evidencia).
+
+## 7. Prueba con TheHouse-GenAI después de su corrección (T08) — 2026-11-25
+
+El equipo de GenAI corrigió su validación de servicios: comparaba por subcadena (`gas` dentro de `gastos`) y devolvía `UNKNOWN_SERVICE`, por eso respondía `generated: false`. Desplegó el fix en `ca-thehouse-genai-u2`; el backend no cambió.
+
+### Prueba de diagnóstico (invitado, mismo payload que fallaba; `.azure-check/nv24_genai_retest.py`, fuera de git)
+
+| # | HTTP | `generatedBy` | Latencia | X-Request-ID | Nota |
+| --- | --- | --- | --- | --- | --- |
+| Despertar | 200 | template | 8,467 ms | `nv24-wake-3d28cde25f9d` | Arranque en frío: «no respondió en 8 s» en el log del backend |
+| 1 | 200 | **genai** | 266 ms | `nv24-retest-97470226ed5a` | — |
+| 2 | 200 | template | 8,274 ms | `nv24-retest-04896c17c33f` | «no respondió en 8 s», con la réplica ya despierta |
+| 3 | 200 | **genai** | 1,539 ms | `nv24-retest-b4e0f6e1e164` | — |
+| 4 | 200 | **genai** | 5,188 ms | `nv24-retest-bb5156335624` | — |
+
+`explanationVersion` `explanation-1.0.0` y `modelVersion` `baseline-1.0.0` en todas. Los X-Request-ID se compartieron con el equipo de GenAI.
+
+### Prueba formal (`.azure-check/nv24_azure_check.py prepare` y `genai`): **5/5 PASS**
+
+| Paso | Resultado |
+| --- | --- |
+| G1. Resumen redactado por TheHouse-GenAI | PASS — `generatedBy: genai` al primer intento (517 ms) |
+| G2. Máximo 600 caracteres, sin HTML ni enlaces | PASS |
+| G3. Ventajas y desventajas deterministas presentes | PASS |
+| G4. La misma consulta sale de la caché | PASS |
+| Z. Eliminar la cuenta de prueba | PASS (204) |
+
+Ejemplo de resumen de GenAI (sin datos personales): «… coincide un 76% con tus preferencias porque cuesta $6,500 MXN, está a 0.7 km de tu universidad y ofrece internet.»
+
+## 8. Revisión final (T11)
+
+| Revisión | Resultado |
+| --- | --- |
+| Coherencia | El contrato de la §6.1 no cambió desde 1.2.1: `generatedBy` pasa de `template` a `genai` sin cambios para Mobile. El puntaje y el desglose son los de NV-23 |
+| Seguridad | GenAI solo recibe hechos públicos del cuarto y las preferencias (sin nombre, correo ni ids de usuario); clave de servicio como secreto; URL interna solo HTTPS; el texto de la IA se valida antes de mostrarlo y no se registra |
+| RNF-16 | Si GenAI tarda más de 8 s o falla, la app responde con la plantilla y no la guarda en caché |
+| Costo | $0: Gemini en nivel gratuito sin facturación y GenAI con 0–1 réplicas (evidencia del 2026-11-22) |
+
+| Advertencia | Detalle | Acción |
+| --- | --- | --- |
+| W1. Latencia de GenAI | 1 de 4 consultas con la réplica despierta pasó de 8 s y otra tardó 5.2 s; el usuario recibe la plantilla | Enviado al equipo de GenAI con el X-Request-ID `nv24-retest-04896c17c33f`; sugerido un timeout propio por debajo de 7 s |
+| W2. Arranque en frío | GenAI escala a cero: la primera consulta tras 5 min sin uso cae en la plantilla | Aceptado por costo $0 (RNF-16) |
+| W3. Título neutral redundante | `NeutralTitle` produce «Departamento completo en departamento» cuando el lugar y el inmueble son departamento; GenAI lo repite | Cosmético; parche opcional de NV-24 |
+| W4. Contrato a Mobile | La §6.1 no cambió; Mobile ya consume `generatedBy` | Victor confirma con Mobile que ya puede mostrar el texto de GenAI |
+
+**Resultado: PASS WITH WARNINGS — NV-24 completa (11 de 11).**
