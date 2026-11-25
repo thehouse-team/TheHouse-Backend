@@ -98,6 +98,8 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 
 ## 9. Guion de demostración del backend
 
+Versión ejecutable, con comandos y lo que debe verse en cada paso: `docs/guion-demo-backend.md`.
+
 1. **Nube y HTTPS:** la URL, `/health/ready` 200, `http://` → 301, certificado TLS 1.3.
 2. **Dos réplicas** (3 de diciembre): `az containerapp replica list` con 2 Healthy y el balanceo del ingress.
 3. **Cuenta:** registro → login (JWT y refresh) → `/users/me` → logout → el mismo token responde 401.
