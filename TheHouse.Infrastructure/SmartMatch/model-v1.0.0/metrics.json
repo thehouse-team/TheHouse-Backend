@@ -1,0 +1,5737 @@
+{
+  "title": "DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS — medición única en test de los modelos de ML-05",
+  "synthetic": true,
+  "banner": "DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS",
+  "warning": "Métricas con etiquetas SINTÉTICAS (utilidad oculta documentada más ruido, M-ML-032): el modelo aprende la función del simulador; no son desempeño real ni preferencias reales (constitución §8.2 y §20.3) y se reemplazan con señales reales en ML-07.",
+  "spec": "ML-05 1.0.0, T03 (ML-05-R03); condición 3 y decisión: T05 (ML-05-R05)",
+  "profile": "full",
+  "official": true,
+  "single_test_measurement": "La partición test se evaluó una sola vez con los modelos finales de T02 (SHA-256 verificados); ningún hiperparámetro, feature, calibración, umbral ni decisión se ajustó con estos resultados (spec ML-05 §6.2 y §7 regla 2). Cambiar algo del modelo después invalida esta medición.",
+  "feature_schema_version": "2.0.0",
+  "labels_params_version": "1.0.0",
+  "train_params_version": "1.0.0",
+  "eval_params_version": "1.0.0",
+  "baseline_model_version": "baseline-1.0.0",
+  "inputs": {
+    "pairs.parquet": {
+      "sha256": "1f5c4d167c2e45c571681857e6b6b34d2889f9cf5d3578729b6557f0b0431cae"
+    },
+    "labels.parquet": {
+      "sha256": "b720f05602fb19cd1d68b8ee9a38d3a593b4cca6eb4985ae3a6a99984d9cdd54"
+    },
+    "students.parquet": {
+      "sha256": "d4ad048ac31392bf98d33437d4bf91ba07839ffeb83d1ebec9842fb49ef373c1"
+    }
+  },
+  "models": {
+    "logreg": {
+      "file": "logreg.json",
+      "sha256": "341ea3ec705c2f877b36d1b931eafe2dea4630523560fe8764ce59e0a70b27fa",
+      "sha256_verified_against": "train_manifest.json",
+      "config_id": "logreg:standard:C=0.01"
+    },
+    "lightgbm": {
+      "file": "lightgbm_lambdarank.txt",
+      "sha256": "5eb8d22dd771e04444383c092413c02501726d6ea1362111673b87ecd9e6086d",
+      "sha256_verified_against": "train_manifest.json",
+      "config_id": "lightgbm:leaves=15:lr=0.05:trees=300"
+    }
+  },
+  "evaluation": {
+    "split": "test",
+    "students_evaluated": 300,
+    "pairs": 30755,
+    "min_candidates": 2,
+    "ranking": "puntaje descendente, desempate por room_id ascendente (igual que el baseline)",
+    "metrics": [
+      "ndcg@10",
+      "ndcg@5",
+      "precision@5",
+      "map"
+    ],
+    "relevance_threshold": 2,
+    "metric_functions": "thehouse_ml.evaluation.ranking (M-ML-034)",
+    "baseline_reference": "reports/baseline_metrics.json (per_student_baseline)",
+    "baseline_reproduced": true
+  },
+  "bootstrap": {
+    "unit": "student",
+    "paired": true,
+    "resamples": 1000,
+    "confidence": 0.95,
+    "seed": 20261122,
+    "segment_id": "total",
+    "rng": "random.Random(\"bootstrap:20261122:total\").choices",
+    "interval": "percentil con interpolación lineal",
+    "baseline_interval_matches_reference": true
+  },
+  "test": {
+    "baseline": {
+      "ndcg@10": {
+        "mean": 0.5272521184236858,
+        "ci_low": 0.5031827000348073,
+        "ci_high": 0.5503788715104617
+      },
+      "ndcg@5": {
+        "mean": 0.5350822896345859,
+        "ci_low": 0.5065604029734413,
+        "ci_high": 0.5603829287320267
+      },
+      "precision@5": {
+        "mean": 0.5860000000000001,
+        "ci_low": 0.5573166666666667,
+        "ci_high": 0.6153333333333333
+      },
+      "map": {
+        "mean": 0.5033594130897066,
+        "ci_low": 0.4846694758899098,
+        "ci_high": 0.5218578218996152
+      }
+    },
+    "logreg": {
+      "ndcg@10": {
+        "mean": 0.8623446747288835,
+        "ci_low": 0.8522093204193819,
+        "ci_high": 0.8725975749244828
+      },
+      "ndcg@5": {
+        "mean": 0.8744892503797921,
+        "ci_low": 0.8611468918231864,
+        "ci_high": 0.8864705105550266
+      },
+      "precision@5": {
+        "mean": 0.916,
+        "ci_low": 0.9,
+        "ci_high": 0.9313333333333332
+      },
+      "map": {
+        "mean": 0.830555708131001,
+        "ci_low": 0.8211592821397419,
+        "ci_high": 0.8394740324333756
+      }
+    },
+    "lightgbm": {
+      "ndcg@10": {
+        "mean": 0.8632736013315275,
+        "ci_low": 0.8533588701492288,
+        "ci_high": 0.8724958710802169
+      },
+      "ndcg@5": {
+        "mean": 0.8771096826954187,
+        "ci_low": 0.8639610876900214,
+        "ci_high": 0.889701549311526
+      },
+      "precision@5": {
+        "mean": 0.9113333333333332,
+        "ci_low": 0.894,
+        "ci_high": 0.9266833333333333
+      },
+      "map": {
+        "mean": 0.8347891420844226,
+        "ci_low": 0.8250717447875875,
+        "ci_high": 0.8437070111647325
+      }
+    }
+  },
+  "paired_difference_vs_baseline": {
+    "logreg": {
+      "ndcg@10": {
+        "mean": 0.3350925563051979,
+        "ci_low": 0.311661888956983,
+        "ci_high": 0.36038581413634113
+      },
+      "ndcg@5": {
+        "mean": 0.339406960745206,
+        "ci_low": 0.3126920304147833,
+        "ci_high": 0.36722112784963123
+      },
+      "precision@5": {
+        "mean": 0.33,
+        "ci_low": 0.29864999999999997,
+        "ci_high": 0.36133333333333334
+      },
+      "map": {
+        "mean": 0.32719629504129444,
+        "ci_low": 0.30663440183708335,
+        "ci_high": 0.3468898125046316
+      }
+    },
+    "lightgbm": {
+      "ndcg@10": {
+        "mean": 0.33602148290784173,
+        "ci_low": 0.3126022381197375,
+        "ci_high": 0.3602154194360948
+      },
+      "ndcg@5": {
+        "mean": 0.34202739306083263,
+        "ci_low": 0.31526672039351106,
+        "ci_high": 0.3696913063727146
+      },
+      "precision@5": {
+        "mean": 0.32533333333333336,
+        "ci_low": 0.29465,
+        "ci_high": 0.35800000000000004
+      },
+      "map": {
+        "mean": 0.3314297289947159,
+        "ci_low": 0.311821917954192,
+        "ci_high": 0.3500316726672206
+      }
+    }
+  },
+  "cross_validation": {
+    "source": "reports/train_cv_metrics.json",
+    "metric": "ndcg@10",
+    "n_splits": 5,
+    "std": "desviación estándar muestral entre pliegues",
+    "baseline": {
+      "config_id": "baseline-1.0.0",
+      "ndcg@10_by_fold": [
+        0.5396251336152134,
+        0.5469682049485249,
+        0.5453067602226455,
+        0.5240761550302022,
+        0.534521453168288
+      ],
+      "ndcg@10_mean": 0.5380995413969748,
+      "ndcg@10_std": 0.009251793185270835
+    },
+    "logreg": {
+      "config_id": "logreg:standard:C=0.01",
+      "ndcg@10_by_fold": [
+        0.8663653595248066,
+        0.8569948753980546,
+        0.8615864621781595,
+        0.8626313065767603,
+        0.8640488351609107
+      ],
+      "ndcg@10_mean": 0.8623253677677383,
+      "ndcg@10_std": 0.00347655009243866
+    },
+    "lightgbm": {
+      "config_id": "lightgbm:leaves=15:lr=0.05:trees=300",
+      "ndcg@10_by_fold": [
+        0.8732629708335486,
+        0.8597323470969623,
+        0.8651308161158295,
+        0.8660906670666341,
+        0.8684308580137928
+      ],
+      "ndcg@10_mean": 0.8665295318253534,
+      "ndcg@10_std": 0.0049321640862890585
+    }
+  },
+  "promotion": {
+    "criterion": "spec ML-05 §6.5 (las 3 condiciones) y §6.6 (solo un modelo aditivo explicable)",
+    "required_folds": 5,
+    "candidates": {
+      "logreg": {
+        "conditions": {
+          "1_cv_all_folds_above_baseline": {
+            "passed": true,
+            "folds": 5,
+            "required_folds": 5,
+            "folds_above_baseline": 5,
+            "delta_ndcg@10_by_fold": [
+              0.3267402259095933,
+              0.3100266704495297,
+              0.316279701955514,
+              0.33855515154655813,
+              0.32952738199262266
+            ]
+          },
+          "2_test_paired_ci_above_zero": {
+            "passed": true,
+            "delta_ndcg@10": {
+              "mean": 0.3350925563051979,
+              "ci_low": 0.311661888956983,
+              "ci_high": 0.36038581413634113
+            }
+          },
+          "3_additive_breakdown": {
+            "passed": true,
+            "status": "verified_t05",
+            "model_version": "logreg-1.0.0",
+            "breakdown_sums_total": true,
+            "order_identical_to_logit": true,
+            "metrics_unchanged_by_calibration": true,
+            "factor_monotonicity": false,
+            "failed_checks": [],
+            "accepted_deviations": {
+              "monotonicity_budget": "M-ML-041 (T05-H1): el coeficiente de price_below_min es negativo; por debajo de budget.min el factor presupuesto sube con la renta solo si budget.max / budget.min > 76.2 (máximo +0.124 puntos sobre 100; ningún par observado en esa zona). Aceptada por el responsable después de ver la verificación; corrección en logreg-1.1.0 (ML-07)"
+            },
+            "pairs_verified": 30755
+          }
+        },
+        "meets_conditions_1_and_2": true,
+        "meets_all_conditions": true,
+        "outcome": "promoted"
+      },
+      "lightgbm": {
+        "conditions": {
+          "1_cv_all_folds_above_baseline": {
+            "passed": true,
+            "folds": 5,
+            "required_folds": 5,
+            "folds_above_baseline": 5,
+            "delta_ndcg@10_by_fold": [
+              0.3336378372183353,
+              0.3127641421484374,
+              0.3198240558931841,
+              0.34201451203643185,
+              0.3339094048455048
+            ]
+          },
+          "2_test_paired_ci_above_zero": {
+            "passed": true,
+            "delta_ndcg@10": {
+              "mean": 0.33602148290784173,
+              "ci_low": 0.3126022381197375,
+              "ci_high": 0.3602154194360948
+            }
+          },
+          "3_additive_breakdown": {
+            "passed": false,
+            "status": "not_additive",
+            "note": "LightGBM no ofrece desglose aditivo exportable (decisión 5)"
+          }
+        },
+        "meets_conditions_1_and_2": true,
+        "meets_all_conditions": false,
+        "outcome": "reference_not_promoted_in_v1"
+      }
+    },
+    "decision": {
+      "outcome": "logreg_promoted",
+      "candidate": "logreg",
+      "text": "La regresión logística cumple las 3 condiciones: queda **PROMOVIDA** como modelo de ML-05 (`logreg-1.0.0`, puntaje 0-100 con desglose por factor); `baseline-1.0.0` queda como respaldo. Desviación conocida aceptada (M-ML-041): `monotonicity_budget` (ver `reports/trained_breakdown.md`)."
+    }
+  },
+  "breakdown": {
+    "spec": "ML-05 1.0.0, T05 (ML-05-R05)",
+    "report": "reports/trained_breakdown.md",
+    "calibration": {
+      "model_version": "logreg-1.0.0",
+      "feature_schema_version": "2.0.0",
+      "transform": "standard",
+      "method": "afín por factor sobre el recorte: puntos_k = 100 · (C_k - min_k) / S",
+      "total_span_logit": 45.28126092286596,
+      "intercept": -4.133224493584685,
+      "min_logit_sum": -35.13860335477446,
+      "factors": [
+        {
+          "factor": "budget",
+          "label": "Presupuesto",
+          "features": [
+            "price_to_budget",
+            "price_below_min"
+          ],
+          "min_logit": -1.9443368629596418,
+          "max_logit": 2.388994657935173,
+          "span_logit": 4.333331520894815,
+          "raw_max_points": 9.569811954389692,
+          "maxPoints": 9.6
+        },
+        {
+          "factor": "distance",
+          "label": "Distancia",
+          "features": [
+            "distance_km",
+            "effective_distance_km",
+            "distance_ratio"
+          ],
+          "min_logit": -28.77312772375122,
+          "max_logit": 4.104451550817833,
+          "span_logit": 32.87757927456905,
+          "raw_max_points": 72.60747294686455,
+          "maxPoints": 72.6
+        },
+        {
+          "factor": "essential_services",
+          "label": "Servicios esenciales",
+          "features": [
+            "services_coverage"
+          ],
+          "min_logit": -2.234827014851568,
+          "max_logit": 0.814234737210226,
+          "span_logit": 3.0490617520617938,
+          "raw_max_points": 6.733606109723173,
+          "maxPoints": 6.7
+        },
+        {
+          "factor": "place_type",
+          "label": "Tipo de lugar",
+          "features": [
+            "place_type_match"
+          ],
+          "min_logit": -0.6570364083887372,
+          "max_logit": 1.541023728673566,
+          "span_logit": 2.198060137062303,
+          "raw_max_points": 4.8542379171078585,
+          "maxPoints": 4.9
+        },
+        {
+          "factor": "property_type",
+          "label": "Tipo de inmueble",
+          "features": [
+            "property_type_match"
+          ],
+          "min_logit": -0.542938406885246,
+          "max_logit": 0.23808535750006402,
+          "span_logit": 0.78102376438531,
+          "raw_max_points": 1.7248277730510626,
+          "maxPoints": 1.7
+        },
+        {
+          "factor": "extras",
+          "label": "Extras",
+          "features": [
+            "extra_services_ratio"
+          ],
+          "min_logit": -0.9863369379380452,
+          "max_logit": 1.0558675359546463,
+          "span_logit": 2.0422044738926917,
+          "raw_max_points": 4.510043298863674,
+          "maxPoints": 4.5
+        }
+      ],
+      "fixed_terms": [
+        {
+          "feature": "pets_compatible",
+          "coef": 0.0,
+          "constant_in_candidates": true,
+          "reason": "constante (1) en los candidatos (HC03 excluye los incompatibles): no aporta señal; su término se suma a la constante del modelo (spec §6.6) y se queda en todos los modelos de la ablación"
+        }
+      ],
+      "raw_max_points_sum": 100.0,
+      "max_points_sum": 100.0
+    },
+    "sums": {
+      "passed": true,
+      "pairs": 30755,
+      "max_abs_raw_total_minus_matchScore": 0.49997292757831246,
+      "max_abs_reported_sum_minus_raw_total": 0.2128956776222921,
+      "total_tolerance": 0.5,
+      "breakdown_tolerance": 0.3,
+      "total_tolerance_violations": 0,
+      "breakdown_tolerance_violations": 0,
+      "factors_outside_0_maxPoints": 0,
+      "matchScore_outside_0_100": 0,
+      "max_abs_logit_minus_affine": 2.3092638912203256e-14,
+      "affine_tolerance": 1e-09
+    },
+    "order": {
+      "passed": true,
+      "students": 300,
+      "identical_order": 300,
+      "differing_students": []
+    },
+    "metrics_unchanged_by_calibration": true,
+    "monotonicity": {
+      "passed": false,
+      "coefficients": [
+        {
+          "feature": "distance_km",
+          "factor": "distance",
+          "coef_standardized": -3.3497410057040513,
+          "scale": 6.303972887149905,
+          "logit_per_unit": -0.5313698306875977,
+          "expected_direction": -1,
+          "sign_consistent": true,
+          "note": "distancia real al campus"
+        },
+        {
+          "feature": "effective_distance_km",
+          "factor": "distance",
+          "coef_standardized": -1.8699381812363738,
+          "scale": 3.69729030011551,
+          "logit_per_unit": -0.5057590909693928,
+          "expected_direction": -1,
+          "sign_consistent": true,
+          "note": "distancia x factor de transporte"
+        },
+        {
+          "feature": "price_to_budget",
+          "factor": "budget",
+          "coef_standardized": -0.9960493472836981,
+          "scale": 0.23287406568615762,
+          "logit_per_unit": -4.277201689887036,
+          "expected_direction": -1,
+          "sign_consistent": true,
+          "note": "renta / budget.max: sube con la renta"
+        },
+        {
+          "feature": "services_coverage",
+          "factor": "essential_services",
+          "coef_standardized": 0.5655307735708116,
+          "scale": 0.18547698261224008,
+          "logit_per_unit": 3.0490617520617938,
+          "expected_direction": 1,
+          "sign_consistent": true,
+          "note": "servicios esenciales cubiertos"
+        },
+        {
+          "feature": "place_type_match",
+          "factor": "place_type",
+          "coef_standardized": 1.0062349109077362,
+          "scale": 0.4577831579497021,
+          "logit_per_unit": 2.198060137062303,
+          "expected_direction": 1,
+          "sign_consistent": true,
+          "note": "coincide el tipo de lugar"
+        },
+        {
+          "feature": "property_type_match",
+          "factor": "property_type",
+          "coef_standardized": 0.359535373369282,
+          "scale": 0.4603385834901548,
+          "logit_per_unit": 0.78102376438531,
+          "expected_direction": 1,
+          "sign_consistent": true,
+          "note": "coincide el tipo de inmueble"
+        },
+        {
+          "feature": "pets_compatible",
+          "factor": null,
+          "coef_standardized": 0.0,
+          "scale": 1.0,
+          "logit_per_unit": 0.0,
+          "expected_direction": null,
+          "sign_consistent": null,
+          "note": "constante (1) en los candidatos (HC03 excluye los incompatibles): no aporta señal; su término se suma a la constante del modelo (spec §6.6) y se queda en todos los modelos de la ablación"
+        },
+        {
+          "feature": "distance_ratio",
+          "factor": "distance",
+          "coef_standardized": -0.10058499273363032,
+          "scale": 3.4218176480518103,
+          "logit_per_unit": -0.029395193747655646,
+          "expected_direction": -1,
+          "sign_consistent": true,
+          "note": "distancia / maxDistanceKm"
+        },
+        {
+          "feature": "price_below_min",
+          "factor": "budget",
+          "coef_standardized": -0.012313810365186752,
+          "scale": 0.2193808558497244,
+          "logit_per_unit": -0.056129831007778075,
+          "expected_direction": 1,
+          "sign_consistent": false,
+          "note": "(budget.min - renta) / budget.min: baja al subir la renta"
+        },
+        {
+          "feature": "extra_services_ratio",
+          "factor": "extras",
+          "coef_standardized": 0.43917103493077686,
+          "scale": 0.2150475334595968,
+          "logit_per_unit": 2.0422044738926917,
+          "expected_direction": 1,
+          "sign_consistent": true,
+          "note": "servicios no pedidos que ofrece el cuarto"
+        }
+      ],
+      "sign_inconsistent_features": [
+        "price_below_min"
+      ],
+      "budget": {
+        "passed": false,
+        "factor": "budget",
+        "variable": "rent_mxn",
+        "domain": "NV-11: budget.min ∈ {nulo, 1, 10, 50, 100, 300, 500, 1000, 1500, 2000, 3000, 5000, 10000, 25000, 50000} ≤ budget.max ∈ {500, 1000, 2000, 2700, 3500, 5000, 10000, 25000, 50000}; renta entera de 0 a budget.max (101 pasos más budget.min ± 1): price_to_budget recorre su training_range [0, 1] y price_below_min su range [0, 1]",
+        "curves": 100,
+        "steps": 10204,
+        "violations": 46,
+        "worst_increase_points": 0.12376927194993392,
+        "worst_case": {
+          "budget.min": 1,
+          "budget.max": 50000,
+          "rent_mxn_from": 0.0,
+          "rent_mxn_to": 1.0,
+          "points_from": 9.44585376536445,
+          "points_to": 9.569623037314384
+        },
+        "tolerance_points": 1e-09
+      },
+      "distance": {
+        "passed": true,
+        "factor": "distance",
+        "variable": "distance_km",
+        "domain": "transporte ∈ {walk, bike, public, car} x maxDistanceKm ∈ {nulo→30, 0.5, 1, 2, 5, 10, 20, 30}; distancia de 0 a 36 km cada 0.25 km (incluye > 30 km para comprobar el recorte)",
+        "curves": 32,
+        "steps": 4608,
+        "violations": 0,
+        "worst_increase_points": 0.0,
+        "worst_case": null,
+        "tolerance_points": 1e-09
+      },
+      "budget_ratio_threshold": 76.20193421381104,
+      "observed_max_budget_ratio": 2.8333333333333335,
+      "observed_pairs_below_budget_min": 73815,
+      "observed_pairs_in_violation_zone": false
+    },
+    "sums_total": true,
+    "failed_checks": [],
+    "accepted_deviations": {
+      "monotonicity_budget": "M-ML-041 (T05-H1): el coeficiente de price_below_min es negativo; por debajo de budget.min el factor presupuesto sube con la renta solo si budget.max / budget.min > 76.2 (máximo +0.124 puntos sobre 100; ningún par observado en esa zona). Aceptada por el responsable después de ver la verificación; corrección en logreg-1.1.0 (ML-07)"
+    },
+    "passed": true,
+    "distribution": {
+      "scope": "pares candidatos de test de la medición única de T03 (DATOS SINTÉTICOS)",
+      "pairs": 30755,
+      "matchScore": {
+        "min": 8,
+        "max": 97,
+        "mean": 77.58533571776947,
+        "interpolation": "linear",
+        "percentiles": {
+          "p5": 50.0,
+          "p10": 61.0,
+          "p25": 74.0,
+          "p50": 81.0,
+          "p75": 85.0,
+          "p90": 88.0,
+          "p95": 90.0
+        },
+        "histogram": [
+          {
+            "low": 0,
+            "high": 9,
+            "count": 1
+          },
+          {
+            "low": 10,
+            "high": 19,
+            "count": 45
+          },
+          {
+            "low": 20,
+            "high": 29,
+            "count": 108
+          },
+          {
+            "low": 30,
+            "high": 39,
+            "count": 319
+          },
+          {
+            "low": 40,
+            "high": 49,
+            "count": 963
+          },
+          {
+            "low": 50,
+            "high": 59,
+            "count": 1444
+          },
+          {
+            "low": 60,
+            "high": 69,
+            "count": 2491
+          },
+          {
+            "low": 70,
+            "high": 79,
+            "count": 7407
+          },
+          {
+            "low": 80,
+            "high": 89,
+            "count": 16140
+          },
+          {
+            "low": 90,
+            "high": 100,
+            "count": 1837
+          }
+        ]
+      },
+      "factor_points_basis": "puntos sin redondear por par",
+      "factor_points": [
+        {
+          "factor": "budget",
+          "label": "Presupuesto",
+          "maxPoints": 9.6,
+          "raw_max_points": 9.569811954389692,
+          "mean": 4.269140521277519,
+          "p25": 2.485421630366352,
+          "p50": 4.404110676456006,
+          "p75": 6.03811057283896,
+          "mean_share_of_max": 0.4461049539556789
+        },
+        {
+          "factor": "distance",
+          "label": "Distancia",
+          "maxPoints": 72.6,
+          "raw_max_points": 72.60747294686455,
+          "mean": 63.42427375319086,
+          "p25": 60.54926116204956,
+          "p50": 68.03769706980819,
+          "p75": 70.90358210191181,
+          "mean_share_of_max": 0.8735226716898119
+        },
+        {
+          "factor": "essential_services",
+          "label": "Servicios esenciales",
+          "maxPoints": 6.7,
+          "raw_max_points": 6.733606109723173,
+          "mean": 4.941195848246133,
+          "p25": 4.040163665833903,
+          "p50": 4.809718649802266,
+          "p75": 5.771662379762718,
+          "mean_share_of_max": 0.7338112398809844
+        },
+        {
+          "factor": "place_type",
+          "label": "Tipo de lugar",
+          "maxPoints": 4.9,
+          "raw_max_points": 4.8542379171078585,
+          "mean": 1.5235883145453473,
+          "p25": 0.0,
+          "p50": 0.0,
+          "p75": 4.8542379171078585,
+          "mean_share_of_max": 0.3138676637945049
+        },
+        {
+          "factor": "property_type",
+          "label": "Tipo de inmueble",
+          "maxPoints": 1.7,
+          "raw_max_points": 1.7248277730510626,
+          "mean": 1.2549096488307778,
+          "p25": 0.0,
+          "p50": 1.7248277730510626,
+          "p75": 1.7248277730510626,
+          "mean_share_of_max": 0.7275564948788814
+        },
+        {
+          "factor": "extras",
+          "label": "Extras",
+          "maxPoints": 4.5,
+          "raw_max_points": 4.510043298863674,
+          "mean": 2.1716981121789356,
+          "p25": 1.5033477662878911,
+          "p50": 2.255021649431837,
+          "p75": 2.8700275538223377,
+          "mean_share_of_max": 0.4815248919508389
+        }
+      ]
+    },
+    "examples": [
+      {
+        "budget_range": "budget_le_2000",
+        "budget_range_label": "≤ $2,000",
+        "student_id": "S0031",
+        "university_code": "UTTT",
+        "budget_max": 1500,
+        "candidates": 112,
+        "top": [
+          {
+            "rank": 1,
+            "room_id": "R00261",
+            "matchScore": 94,
+            "points": {
+              "budget": 7.3,
+              "distance": 70.6,
+              "essential_services": 6.7,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.6
+            },
+            "relevance": 3,
+            "baseline_matchScore": 81
+          },
+          {
+            "rank": 2,
+            "room_id": "R00101",
+            "matchScore": 93,
+            "points": {
+              "budget": 6.4,
+              "distance": 72.2,
+              "essential_services": 5.1,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 3.2
+            },
+            "relevance": 3,
+            "baseline_matchScore": 82
+          },
+          {
+            "rank": 3,
+            "room_id": "R00069",
+            "matchScore": 93,
+            "points": {
+              "budget": 7.0,
+              "distance": 72.2,
+              "essential_services": 5.1,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.6
+            },
+            "relevance": 3,
+            "baseline_matchScore": 78
+          },
+          {
+            "rank": 4,
+            "room_id": "R00282",
+            "matchScore": 91,
+            "points": {
+              "budget": 6.1,
+              "distance": 70.7,
+              "essential_services": 5.1,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.6
+            },
+            "relevance": 3,
+            "baseline_matchScore": 83
+          },
+          {
+            "rank": 5,
+            "room_id": "R00193",
+            "matchScore": 90,
+            "points": {
+              "budget": 5.5,
+              "distance": 71.1,
+              "essential_services": 5.1,
+              "place_type": 4.9,
+              "property_type": 0.0,
+              "extras": 3.2
+            },
+            "relevance": 2,
+            "baseline_matchScore": 78
+          }
+        ],
+        "first_place": {
+          "room_id": "R00261",
+          "inputs": {
+            "distance_km": 0.8924504599656791,
+            "effective_distance_km": 0.8924504599656791,
+            "price_to_budget": 0.23333333333333334,
+            "services_coverage": 1.0,
+            "place_type_match": 1.0,
+            "property_type_match": 1.0,
+            "pets_compatible": 1.0,
+            "distance_ratio": 0.029748348665522634,
+            "price_below_min": 0.5625,
+            "extra_services_ratio": 0.5714285714285714
+          },
+          "raw_total": 93.7473519280626,
+          "probability": 0.9600038918934093,
+          "output": {
+            "modelVersion": "logreg-1.0.0",
+            "featureSchemaVersion": "2.0.0",
+            "matchScore": 94,
+            "breakdown": [
+              {
+                "factor": "budget",
+                "points": 7.3,
+                "maxPoints": 9.6,
+                "features": [
+                  {
+                    "feature": "price_to_budget",
+                    "value": 0.23333333333333334
+                  },
+                  {
+                    "feature": "price_below_min",
+                    "value": 0.5625
+                  }
+                ]
+              },
+              {
+                "factor": "distance",
+                "points": 70.6,
+                "maxPoints": 72.6,
+                "features": [
+                  {
+                    "feature": "distance_km",
+                    "value": 0.8924504599656791
+                  },
+                  {
+                    "feature": "effective_distance_km",
+                    "value": 0.8924504599656791
+                  },
+                  {
+                    "feature": "distance_ratio",
+                    "value": 0.029748348665522634
+                  }
+                ]
+              },
+              {
+                "factor": "essential_services",
+                "points": 6.7,
+                "maxPoints": 6.7,
+                "feature": "services_coverage",
+                "value": 1
+              },
+              {
+                "factor": "place_type",
+                "points": 4.9,
+                "maxPoints": 4.9,
+                "feature": "place_type_match",
+                "value": 1
+              },
+              {
+                "factor": "property_type",
+                "points": 1.7,
+                "maxPoints": 1.7,
+                "feature": "property_type_match",
+                "value": 1
+              },
+              {
+                "factor": "extras",
+                "points": 2.6,
+                "maxPoints": 4.5,
+                "feature": "extra_services_ratio",
+                "value": 0.5714285714285714
+              }
+            ]
+          }
+        }
+      },
+      {
+        "budget_range": "budget_2001_3500",
+        "budget_range_label": "$2,001–$3,500",
+        "student_id": "S0003",
+        "university_code": "UTTT",
+        "budget_max": 2200,
+        "candidates": 178,
+        "top": [
+          {
+            "rank": 1,
+            "room_id": "R00244",
+            "matchScore": 89,
+            "points": {
+              "budget": 6.3,
+              "distance": 70.7,
+              "essential_services": 3.8,
+              "place_type": 4.9,
+              "property_type": 0.0,
+              "extras": 3.4
+            },
+            "relevance": 3,
+            "baseline_matchScore": 44
+          },
+          {
+            "rank": 2,
+            "room_id": "R00088",
+            "matchScore": 88,
+            "points": {
+              "budget": 6.5,
+              "distance": 66.6,
+              "essential_services": 5.8,
+              "place_type": 4.9,
+              "property_type": 0.0,
+              "extras": 4.5
+            },
+            "relevance": 3,
+            "baseline_matchScore": 50
+          },
+          {
+            "rank": 3,
+            "room_id": "R00101",
+            "matchScore": 88,
+            "points": {
+              "budget": 7.4,
+              "distance": 72.2,
+              "essential_services": 3.8,
+              "place_type": 0.0,
+              "property_type": 0.0,
+              "extras": 4.5
+            },
+            "relevance": 3,
+            "baseline_matchScore": 54
+          },
+          {
+            "rank": 4,
+            "room_id": "R00193",
+            "matchScore": 88,
+            "points": {
+              "budget": 6.7,
+              "distance": 71.0,
+              "essential_services": 4.8,
+              "place_type": 0.0,
+              "property_type": 1.7,
+              "extras": 3.4
+            },
+            "relevance": 3,
+            "baseline_matchScore": 44
+          },
+          {
+            "rank": 5,
+            "room_id": "R00075",
+            "matchScore": 88,
+            "points": {
+              "budget": 5.0,
+              "distance": 70.6,
+              "essential_services": 4.8,
+              "place_type": 4.9,
+              "property_type": 0.0,
+              "extras": 2.3
+            },
+            "relevance": 3,
+            "baseline_matchScore": 53
+          }
+        ],
+        "first_place": {
+          "room_id": "R00244",
+          "inputs": {
+            "distance_km": 0.7822592077662694,
+            "effective_distance_km": 0.7822592077662694,
+            "price_to_budget": 0.3409090909090909,
+            "services_coverage": 0.5714285714285714,
+            "place_type_match": 1.0,
+            "property_type_match": 0.0,
+            "pets_compatible": 1.0,
+            "distance_ratio": 1.564518415532539,
+            "price_below_min": 0.375,
+            "extra_services_ratio": 0.75
+          },
+          "raw_total": 89.10190632927907,
+          "probability": 0.7454780942513416,
+          "output": {
+            "modelVersion": "logreg-1.0.0",
+            "featureSchemaVersion": "2.0.0",
+            "matchScore": 89,
+            "breakdown": [
+              {
+                "factor": "budget",
+                "points": 6.3,
+                "maxPoints": 9.6,
+                "features": [
+                  {
+                    "feature": "price_to_budget",
+                    "value": 0.3409090909090909
+                  },
+                  {
+                    "feature": "price_below_min",
+                    "value": 0.375
+                  }
+                ]
+              },
+              {
+                "factor": "distance",
+                "points": 70.7,
+                "maxPoints": 72.6,
+                "features": [
+                  {
+                    "feature": "distance_km",
+                    "value": 0.7822592077662694
+                  },
+                  {
+                    "feature": "effective_distance_km",
+                    "value": 0.7822592077662694
+                  },
+                  {
+                    "feature": "distance_ratio",
+                    "value": 1.564518415532539
+                  }
+                ]
+              },
+              {
+                "factor": "essential_services",
+                "points": 3.8,
+                "maxPoints": 6.7,
+                "feature": "services_coverage",
+                "value": 0.5714285714285714
+              },
+              {
+                "factor": "place_type",
+                "points": 4.9,
+                "maxPoints": 4.9,
+                "feature": "place_type_match",
+                "value": 1
+              },
+              {
+                "factor": "property_type",
+                "points": 0.0,
+                "maxPoints": 1.7,
+                "feature": "property_type_match",
+                "value": 0
+              },
+              {
+                "factor": "extras",
+                "points": 3.4,
+                "maxPoints": 4.5,
+                "feature": "extra_services_ratio",
+                "value": 0.75
+              }
+            ]
+          }
+        }
+      },
+      {
+        "budget_range": "budget_gt_3500",
+        "budget_range_label": "> $3,500",
+        "student_id": "S0044",
+        "university_code": "UTTT",
+        "budget_max": 5400,
+        "candidates": 200,
+        "top": [
+          {
+            "rank": 1,
+            "room_id": "R00088",
+            "matchScore": 94,
+            "points": {
+              "budget": 8.2,
+              "distance": 69.0,
+              "essential_services": 6.7,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 3.4
+            },
+            "relevance": 3,
+            "baseline_matchScore": 74
+          },
+          {
+            "rank": 2,
+            "room_id": "R00175",
+            "matchScore": 92,
+            "points": {
+              "budget": 6.0,
+              "distance": 72.5,
+              "essential_services": 4.8,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.3
+            },
+            "relevance": 3,
+            "baseline_matchScore": 78
+          },
+          {
+            "rank": 3,
+            "room_id": "R00235",
+            "matchScore": 92,
+            "points": {
+              "budget": 6.9,
+              "distance": 70.6,
+              "essential_services": 6.7,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 1.1
+            },
+            "relevance": 3,
+            "baseline_matchScore": 78
+          },
+          {
+            "rank": 4,
+            "room_id": "R00156",
+            "matchScore": 91,
+            "points": {
+              "budget": 7.0,
+              "distance": 72.0,
+              "essential_services": 5.8,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 0.0
+            },
+            "relevance": 3,
+            "baseline_matchScore": 74
+          },
+          {
+            "rank": 5,
+            "room_id": "R00269",
+            "matchScore": 91,
+            "points": {
+              "budget": 6.4,
+              "distance": 70.9,
+              "essential_services": 4.8,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.3
+            },
+            "relevance": 3,
+            "baseline_matchScore": 76
+          }
+        ],
+        "first_place": {
+          "room_id": "R00088",
+          "inputs": {
+            "distance_km": 2.481011923330055,
+            "effective_distance_km": 0.6202529808325138,
+            "price_to_budget": 0.12962962962962962,
+            "services_coverage": 1.0,
+            "place_type_match": 1.0,
+            "property_type_match": 1.0,
+            "pets_compatible": 1.0,
+            "distance_ratio": 0.16540079488867035,
+            "price_below_min": 0.8157894736842105,
+            "extra_services_ratio": 0.75
+          },
+          "raw_total": 93.93195172465872,
+          "probability": 0.9630928420607391,
+          "output": {
+            "modelVersion": "logreg-1.0.0",
+            "featureSchemaVersion": "2.0.0",
+            "matchScore": 94,
+            "breakdown": [
+              {
+                "factor": "budget",
+                "points": 8.2,
+                "maxPoints": 9.6,
+                "features": [
+                  {
+                    "feature": "price_to_budget",
+                    "value": 0.12962962962962962
+                  },
+                  {
+                    "feature": "price_below_min",
+                    "value": 0.8157894736842105
+                  }
+                ]
+              },
+              {
+                "factor": "distance",
+                "points": 69.0,
+                "maxPoints": 72.6,
+                "features": [
+                  {
+                    "feature": "distance_km",
+                    "value": 2.481011923330055
+                  },
+                  {
+                    "feature": "effective_distance_km",
+                    "value": 0.6202529808325138
+                  },
+                  {
+                    "feature": "distance_ratio",
+                    "value": 0.16540079488867035
+                  }
+                ]
+              },
+              {
+                "factor": "essential_services",
+                "points": 6.7,
+                "maxPoints": 6.7,
+                "feature": "services_coverage",
+                "value": 1
+              },
+              {
+                "factor": "place_type",
+                "points": 4.9,
+                "maxPoints": 4.9,
+                "feature": "place_type_match",
+                "value": 1
+              },
+              {
+                "factor": "property_type",
+                "points": 1.7,
+                "maxPoints": 1.7,
+                "feature": "property_type_match",
+                "value": 1
+              },
+              {
+                "factor": "extras",
+                "points": 3.4,
+                "maxPoints": 4.5,
+                "feature": "extra_services_ratio",
+                "value": 0.75
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "per_student_test": [
+    {
+      "student_id": "S0003",
+      "logreg": {
+        "ndcg@10": 0.9621404437403491,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8907947588400541
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9257857076266625,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.865607471994935
+      }
+    },
+    {
+      "student_id": "S0007",
+      "logreg": {
+        "ndcg@10": 0.7484317283150278,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7984384845736135
+      },
+      "lightgbm": {
+        "ndcg@10": 0.855259769079696,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.8300888017070812
+      }
+    },
+    {
+      "student_id": "S0008",
+      "logreg": {
+        "ndcg@10": 0.9301388471132441,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.856379682695472
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9292475650256389,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8477716727716725
+      }
+    },
+    {
+      "student_id": "S0020",
+      "logreg": {
+        "ndcg@10": 0.7889507122089876,
+        "ndcg@5": 0.7942545059558663,
+        "precision@5": 1.0,
+        "map": 0.7733527240966319
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7293875982597222,
+        "ndcg@5": 0.6973515901634045,
+        "precision@5": 1.0,
+        "map": 0.7746384952709534
+      }
+    },
+    {
+      "student_id": "S0031",
+      "logreg": {
+        "ndcg@10": 0.8918343139732646,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8858224306767618
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9035456546298357,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9068089853344968
+      }
+    },
+    {
+      "student_id": "S0042",
+      "logreg": {
+        "ndcg@10": 0.9458352203602566,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.824360914774028
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9079756641006057,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8104837367041916
+      }
+    },
+    {
+      "student_id": "S0044",
+      "logreg": {
+        "ndcg@10": 0.8441884824631555,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7838658177195919
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8184703918739046,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7560826796331809
+      }
+    },
+    {
+      "student_id": "S0059",
+      "logreg": {
+        "ndcg@10": 0.9636452638863133,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9330426800020023
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9339913667744852
+      }
+    },
+    {
+      "student_id": "S0060",
+      "logreg": {
+        "ndcg@10": 0.8032392983656655,
+        "ndcg@5": 0.7192801759488139,
+        "precision@5": 1.0,
+        "map": 0.876845014099916
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8119839834240926,
+        "ndcg@5": 0.7192801759488139,
+        "precision@5": 1.0,
+        "map": 0.8649350649350649
+      }
+    },
+    {
+      "student_id": "S0061",
+      "logreg": {
+        "ndcg@10": 0.6499816948048461,
+        "ndcg@5": 0.644705955856605,
+        "precision@5": 0.8,
+        "map": 0.7377159790679155
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6558235073192313,
+        "ndcg@5": 0.6581412431675202,
+        "precision@5": 0.8,
+        "map": 0.7489961919730731
+      }
+    },
+    {
+      "student_id": "S0064",
+      "logreg": {
+        "ndcg@10": 0.6932637174022491,
+        "ndcg@5": 0.6884243782136499,
+        "precision@5": 0.8,
+        "map": 0.7493952605365648
+      },
+      "lightgbm": {
+        "ndcg@10": 0.724267624212615,
+        "ndcg@5": 0.6884243782136499,
+        "precision@5": 0.8,
+        "map": 0.7662014649837469
+      }
+    },
+    {
+      "student_id": "S0072",
+      "logreg": {
+        "ndcg@10": 0.7418473025482129,
+        "ndcg@5": 0.7599524252759141,
+        "precision@5": 0.8,
+        "map": 0.6791666666666667
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7301231374110093,
+        "ndcg@5": 0.7479421265260928,
+        "precision@5": 0.8,
+        "map": 0.6791666666666667
+      }
+    },
+    {
+      "student_id": "S0078",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 0.2,
+        "map": 1.0
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 0.2,
+        "map": 1.0
+      }
+    },
+    {
+      "student_id": "S0086",
+      "logreg": {
+        "ndcg@10": 0.9198754673596997,
+        "ndcg@5": 0.867811381317105,
+        "precision@5": 1.0,
+        "map": 0.9682539682539683
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9190656935169247,
+        "ndcg@5": 0.867811381317105,
+        "precision@5": 1.0,
+        "map": 0.9682539682539683
+      }
+    },
+    {
+      "student_id": "S0088",
+      "logreg": {
+        "ndcg@10": 0.8861107236627898,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8338617109731962
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8861107236627898,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8165220862195391
+      }
+    },
+    {
+      "student_id": "S0090",
+      "logreg": {
+        "ndcg@10": 0.7758624046434249,
+        "ndcg@5": 0.7906355891969594,
+        "precision@5": 0.8,
+        "map": 0.8012611170505908
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8530082194677326,
+        "ndcg@5": 0.7906355891969594,
+        "precision@5": 0.8,
+        "map": 0.8045907795907795
+      }
+    },
+    {
+      "student_id": "S0094",
+      "logreg": {
+        "ndcg@10": 0.8891606286189596,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.7570500144335832
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8822211740336531,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.7611513349633929
+      }
+    },
+    {
+      "student_id": "S0101",
+      "logreg": {
+        "ndcg@10": 0.7339418598884387,
+        "ndcg@5": 0.7853272940061117,
+        "precision@5": 0.8,
+        "map": 0.6995844390387734
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6551243873404138,
+        "ndcg@5": 0.7227265726449517,
+        "precision@5": 0.6,
+        "map": 0.6669988576238576
+      }
+    },
+    {
+      "student_id": "S0104",
+      "logreg": {
+        "ndcg@10": 0.8764437184986227,
+        "ndcg@5": 0.867811381317105,
+        "precision@5": 1.0,
+        "map": 0.9105519480519481
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8728099587161927,
+        "ndcg@5": 0.867811381317105,
+        "precision@5": 1.0,
+        "map": 0.8867424242424243
+      }
+    },
+    {
+      "student_id": "S0116",
+      "logreg": {
+        "ndcg@10": 0.6331573731474595,
+        "ndcg@5": 0.4889350467436384,
+        "precision@5": 0.6,
+        "map": 0.6334890109890109
+      },
+      "lightgbm": {
+        "ndcg@10": 0.5684522135792008,
+        "ndcg@5": 0.5113250808989613,
+        "precision@5": 0.6,
+        "map": 0.6535231873389769
+      }
+    },
+    {
+      "student_id": "S0120",
+      "logreg": {
+        "ndcg@10": 0.8210218154466515,
+        "ndcg@5": 0.644705955856605,
+        "precision@5": 0.8,
+        "map": 0.8275124448201373
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8742877172053144,
+        "ndcg@5": 0.7778956414852184,
+        "precision@5": 0.8,
+        "map": 0.8913392388088742
+      }
+    },
+    {
+      "student_id": "S0129",
+      "logreg": {
+        "ndcg@10": 0.7071891177637937,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.8421694318753142
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6715123524508744,
+        "ndcg@5": 0.731219838408024,
+        "precision@5": 1.0,
+        "map": 0.7980413105413104
+      }
+    },
+    {
+      "student_id": "S0138",
+      "logreg": {
+        "ndcg@10": 0.8262953633016289,
+        "ndcg@5": 0.8040708765078748,
+        "precision@5": 0.8,
+        "map": 0.8669376375258729
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8009463339626981,
+        "ndcg@5": 0.7652606394268341,
+        "precision@5": 0.8,
+        "map": 0.8544346678962064
+      }
+    },
+    {
+      "student_id": "S0139",
+      "logreg": {
+        "ndcg@10": 0.911671805955201,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8451066571335344
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8656860983701847,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8240406044273553
+      }
+    },
+    {
+      "student_id": "S0147",
+      "logreg": {
+        "ndcg@10": 0.7300621421964296,
+        "ndcg@5": 0.5098542993875099,
+        "precision@5": 0.6,
+        "map": 0.8010912698412698
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6583594011638216,
+        "ndcg@5": 0.4331479920546084,
+        "precision@5": 0.6,
+        "map": 0.6995561821219716
+      }
+    },
+    {
+      "student_id": "S0166",
+      "logreg": {
+        "ndcg@10": 0.8929041799074677,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.9289215686274509
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8953192466539345,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9302177601809954
+      }
+    },
+    {
+      "student_id": "S0187",
+      "logreg": {
+        "ndcg@10": 0.9765011103633457,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9113289760348584
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9691003276841789,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9051256613756613
+      }
+    },
+    {
+      "student_id": "S0189",
+      "logreg": {
+        "ndcg@10": 0.8741081814591389,
+        "ndcg@5": 0.7611915317451772,
+        "precision@5": 0.6,
+        "map": 0.718452380952381
+      },
+      "lightgbm": {
+        "ndcg@10": 0.940051411940147,
+        "ndcg@5": 0.8692416898160298,
+        "precision@5": 0.8,
+        "map": 0.9115936147186147
+      }
+    },
+    {
+      "student_id": "S0199",
+      "logreg": {
+        "ndcg@10": 0.8638014123698322,
+        "ndcg@5": 0.731219838408024,
+        "precision@5": 1.0,
+        "map": 0.9733333333333334
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8702985490022499,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.9558119658119659
+      }
+    },
+    {
+      "student_id": "S0200",
+      "logreg": {
+        "ndcg@10": 0.8310527654757103,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.8919191919191919
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7961505257882224,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.8883708883708885
+      }
+    },
+    {
+      "student_id": "S0216",
+      "logreg": {
+        "ndcg@10": 0.932801483732564,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7170391634754717
+      },
+      "lightgbm": {
+        "ndcg@10": 0.932801483732564,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7297221458427472
+      }
+    },
+    {
+      "student_id": "S0219",
+      "logreg": {
+        "ndcg@10": 0.9363792118010483,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.6945151104797096
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.6861666369430025
+      }
+    },
+    {
+      "student_id": "S0220",
+      "logreg": {
+        "ndcg@10": 0.8949419274729131,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8177796994894625
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8974416542366758,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8286771169763308
+      }
+    },
+    {
+      "student_id": "S0230",
+      "logreg": {
+        "ndcg@10": 0.830518058996557,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8665856281603568
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8686882228144654,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8752583925451438
+      }
+    },
+    {
+      "student_id": "S0238",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.846446491946464
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9257857076266625,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8305670602762516
+      }
+    },
+    {
+      "student_id": "S0240",
+      "logreg": {
+        "ndcg@10": 0.8706377733274189,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8944444444444445
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9026072664686978,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.9172064863241333
+      }
+    },
+    {
+      "student_id": "S0241",
+      "logreg": {
+        "ndcg@10": 0.8298250042362307,
+        "ndcg@5": 0.782076186928392,
+        "precision@5": 0.6,
+        "map": 0.6655071119356833
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8743095960216444,
+        "ndcg@5": 0.8023389570436322,
+        "precision@5": 0.6,
+        "map": 0.6871882086167799
+      }
+    },
+    {
+      "student_id": "S0243",
+      "logreg": {
+        "ndcg@10": 0.9183546549915462,
+        "ndcg@5": 0.9594744597695195,
+        "precision@5": 0.8,
+        "map": 0.8163265306122449
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9481439364535114,
+        "ndcg@5": 0.9594744597695195,
+        "precision@5": 0.8,
+        "map": 0.8575353218210361
+      }
+    },
+    {
+      "student_id": "S0254",
+      "logreg": {
+        "ndcg@10": 0.9282307427334872,
+        "ndcg@5": 0.90976723004651,
+        "precision@5": 1.0,
+        "map": 0.8993055555555556
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9254576140299611,
+        "ndcg@5": 0.90976723004651,
+        "precision@5": 1.0,
+        "map": 0.9040178571428571
+      }
+    },
+    {
+      "student_id": "S0257",
+      "logreg": {
+        "ndcg@10": 0.8632649733499226,
+        "ndcg@5": 0.7052184546408721,
+        "precision@5": 0.6,
+        "map": 0.757583774250441
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8847115345977601,
+        "ndcg@5": 0.8546456263113074,
+        "precision@5": 0.8,
+        "map": 0.7910373577040244
+      }
+    },
+    {
+      "student_id": "S0262",
+      "logreg": {
+        "ndcg@10": 0.9666934294632711,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9191032182103612
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9942173966026455,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9675780568637712
+      }
+    },
+    {
+      "student_id": "S0289",
+      "logreg": {
+        "ndcg@10": 0.8464333675179274,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8349313528661354
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8325031551549891,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.765917361568283
+      }
+    },
+    {
+      "student_id": "S0290",
+      "logreg": {
+        "ndcg@10": 0.8698055002826972,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8711787963939046
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8465041053447692,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8808122789049371
+      }
+    },
+    {
+      "student_id": "S0298",
+      "logreg": {
+        "ndcg@10": 0.6682576953251647,
+        "ndcg@5": 0.6884243782136499,
+        "precision@5": 0.8,
+        "map": 0.6714209401709401
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6682576953251647,
+        "ndcg@5": 0.6884243782136499,
+        "precision@5": 0.8,
+        "map": 0.6896533613445378
+      }
+    },
+    {
+      "student_id": "S0300",
+      "logreg": {
+        "ndcg@10": 0.7090152624620073,
+        "ndcg@5": 0.72272653993353,
+        "precision@5": 1.0,
+        "map": 0.7705682959969052
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7464132071363915,
+        "ndcg@5": 0.7808192186449511,
+        "precision@5": 1.0,
+        "map": 0.7811550782265007
+      }
+    },
+    {
+      "student_id": "S0307",
+      "logreg": {
+        "ndcg@10": 0.7291633083512541,
+        "ndcg@5": 0.746517056925071,
+        "precision@5": 0.8,
+        "map": 0.6924463989612838
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7367750531172642,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.7041394545914994
+      }
+    },
+    {
+      "student_id": "S0310",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8631831017197106
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8797260550894827
+      }
+    },
+    {
+      "student_id": "S0316",
+      "logreg": {
+        "ndcg@10": 0.8345582924372243,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.9031109615013406
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8827904758126036,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.8858682175410075
+      }
+    },
+    {
+      "student_id": "S0325",
+      "logreg": {
+        "ndcg@10": 0.5565632364604381,
+        "ndcg@5": 0.5254743443638903,
+        "precision@5": 1.0,
+        "map": 0.8508874166768904
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6226909924362999,
+        "ndcg@5": 0.6004486743709427,
+        "precision@5": 1.0,
+        "map": 0.8490682928182928
+      }
+    },
+    {
+      "student_id": "S0330",
+      "logreg": {
+        "ndcg@10": 0.9534131773100608,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9044753086419752
+      },
+      "lightgbm": {
+        "ndcg@10": 0.961748052493652,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9035714285714285
+      }
+    },
+    {
+      "student_id": "S0335",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8233346662644992
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8326999566102925
+      }
+    },
+    {
+      "student_id": "S0336",
+      "logreg": {
+        "ndcg@10": 0.8094174158925851,
+        "ndcg@5": 0.8546456263113074,
+        "precision@5": 0.8,
+        "map": 0.7085766629884278
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7727229072923494,
+        "ndcg@5": 0.5927569596302934,
+        "precision@5": 0.4,
+        "map": 0.6543169793169793
+      }
+    },
+    {
+      "student_id": "S0355",
+      "logreg": {
+        "ndcg@10": 0.8397446059950885,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7849214170572816
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8162804782162765,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7858948123055287
+      }
+    },
+    {
+      "student_id": "S0359",
+      "logreg": {
+        "ndcg@10": 0.8593337770955468,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.821510146780916
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8649336882972027,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8251903791819759
+      }
+    },
+    {
+      "student_id": "S0369",
+      "logreg": {
+        "ndcg@10": 0.9155260051911699,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9142694408999936
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9149920538053871,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9220037205271074
+      }
+    },
+    {
+      "student_id": "S0378",
+      "logreg": {
+        "ndcg@10": 0.8260246866707514,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.8748863434262593
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8272983594515162,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.8782883782883782
+      }
+    },
+    {
+      "student_id": "S0382",
+      "logreg": {
+        "ndcg@10": 0.9423668871447204,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9590909090909091
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9276177826464047,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9590909090909091
+      }
+    },
+    {
+      "student_id": "S0388",
+      "logreg": {
+        "ndcg@10": 0.8887765216409891,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7643709983096015
+      },
+      "lightgbm": {
+        "ndcg@10": 0.92663607790064,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7689947329403353
+      }
+    },
+    {
+      "student_id": "S0391",
+      "logreg": {
+        "ndcg@10": 0.9115734544245089,
+        "ndcg@5": 0.8747985572776802,
+        "precision@5": 0.8,
+        "map": 0.833731497547287
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8976946788847027,
+        "ndcg@5": 0.8546456263113074,
+        "precision@5": 0.8,
+        "map": 0.8075528151186044
+      }
+    },
+    {
+      "student_id": "S0400",
+      "logreg": {
+        "ndcg@10": 0.9636452638863133,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8052589540697012
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8973910404319243,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7971533786493818
+      }
+    },
+    {
+      "student_id": "S0413",
+      "logreg": {
+        "ndcg@10": 0.70516644044033,
+        "ndcg@5": 0.6102650449229513,
+        "precision@5": 0.8,
+        "map": 0.7850786875245086
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7545605802121691,
+        "ndcg@5": 0.7092912526226147,
+        "precision@5": 1.0,
+        "map": 0.8081877587215986
+      }
+    },
+    {
+      "student_id": "S0424",
+      "logreg": {
+        "ndcg@10": 0.8089598216046896,
+        "ndcg@5": 0.707167960715413,
+        "precision@5": 0.8,
+        "map": 0.7986898330209367
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8147579763445977,
+        "ndcg@5": 0.7906355891969594,
+        "precision@5": 0.8,
+        "map": 0.7790175636329482
+      }
+    },
+    {
+      "student_id": "S0425",
+      "logreg": {
+        "ndcg@10": 0.921723022686679,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.886396671678859
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9134872336594229,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8832200770000853
+      }
+    },
+    {
+      "student_id": "S0430",
+      "logreg": {
+        "ndcg@10": 0.8208588129622223,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7277847202337817
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8036385906689755,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7237789298892945
+      }
+    },
+    {
+      "student_id": "S0433",
+      "logreg": {
+        "ndcg@10": 0.9524388883275952,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.9505590666018473
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9458525913812434,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9075563325563327
+      }
+    },
+    {
+      "student_id": "S0436",
+      "logreg": {
+        "ndcg@10": 0.7904966091947766,
+        "ndcg@5": 0.7808192186449511,
+        "precision@5": 1.0,
+        "map": 0.8515924888473907
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7870497010392778,
+        "ndcg@5": 0.7808192186449511,
+        "precision@5": 1.0,
+        "map": 0.9148860398860399
+      }
+    },
+    {
+      "student_id": "S0437",
+      "logreg": {
+        "ndcg@10": 0.884034171650053,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.9387412587412587
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8365888650685178,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.8994444444444444
+      }
+    },
+    {
+      "student_id": "S0451",
+      "logreg": {
+        "ndcg@10": 0.8950050897718139,
+        "ndcg@5": 0.8040708765078748,
+        "precision@5": 0.8,
+        "map": 0.8746947496947496
+      },
+      "lightgbm": {
+        "ndcg@10": 0.905574614036312,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.8771238994923205
+      }
+    },
+    {
+      "student_id": "S0456",
+      "logreg": {
+        "ndcg@10": 0.834799807385178,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8142094833271304
+      },
+      "lightgbm": {
+        "ndcg@10": 0.841454860145797,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.7868121730350832
+      }
+    },
+    {
+      "student_id": "S0468",
+      "logreg": {
+        "ndcg@10": 0.8993713426602534,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.9248015873015872
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8558609869598239,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.9254120879120881
+      }
+    },
+    {
+      "student_id": "S0469",
+      "logreg": {
+        "ndcg@10": 0.7701502635530599,
+        "ndcg@5": 0.7110394052584199,
+        "precision@5": 0.8,
+        "map": 0.7568582153140976
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7931998803101009,
+        "ndcg@5": 0.7469522688816453,
+        "precision@5": 0.8,
+        "map": 0.7587405921964745
+      }
+    },
+    {
+      "student_id": "S0479",
+      "logreg": {
+        "ndcg@10": 0.9511307112681576,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9588977688977689
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8892202105536474,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9304297554297555
+      }
+    },
+    {
+      "student_id": "S0502",
+      "logreg": {
+        "ndcg@10": 0.7813541765100301,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.8013227513227513
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7934698222120932,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.7790431962258588
+      }
+    },
+    {
+      "student_id": "S0511",
+      "logreg": {
+        "ndcg@10": 0.8118362188835113,
+        "ndcg@5": 0.7623370622671015,
+        "precision@5": 0.6,
+        "map": 0.8047916369344941
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8181192994707025,
+        "ndcg@5": 0.7623370622671015,
+        "precision@5": 0.6,
+        "map": 0.8063300984729557
+      }
+    },
+    {
+      "student_id": "S0516",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8293248286557567
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.829821449991312
+      }
+    },
+    {
+      "student_id": "S0527",
+      "logreg": {
+        "ndcg@10": 0.6451050482519832,
+        "ndcg@5": 0.6581412431675202,
+        "precision@5": 0.8,
+        "map": 0.6713967067309464
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6550130156156635,
+        "ndcg@5": 0.7331155731745727,
+        "precision@5": 0.8,
+        "map": 0.7032193719226703
+      }
+    },
+    {
+      "student_id": "S0530",
+      "logreg": {
+        "ndcg@10": 0.9399645065189601,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8019296607531902
+      },
+      "lightgbm": {
+        "ndcg@10": 0.874036418248886,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7963468115848147
+      }
+    },
+    {
+      "student_id": "S0539",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8977814466176296
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9580777588003657,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.896185236213884
+      }
+    },
+    {
+      "student_id": "S0553",
+      "logreg": {
+        "ndcg@10": 0.7385867177398341,
+        "ndcg@5": 0.8040708765078748,
+        "precision@5": 0.8,
+        "map": 0.7416798941798941
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7440442271893695,
+        "ndcg@5": 0.778957320150241,
+        "precision@5": 0.8,
+        "map": 0.737491111829347
+      }
+    },
+    {
+      "student_id": "S0554",
+      "logreg": {
+        "ndcg@10": 0.92976128536482,
+        "ndcg@5": 0.9296142744880715,
+        "precision@5": 0.8,
+        "map": 0.8875
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8310239469688427,
+        "ndcg@5": 0.8284672061876717,
+        "precision@5": 0.8,
+        "map": 0.8875
+      }
+    },
+    {
+      "student_id": "S0560",
+      "logreg": {
+        "ndcg@10": 0.7415390499200316,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.7190675731005126
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7796628282703288,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.7166189991276266
+      }
+    },
+    {
+      "student_id": "S0567",
+      "logreg": {
+        "ndcg@10": 0.8035633305032552,
+        "ndcg@5": 0.7192801759488139,
+        "precision@5": 1.0,
+        "map": 0.8992670028384315
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8701456800353918,
+        "ndcg@5": 0.7808192186449511,
+        "precision@5": 1.0,
+        "map": 0.9299136577708006
+      }
+    },
+    {
+      "student_id": "S0570",
+      "logreg": {
+        "ndcg@10": 0.8771324975457362,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8858645133799572
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9202182025407148,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.86525459032144
+      }
+    },
+    {
+      "student_id": "S0574",
+      "logreg": {
+        "ndcg@10": 0.826515594784042,
+        "ndcg@5": 0.72272653993353,
+        "precision@5": 1.0,
+        "map": 0.9833333333333334
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7986528552964522,
+        "ndcg@5": 0.7446551257189392,
+        "precision@5": 1.0,
+        "map": 0.9310939060939063
+      }
+    },
+    {
+      "student_id": "S0578",
+      "logreg": {
+        "ndcg@10": 0.711260827915448,
+        "ndcg@5": 0.5535403758653302,
+        "precision@5": 0.8,
+        "map": 0.6523339598997495
+      },
+      "lightgbm": {
+        "ndcg@10": 0.913444436380679,
+        "ndcg@5": 0.7526317273206227,
+        "precision@5": 0.8,
+        "map": 0.8120535714285713
+      }
+    },
+    {
+      "student_id": "S0581",
+      "logreg": {
+        "ndcg@10": 0.9087335846169434,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.8951388888888889
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8873191018314768,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.862063492063492
+      }
+    },
+    {
+      "student_id": "S0584",
+      "logreg": {
+        "ndcg@10": 0.889400254342836,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.771983571983572
+      },
+      "lightgbm": {
+        "ndcg@10": 0.875763876490505,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.8020239546159278
+      }
+    },
+    {
+      "student_id": "S0592",
+      "logreg": {
+        "ndcg@10": 0.9552257038489796,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.9472832722832721
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9552257038489796,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.9333919186403659
+      }
+    },
+    {
+      "student_id": "S0595",
+      "logreg": {
+        "ndcg@10": 0.8366010985257216,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.8495837495837495
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9013885706584933,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.865341521223874
+      }
+    },
+    {
+      "student_id": "S0597",
+      "logreg": {
+        "ndcg@10": 0.8992570819408976,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7915776028202937
+      },
+      "lightgbm": {
+        "ndcg@10": 0.911671805955201,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8157593807654578
+      }
+    },
+    {
+      "student_id": "S0602",
+      "logreg": {
+        "ndcg@10": 0.9094245487194395,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8857914581182948
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8701930429604297,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8960808474768635
+      }
+    },
+    {
+      "student_id": "S0605",
+      "logreg": {
+        "ndcg@10": 0.8595820979770249,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.8517889228882145
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8232273618633382,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.8570340024433012
+      }
+    },
+    {
+      "student_id": "S0615",
+      "logreg": {
+        "ndcg@10": 0.6397463826499274,
+        "ndcg@5": 0.7179584023526132,
+        "precision@5": 0.6,
+        "map": 0.690492554741297
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7037686015360421,
+        "ndcg@5": 0.7085772764686009,
+        "precision@5": 0.6,
+        "map": 0.6889062207536472
+      }
+    },
+    {
+      "student_id": "S0619",
+      "logreg": {
+        "ndcg@10": 0.7684834047876691,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.724088582493888
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7378514775390589,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7228995680711975
+      }
+    },
+    {
+      "student_id": "S0623",
+      "logreg": {
+        "ndcg@10": 0.7954925339913762,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.8819080492157416
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7916443378676905,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.9007392180469105
+      }
+    },
+    {
+      "student_id": "S0643",
+      "logreg": {
+        "ndcg@10": 0.8803273038110722,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.80722903849816
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8296161694811076,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7857810312344569
+      }
+    },
+    {
+      "student_id": "S0646",
+      "logreg": {
+        "ndcg@10": 0.8540417824998212,
+        "ndcg@5": 0.90976723004651,
+        "precision@5": 1.0,
+        "map": 0.9362980769230769
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8540417824998212,
+        "ndcg@5": 0.90976723004651,
+        "precision@5": 1.0,
+        "map": 0.9427083333333334
+      }
+    },
+    {
+      "student_id": "S0649",
+      "logreg": {
+        "ndcg@10": 0.8489430663709434,
+        "ndcg@5": 0.6844866281369031,
+        "precision@5": 0.8,
+        "map": 0.8413576007326007
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8301244028335792,
+        "ndcg@5": 0.6844866281369031,
+        "precision@5": 0.8,
+        "map": 0.8358630952380951
+      }
+    },
+    {
+      "student_id": "S0660",
+      "logreg": {
+        "ndcg@10": 0.8068363630969917,
+        "ndcg@5": 0.7442219178835312,
+        "precision@5": 0.8,
+        "map": 0.8283145426002569
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7981006323920439,
+        "ndcg@5": 0.6968101105336539,
+        "precision@5": 0.6,
+        "map": 0.7806954949812093
+      }
+    },
+    {
+      "student_id": "S0662",
+      "logreg": {
+        "ndcg@10": 0.8334531406237881,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8155178155178154
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8286903990167884,
+        "ndcg@5": 0.8687949224876581,
+        "precision@5": 0.8,
+        "map": 0.822029822029822
+      }
+    },
+    {
+      "student_id": "S0676",
+      "logreg": {
+        "ndcg@10": 0.7989447509013814,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.8312068048910154
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7940126454812458,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.8332828282828283
+      }
+    },
+    {
+      "student_id": "S0679",
+      "logreg": {
+        "ndcg@10": 0.7978244807997983,
+        "ndcg@5": 0.7294441835889875,
+        "precision@5": 0.6,
+        "map": 0.6847163865546219
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7823555239186462,
+        "ndcg@5": 0.7041217066455405,
+        "precision@5": 0.6,
+        "map": 0.7089194139194139
+      }
+    },
+    {
+      "student_id": "S0680",
+      "logreg": {
+        "ndcg@10": 0.9220526049473897,
+        "ndcg@5": 0.7821995632389057,
+        "precision@5": 0.4,
+        "map": 0.7678571428571428
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9431516793056288,
+        "ndcg@5": 0.7821995632389057,
+        "precision@5": 0.4,
+        "map": 0.7678571428571428
+      }
+    },
+    {
+      "student_id": "S0722",
+      "logreg": {
+        "ndcg@10": 0.7636230137576261,
+        "ndcg@5": 0.6089419728454368,
+        "precision@5": 1.0,
+        "map": 0.9562770562770564
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7831288545388791,
+        "ndcg@5": 0.6343169226155623,
+        "precision@5": 1.0,
+        "map": 0.9686586141131596
+      }
+    },
+    {
+      "student_id": "S0725",
+      "logreg": {
+        "ndcg@10": 0.7940252718340219,
+        "ndcg@5": 0.5927952221442185,
+        "precision@5": 0.4,
+        "map": 0.6015873015873016
+      },
+      "lightgbm": {
+        "ndcg@10": 0.69970845724717,
+        "ndcg@5": 0.5927952221442185,
+        "precision@5": 0.4,
+        "map": 0.5937950937950938
+      }
+    },
+    {
+      "student_id": "S0728",
+      "logreg": {
+        "ndcg@10": 0.9573643941786459,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9427083333333334
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9578915658262128,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9502840909090909
+      }
+    },
+    {
+      "student_id": "S0732",
+      "logreg": {
+        "ndcg@10": 0.8578479195421108,
+        "ndcg@5": 0.72272653993353,
+        "precision@5": 1.0,
+        "map": 0.9909090909090909
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9251426234142217,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.9909090909090909
+      }
+    },
+    {
+      "student_id": "S0734",
+      "logreg": {
+        "ndcg@10": 0.864136823079159,
+        "ndcg@5": 0.7906355891969594,
+        "precision@5": 0.8,
+        "map": 0.852997187401137
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7503264393423476,
+        "ndcg@5": 0.7778956414852184,
+        "precision@5": 0.8,
+        "map": 0.8151738238977267
+      }
+    },
+    {
+      "student_id": "S0738",
+      "logreg": {
+        "ndcg@10": 0.7835523778994655,
+        "ndcg@5": 0.7808192186449511,
+        "precision@5": 1.0,
+        "map": 0.9028381955053986
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8180916863089303,
+        "ndcg@5": 0.7808192186449511,
+        "precision@5": 1.0,
+        "map": 0.8992612932959232
+      }
+    },
+    {
+      "student_id": "S0743",
+      "logreg": {
+        "ndcg@10": 0.8625172829300511,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7945931803806567
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8644464971788972,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.8108592132505177
+      }
+    },
+    {
+      "student_id": "S0744",
+      "logreg": {
+        "ndcg@10": 0.8593688086525767,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7622157244964263
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8611000011533083,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7650776773583793
+      }
+    },
+    {
+      "student_id": "S0746",
+      "logreg": {
+        "ndcg@10": 0.9281548969304949,
+        "ndcg@5": 0.8101556604709256,
+        "precision@5": 0.8,
+        "map": 0.9428571428571428
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9203995693329142,
+        "ndcg@5": 0.7941908824660883,
+        "precision@5": 0.8,
+        "map": 0.9666666666666666
+      }
+    },
+    {
+      "student_id": "S0751",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.821974947638208
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8430741974392637
+      }
+    },
+    {
+      "student_id": "S0764",
+      "logreg": {
+        "ndcg@10": 0.8915802009560909,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8077951829413313
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9580777588003657,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8330018888424396
+      }
+    },
+    {
+      "student_id": "S0772",
+      "logreg": {
+        "ndcg@10": 0.9085865142540231,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8046779791845582
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9301147242059562,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7976679049059563
+      }
+    },
+    {
+      "student_id": "S0773",
+      "logreg": {
+        "ndcg@10": 0.804422411719483,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8447415268588246
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7945784279255463,
+        "ndcg@5": 0.8040708765078748,
+        "precision@5": 0.8,
+        "map": 0.8617672781773369
+      }
+    },
+    {
+      "student_id": "S0776",
+      "logreg": {
+        "ndcg@10": 0.9621404437403491,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7627934951923124
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8397446059950885,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7730055158292173
+      }
+    },
+    {
+      "student_id": "S0781",
+      "logreg": {
+        "ndcg@10": 0.7776945424837282,
+        "ndcg@5": 0.8038625347240446,
+        "precision@5": 0.6,
+        "map": 0.6631358225108225
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7746711551420665,
+        "ndcg@5": 0.8038625347240446,
+        "precision@5": 0.6,
+        "map": 0.6553406084656084
+      }
+    },
+    {
+      "student_id": "S0792",
+      "logreg": {
+        "ndcg@10": 0.7744473081157999,
+        "ndcg@5": 0.7744473081157999,
+        "precision@5": 0.6,
+        "map": 0.8333333333333334
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7744473081157999,
+        "ndcg@5": 0.7744473081157999,
+        "precision@5": 0.6,
+        "map": 0.8269230769230769
+      }
+    },
+    {
+      "student_id": "S0800",
+      "logreg": {
+        "ndcg@10": 0.8406622928303842,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7981376401978164
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8565974143417632,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8048655768705546
+      }
+    },
+    {
+      "student_id": "S0802",
+      "logreg": {
+        "ndcg@10": 0.9636452638863133,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8871018978371922
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9239702799224406,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8895084973738737
+      }
+    },
+    {
+      "student_id": "S0824",
+      "logreg": {
+        "ndcg@10": 0.9232386703631136,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.9445684657223119
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9126822919425964,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9282450455527381
+      }
+    },
+    {
+      "student_id": "S0826",
+      "logreg": {
+        "ndcg@10": 0.7209307180007745,
+        "ndcg@5": 0.8074935573272687,
+        "precision@5": 0.8,
+        "map": 0.6572133458646616
+      },
+      "lightgbm": {
+        "ndcg@10": 0.814283234039424,
+        "ndcg@5": 0.6656541665205875,
+        "precision@5": 0.6,
+        "map": 0.7003968253968254
+      }
+    },
+    {
+      "student_id": "S0827",
+      "logreg": {
+        "ndcg@10": 0.8356738738131713,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8353313353313354
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8356738738131713,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8339845339845339
+      }
+    },
+    {
+      "student_id": "S0839",
+      "logreg": {
+        "ndcg@10": 0.9010344411875802,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.845668449197861
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8656552870651093,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8198717948717948
+      }
+    },
+    {
+      "student_id": "S0843",
+      "logreg": {
+        "ndcg@10": 0.8507030717145271,
+        "ndcg@5": 0.8687949224876581,
+        "precision@5": 0.8,
+        "map": 0.8220301097095355
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8020947388691307,
+        "ndcg@5": 0.8539316501572934,
+        "precision@5": 0.8,
+        "map": 0.7730610298792118
+      }
+    },
+    {
+      "student_id": "S0856",
+      "logreg": {
+        "ndcg@10": 0.917149131847623,
+        "ndcg@5": 0.8747985572776802,
+        "precision@5": 0.8,
+        "map": 0.7990620490620491
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9200257606473009,
+        "ndcg@5": 0.8747985572776802,
+        "precision@5": 0.8,
+        "map": 0.8149350649350651
+      }
+    },
+    {
+      "student_id": "S0867",
+      "logreg": {
+        "ndcg@10": 0.6879897319826548,
+        "ndcg@5": 0.6258236241410682,
+        "precision@5": 1.0,
+        "map": 0.8924952870074822
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7275033872067743,
+        "ndcg@5": 0.72272653993353,
+        "precision@5": 1.0,
+        "map": 0.888801702808915
+      }
+    },
+    {
+      "student_id": "S0869",
+      "logreg": {
+        "ndcg@10": 0.8414678329283709,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.8927964426877469
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9312435875025852,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.903425925925926
+      }
+    },
+    {
+      "student_id": "S0870",
+      "logreg": {
+        "ndcg@10": 0.9257857076266625,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8142298274660236
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8753170698415144,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8278270023279305
+      }
+    },
+    {
+      "student_id": "S0872",
+      "logreg": {
+        "ndcg@10": 0.7987385846082324,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.8659722222222224
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7820234753960358,
+        "ndcg@5": 0.8040708765078748,
+        "precision@5": 0.8,
+        "map": 0.8219887955182072
+      }
+    },
+    {
+      "student_id": "S0876",
+      "logreg": {
+        "ndcg@10": 0.9057929118655972,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8401937756552096
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8861107236627898,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8402096546209844
+      }
+    },
+    {
+      "student_id": "S0877",
+      "logreg": {
+        "ndcg@10": 0.7702794407008541,
+        "ndcg@5": 0.7192801759488139,
+        "precision@5": 1.0,
+        "map": 0.8456289081289081
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8336852217904579,
+        "ndcg@5": 0.7192801759488139,
+        "precision@5": 1.0,
+        "map": 0.8513431013431013
+      }
+    },
+    {
+      "student_id": "S0878",
+      "logreg": {
+        "ndcg@10": 0.5907522424295755,
+        "ndcg@5": 0.4268482465790705,
+        "precision@5": 0.6,
+        "map": 0.66386542408321
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6771733736284774,
+        "ndcg@5": 0.5091154798932425,
+        "precision@5": 0.8,
+        "map": 0.7340357216219285
+      }
+    },
+    {
+      "student_id": "S0890",
+      "logreg": {
+        "ndcg@10": 0.8992570819408976,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7533818105693396
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8480958636240099,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7634192662121921
+      }
+    },
+    {
+      "student_id": "S0899",
+      "logreg": {
+        "ndcg@10": 0.9458352203602566,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8964396474953261
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9094804842465699,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.887039232301918
+      }
+    },
+    {
+      "student_id": "S0903",
+      "logreg": {
+        "ndcg@10": 0.808356891687453,
+        "ndcg@5": 0.830419897363192,
+        "precision@5": 0.8,
+        "map": 0.785244592723078
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8502791328870872,
+        "ndcg@5": 0.830419897363192,
+        "precision@5": 0.8,
+        "map": 0.8087070760563015
+      }
+    },
+    {
+      "student_id": "S0905",
+      "logreg": {
+        "ndcg@10": 0.8570292438733028,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.7804705863125385
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8708624147461594,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.787223196062414
+      }
+    },
+    {
+      "student_id": "S0916",
+      "logreg": {
+        "ndcg@10": 0.9529119430773975,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9500000000000001
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9500416972965816,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9395773979107312
+      }
+    },
+    {
+      "student_id": "S0921",
+      "logreg": {
+        "ndcg@10": 0.8980293327208305,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8364726631393298
+      },
+      "lightgbm": {
+        "ndcg@10": 0.925563230648185,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8606837606837607
+      }
+    },
+    {
+      "student_id": "S0928",
+      "logreg": {
+        "ndcg@10": 0.7603440000638868,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.8556630403984669
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7915747092964888,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.8466501360436312
+      }
+    },
+    {
+      "student_id": "S0936",
+      "logreg": {
+        "ndcg@10": 0.9215439149655106,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9108386496544393
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8812020446060901,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.854493006993007
+      }
+    },
+    {
+      "student_id": "S0938",
+      "logreg": {
+        "ndcg@10": 0.9497856559979252,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9200563325563327
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9434375246347767,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.9192279942279942
+      }
+    },
+    {
+      "student_id": "S0939",
+      "logreg": {
+        "ndcg@10": 0.9202182025407148,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7317788484280767
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8470353031283072,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7549619119012185
+      }
+    },
+    {
+      "student_id": "S0941",
+      "logreg": {
+        "ndcg@10": 0.8106847411757202,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.9087324134199134
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8102057121723455,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.9134513158410217
+      }
+    },
+    {
+      "student_id": "S0943",
+      "logreg": {
+        "ndcg@10": 0.8837753124991881,
+        "ndcg@5": 0.8547174579522612,
+        "precision@5": 0.8,
+        "map": 0.8207799145299145
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8802858446032263,
+        "ndcg@5": 0.8547174579522612,
+        "precision@5": 0.8,
+        "map": 0.8004901960784313
+      }
+    },
+    {
+      "student_id": "S0952",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9254949354648794
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9140642702443833
+      }
+    },
+    {
+      "student_id": "S0971",
+      "logreg": {
+        "ndcg@10": 0.8668727951102436,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7703113641855305
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8194389843517922,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8027480553029177
+      }
+    },
+    {
+      "student_id": "S0990",
+      "logreg": {
+        "ndcg@10": 0.8326591954828785,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.79021782311256
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8545197789977846,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8217356272169106
+      }
+    },
+    {
+      "student_id": "S0999",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9335170482982889
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9392879821622486
+      }
+    },
+    {
+      "student_id": "S1011",
+      "logreg": {
+        "ndcg@10": 0.8426499061088003,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.8564658968863252
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8758510212272971,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.8656556857845011
+      }
+    },
+    {
+      "student_id": "S1015",
+      "logreg": {
+        "ndcg@10": 0.9010362095152992,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.7333634873868228
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8376695343335212,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.7234039189151629
+      }
+    },
+    {
+      "student_id": "S1025",
+      "logreg": {
+        "ndcg@10": 0.8786367040928206,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.7394412670790271
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8984116547655663,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7554673484029982
+      }
+    },
+    {
+      "student_id": "S1026",
+      "logreg": {
+        "ndcg@10": 0.9603250160361273,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7277949819736919
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9603250160361273,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7619945337070294
+      }
+    },
+    {
+      "student_id": "S1040",
+      "logreg": {
+        "ndcg@10": 0.7383098888496451,
+        "ndcg@5": 0.7808192186449511,
+        "precision@5": 1.0,
+        "map": 0.8248598126203982
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8160282633206862,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.835478827169216
+      }
+    },
+    {
+      "student_id": "S1045",
+      "logreg": {
+        "ndcg@10": 0.8354477690556398,
+        "ndcg@5": 0.8354477690556398,
+        "precision@5": 0.4,
+        "map": 1.0
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8307820888596468,
+        "ndcg@5": 0.8307820888596468,
+        "precision@5": 0.4,
+        "map": 1.0
+      }
+    },
+    {
+      "student_id": "S1053",
+      "logreg": {
+        "ndcg@10": 0.9194398353277651,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8377122626828509
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8676920006017144,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8403544976296835
+      }
+    },
+    {
+      "student_id": "S1054",
+      "logreg": {
+        "ndcg@10": 0.7662469539309498,
+        "ndcg@5": 0.6496141411326093,
+        "precision@5": 0.8,
+        "map": 0.7688914441774855
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8645825655821692,
+        "ndcg@5": 0.7808192186449511,
+        "precision@5": 1.0,
+        "map": 0.8555134479047521
+      }
+    },
+    {
+      "student_id": "S1061",
+      "logreg": {
+        "ndcg@10": 0.7945694335065863,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7657594691006725
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7955024663604254,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.76491850634459
+      }
+    },
+    {
+      "student_id": "S1063",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 1.0
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9724395078056083,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9909090909090909
+      }
+    },
+    {
+      "student_id": "S1068",
+      "logreg": {
+        "ndcg@10": 0.8656127652083212,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.776336653542536
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7949611916609726,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.7900274144745617
+      }
+    },
+    {
+      "student_id": "S1070",
+      "logreg": {
+        "ndcg@10": 0.8011932506490966,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.9847374033591042
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8235016692917756,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9866991341991341
+      }
+    },
+    {
+      "student_id": "S1074",
+      "logreg": {
+        "ndcg@10": 0.7392615877987153,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7555749303530532
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7311447896364106,
+        "ndcg@5": 0.7718920066951964,
+        "precision@5": 0.8,
+        "map": 0.765216275963945
+      }
+    },
+    {
+      "student_id": "S1086",
+      "logreg": {
+        "ndcg@10": 0.6728909418596841,
+        "ndcg@5": 0.6817930109452877,
+        "precision@5": 0.8,
+        "map": 0.7914953733135551
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7263859274071025,
+        "ndcg@5": 0.6817930109452877,
+        "precision@5": 0.8,
+        "map": 0.8224689748753918
+      }
+    },
+    {
+      "student_id": "S1090",
+      "logreg": {
+        "ndcg@10": 0.8694516991795432,
+        "ndcg@5": 0.7853272940061117,
+        "precision@5": 0.8,
+        "map": 0.7655318565007562
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8208397820975417,
+        "ndcg@5": 0.7435934797653384,
+        "precision@5": 0.6,
+        "map": 0.7434684222233628
+      }
+    },
+    {
+      "student_id": "S1096",
+      "logreg": {
+        "ndcg@10": 0.9311208299667688,
+        "ndcg@5": 0.8420926525813925,
+        "precision@5": 0.8,
+        "map": 0.88015873015873
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9433799776571348,
+        "ndcg@5": 0.8489789197007895,
+        "precision@5": 0.8,
+        "map": 0.8976190476190476
+      }
+    },
+    {
+      "student_id": "S1099",
+      "logreg": {
+        "ndcg@10": 0.9039129791606223,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8707300010566332
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8450923023011543,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8457919659591454
+      }
+    },
+    {
+      "student_id": "S1100",
+      "logreg": {
+        "ndcg@10": 0.9492678359220561,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8387753272368659
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9479914066345729,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8338807488807488
+      }
+    },
+    {
+      "student_id": "S1107",
+      "logreg": {
+        "ndcg@10": 0.906855929496837,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.757089627620475
+      },
+      "lightgbm": {
+        "ndcg@10": 0.907608339569819,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7908709492721053
+      }
+    },
+    {
+      "student_id": "S1116",
+      "logreg": {
+        "ndcg@10": 0.8446271332173609,
+        "ndcg@5": 0.8546456263113074,
+        "precision@5": 0.8,
+        "map": 0.807916878872761
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8304721905118413,
+        "ndcg@5": 0.7234405487989655,
+        "precision@5": 0.6,
+        "map": 0.7657660565555302
+      }
+    },
+    {
+      "student_id": "S1120",
+      "logreg": {
+        "ndcg@10": 0.8864348908802631,
+        "ndcg@5": 0.887443735632458,
+        "precision@5": 0.8,
+        "map": 0.8041666666666667
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9477332402914564,
+        "ndcg@5": 0.9502380992979097,
+        "precision@5": 0.8,
+        "map": 0.8875
+      }
+    },
+    {
+      "student_id": "S1138",
+      "logreg": {
+        "ndcg@10": 0.8318900084959158,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8703749399150638
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8591139683156649,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8807682281989486
+      }
+    },
+    {
+      "student_id": "S1163",
+      "logreg": {
+        "ndcg@10": 0.9546105625326006,
+        "ndcg@5": 0.8692416898160298,
+        "precision@5": 0.8,
+        "map": 0.9087301587301587
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9550303267900084,
+        "ndcg@5": 0.8646508450697651,
+        "precision@5": 0.8,
+        "map": 0.9093537414965985
+      }
+    },
+    {
+      "student_id": "S1164",
+      "logreg": {
+        "ndcg@10": 0.8027487921668418,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7872268907563026
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8027487921668418,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.7872268907563026
+      }
+    },
+    {
+      "student_id": "S1168",
+      "logreg": {
+        "ndcg@10": 0.7115490718023499,
+        "ndcg@5": 0.6470030990193111,
+        "precision@5": 0.6,
+        "map": 0.7242780872010196
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7238978268950249,
+        "ndcg@5": 0.6705148518134127,
+        "precision@5": 0.6,
+        "map": 0.7156187901488653
+      }
+    },
+    {
+      "student_id": "S1170",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8202516853640758
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8318037931444551
+      }
+    },
+    {
+      "student_id": "S1176",
+      "logreg": {
+        "ndcg@10": 0.9461356536981058,
+        "ndcg@5": 0.9461356536981058,
+        "precision@5": 0.4,
+        "map": 0.8333333333333333
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9879538239787089,
+        "ndcg@5": 0.9879538239787089,
+        "precision@5": 0.4,
+        "map": 1.0
+      }
+    },
+    {
+      "student_id": "S1177",
+      "logreg": {
+        "ndcg@10": 0.9552009891550426,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8646068894134157
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9603250160361273,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8587455790061334
+      }
+    },
+    {
+      "student_id": "S1191",
+      "logreg": {
+        "ndcg@10": 0.8439725676973855,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7851824320593517
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8257951996405422,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7913824324360327
+      }
+    },
+    {
+      "student_id": "S1195",
+      "logreg": {
+        "ndcg@10": 0.7713500278704819,
+        "ndcg@5": 0.707167960715413,
+        "precision@5": 0.8,
+        "map": 0.7631343074817339
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7519757497225191,
+        "ndcg@5": 0.6654341464746397,
+        "precision@5": 0.6,
+        "map": 0.7424000853412618
+      }
+    },
+    {
+      "student_id": "S1203",
+      "logreg": {
+        "ndcg@10": 0.9833350093918972,
+        "ndcg@5": 0.9844954897537884,
+        "precision@5": 0.8,
+        "map": 0.8875
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9833350093918972,
+        "ndcg@5": 0.9844954897537884,
+        "precision@5": 0.8,
+        "map": 0.8875
+      }
+    },
+    {
+      "student_id": "S1209",
+      "logreg": {
+        "ndcg@10": 0.6603674537940775,
+        "ndcg@5": 0.8040708765078748,
+        "precision@5": 0.8,
+        "map": 0.6621380962715028
+      },
+      "lightgbm": {
+        "ndcg@10": 0.635853277908735,
+        "ndcg@5": 0.7525206917150931,
+        "precision@5": 0.8,
+        "map": 0.6664479200138276
+      }
+    },
+    {
+      "student_id": "S1216",
+      "logreg": {
+        "ndcg@10": 0.840392675889854,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.8178324170709319
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9061602363963839,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8245880176124422
+      }
+    },
+    {
+      "student_id": "S1217",
+      "logreg": {
+        "ndcg@10": 0.8559067235531853,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7685584477693517
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8548823438364397,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.810317967766817
+      }
+    },
+    {
+      "student_id": "S1218",
+      "logreg": {
+        "ndcg@10": 0.6822549373452207,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.5997614202695872
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7901122553212115,
+        "ndcg@5": 0.8687949224876581,
+        "precision@5": 0.8,
+        "map": 0.6650531460876287
+      }
+    },
+    {
+      "student_id": "S1219",
+      "logreg": {
+        "ndcg@10": 0.9478667518838534,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8414047396186439
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9468423721671078,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8584001468616855
+      }
+    },
+    {
+      "student_id": "S1230",
+      "logreg": {
+        "ndcg@10": 0.9428715580857417,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9226124885215795
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9418700907678453,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.917644855144855
+      }
+    },
+    {
+      "student_id": "S1243",
+      "logreg": {
+        "ndcg@10": 0.9196805379215194,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8345832645686019
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8908443694169667,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.859297520661157
+      }
+    },
+    {
+      "student_id": "S1254",
+      "logreg": {
+        "ndcg@10": 0.9513467899190737,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8261664453674171
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9603250160361273,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8132792242261159
+      }
+    },
+    {
+      "student_id": "S1258",
+      "logreg": {
+        "ndcg@10": 0.8676854162637713,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7735052409301908
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8984116547655663,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8176589883769936
+      }
+    },
+    {
+      "student_id": "S1264",
+      "logreg": {
+        "ndcg@10": 0.9433337463280641,
+        "ndcg@5": 0.8180355296436479,
+        "precision@5": 0.8,
+        "map": 0.9666666666666666
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9403082422499585,
+        "ndcg@5": 0.8995561767851945,
+        "precision@5": 0.8,
+        "map": 0.9028571428571428
+      }
+    },
+    {
+      "student_id": "S1269",
+      "logreg": {
+        "ndcg@10": 0.7783610325757666,
+        "ndcg@5": 0.8165832016561192,
+        "precision@5": 0.8,
+        "map": 0.6871957671957671
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7310366654153727,
+        "ndcg@5": 0.6581412431675202,
+        "precision@5": 0.8,
+        "map": 0.6581696273075583
+      }
+    },
+    {
+      "student_id": "S1272",
+      "logreg": {
+        "ndcg@10": 0.8642379951967496,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9246523235869336
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8697495647555668,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9407348516404417
+      }
+    },
+    {
+      "student_id": "S1285",
+      "logreg": {
+        "ndcg@10": 0.9603250160361273,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8704741598654723
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9621404437403491,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8631102150059047
+      }
+    },
+    {
+      "student_id": "S1288",
+      "logreg": {
+        "ndcg@10": 0.8660534229009714,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.887380163766923
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8923176273555912,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.8903930158063111
+      }
+    },
+    {
+      "student_id": "S1289",
+      "logreg": {
+        "ndcg@10": 0.9636452638863133,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8860420675395435
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8860298419368652
+      }
+    },
+    {
+      "student_id": "S1316",
+      "logreg": {
+        "ndcg@10": 0.8149129386859445,
+        "ndcg@5": 0.7778956414852184,
+        "precision@5": 0.8,
+        "map": 0.7792534853061169
+      },
+      "lightgbm": {
+        "ndcg@10": 0.830283830244646,
+        "ndcg@5": 0.7998242272706277,
+        "precision@5": 0.8,
+        "map": 0.7814709734709734
+      }
+    },
+    {
+      "student_id": "S1319",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8442258454417193
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9603250160361273,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.840601949567966
+      }
+    },
+    {
+      "student_id": "S1335",
+      "logreg": {
+        "ndcg@10": 0.9020520392324726,
+        "ndcg@5": 0.8040708765078748,
+        "precision@5": 0.8,
+        "map": 0.8267790688843321
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9089003900143794,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8507870916961825
+      }
+    },
+    {
+      "student_id": "S1338",
+      "logreg": {
+        "ndcg@10": 0.8200924488533761,
+        "ndcg@5": 0.7711779978297608,
+        "precision@5": 0.8,
+        "map": 0.7654660154660156
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8900582193896289,
+        "ndcg@5": 0.7906355891969594,
+        "precision@5": 0.8,
+        "map": 0.8456228956228956
+      }
+    },
+    {
+      "student_id": "S1343",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8658383354615222
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8721097141774965
+      }
+    },
+    {
+      "student_id": "S1352",
+      "logreg": {
+        "ndcg@10": 0.8135509018752831,
+        "ndcg@5": 0.7525206917150931,
+        "precision@5": 0.8,
+        "map": 0.7878369386841254
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7524235042593495,
+        "ndcg@5": 0.7778956414852184,
+        "precision@5": 0.8,
+        "map": 0.7742221014279838
+      }
+    },
+    {
+      "student_id": "S1358",
+      "logreg": {
+        "ndcg@10": 0.8829518585608052,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.7866704242871287
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7927540058023644,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.7941322048165337
+      }
+    },
+    {
+      "student_id": "S1371",
+      "logreg": {
+        "ndcg@10": 0.9009558415101943,
+        "ndcg@5": 0.8692416898160298,
+        "precision@5": 0.8,
+        "map": 0.7969246031746032
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9105399466468659,
+        "ndcg@5": 0.9594744597695195,
+        "precision@5": 0.8,
+        "map": 0.8020188338493293
+      }
+    },
+    {
+      "student_id": "S1379",
+      "logreg": {
+        "ndcg@10": 0.9371166382005486,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.841264448283684
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9636452638863133,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8384713351951752
+      }
+    },
+    {
+      "student_id": "S1381",
+      "logreg": {
+        "ndcg@10": 0.9188462530413559,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8295319224250035
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9603250160361273,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8399226121972865
+      }
+    },
+    {
+      "student_id": "S1386",
+      "logreg": {
+        "ndcg@10": 0.9024108054877696,
+        "ndcg@5": 0.7192801759488139,
+        "precision@5": 1.0,
+        "map": 0.9714285714285713
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8829459394808777,
+        "ndcg@5": 0.7058448886378986,
+        "precision@5": 1.0,
+        "map": 0.9625
+      }
+    },
+    {
+      "student_id": "S1392",
+      "logreg": {
+        "ndcg@10": 0.8106697883873326,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8198975269810113
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8278832590830629,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8341416836987087
+      }
+    },
+    {
+      "student_id": "S1397",
+      "logreg": {
+        "ndcg@10": 0.9626558662412671,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8142817717945595
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9723541510540442,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8284753645047763
+      }
+    },
+    {
+      "student_id": "S1398",
+      "logreg": {
+        "ndcg@10": 0.9984701398565539,
+        "ndcg@5": 1.0,
+        "precision@5": 0.8,
+        "map": 1.0
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9984701398565539,
+        "ndcg@5": 1.0,
+        "precision@5": 0.8,
+        "map": 1.0
+      }
+    },
+    {
+      "student_id": "S1402",
+      "logreg": {
+        "ndcg@10": 0.9428784192735167,
+        "ndcg@5": 0.8027478044303603,
+        "precision@5": 1.0,
+        "map": 0.9754901960784313
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9385000820521765,
+        "ndcg@5": 0.7942545059558663,
+        "precision@5": 1.0,
+        "map": 0.9666666666666667
+      }
+    },
+    {
+      "student_id": "S1405",
+      "logreg": {
+        "ndcg@10": 0.9147312702350199,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8514753764753763
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9246878532820109,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8656522331154682
+      }
+    },
+    {
+      "student_id": "S1407",
+      "logreg": {
+        "ndcg@10": 0.9422049497289245,
+        "ndcg@5": 0.8428644972741126,
+        "precision@5": 0.8,
+        "map": 0.827437641723356
+      },
+      "lightgbm": {
+        "ndcg@10": 0.944278172832538,
+        "ndcg@5": 0.8428644972741126,
+        "precision@5": 0.8,
+        "map": 0.8444444444444443
+      }
+    },
+    {
+      "student_id": "S1409",
+      "logreg": {
+        "ndcg@10": 0.8891606286189596,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.8301100645950296
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9056749573008228,
+        "ndcg@5": 0.8546456263113074,
+        "precision@5": 0.8,
+        "map": 0.8154926523345175
+      }
+    },
+    {
+      "student_id": "S1419",
+      "logreg": {
+        "ndcg@10": 0.8620505611824121,
+        "ndcg@5": 0.8860613086902124,
+        "precision@5": 1.0,
+        "map": 0.9069940476190477
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8436379821362333,
+        "ndcg@5": 0.8050102282292517,
+        "precision@5": 1.0,
+        "map": 0.888188608776844
+      }
+    },
+    {
+      "student_id": "S1425",
+      "logreg": {
+        "ndcg@10": 0.8542918511419914,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.8878824391982287
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8827440178902215,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.9240783788860714
+      }
+    },
+    {
+      "student_id": "S1429",
+      "logreg": {
+        "ndcg@10": 0.8369342716730682,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.6917015161251945
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8029264720792233,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.6998608039421967
+      }
+    },
+    {
+      "student_id": "S1432",
+      "logreg": {
+        "ndcg@10": 0.8945574555295974,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8040433816753957
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9149920538053871,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8887251643039192
+      }
+    },
+    {
+      "student_id": "S1436",
+      "logreg": {
+        "ndcg@10": 0.8323110352014628,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.799386112154868
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8884634281196222,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.7890581342730261
+      }
+    },
+    {
+      "student_id": "S1440",
+      "logreg": {
+        "ndcg@10": 0.8656860983701847,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7122301924363251
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8984116547655663,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.6977791313272064
+      }
+    },
+    {
+      "student_id": "S1449",
+      "logreg": {
+        "ndcg@10": 0.9202182025407148,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7606014088715989
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9224654597764764,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7613721026705211
+      }
+    },
+    {
+      "student_id": "S1451",
+      "logreg": {
+        "ndcg@10": 0.9214598006384858,
+        "ndcg@5": 0.8017170719756574,
+        "precision@5": 0.8,
+        "map": 0.822767857142857
+      },
+      "lightgbm": {
+        "ndcg@10": 0.830350115230202,
+        "ndcg@5": 0.7667800750091858,
+        "precision@5": 0.8,
+        "map": 0.7713789682539682
+      }
+    },
+    {
+      "student_id": "S1452",
+      "logreg": {
+        "ndcg@10": 0.819316413082694,
+        "ndcg@5": 0.7711779978297608,
+        "precision@5": 0.8,
+        "map": 0.7241462241462242
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8794526507140266,
+        "ndcg@5": 0.830419897363192,
+        "precision@5": 0.8,
+        "map": 0.7709824670608983
+      }
+    },
+    {
+      "student_id": "S1487",
+      "logreg": {
+        "ndcg@10": 0.9725964634311459,
+        "ndcg@5": 0.973494864667227,
+        "precision@5": 0.8,
+        "map": 1.0
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9714013766842275,
+        "ndcg@5": 0.973494864667227,
+        "precision@5": 0.8,
+        "map": 1.0
+      }
+    },
+    {
+      "student_id": "S1491",
+      "logreg": {
+        "ndcg@10": 0.9848381538398225,
+        "ndcg@5": 0.925613304997084,
+        "precision@5": 0.8,
+        "map": 0.9266666666666665
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9559381396929508,
+        "ndcg@5": 0.8976749434886186,
+        "precision@5": 0.8,
+        "map": 0.8528571428571429
+      }
+    },
+    {
+      "student_id": "S1496",
+      "logreg": {
+        "ndcg@10": 0.928416821033033,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.9415404040404042
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9309579384008659,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.9532467532467532
+      }
+    },
+    {
+      "student_id": "S1497",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8341428331227991
+      },
+      "lightgbm": {
+        "ndcg@10": 0.932801483732564,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8289807440098753
+      }
+    },
+    {
+      "student_id": "S1499",
+      "logreg": {
+        "ndcg@10": 0.921723022686679,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7775897259145962
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9239702799224406,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7852353437045565
+      }
+    },
+    {
+      "student_id": "S1503",
+      "logreg": {
+        "ndcg@10": 0.8161438709723093,
+        "ndcg@5": 0.8747985572776802,
+        "precision@5": 0.8,
+        "map": 0.7778155161748528
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8808932742807342,
+        "ndcg@5": 0.8747985572776802,
+        "precision@5": 0.8,
+        "map": 0.8281072401797713
+      }
+    },
+    {
+      "student_id": "S1512",
+      "logreg": {
+        "ndcg@10": 0.8374380187946897,
+        "ndcg@5": 0.7554455673561394,
+        "precision@5": 0.8,
+        "map": 0.7386603718051681
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8527604903568511,
+        "ndcg@5": 0.830419897363192,
+        "precision@5": 0.8,
+        "map": 0.7801520930182514
+      }
+    },
+    {
+      "student_id": "S1523",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9203400921004574
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8779060566495299
+      }
+    },
+    {
+      "student_id": "S1524",
+      "logreg": {
+        "ndcg@10": 0.9697687106952284,
+        "ndcg@5": 0.8415580415114009,
+        "precision@5": 1.0,
+        "map": 0.8913242554546902
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9616277844869039,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.8980397621701969
+      }
+    },
+    {
+      "student_id": "S1538",
+      "logreg": {
+        "ndcg@10": 0.9257857076266625,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8228579380507826
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9257857076266625,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8371357382970089
+      }
+    },
+    {
+      "student_id": "S1542",
+      "logreg": {
+        "ndcg@10": 0.8572700731153919,
+        "ndcg@5": 0.9908183105074706,
+        "precision@5": 1.0,
+        "map": 0.8105228105228105
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8415902559114333,
+        "ndcg@5": 0.8420926525813925,
+        "precision@5": 0.8,
+        "map": 0.7732933732933732
+      }
+    },
+    {
+      "student_id": "S1547",
+      "logreg": {
+        "ndcg@10": 0.901887652449255,
+        "ndcg@5": 0.8687949224876581,
+        "precision@5": 0.8,
+        "map": 0.8436507936507938
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9065084741465267,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8743978243978244
+      }
+    },
+    {
+      "student_id": "S1568",
+      "logreg": {
+        "ndcg@10": 0.8250064894377398,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8940398790371271
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7744811346800626,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8834485948629259
+      }
+    },
+    {
+      "student_id": "S1575",
+      "logreg": {
+        "ndcg@10": 0.7075251149574431,
+        "ndcg@5": 0.8027478044303603,
+        "precision@5": 1.0,
+        "map": 0.7511569992597849
+      },
+      "lightgbm": {
+        "ndcg@10": 0.762165530935886,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.741380853424086
+      }
+    },
+    {
+      "student_id": "S1584",
+      "logreg": {
+        "ndcg@10": 0.751883386914719,
+        "ndcg@5": 0.7554455673561394,
+        "precision@5": 0.8,
+        "map": 0.78375868999708
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7804067193422661,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.8238458770555958
+      }
+    },
+    {
+      "student_id": "S1588",
+      "logreg": {
+        "ndcg@10": 0.7910984224773394,
+        "ndcg@5": 0.7436487957706598,
+        "precision@5": 0.8,
+        "map": 0.7100000000000001
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8008054122357536,
+        "ndcg@5": 0.753741145977712,
+        "precision@5": 0.8,
+        "map": 0.7100000000000001
+      }
+    },
+    {
+      "student_id": "S1597",
+      "logreg": {
+        "ndcg@10": 0.9060449959884688,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.8972222222222224
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9186548104728518,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.9175324675324676
+      }
+    },
+    {
+      "student_id": "S1605",
+      "logreg": {
+        "ndcg@10": 0.7594802713087351,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.7651344102636516
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8100651591409469,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7477350219417946
+      }
+    },
+    {
+      "student_id": "S1611",
+      "logreg": {
+        "ndcg@10": 0.592832428963699,
+        "ndcg@5": 0.7234405487989655,
+        "precision@5": 0.6,
+        "map": 0.6022514812710891
+      },
+      "lightgbm": {
+        "ndcg@10": 0.5786508086516593,
+        "ndcg@5": 0.7796712963042549,
+        "precision@5": 0.8,
+        "map": 0.6117433394106085
+      }
+    },
+    {
+      "student_id": "S1621",
+      "logreg": {
+        "ndcg@10": 0.9285520647637122,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.9077604073382289
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9162216645104561,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.870677168939201
+      }
+    },
+    {
+      "student_id": "S1623",
+      "logreg": {
+        "ndcg@10": 0.8610869181229891,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7947819071297642
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8301925241644883,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.786572854877933
+      }
+    },
+    {
+      "student_id": "S1630",
+      "logreg": {
+        "ndcg@10": 0.7285942363330914,
+        "ndcg@5": 0.8027478044303603,
+        "precision@5": 1.0,
+        "map": 0.8446307043582154
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8357442077318847,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8572886926936757
+      }
+    },
+    {
+      "student_id": "S1632",
+      "logreg": {
+        "ndcg@10": 0.774995178487959,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.7875287957688631
+      },
+      "lightgbm": {
+        "ndcg@10": 0.864136823079159,
+        "ndcg@5": 0.7906355891969594,
+        "precision@5": 0.8,
+        "map": 0.8035455663133148
+      }
+    },
+    {
+      "student_id": "S1636",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8686758167840777
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8741484347336812
+      }
+    },
+    {
+      "student_id": "S1637",
+      "logreg": {
+        "ndcg@10": 0.9552009891550426,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9260356991390154
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9257857076266625,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9228962355131223
+      }
+    },
+    {
+      "student_id": "S1646",
+      "logreg": {
+        "ndcg@10": 0.9398081705075352,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.9909090909090909
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9411358611749552,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.9909090909090909
+      }
+    },
+    {
+      "student_id": "S1647",
+      "logreg": {
+        "ndcg@10": 0.974568301664988,
+        "ndcg@5": 0.974568301664988,
+        "precision@5": 0.6,
+        "map": 0.8666666666666667
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9811350423502985,
+        "ndcg@5": 0.9811350423502985,
+        "precision@5": 0.6,
+        "map": 0.9166666666666666
+      }
+    },
+    {
+      "student_id": "S1652",
+      "logreg": {
+        "ndcg@10": 0.7948833084733515,
+        "ndcg@5": 0.6839163028524893,
+        "precision@5": 1.0,
+        "map": 0.7899125276040773
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7749951784879588,
+        "ndcg@5": 0.7092912526226147,
+        "precision@5": 1.0,
+        "map": 0.8044318046721068
+      }
+    },
+    {
+      "student_id": "S1654",
+      "logreg": {
+        "ndcg@10": 0.8985652828545566,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7757567623103175
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9057929118655972,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8087699886250134
+      }
+    },
+    {
+      "student_id": "S1659",
+      "logreg": {
+        "ndcg@10": 0.9566853747232849,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9229024696728046
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9642937301837641,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9439393939393941
+      }
+    },
+    {
+      "student_id": "S1665",
+      "logreg": {
+        "ndcg@10": 0.7814782559745507,
+        "ndcg@5": 0.7906355891969594,
+        "precision@5": 0.8,
+        "map": 0.8488974372486616
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7268414860283484,
+        "ndcg@5": 0.7652606394268341,
+        "precision@5": 0.8,
+        "map": 0.8562493483836172
+      }
+    },
+    {
+      "student_id": "S1666",
+      "logreg": {
+        "ndcg@10": 0.8708186433584509,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.8077873977873977
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7992532444669105,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.7817953926850361
+      }
+    },
+    {
+      "student_id": "S1672",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8011111072496109
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8672995559415669
+      }
+    },
+    {
+      "student_id": "S1737",
+      "logreg": {
+        "ndcg@10": 0.9146442426315919,
+        "ndcg@5": 0.9392116896542794,
+        "precision@5": 0.8,
+        "map": 0.8476190476190475
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8387962895196287,
+        "ndcg@5": 0.8977263272807587,
+        "precision@5": 0.8,
+        "map": 0.7642857142857142
+      }
+    },
+    {
+      "student_id": "S1744",
+      "logreg": {
+        "ndcg@10": 0.6788028252081284,
+        "ndcg@5": 0.6406593615767797,
+        "precision@5": 0.6,
+        "map": 0.6400067050280523
+      },
+      "lightgbm": {
+        "ndcg@10": 0.669384719578113,
+        "ndcg@5": 0.5397111499858066,
+        "precision@5": 0.6,
+        "map": 0.650870581712973
+      }
+    },
+    {
+      "student_id": "S1750",
+      "logreg": {
+        "ndcg@10": 0.7246394653830467,
+        "ndcg@5": 0.7058448886378986,
+        "precision@5": 1.0,
+        "map": 0.8515970923192462
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6972009943070898,
+        "ndcg@5": 0.6477522099264775,
+        "precision@5": 1.0,
+        "map": 0.8917654334320002
+      }
+    },
+    {
+      "student_id": "S1751",
+      "logreg": {
+        "ndcg@10": 0.9198976882124067,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8570443893024537
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9128379227927668,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8572054633819342
+      }
+    },
+    {
+      "student_id": "S1754",
+      "logreg": {
+        "ndcg@10": 0.9071317950821521,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9161074071501877
+      },
+      "lightgbm": {
+        "ndcg@10": 0.907118552689739,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9585576040121495
+      }
+    },
+    {
+      "student_id": "S1756",
+      "logreg": {
+        "ndcg@10": 0.9208948538292206,
+        "ndcg@5": 0.8196294557259916,
+        "precision@5": 1.0,
+        "map": 0.9534580252283601
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9322362245037707,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.9506118881118882
+      }
+    },
+    {
+      "student_id": "S1758",
+      "logreg": {
+        "ndcg@10": 0.9513467899190737,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8833544447289343
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9552009891550426,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8858475229162635
+      }
+    },
+    {
+      "student_id": "S1762",
+      "logreg": {
+        "ndcg@10": 0.9039129791606223,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8238188639492594
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9065477790741163,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8540475842660826
+      }
+    },
+    {
+      "student_id": "S1770",
+      "logreg": {
+        "ndcg@10": 0.7732052636967316,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.7446546781105604
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7395698045728535,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.7289841887558605
+      }
+    },
+    {
+      "student_id": "S1771",
+      "logreg": {
+        "ndcg@10": 0.7638203573373049,
+        "ndcg@5": 0.8027478044303603,
+        "precision@5": 1.0,
+        "map": 0.8315320267063304
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8465411869199879,
+        "ndcg@5": 0.8281227542004858,
+        "precision@5": 1.0,
+        "map": 0.866435365650147
+      }
+    },
+    {
+      "student_id": "S1772",
+      "logreg": {
+        "ndcg@10": 0.8973910404319243,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8393851114919156
+      },
+      "lightgbm": {
+        "ndcg@10": 0.933745776545611,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8270158344866277
+      }
+    },
+    {
+      "student_id": "S1777",
+      "logreg": {
+        "ndcg@10": 0.8787659930126029,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.870962370962371
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9515039020550452,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9387412587412587
+      }
+    },
+    {
+      "student_id": "S1780",
+      "logreg": {
+        "ndcg@10": 0.7822089405017028,
+        "ndcg@5": 0.72272653993353,
+        "precision@5": 1.0,
+        "map": 0.8428922576490658
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8000189840277595,
+        "ndcg@5": 0.8061941684150765,
+        "precision@5": 1.0,
+        "map": 0.846013460357134
+      }
+    },
+    {
+      "student_id": "S1782",
+      "logreg": {
+        "ndcg@10": 0.8589551294888927,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8225031086669198
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9552009891550426,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8488865494351282
+      }
+    },
+    {
+      "student_id": "S1805",
+      "logreg": {
+        "ndcg@10": 0.8631766532556483,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.764972251092787
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9065477790741163,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7981010510135226
+      }
+    },
+    {
+      "student_id": "S1807",
+      "logreg": {
+        "ndcg@10": 0.8001331812069589,
+        "ndcg@5": 0.7604620106392853,
+        "precision@5": 0.6,
+        "map": 0.7569444444444443
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9173218120015002,
+        "ndcg@5": 0.8352618319893308,
+        "precision@5": 0.8,
+        "map": 0.8972222222222221
+      }
+    },
+    {
+      "student_id": "S1813",
+      "logreg": {
+        "ndcg@10": 0.8662732316808534,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.882396742172089
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8662732316808534,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8817325951268449
+      }
+    },
+    {
+      "student_id": "S1820",
+      "logreg": {
+        "ndcg@10": 0.796751867315647,
+        "ndcg@5": 0.8586296918245757,
+        "precision@5": 1.0,
+        "map": 0.900974025974026
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7979150232809675,
+        "ndcg@5": 0.8586296918245757,
+        "precision@5": 1.0,
+        "map": 0.900974025974026
+      }
+    },
+    {
+      "student_id": "S1834",
+      "logreg": {
+        "ndcg@10": 0.8803204088647294,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8266806722689076
+      },
+      "lightgbm": {
+        "ndcg@10": 0.920662805949186,
+        "ndcg@5": 0.9392116896542794,
+        "precision@5": 0.8,
+        "map": 0.8843537414965985
+      }
+    },
+    {
+      "student_id": "S1839",
+      "logreg": {
+        "ndcg@10": 0.8100950102781649,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.8541609905246269
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9147647634223738,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9484454939000393
+      }
+    },
+    {
+      "student_id": "S1850",
+      "logreg": {
+        "ndcg@10": 0.9508013338940989,
+        "ndcg@5": 0.9508013338940989,
+        "precision@5": 0.4,
+        "map": 0.8333333333333333
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9360403422435027,
+        "ndcg@5": 0.9360403422435027,
+        "precision@5": 0.4,
+        "map": 0.75
+      }
+    },
+    {
+      "student_id": "S1852",
+      "logreg": {
+        "ndcg@10": 0.9355639388087064,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9435045948203842
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8772694919119499,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.9301407742584215
+      }
+    },
+    {
+      "student_id": "S1857",
+      "logreg": {
+        "ndcg@10": 0.798870157548608,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.81478578892372
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8242452595736444,
+        "ndcg@5": 0.8040708765078748,
+        "precision@5": 0.8,
+        "map": 0.8534415584415583
+      }
+    },
+    {
+      "student_id": "S1866",
+      "logreg": {
+        "ndcg@10": 0.946858671429819,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.9264249639249639
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9341318959686453,
+        "ndcg@5": 0.8777221344374128,
+        "precision@5": 1.0,
+        "map": 0.9331168831168831
+      }
+    },
+    {
+      "student_id": "S1881",
+      "logreg": {
+        "ndcg@10": 0.8402935556197273,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.7177990889478969
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7713462959243109,
+        "ndcg@5": 0.8687949224876581,
+        "precision@5": 0.8,
+        "map": 0.7315651006059032
+      }
+    },
+    {
+      "student_id": "S1889",
+      "logreg": {
+        "ndcg@10": 0.8951943970009143,
+        "ndcg@5": 0.9030970842075382,
+        "precision@5": 1.0,
+        "map": 0.9649679924279464
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9132787479554083,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9660188739136104
+      }
+    },
+    {
+      "student_id": "S1890",
+      "logreg": {
+        "ndcg@10": 0.9030703625903134,
+        "ndcg@5": 0.8050102282292517,
+        "precision@5": 1.0,
+        "map": 0.9519230769230769
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9025431909427465,
+        "ndcg@5": 0.8050102282292517,
+        "precision@5": 1.0,
+        "map": 0.9583333333333334
+      }
+    },
+    {
+      "student_id": "S1893",
+      "logreg": {
+        "ndcg@10": 0.9636452638863133,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8743173993508379
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8767583986907636
+      }
+    },
+    {
+      "student_id": "S1894",
+      "logreg": {
+        "ndcg@10": 0.7984331066430963,
+        "ndcg@5": 0.6241688041470668,
+        "precision@5": 0.8,
+        "map": 0.8736394557823128
+      },
+      "lightgbm": {
+        "ndcg@10": 0.824619973828354,
+        "ndcg@5": 0.6597276861815131,
+        "precision@5": 0.8,
+        "map": 0.9240362811791382
+      }
+    },
+    {
+      "student_id": "S1898",
+      "logreg": {
+        "ndcg@10": 0.777246700001245,
+        "ndcg@5": 0.7052184546408721,
+        "precision@5": 0.6,
+        "map": 0.6415348339261384
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7179462472796293,
+        "ndcg@5": 0.6913817589337994,
+        "precision@5": 0.6,
+        "map": 0.6007790357790358
+      }
+    },
+    {
+      "student_id": "S1899",
+      "logreg": {
+        "ndcg@10": 0.9603250160361273,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7660218500560848
+      },
+      "lightgbm": {
+        "ndcg@10": 0.7590264385813844,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.711579144363501
+      }
+    },
+    {
+      "student_id": "S1900",
+      "logreg": {
+        "ndcg@10": 0.8847271206266134,
+        "ndcg@5": 0.9250256699929476,
+        "precision@5": 1.0,
+        "map": 0.836930311068242
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8843944846579778,
+        "ndcg@5": 0.9165323715184533,
+        "precision@5": 1.0,
+        "map": 0.8173285048285048
+      }
+    },
+    {
+      "student_id": "S1907",
+      "logreg": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8811285004983465
+      },
+      "lightgbm": {
+        "ndcg@10": 1.0,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8748771648611594
+      }
+    },
+    {
+      "student_id": "S1908",
+      "logreg": {
+        "ndcg@10": 0.9716381676451012,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.9821428571428571
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9653135871901933,
+        "ndcg@5": 0.9908183105074706,
+        "precision@5": 1.0,
+        "map": 1.0
+      }
+    },
+    {
+      "student_id": "S1910",
+      "logreg": {
+        "ndcg@10": 0.7591919243197319,
+        "ndcg@5": 0.7591919243197319,
+        "precision@5": 0.4,
+        "map": 0.8333333333333333
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6806060567602009,
+        "ndcg@5": 0.6806060567602009,
+        "precision@5": 0.4,
+        "map": 0.5833333333333333
+      }
+    },
+    {
+      "student_id": "S1913",
+      "logreg": {
+        "ndcg@10": 0.9647470910276239,
+        "ndcg@5": 0.8875385049894211,
+        "precision@5": 0.8,
+        "map": 0.8771031746031746
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8976388434874436,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8439833113746158
+      }
+    },
+    {
+      "student_id": "S1927",
+      "logreg": {
+        "ndcg@10": 0.8927092218035718,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7645167646202694
+      },
+      "lightgbm": {
+        "ndcg@10": 0.894214041949536,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7611310328419306
+      }
+    },
+    {
+      "student_id": "S1938",
+      "logreg": {
+        "ndcg@10": 0.8264806528935396,
+        "ndcg@5": 0.6630494284435245,
+        "precision@5": 0.8,
+        "map": 0.8211640211640211
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8016569357180886,
+        "ndcg@5": 0.7942545059558663,
+        "precision@5": 1.0,
+        "map": 0.8547657388237098
+      }
+    },
+    {
+      "student_id": "S1941",
+      "logreg": {
+        "ndcg@10": 0.9552009891550426,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8803192165518527
+      },
+      "lightgbm": {
+        "ndcg@10": 0.9202182025407148,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8871194468919027
+      }
+    },
+    {
+      "student_id": "S1959",
+      "logreg": {
+        "ndcg@10": 0.8931518463901604,
+        "ndcg@5": 0.9278257471613418,
+        "precision@5": 1.0,
+        "map": 0.9333333333333332
+      },
+      "lightgbm": {
+        "ndcg@10": 0.846756195789565,
+        "ndcg@5": 0.9278257471613418,
+        "precision@5": 1.0,
+        "map": 0.9242424242424242
+      }
+    },
+    {
+      "student_id": "S1968",
+      "logreg": {
+        "ndcg@10": 0.6716058101129891,
+        "ndcg@5": 0.7998242272706277,
+        "precision@5": 0.8,
+        "map": 0.6592269536019536
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6673297012660943,
+        "ndcg@5": 0.7435934797653384,
+        "precision@5": 0.6,
+        "map": 0.650525858730193
+      }
+    },
+    {
+      "student_id": "S1969",
+      "logreg": {
+        "ndcg@10": 0.8104993628681345,
+        "ndcg@5": 0.731219838408024,
+        "precision@5": 1.0,
+        "map": 0.911024531024531
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8104993628681345,
+        "ndcg@5": 0.731219838408024,
+        "precision@5": 1.0,
+        "map": 0.8984371184371183
+      }
+    },
+    {
+      "student_id": "S1972",
+      "logreg": {
+        "ndcg@10": 0.6325711808896333,
+        "ndcg@5": 0.596829757612036,
+        "precision@5": 0.8,
+        "map": 0.7467967762085409
+      },
+      "lightgbm": {
+        "ndcg@10": 0.6869319273089386,
+        "ndcg@5": 0.5773721662448373,
+        "precision@5": 0.8,
+        "map": 0.7142686465267108
+      }
+    },
+    {
+      "student_id": "S1984",
+      "logreg": {
+        "ndcg@10": 0.82667556987764,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.8223257291907178
+      },
+      "lightgbm": {
+        "ndcg@10": 0.8237491220763842,
+        "ndcg@5": 1.0,
+        "precision@5": 1.0,
+        "map": 0.7989662384399228
+      }
+    }
+  ]
+}
