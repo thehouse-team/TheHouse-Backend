@@ -4,18 +4,20 @@
 | --- | --- |
 | ID | NV-09 |
 | Documento | `plan.md` |
-| Versión | 1.1.1-u2 |
+| Versión | 1.2.0-u2 |
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes** |
-| Spec | `spec.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes; 1.2.0-u2 (T16 con k6) PROPUESTA** |
+| Spec | `spec.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 
 **Cambio 1.1.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-09-R17 (no desplegar cambios que solo tocan documentación) y la task T20. T13 y T18 se ejecutan en este ciclo (T13 ya autorizada; T18 requiere su autorización propia).
 
 **Cambio 1.1.1-u2 (2026-11-24) — NV-09-R17 corregida, M-BE-087 (autorizado por Victor: «Arreglar regla del CD»):** el CD comparaba solo el commit contra su padre. El 2026-11-23 el CD del merge de NV-23 quedó en cola detrás de un CD antiguo sin aprobar y se canceló; el siguiente merge solo cambiaba documentación y el CD omitió el despliegue, así que el código de NV-23 no llegó a Azure hasta un CD manual. Ahora el job `deploy` guarda, solo si todo salió bien, el commit realmente desplegado en el artefacto `deployed-sha` (90 días), y `resolve` compara contra ese commit; sin registro verificable, publica.
+
+**Cambio 1.2.0-u2 (2026-11-24) — PROPUESTO, pendiente de «Apruebo NV-09 1.2.0-u2 y EJECUTA T16» y de «Apruebo 1.2.1» (constitución):** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
 
 Plan preparado para revisión. No crea workflows, identidades ni roles, no cambia Terraform ni la configuración de GitHub, y no publica ni despliega hasta la autorización «EJECUTA».
 
@@ -107,7 +109,7 @@ Principios:
 
 - `.github/workflows/cd-extended.yml` (manual y semanal): levanta el mismo entorno efímero que F3.
 - RESTler compilado desde `v9.3.1`, en modo *test* y luego *fuzz-lean*, contra el OpenAPI efímero; reporte de bugs como artefacto.
-- Performance: verificar primero la licencia de NBomber para uso académico. Si se confirma, proyecto `TheHouse.PerformanceTests/` en la raíz (mismo patrón que las otras suites), lo que requiere el levantamiento explícito de las acciones protegidas de `AGENTS.md` (`dotnet new`, `dotnet sln add`, paquetes NuGet); si no, la task queda BLOCKED y se propone k6 v2.3.0 con un script en `.github/perf/`, sin proyecto nuevo, y decisión formal. Escenarios: listado de universidades y de propiedades, detalle y login; presupuesto propuesto p95 < 500 ms en el runner.
+- Performance (1.2.0-u2): k6 2.3.0 desde su imagen oficial con el script `.github/perf/k6-backend.js`, sin proyecto nuevo (NBomber descartado por licencia, M-BE-089). Escenarios de catálogo, búsqueda, Smart Match y sesión con los límites de producción y clientes simulados por `X-Forwarded-For` en `198.18.0.0/15`; diseño y presupuesto p95 en la §6.1 de la spec.
 
 **Criterios de salida:** reportes registrados; los hallazgos se triagean y los umbrales solo se fijan con evidencia.
 
@@ -183,7 +185,7 @@ F6 Primer despliegue, seed y evidencia
 | GHCR y Sigstore | $0 | Paquete público; entrada en Rekor |
 | Identidad y rol en Azure | $0 | Inventario del grupo de recursos |
 | Revisiones de Container Apps y Log Analytics | $0 dentro de la concesión y del tope diario | Cost Management con fecha |
-| NBomber | $0 solo con licencia confirmada | Respuesta del proveedor o licencia; si no, BLOCKED |
+| k6 | $0 (AGPL-3.0, en el runner) | Imagen oficial `grafana/k6:2.3.0` |
 
 ## 8. Puertas
 

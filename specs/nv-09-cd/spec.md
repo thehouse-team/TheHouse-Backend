@@ -4,20 +4,22 @@
 | --- | --- |
 | ID | NV-09 |
 | Documento | `spec.md` |
-| Versión | 1.1.1-u2 |
+| Versión | 1.2.0-u2 |
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes; 1.2.0-u2 (T16 con k6) PROPUESTA** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Plan | `plan.md` 1.1.0-u2 |
-| Tasks | `task.md` 1.1.0-u2 |
+| Plan | `plan.md` 1.2.0-u2 |
+| Tasks | `task.md` 1.2.0-u2 |
 | Precondición | NV-02 1.1.0-u2 completada (CI en verde y ruleset de `main` activo); NV-03 desplegada en Azure; M-BE-036, M-BE-038, M-BE-043, M-BE-044 y M-BE-049 |
 | Relación | Consume el resultado de la CI de NV-02. Aporta la evidencia que falta en NV-03 (T14, T19, T22 y T25). El roadmap funcional de M-BE-023 se recorre a partir de NV-10 (M-BE-049) |
 
 **Cambio 1.1.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-09-R17 (no desplegar cambios que solo tocan documentación) y la task T20. T13 y T18 se ejecutan en este ciclo (T13 ya autorizada; T18 requiere su autorización propia).
 
 **Cambio 1.1.1-u2 (2026-11-24) — NV-09-R17 corregida, M-BE-087 (autorizado por Victor: «Arreglar regla del CD»):** el CD comparaba solo el commit contra su padre. El 2026-11-23 el CD del merge de NV-23 quedó en cola detrás de un CD antiguo sin aprobar y se canceló; el siguiente merge solo cambiaba documentación y el CD omitió el despliegue, así que el código de NV-23 no llegó a Azure hasta un CD manual. Ahora el job `deploy` guarda, solo si todo salió bien, el commit realmente desplegado en el artefacto `deployed-sha` (90 días), y `resolve` compara contra ese commit; sin registro verificable, publica.
+
+**Cambio 1.2.0-u2 (2026-11-24) — PROPUESTO, pendiente de «Apruebo NV-09 1.2.0-u2 y EJECUTA T16» y de «Apruebo 1.2.1» (constitución):** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
 
 Esta spec define la entrega continua para revisión humana. No autoriza crear workflows, identidades ni roles, cambiar Terraform, configurar GitHub, publicar, desplegar ni ejecutar seeds: la ejecución requiere la autorización humana «EJECUTA», y cualquier `terraform apply` requiere además «OK PARA APPLY».
 
@@ -99,7 +101,7 @@ CI (push a main, éxito)
 | `dast-baseline` | ZAP baseline | Escaneo pasivo de la URL de producción | High no excepcionado | Reporte ZAP |
 | `cd-summary` | Script del workflow | Registro del despliegue: commit, digest, firma, aprobador, revisión y resultados | Algún job obligatorio no terminó en éxito | Resumen y `deployment-record.json` |
 
-Workflow aparte `cd-extended.yml` (manual y semanal, informativo): RESTler y performance contra el entorno efímero.
+Workflow aparte `cd-extended.yml` (manual y semanal, informativo): RESTler y performance (k6, §6.1) contra el entorno efímero.
 
 Reglas comunes:
 
@@ -109,6 +111,38 @@ Reglas comunes:
 - El job checkout usa `github.event.workflow_run.head_sha` y solo procede cuando el run de `CI` fue un `push` a `main` con conclusión `success`.
 - Ningún secreto de larga duración: GHCR con `GITHUB_TOKEN`, Azure con OIDC y firma keyless.
 - La ejecución manual acepta un digest solo si su firma verifica con la identidad de `cd.yml` en `main`.
+
+### 6.1 Prueba de performance con k6 (T16, 1.2.0-u2)
+
+| Punto | Diseño |
+| --- | --- |
+| Workflow | `.github/workflows/cd-extended.yml`: `workflow_dispatch` y semanal (domingo 09:00 UTC); `concurrency` sin ejecuciones simultáneas; permisos `contents: read`; sin secretos, sin Azure y sin GHCR |
+| Imagen | Se construye en el runner desde el commit del workflow con el mismo `Dockerfile` (sin publicar) |
+| Entorno | El mismo entorno efímero de `verify-ephemeral` (T09): MongoDB 7.0.45 y Redis 7.4.12 como `services`, API en `Testing` con llave JWT aleatoria por run y los **límites de peticiones de producción** (perfil `smoke`, sin aflojar) |
+| Datos | Seeds de universidades y propiedades (como en el CD) más colonias y los 12 cuartos de demostración (`--seed-places --seed-demo-rooms`, solo en esta base efímera); un nuevo comando `seed-demo` en `ephemeral_env.sh` que no cambia los existentes |
+| Herramienta | `grafana/k6:2.3.0` (imagen oficial, versión del 2026-09-21; la 2.4.0 tiene menos de dos semanas); script `.github/perf/k6-backend.js` |
+| Clientes simulados | Cada iteración envía `X-Forwarded-For` con una IP del rango de pruebas de rendimiento `198.18.0.0/15` (RFC 2544). La API solo acepta ese encabezado del proxy local (`Proxy__KnownProxies`), igual que con el ingress de Azure; así la prueba representa muchos estudiantes sin desactivar los límites por IP. Un 429 cuenta como hallazgo |
+| Cuentas | `setup()` registra 200 cuentas de prueba con contraseñas aleatorias en memoria del script (nunca en el reporte); cada cuenta inicia sesión menos de 5 veces por minuto (límite por correo) |
+
+Escenarios (llegada constante de peticiones, 30 s de calentamiento y 3 min de medición):
+
+| Escenario | Peticiones | Tasa |
+| --- | --- | --- |
+| `catalogo` (invitado) | `GET /api/v1/universities?page=1&pageSize=10` y `GET /api/v1/properties?page=1&pageSize=12` | 10 iteraciones/s |
+| `busqueda` (invitado) | `GET /api/v1/rooms/search` cerca de la UTTT (30 km) | 8/s |
+| `smart_match` (invitado) | `POST /api/v1/smart-match/recommendations/query` con preferencias fijas | 4/s |
+| `sesion` | `POST /api/v1/auth/login`, `GET /api/v1/users/me` y `GET /api/v1/rooms/{id}` de un cuarto de demostración | 2/s |
+
+| Resultado | Regla |
+| --- | --- |
+| Métricas | p50, p95, p99 y máximo por escenario; tasa de errores (status inesperado); conteo de 429; iteraciones descartadas |
+| Reporte | `perf-report.md` (resumen del job) y `perf-summary.json`, artefacto `performance` de 14 días; sin tokens, contraseñas ni correos |
+| Umbrales | **Informativos** (NV-09-R13): el job falla solo si el entorno no arranca, el script falla o los errores superan el 5 %. Presupuesto propuesto p95 en el runner: catálogo < 200 ms, búsqueda < 500 ms, Smart Match < 800 ms y sesión < 1,000 ms (el login incluye el hash de la contraseña). Se fijan como obligatorios solo después de 3 ejecuciones con evidencia |
+| Alcance | Mide el backend en un runner de GitHub (CPU compartida, sin red de Azure): sirve para comparar versiones y encontrar regresiones, no como capacidad de producción. Nunca se ejecuta contra producción |
+
+Cambio propuesto a la constitución (1.2.0 → **1.2.1**, se aplica solo con «Apruebo 1.2.1»), §25, segundo párrafo:
+
+> Herramientas en uso: Stryker.NET (mutación, NV-02), OWASP ZAP (DAST, NV-09) y k6 (performance, NV-09; sustituye a NBomber, que requiere licencia para uso por una organización, M-BE-089). Previstas: Contract Testing con PactNet y REST Fuzzing con RESTler. Ninguna suite vacía o no ejecutada representa un control satisfecho.
 
 ## 7. Decisiones propuestas
 
@@ -121,7 +155,7 @@ Reglas comunes:
 | Firma | Cosign keyless (Sigstore público, gratuito); la identidad del certificado es `cd.yml` en `main` | APROBADO (M-BE-051) |
 | Smoke en producción | Sin escrituras persistentes: GET de universidades y propiedades, registro con cuerpo inválido (400), login con credenciales inexistentes (401) y logout sin token (401). El flujo completo (registro, login, logout y reuso del token) corre solo en el entorno efímero | APROBADO (M-BE-051) |
 | DAST | Activo (API scan con OpenAPI) solo en el entorno efímero; pasivo (baseline) en producción | APROBADO (M-BE-051) |
-| Performance | NBomber (constitución) solo si se confirma que el uso académico no requiere licencia; si no, BLOCKED y se propone k6 (AGPL-3.0, gratuito) con cambio formal de la constitución | PENDIENTE DE VERIFICAR |
+| Performance | k6 2.3.0 (AGPL-3.0, imagen oficial en el runner) en `cd-extended.yml` contra el entorno efímero, con el diseño de la §6.1; NBomber descartado por licencia (uso por una organización) | PROPUESTO 1.2.0-u2 (M-BE-089) |
 | Seed en producción | Operación humana única, fuera del pipeline, con `--allow-production-seed` y autorización explícita (M-BE-043) | APROBADO (M-BE-051) |
 | `VERSIONING.md` | El CD no escribe en `main` (lo impide el ruleset); el registro de cada despliegue se agrega con un pull request | APROBADO (M-BE-051) |
 
@@ -141,7 +175,7 @@ Reglas comunes:
 | NV-09-R10 | Smoke en producción sin escrituras | Después del despliegue: health, los 7 endpoints sin escrituras persistentes, HSTS, `nosniff` y caché; el arranque en frío (0 réplicas) se tolera con reintentos acotados. | F4 | T12 |
 | NV-09-R11 | Rollback automático | Si `deploy` o `smoke-production` fallan, se restaura la imagen anterior, se repiten los smoke tests y el run termina en fallo; el camino se prueba una vez con una falla controlada. | F4 | T13 |
 | NV-09-R12 | DAST pasivo en producción | ZAP baseline contra la URL pública después del smoke; High bloquea el cierre del run salvo excepción justificada. | F4 | T14 |
-| NV-09-R13 | Fuzzing y performance | `cd-extended.yml` (manual y semanal) ejecuta RESTler y la prueba de performance contra el entorno efímero; resultados y presupuesto de latencia p95 registrados; informativo hasta fijar umbrales con evidencia. | F5 | T15, T16 |
+| NV-09-R13 | Fuzzing y performance | `cd-extended.yml` (manual y semanal) ejecuta RESTler y la prueba de performance con k6 (§6.1) contra el entorno efímero, con los límites de peticiones de producción; resultados y presupuesto de latencia p95 registrados; informativo hasta fijar umbrales con evidencia. | F5 | T15, T16 |
 | NV-09-R14 | Seed controlado en producción | El catálogo de universidades y propiedades se carga una sola vez en producción con `--allow-production-seed`, autorización explícita y evidencia sin datos sensibles. | F6 | T18 |
 | NV-09-R15 | Registro y trazabilidad | Cada despliegue deja commit, digest, firma, aprobador, revisión y resultados en el resumen y en `deployment-record.json`; `VERSIONING.md` se actualiza por pull request; la evidencia se enlaza a NV-03 T14, T19, T22 y T25. | F6 | T17, T19 |
 | NV-09-R16 | Costo $0 y evidencia | Todos los componentes con costo $0 demostrado; `evidence.md` con runs, hallazgos, excepciones y revisión de seguridad y coherencia. | F6 | T19 |
@@ -179,7 +213,7 @@ Reglas comunes:
 | Azure Container Apps (nuevas revisiones) | $0 dentro de la concesión gratuita mensual | Escala 0–2 (M-BE-039); se verifica en Cost Management |
 | Log Analytics | $0 dentro del tope diario de 0.1 GB | NV-03 1.2.0-u2 |
 | OWASP ZAP, RESTler, Trivy, MongoDB y Redis efímeros | $0 (open source, en el runner) | — |
-| NBomber | $0 solo si el uso académico no requiere licencia | PENDIENTE DE VERIFICAR; si no, BLOCKED |
+| k6 | $0 (AGPL-3.0, imagen oficial en el runner; minutos de Actions gratis en repositorio público) | Sin modificarlo ni distribuirlo |
 
 Si algún componente no puede demostrarse $0, la task correspondiente queda **BLOCKED**.
 
@@ -194,7 +228,9 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | NV-09-RK05 | Arranque en frío con 0 réplicas | Smoke falla por tiempo | Reintentos acotados contra `/health/ready` antes de evaluar |
 | NV-09-RK06 | Rate limit de login durante el smoke | 429 inesperado | Un solo intento de login en producción; el 429 se prueba en el entorno efímero |
 | NV-09-RK07 | Rollback también falla | Servicio caído | Alerta en el resumen, procedimiento manual documentado y digest anterior registrado |
-| NV-09-RK08 | Licencia de NBomber | Incumplimiento de licencia | Verificar antes de usar; alternativa k6 con decisión formal |
+| NV-09-RK08 | Licencia de la herramienta de performance | Incumplimiento de licencia | NBomber descartado; k6 (AGPL-3.0) se ejecuta sin modificarlo ni distribuirlo |
+| NV-09-RK11 | Resultados del runner leídos como capacidad de producción | Conclusiones equivocadas | El reporte dice que es un runner compartido; umbrales informativos hasta tener 3 ejecuciones |
+| NV-09-RK12 | `X-Forwarded-For` simulado | Que la API confíe en el encabezado desde cualquier origen | Solo se acepta del proxy local (configuración existente de `Proxy__KnownProxies`); la prueba no cambia esa configuración |
 | NV-09-RK09 | RESTler sin imagen oficial | Job lento o inviable | Compilar desde una etiqueta fijada (`v9.3.1`), solo en `cd-extended.yml`, informativo |
 | NV-09-RK10 | Aprobadores no disponibles cerca de la evaluación | Despliegue detenido | Dos revisores (Victor e Isai) y desplegar con anticipación al 3 de diciembre |
 
@@ -215,13 +251,13 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Tasks sin requisito | 0 |
 | Tasks completadas | 18 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes; 1.2.0-u2 (T16 con k6) PROPUESTA** |
 
 ## 14. Aprobación pendiente
 
 Para ejecutar se requiere la autorización humana «EJECUTA» que registre aprobador, fecha, versión `1.0.0-u2` de `spec.md`, `plan.md` y `task.md`, tasks autorizadas y rutas permitidas (`.github/workflows/`, `.github/scripts/`, `.github/perf/`, `.zap/`, `infra/terraform/`, `VERSIONING.md` y `specs/nv-09-cd/`). Además:
 
-- Crear `TheHouse.PerformanceTests/` con NBomber (T16) requiere el levantamiento explícito de las acciones protegidas de `AGENTS.md` (`dotnet new`, `dotnet sln add` y paquetes NuGet); no se agrega `tests/`.
+- T16 (1.2.0-u2) usa k6 desde su imagen oficial: no crea proyectos ni agrega paquetes, así que no requiere el levantamiento de acciones protegidas de `AGENTS.md`. Requiere «Apruebo NV-09 1.2.0-u2 y EJECUTA T16» y «Apruebo 1.2.1» para la constitución. Rutas: `.github/workflows/cd-extended.yml`, `.github/scripts/ephemeral_env.sh` (comando nuevo), `.github/perf/`, `constitution.md` (§25), `memoria.md` y `specs/nv-09-cd/`.
 
 - `terraform apply` de T01 y T02 requiere «OK PARA APPLY».
 - El Environment `production` y sus revisores se configuran por un humano en GitHub (T03).
