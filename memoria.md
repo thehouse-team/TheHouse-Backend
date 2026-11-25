@@ -795,3 +795,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-24.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** cliente HTTP a la URL interna de GenAI, desactivado por defecto; colección de caché `smart_match_explanations` (TTL 24 h); la clave se carga como secreto `genai-service-key` cuando el código esté desplegado; sin paquetes nuevos ni costo.
+
+## M-BE-087 — NV-09-R17: el CD compara contra el último commit desplegado
+
+- **ID:** M-BE-087
+- **Decisión:** corregir NV-09-R17 (NV-09 1.1.1-u2). El job `deploy` guarda el commit realmente desplegado en el artefacto `deployed-sha` (solo con éxito, 90 días) y `resolve` decide «solo documentación» comparando contra ese commit, no contra el padre. Sin registro verificable, publica. Se descartó la API de deployments de GitHub porque registra el HEAD de `main` al terminar la CI, no el commit desplegado.
+- **Estado:** APROBADO — Victor, 2026-11-24 («Arreglar regla del CD»), después de que el despliegue de NV-23 se omitiera el 2026-11-23.
+- **Fecha:** 2026-11-24.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** cambio en `.github/workflows/cd.yml` (permiso `actions: read` en `resolve` y un artefacto más en `deploy`); sin secretos ni costo.
