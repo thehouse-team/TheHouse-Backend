@@ -386,4 +386,6 @@ Total: 7,715 peticiones (7,512 de los escenarios más 200 registros y las consul
 - Los presupuestos propuestos tienen mucho margen. Siguen **informativos** (NV-09-R13): con 3 ejecuciones se propondrán umbrales obligatorios más ajustados a la evidencia.
 - Es un runner compartido de GitHub en la misma máquina que MongoDB y Redis: sirve para detectar regresiones entre versiones, no como capacidad de Azure (NV-09-RK11).
 
-Pendiente para cerrar T16: «Apruebo 1.2.1» (constitución §25: k6 en lugar de NBomber).
+Constitución 1.2.1 aprobada el 2026-11-25 («Apruebo 1.2.1») y aplicada en la §25 (k6 en lugar de NBomber).
+
+**Resultado: PASS — T16 completa.** NV-09 queda en **19 de 20** (pendiente T15, RESTler).

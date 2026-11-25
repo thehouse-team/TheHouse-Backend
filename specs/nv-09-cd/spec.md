@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T16 ejecutada con k6 (1.2.0-u2, run en verde), cierre pendiente de «Apruebo 1.2.1»; T15 pendiente** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 pendiente** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.2.0-u2 |
 | Tasks | `task.md` 1.2.0-u2 |
@@ -19,7 +19,7 @@
 
 **Cambio 1.1.1-u2 (2026-11-24) — NV-09-R17 corregida, M-BE-087 (autorizado por Victor: «Arreglar regla del CD»):** el CD comparaba solo el commit contra su padre. El 2026-11-23 el CD del merge de NV-23 quedó en cola detrás de un CD antiguo sin aprobar y se canceló; el siguiente merge solo cambiaba documentación y el CD omitió el despliegue, así que el código de NV-23 no llegó a Azure hasta un CD manual. Ahora el job `deploy` guarda, solo si todo salió bien, el commit realmente desplegado en el artefacto `deployed-sha` (90 días), y `resolve` compara contra ese commit; sin registro verificable, publica.
 
-**Cambio 1.2.0-u2 (2026-11-24) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo y EJECUTA», respuesta a la propuesta del PR #90); la constitución 1.2.1 sigue pendiente de «Apruebo 1.2.1»:** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
+**Cambio 1.2.0-u2 (2026-11-24) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo y EJECUTA», respuesta a la propuesta del PR #90); constitución 1.2.1 aprobada el 2026-11-25 («Apruebo 1.2.1»):** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
 
 Esta spec define la entrega continua para revisión humana. No autoriza crear workflows, identidades ni roles, cambiar Terraform, configurar GitHub, publicar, desplegar ni ejecutar seeds: la ejecución requiere la autorización humana «EJECUTA», y cualquier `terraform apply` requiere además «OK PARA APPLY».
 
@@ -140,7 +140,7 @@ Escenarios (llegada constante de peticiones, 30 s de calentamiento y 3 min de me
 | Umbrales | **Informativos** (NV-09-R13): el job falla solo si el entorno no arranca, el script falla o los errores superan el 5 %. Presupuesto propuesto p95 en el runner: catálogo < 200 ms, búsqueda < 500 ms, Smart Match < 800 ms y sesión < 1,000 ms (el login incluye el hash de la contraseña). Se fijan como obligatorios solo después de 3 ejecuciones con evidencia |
 | Alcance | Mide el backend en un runner de GitHub (CPU compartida, sin red de Azure): sirve para comparar versiones y encontrar regresiones, no como capacidad de producción. Nunca se ejecuta contra producción |
 
-Cambio propuesto a la constitución (1.2.0 → **1.2.1**, se aplica solo con «Apruebo 1.2.1»), §25, segundo párrafo:
+Cambio a la constitución (1.2.0 → **1.2.1**, aprobado el 2026-11-25 con «Apruebo 1.2.1» y aplicado), §25, segundo párrafo:
 
 > Herramientas en uso: Stryker.NET (mutación, NV-02), OWASP ZAP (DAST, NV-09) y k6 (performance, NV-09; sustituye a NBomber, que requiere licencia para uso por una organización, M-BE-089). Previstas: Contract Testing con PactNet y REST Fuzzing con RESTler. Ninguna suite vacía o no ejecutada representa un control satisfecho.
 
@@ -249,9 +249,9 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Tasks | 20 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 18 |
+| Tasks completadas | 19 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T16 ejecutada con k6 (1.2.0-u2, run en verde), cierre pendiente de «Apruebo 1.2.1»; T15 pendiente** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 pendiente** |
 
 ## 14. Aprobación pendiente
 

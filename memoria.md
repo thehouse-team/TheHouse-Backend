@@ -818,7 +818,7 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 
 - **ID:** M-BE-089
 - **Decisión:** ejecutar la prueba de performance de NV-09-R13 con k6 2.3.0 (imagen oficial, AGPL-3.0) en `cd-extended.yml`, contra el entorno efímero con los límites de peticiones de producción y clientes simulados por `X-Forwarded-For` en `198.18.0.0/15`. NBomber se descarta: es gratuito solo para uso personal y su uso por una organización requiere licencia. Sin proyecto nuevo ni paquetes NuGet. Umbrales informativos hasta tener 3 ejecuciones.
-- **Estado:** APROBADO Y EJECUTADO — Victor, 2026-11-25 («Apruebo y EJECUTA»); primera ejecución en verde (run 45558364271). La constitución 1.2.1 (§25) queda pendiente de «Apruebo 1.2.1».
+- **Estado:** APROBADO Y EJECUTADO — Victor, 2026-11-25 («Apruebo y EJECUTA»); primera ejecución en verde (run 45558364271). Constitución 1.2.1 (§25) aprobada el 2026-11-25 («Apruebo 1.2.1») y aplicada.
 - **Fecha:** 2026-11-25.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** workflow nuevo `cd-extended.yml` (manual, semanal y en PR de sus archivos; `contents: read`, sin secretos), script `.github/perf/k6-backend.js` y comando `seed-demo` en `ephemeral_env.sh`; costo $0 (repositorio público).
