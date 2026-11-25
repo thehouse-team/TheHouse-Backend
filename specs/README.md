@@ -10,7 +10,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | --- | --- | --- | --- | --- |
 | NV-01 | [Foundation (U2)](nv-01-foundation/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) | 18/19 |
 | NV-02 | [CI y DevSecOps (U2)](nv-02-devsecops/spec.md) | **✅ APROBADA** | **✅ COMPLETADA — PASS WITH WARNINGS (2026-11-05)** | 15/15 |
-| NV-03 | [Scaling Cloud U2](nv-03-scaling-cloud/spec.md) | **✅ APROBADA PARA U2** | **🟡 EJECUCIÓN PARCIAL — 17 de 25 tasks (ciclo de vida demostrado el 2026-11-19); abiertas: T07–T09, T11, T12, T14, T18, T19; ver `evidence.md`** | 17/25 |
+| NV-03 | [Scaling Cloud U2](nv-03-scaling-cloud/spec.md) | **✅ APROBADA PARA U2** | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; ver `evidence.md`** | 18/25 |
 | NV-04 | [User Registration (U2)](nv-04-registration/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 11/11 |
 | NV-05 | [Login (U2)](nv-05-login/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 11/11 |
 | NV-06 | [Logout (U2)](nv-06-logout/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 10/10 |

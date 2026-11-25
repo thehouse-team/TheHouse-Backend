@@ -804,3 +804,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-24.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** cambio en `.github/workflows/cd.yml` (permiso `actions: read` en `resolve` y un artefacto más en `deploy`); sin secretos ni costo.
+
+## M-BE-088 — NV-03 T07: la app usa un usuario de Atlas de mínimo privilegio
+
+- **ID:** M-BE-088
+- **Decisión:** reemplazar el usuario administrador (`atlasAdmin`) de la cadena `mongodb-uri` por `thehouse-backend`, creado por el responsable de Atlas con `readWrite` solo en `thehouse_u2`. Se aceptan `0.0.0.0/0` (salida de Azure en un rango amplio de IPs) y M0 sin respaldos (costo $0; el esquema y los catálogos se recrean con `scripts/db/`).
+- **Estado:** EJECUTADO — Victor, 2026-11-25 («Autorizo cambiar Mongo»); verificación 7/7.
+- **Fecha:** 2026-11-25.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** sin cambios de código. Riesgo aceptado por Victor (2026-11-25): no se rotan la contraseña de `thehouse-backend` (quedó escrita en una conversación) ni la del administrador anterior, porque el proyecto de Atlas se eliminará después de la entrega.

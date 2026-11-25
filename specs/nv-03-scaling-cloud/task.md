@@ -8,13 +8,13 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 17 de 25 tasks (ciclo de vida demostrado el 2026-11-19); abiertas: T07–T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
 | Spec | `spec.md` 1.2.0-u2 |
 | Plan | `plan.md` 1.2.0-u2 |
 | Tasks totales | 25 |
 | Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
-| Tasks completadas | 17 (T01–T06, T10, T13, T15–T17, T20–T25; ver `evidence.md`) |
+| Tasks completadas | 18 (T01–T07, T10, T13, T15–T17, T20–T25; ver `evidence.md`) |
 
 ## Reglas de esta lista
 
@@ -39,7 +39,7 @@
 - [x] **T04 · Invalidación y fallos de Redis** — Requisito: NV-03-R04 · Fase: F2 · **Alcance: U2** · Aceptación: invalidación tras escritura confirmada, stampede, timeout, reconexión y degradación sin abrir controles. · Evidencia: matriz de fallos y pruebas. · Depende de: T03.
 - [x] **T05 · Estado distribuido para autenticación y límites** — Requisitos: NV-03-R01, NV-03-R04 · Fase: F2 · **Alcance: U2** · Aceptación: revocación y cuotas globales usan estado compartido; no hay fallback local de seguridad. · Evidencia: diseño, implementación y revisión. · Depende de: T03, T04.
 - [x] **T06 · Conexión MongoDB, pooling e índices** — Requisito: NV-03-R05 · Fase: F2 · **Alcance: U2** · Aceptación: pooling, timeouts, cancelación, TLS, credenciales protegidas e índices justificados por consultas U2. · Evidencia: diseño, implementación y revisión de consultas. · Depende de: T01.
-- [ ] **T07 · Resiliencia y seguridad MongoDB** — Requisito: NV-03-R05 · Fase: F2 · **Alcance: U2** · Aceptación: reconexión, límites, mínimo privilegio y fallo controlado; sin exponer la base a Internet. · Evidencia: matriz de fallos y revisión. · Depende de: T06.
+- [x] **T07 · Resiliencia y seguridad MongoDB** — Requisito: NV-03-R05 · Fase: F2 · **Alcance: U2** · Aceptación: reconexión, límites, mínimo privilegio y fallo controlado; sin exponer la base a Internet. · Evidencia: matriz de fallos y revisión. · Depende de: T06.
 
 ## F3 — Réplicas, balanceo y TLS
 
@@ -81,7 +81,7 @@
 | T04 | R04 | F2 | U2 | COMPLETADA |
 | T05 | R01, R04 | F2 | U2 | COMPLETADA |
 | T06 | R05 | F2 | U2 | COMPLETADA |
-| T07 | R05 | F2 | U2 | ABIERTA |
+| T07 | R05 | F2 | U2 | COMPLETADA |
 | T08 | R02 | F3 | U2 | ABIERTA |
 | T09 | R03 | F3 | U2 | ABIERTA |
 | T10 | R06 | F3 | U2 | COMPLETADA |
@@ -129,11 +129,11 @@
 | Tasks | 25 |
 | Tasks U2 | 24 |
 | Tasks futuras (no U2) | 1 |
-| Tasks abiertas | 8 |
-| Tasks completadas | 17 |
+| Tasks abiertas | 7 |
+| Tasks completadas | 18 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 17 de 25 tasks (ciclo de vida demostrado el 2026-11-19); abiertas: T07–T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
 
 Ninguna task puede ejecutarse hasta la aprobación de Fase B con versiones, IDs, rutas, proveedor, servicios y restricciones explícitas. `terraform apply` y `terraform destroy` requieren confirmación humana separada.
