@@ -4,15 +4,17 @@
 | --- | --- |
 | ID | NV-03 |
 | Documento | `plan.md` |
-| Versión | 1.2.0-u2 |
+| Versión | 1.3.0-u2 |
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
-| Spec | `spec.md` 1.2.0-u2 |
-| Tasks | `task.md` 1.2.0-u2 |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; 1.3.0-u2 (T11/T12 con Application Insights) PROPUESTA; ver `evidence.md`** |
+| Spec | `spec.md` 1.3.0-u2 |
+| Tasks | `task.md` 1.3.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
+
+**Cambio 1.3.0-u2 (2026-11-25) — PROPUESTO, pendiente de «Apruebo NV-03 1.3.0-u2 y EJECUTA T11 y T12», de la autorización del paquete `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0 y de «OK PARA APPLY»:** define cómo se cierran T11 y T12 (§7.2): las trazas y métricas de OpenTelemetry que la API ya produce se exportan a Application Insights basado en el mismo workspace de Log Analytics (tope de 0.1 GB/día), con la identidad administrada de la app y sin llaves. T11 deja de depender de T08: se implementa y verifica con una réplica, y la correlación entre dos réplicas se demuestra en la ventana del 3 de diciembre (T19).
 
 Plan aprobado documentalmente para U2. No se crea infraestructura, no se ejecuta Docker, no se ejecuta Terraform y no se despliega en esta fase. La ejecución requiere autorización de Fase B; apply y destroy requieren confirmación humana separada.
 
@@ -128,8 +130,8 @@ T14 — handoff de imagen (digest y SBOM); lo cubre NV-09 (CD) desde el 2026-11-
 
 **Entregables U2:**
 
-- Trazas, métricas y logs con correlación.
-- Exportador, muestreo, cardinalidad y retención compatibles con COST-001.
+- Trazas, métricas y logs con correlación: exportador `Azure.Monitor.OpenTelemetry.Exporter` hacia Application Insights basado en el workspace, con identidad administrada (§7.2 de la spec, 1.3.0-u2).
+- Exportador, muestreo, cardinalidad y retención compatibles con COST-001: muestreo de 10 %, métricas en lista permitida, `daily_data_cap_in_gb = 0.05`, sin datos sensibles.
 - `Dockerfile` multi-stage, no root, sin secretos y con healthcheck.
 - Publicación de imagen en GHCR con tag y commit trazables.
 - `VERSIONING.md` sin secretos.
@@ -219,7 +221,7 @@ Dependencias internas:
 - T08 depende de T01 y T02.
 - T09 depende de T08.
 - T10 depende de T08.
-- T11 depende de T08.
+- T11 se implementa con una réplica (1.3.0-u2); la correlación entre dos réplicas se verifica en T19.
 - T12 depende de T11.
 - T13 depende de T01.
 - T15 depende de T08 y T13.
@@ -354,4 +356,4 @@ Este plan no autoriza:
 - Ejecutar NV-02 o declarar sus controles.
 - Afirmar costo $0 sin evidencia.
 
-Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; ver `evidence.md`**.
+Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; 1.3.0-u2 (T11/T12 con Application Insights) PROPUESTA; ver `evidence.md`**.

@@ -4,15 +4,15 @@
 | --- | --- |
 | ID | NV-03 |
 | Documento | `spec.md` |
-| Versión | 1.2.0-u2 |
+| Versión | 1.3.0-u2 |
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; 1.3.0-u2 (T11/T12 con Application Insights) PROPUESTA; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RNF-05, RNF-06, RNF-08 (transversales) (`Requerimientos_TheHouse_v2`) |
-| Plan | `plan.md` 1.2.0-u2 |
-| Tasks | `task.md` 1.2.0-u2 |
+| Plan | `plan.md` 1.3.0-u2 |
+| Tasks | `task.md` 1.3.0-u2 |
 | Precondición | NV-01 U2 y specs funcionales U2 aprobadas documentalmente; M-BE-028; COST-001 |
 | Relación | No autoriza NV-01, NV-02 ni specs funcionales por transitividad |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
@@ -20,6 +20,8 @@
 Este documento está aprobado documentalmente para la Entrega Unidad 2. No autoriza crear recursos, ejecutar Docker, ejecutar Terraform ni desplegar. **La ejecución requiere autorización humana de Fase B y, para `terraform apply` o `terraform destroy`, una confirmación humana separada.**
 
 **Cambio 1.2.0-u2 (2026-11-05):** agrega NV-03-R15 (observabilidad persistente a costo $0) y las tasks T24 y T25. Aprobación documental: Victor Manuel Jose Jose, 2026-11-05 (M-BE-047). T24 y T25 quedan **⛔ NO EJECUTAR** hasta la autorización humana «EJECUTA»; `terraform apply` sigue requiriendo `OK PARA APPLY`.
+
+**Cambio 1.3.0-u2 (2026-11-25) — PROPUESTO, pendiente de «Apruebo NV-03 1.3.0-u2 y EJECUTA T11 y T12», de la autorización del paquete `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0 y de «OK PARA APPLY»:** define cómo se cierran T11 y T12 (§7.2): las trazas y métricas de OpenTelemetry que la API ya produce se exportan a Application Insights basado en el mismo workspace de Log Analytics (tope de 0.1 GB/día), con la identidad administrada de la app y sin llaves. T11 deja de depender de T08: se implementa y verifica con una réplica, y la correlación entre dos réplicas se demuestra en la ventana del 3 de diciembre (T19).
 
 ## 1. Contexto
 
@@ -137,6 +139,42 @@ Cálculo: tope de 0.1 GB/día × 31 días = 3.1 GB/mes, por debajo del tramo de 
 
 Al alcanzar el tope diario, Azure deja de ingerir logs hasta el día siguiente; se acepta la pérdida de los logs restantes de ese día (NV-03-RK11).
 
+## 7.2 Telemetría con Application Insights (1.3.0-u2, T11 y T12)
+
+Hallazgos (2026-11-25):
+
+1. La API ya está instrumentada con OpenTelemetry 1.20.1 (`ObservabilityConfiguration`): trazas de ASP.NET Core (sin `/health`), de `MongoDB.Driver` y de Redis (`TheHouse.Redis`, solo `db.system.name`), métricas de ASP.NET Core y del runtime, muestreo padre-hijo de 10 % y `service.instance.id` = nombre de la réplica. **El exportador OTLP está apagado**: las trazas y métricas no salen de la réplica.
+2. Los logs de consola llegan a Log Analytics (T24/T25) en varias filas por evento (`info: …` y el mensaje en filas distintas), así que el `TraceId` no queda junto al mensaje: la correlación con las trazas no se puede hacer solo con esos logs.
+3. Ingestión actual del workspace: ~0.2 MB/día (`Usage`, últimos 7 días) contra un tope de 100 MB/día.
+
+| Punto | Decisión |
+| --- | --- |
+| Destino | Application Insights `appi-thehouse-u2` **basado en el workspace existente** (`azurerm_application_insights` con `workspace_id`): misma retención de 30 días y mismo tope de 0.1 GB/día del workspace; además `daily_data_cap_in_gb = 0.05` para que la telemetría nunca use más de la mitad del tope y no deje sin espacio a los logs de consola. Sin pruebas de disponibilidad ni alertas con costo |
+| Autenticación | **Microsoft Entra ID con la identidad administrada de la app** (la misma de Content Safety), con el rol `Monitoring Metrics Publisher` solo sobre `appi-thehouse-u2`, y `local_authentication_disabled = true`: sin llave ni secreto. La cadena de conexión solo identifica el recurso; se carga como variable `Observability__AzureMonitorConnectionString` (Terraform no administra las variables de la app) |
+| Exportador | Paquete nuevo **`Azure.Monitor.OpenTelemetry.Exporter` 1.10.0** (Microsoft, MIT, publicado el 2026-10-07; requiere OpenTelemetry ≥ 1.18, compatible con 1.20.1). Trae `Azure.Core` y `OpenTelemetry.PersistentStorage.FileSystem` como dependencias; el almacenamiento local de reintentos se **desactiva** (contenedor sin disco persistente). Se descarta la distro `Azure.Monitor.OpenTelemetry.AspNetCore` (agrega instrumentación y paquetes que no hacen falta) y el agente OpenTelemetry administrado de Container Apps (requiere el proveedor `azapi`, no envía métricas a Application Insights y toca el entorno, NV-03-RK12) |
+| Credencial | Adaptador `TokenCredential` sobre la fuente de tokens de identidad administrada que ya usa Content Safety, generalizada para pedir el recurso `https://monitor.azure.com`; sin `Azure.Identity` |
+| Trazas | Solicitudes HTTP (sin `/health`), dependencias MongoDB, Redis y HTTP salientes (`System.Net.Http`, nativo en .NET 10: GenAI, Content Safety y FCM). Muestreo padre-hijo de 10 % por defecto (`Observability__TraceSampleRatio`), compatible con los conteos de Application Insights |
+| Métricas | Lista permitida por `View`: `http.server.request.duration`, `http.server.active_requests`, `dotnet.process.cpu.time`, `dotnet.process.memory.working_set`, `dotnet.gc.collections` y `dotnet.thread_pool.queue.length`; el resto se descarta. Exportación cada 60 s |
+| Logs | Sin cambios en la consola (todos los niveles siguen en Log Analytics). Además, los logs **Warning y superiores** van a Application Insights con el `operation_Id` de su traza, para ver cada error dentro de su transacción |
+| Réplicas | `cloud_RoleInstance` = nombre de la réplica: el 3 de diciembre se comparan las dos réplicas en el mapa de aplicación y en las consultas (T19) |
+| Configuración | `Observability__AzureMonitorEnabled` (falso por defecto; en `Testing` y en el CI nunca exporta) y la cadena de conexión; si está activo sin cadena válida, la app no arranca (validación de opciones) |
+
+Datos sensibles (T12):
+
+| Dato | Regla |
+| --- | --- |
+| Cuerpos, encabezados y cookies | No se registran |
+| Query string | Redactada por la instrumentación de ASP.NET Core (búsquedas con texto libre) |
+| Consultas de MongoDB | Sin texto de la consulta (solo colección y operación) |
+| Redis | Solo `db.system.name`; nunca claves (las de los límites de login contienen correos) |
+| IP del cliente | Application Insights la enmascara por defecto (no se desactiva) |
+| Usuario | Sin ids de usuario, correos ni tokens en atributos; el id de correlación (`thehouse.correlation_id`) no es dato personal |
+| Mensajes de log | Los mismos que hoy, ya revisados sin PII; se verifican con datos reales antes de cerrar |
+
+Costo (T12): Application Insights basado en workspace no tiene cargo propio; su ingestión cuenta en el mismo workspace (primeros 5 GB/mes gratis, §7.1) y queda limitada por los dos topes. Estimado con el tráfico actual: menos de 5 MB/día de métricas mientras haya réplica y menos de 1 MB/día de trazas al 10 %. Si `Usage` muestra más de 50 MB/día, se baja el muestreo o la lista de métricas. Se verifica en Cost Management y con `Usage` antes de cerrar.
+
+Evidencia: consultas KQL documentadas en `evidence.md` (solicitudes con sus dependencias por `operation_Id`, errores con su traza, latencia p95 por ruta y réplica, y `Usage` por tipo de dato).
+
 ## 8. Decisiones y restricciones aplicables
 
 - M-BE-007: MongoDB con `MongoDB.Driver`, encapsulado en Infrastructure.
@@ -199,6 +237,8 @@ Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran late
 | NV-03-RK10 | Observabilidad con cardinalidad excesiva | Costo y ruido | Muestreo, límites y retención |
 | NV-03-RK11 | Tope diario de ingestión alcanzado | Pérdida de logs del resto del día | Tope de 0.1 GB/día aceptado; revisar uso y ajustar solo con evidencia de costo |
 | NV-03-RK12 | Cambiar el destino de logs fuerza recrear el entorno o la app | Caída o URL nueva | Revisar el plan; si propone reemplazo, BLOCKED y usar la opción B |
+| NV-03-RK13 | La telemetría llena el tope diario del workspace | Se pierden logs de consola el resto del día | `daily_data_cap_in_gb = 0.05` en Application Insights, métricas en lista permitida y muestreo de 10 %; revisar `Usage` |
+| NV-03-RK14 | El exportador no obtiene token de la identidad | Sin telemetría (la API sigue funcionando) | El exportador falla sin afectar las solicitudes; se verifica la llegada de datos antes de cerrar T11 |
 
 ## 12. Dependencias
 
@@ -223,7 +263,7 @@ Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran late
 | Tasks sin requisito | 0 |
 | Tasks completadas | 18 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; 1.3.0-u2 (T11/T12 con Application Insights) PROPUESTA; ver `evidence.md`** |
 
 ## 14. Aprobación documental y ejecución
 

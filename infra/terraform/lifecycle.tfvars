@@ -24,6 +24,7 @@ log_analytics_workspace_name   = "log-thehouse-lifecycle"
 cd_identity_name               = "id-thehouse-lifecycle-deploy"
 app_identity_name              = "id-thehouse-lifecycle-app"
 content_safety_name            = "cs-thehouse-lifecycle"
+application_insights_name      = "appi-thehouse-lifecycle"
 
 # Un solo F0 de Content Safety por suscripción: el de producción.
 content_safety_enabled = false

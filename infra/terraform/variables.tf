@@ -213,3 +213,20 @@ variable "cd_identity_enabled" {
   type        = bool
   default     = true
 }
+
+variable "application_insights_name" {
+  description = "NV-03 1.3.0-u2: workspace-based Application Insights for the API telemetry."
+  type        = string
+  default     = "appi-thehouse-u2"
+}
+
+variable "application_insights_daily_cap_gb" {
+  description = "NV-03 1.3.0-u2: own daily cap, at most half of the workspace cap so console logs keep room."
+  type        = number
+  default     = 0.05
+
+  validation {
+    condition     = var.application_insights_daily_cap_gb > 0 && var.application_insights_daily_cap_gb <= 0.05
+    error_message = "COST-001: application_insights_daily_cap_gb must be greater than 0 and at most 0.05."
+  }
+}
