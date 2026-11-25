@@ -16,7 +16,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-06 | [Logout (U2)](nv-06-logout/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 10/10 |
 | NV-07 | [Property Core (U2)](nv-07-property-core/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 13/13 |
 | NV-08 | [University Catalog (U2)](nv-08-university-catalog/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 14/14 |
-| NV-09 | [Entrega continua (CD) U2](nv-09-cd/spec.md) | **✅ APROBADA** | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes; 1.2.0-u2 (T16 con k6) PROPUESTA** | 18/20 |
+| NV-09 | [Entrega continua (CD) U2](nv-09-cd/spec.md) | **✅ APROBADA** | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T16 ejecutada con k6 (1.2.0-u2, run en verde), cierre pendiente de «Apruebo 1.2.1»; T15 pendiente** | 18/20 |
 | NV-10 | [Sesión: refresh token y cuenta propia](nv-10-account-session/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.2.0 T01–T09 (2026-11-18): PASS WITH WARNINGS, ver `evidence.md`** | 9/9 |
 | NV-11 | [Perfil, universidad y preferencias](nv-11-profile-preferences/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T11 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-12 | [Arrendador, edificios y cuartos](nv-12-landlord-buildings-rooms/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T13 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 13/13 |

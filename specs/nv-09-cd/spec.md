@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes; 1.2.0-u2 (T16 con k6) PROPUESTA** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T16 ejecutada con k6 (1.2.0-u2, run en verde), cierre pendiente de «Apruebo 1.2.1»; T15 pendiente** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.2.0-u2 |
 | Tasks | `task.md` 1.2.0-u2 |
@@ -19,7 +19,7 @@
 
 **Cambio 1.1.1-u2 (2026-11-24) — NV-09-R17 corregida, M-BE-087 (autorizado por Victor: «Arreglar regla del CD»):** el CD comparaba solo el commit contra su padre. El 2026-11-23 el CD del merge de NV-23 quedó en cola detrás de un CD antiguo sin aprobar y se canceló; el siguiente merge solo cambiaba documentación y el CD omitió el despliegue, así que el código de NV-23 no llegó a Azure hasta un CD manual. Ahora el job `deploy` guarda, solo si todo salió bien, el commit realmente desplegado en el artefacto `deployed-sha` (90 días), y `resolve` compara contra ese commit; sin registro verificable, publica.
 
-**Cambio 1.2.0-u2 (2026-11-24) — PROPUESTO, pendiente de «Apruebo NV-09 1.2.0-u2 y EJECUTA T16» y de «Apruebo 1.2.1» (constitución):** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
+**Cambio 1.2.0-u2 (2026-11-24) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo y EJECUTA», respuesta a la propuesta del PR #90); la constitución 1.2.1 sigue pendiente de «Apruebo 1.2.1»:** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
 
 Esta spec define la entrega continua para revisión humana. No autoriza crear workflows, identidades ni roles, cambiar Terraform, configurar GitHub, publicar, desplegar ni ejecutar seeds: la ejecución requiere la autorización humana «EJECUTA», y cualquier `terraform apply` requiere además «OK PARA APPLY».
 
@@ -116,7 +116,7 @@ Reglas comunes:
 
 | Punto | Diseño |
 | --- | --- |
-| Workflow | `.github/workflows/cd-extended.yml`: `workflow_dispatch` y semanal (domingo 09:00 UTC); `concurrency` sin ejecuciones simultáneas; permisos `contents: read`; sin secretos, sin Azure y sin GHCR |
+| Workflow | `.github/workflows/cd-extended.yml`: `workflow_dispatch`, semanal (domingo 09:00 UTC) y en los pull requests que cambian sus propios archivos (única forma de probar un workflow nuevo antes del merge); `concurrency` sin ejecuciones simultáneas; permisos `contents: read`; sin secretos, sin Azure y sin GHCR |
 | Imagen | Se construye en el runner desde el commit del workflow con el mismo `Dockerfile` (sin publicar) |
 | Entorno | El mismo entorno efímero de `verify-ephemeral` (T09): MongoDB 7.0.45 y Redis 7.4.12 como `services`, API en `Testing` con llave JWT aleatoria por run y los **límites de peticiones de producción** (perfil `smoke`, sin aflojar) |
 | Datos | Seeds de universidades y propiedades (como en el CD) más colonias y los 12 cuartos de demostración (`--seed-places --seed-demo-rooms`, solo en esta base efímera); un nuevo comando `seed-demo` en `ephemeral_env.sh` que no cambia los existentes |
@@ -155,7 +155,7 @@ Cambio propuesto a la constitución (1.2.0 → **1.2.1**, se aplica solo con «A
 | Firma | Cosign keyless (Sigstore público, gratuito); la identidad del certificado es `cd.yml` en `main` | APROBADO (M-BE-051) |
 | Smoke en producción | Sin escrituras persistentes: GET de universidades y propiedades, registro con cuerpo inválido (400), login con credenciales inexistentes (401) y logout sin token (401). El flujo completo (registro, login, logout y reuso del token) corre solo en el entorno efímero | APROBADO (M-BE-051) |
 | DAST | Activo (API scan con OpenAPI) solo en el entorno efímero; pasivo (baseline) en producción | APROBADO (M-BE-051) |
-| Performance | k6 2.3.0 (AGPL-3.0, imagen oficial en el runner) en `cd-extended.yml` contra el entorno efímero, con el diseño de la §6.1; NBomber descartado por licencia (uso por una organización) | PROPUESTO 1.2.0-u2 (M-BE-089) |
+| Performance | k6 2.3.0 (AGPL-3.0, imagen oficial en el runner) en `cd-extended.yml` contra el entorno efímero, con el diseño de la §6.1; NBomber descartado por licencia (uso por una organización) | APROBADO 1.2.0-u2 (M-BE-089) |
 | Seed en producción | Operación humana única, fuera del pipeline, con `--allow-production-seed` y autorización explícita (M-BE-043) | APROBADO (M-BE-051) |
 | `VERSIONING.md` | El CD no escribe en `main` (lo impide el ruleset); el registro de cada despliegue se agrega con un pull request | APROBADO (M-BE-051) |
 
@@ -251,7 +251,7 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Tasks sin requisito | 0 |
 | Tasks completadas | 18 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes; 1.2.0-u2 (T16 con k6) PROPUESTA** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T16 ejecutada con k6 (1.2.0-u2, run en verde), cierre pendiente de «Apruebo 1.2.1»; T15 pendiente** |
 
 ## 14. Aprobación pendiente
 

@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T15 y T16 pendientes; 1.2.0-u2 (T16 con k6) PROPUESTA** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 18 de 20 tasks (T17 y T19 cerradas el 2026-11-17: PASS WITH WARNINGS); T16 ejecutada con k6 (1.2.0-u2, run en verde), cierre pendiente de «Apruebo 1.2.1»; T15 pendiente** |
 | Spec | `spec.md` 1.2.0-u2 |
 | Tasks | `task.md` 1.2.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -17,7 +17,7 @@
 
 **Cambio 1.1.1-u2 (2026-11-24) — NV-09-R17 corregida, M-BE-087 (autorizado por Victor: «Arreglar regla del CD»):** el CD comparaba solo el commit contra su padre. El 2026-11-23 el CD del merge de NV-23 quedó en cola detrás de un CD antiguo sin aprobar y se canceló; el siguiente merge solo cambiaba documentación y el CD omitió el despliegue, así que el código de NV-23 no llegó a Azure hasta un CD manual. Ahora el job `deploy` guarda, solo si todo salió bien, el commit realmente desplegado en el artefacto `deployed-sha` (90 días), y `resolve` compara contra ese commit; sin registro verificable, publica.
 
-**Cambio 1.2.0-u2 (2026-11-24) — PROPUESTO, pendiente de «Apruebo NV-09 1.2.0-u2 y EJECUTA T16» y de «Apruebo 1.2.1» (constitución):** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
+**Cambio 1.2.0-u2 (2026-11-24) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo y EJECUTA», respuesta a la propuesta del PR #90); la constitución 1.2.1 sigue pendiente de «Apruebo 1.2.1»:** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
 
 Plan preparado para revisión. No crea workflows, identidades ni roles, no cambia Terraform ni la configuración de GitHub, y no publica ni despliega hasta la autorización «EJECUTA».
 
