@@ -4,16 +4,18 @@
 | --- | --- |
 | ID | NV-23 |
 | Documento | `task.md` |
-| Versión | 1.2.0 |
+| Versión | 1.3.0 |
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA — 1.2.0** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) BLOCKED por TheHouse-ML; ver `evidence.md`** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Spec | `spec.md` 1.2.0 |
-| Plan | `plan.md` 1.2.0 |
+| Spec | `spec.md` 1.3.0 |
+| Plan | `plan.md` 1.3.0 |
 | Tasks totales | 14 |
 | Tasks completadas | 12 |
+
+**Cambio 1.3.0 (2026-11-25) — PROPUESTO, pendiente de «Apruebo NV-23 1.3.0 y EJECUTA T06 y T07», de la autorización del paquete `Microsoft.ML.OnnxRuntime` 1.31.1 y del permiso para descargar los 7 archivos del release:** `TheHouse-ML` publicó el release inmutable `model-v1.0.0` (modelo `logreg-1.0.0`, ONNX, esquema 2.0.0, commit `59f07bc`) y su guía de integración para .NET (ML-06 T06, M-ML-050). Esta versión fija lo que la 1.2.0 dejaba a ML-06 (§9.1): artefactos versionados en el repositorio en lugar de descargarlos en el build, verificaciones al cargar, `maxPoints` leídos del modelo, inferencia por lotes, casos dorados de los dos modelos en el CI y activación por configuración con respaldo al modelo base. El contrato con Mobile no cambia de forma; cambian los valores de `modelVersion` y `maxPoints` cuando el ONNX está activo.
 
 ## Reglas de esta lista
 
@@ -33,11 +35,11 @@
 
 - [x] **T04 · Recomendaciones ordenadas** — Requisito: NV-23-R04 · Fase: F2 · Aceptación: Lista paginada sobre hasta 500 candidatos de NV-14, no descartados primero, puntaje sin redondear desc y `roomId`; no elegibles fuera; con y sin cuenta. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
 - [x] **T05 · Retroalimentación y descartes** — Requisito: NV-23-R05 · Fase: F2 · Aceptación: Feedback con `modelVersion` y reemplazo de la opinión anterior; descartes con TTL de 30 días y opción de deshacer; idempotentes; borrados al eliminar la cuenta (NV-10); colecciones en el script de NV-26. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
-- [ ] **T06 · Carga del modelo de TheHouse-ML** — Requisito: NV-23-R06 · Fase: F2 · Aceptación: `OnnxCompatibilityModel` carga el paquete de entrega, verifica SHA-256 y esquema y hace la prueba de arranque; cualquier falla usa el modelo base y lo registra; desactivado por configuración. · Evidencia: repositorio, índices y pruebas de integración. · Depende de: T01, T02, T03.
+- [ ] **T06 · Carga del modelo de TheHouse-ML** — Requisito: NV-23-R06 · Fase: F2 · Aceptación (1.3.0, §9.1): `Microsoft.ML.OnnxRuntime` 1.31.1; los 7 archivos de `model-v1.0.0` versionados y verificados contra `SHA256SUMS` y el SHA-256 fijado; `OnnxCompatibilityModel` con una sola sesión, verificación de metadatos, `maxPoints` del modelo, inferencia por lotes `[N, 10]` en `double`, validación del vector y prueba de arranque; cualquier falla usa el modelo base y lo registra; desactivado por configuración; activación en Azure por Victor con verificación real. · Evidencia: pruebas de integración, despliegue y prueba en Azure. · Depende de: T01, T02, T03.
 
 ## F3 — Seguridad, autorización y límites
 
-- [ ] **T07 · Paridad con TheHouse-ML** — Requisito: NV-23-R07 · Fase: F3 · Aceptación: Los casos dorados de ML-04 (T05) dan el mismo vector de features, el mismo desglose y el mismo `matchScore` en `baseline-1.0.0`, y los de ML-06 el mismo puntaje en ONNX dentro de la tolerancia publicada. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
+- [ ] **T07 · Paridad con TheHouse-ML** — Requisito: NV-23-R07 · Fase: F3 · Aceptación (1.3.0, §9.1): los 109 casos de `golden_cases.json` (`logreg-1.0.0`) y los 81 de `baseline_golden_cases.json` (`baseline-1.0.0`) en el CI con diferencia 0 en `points`, `maxPoints` y `matchScore` (features 1e-6, ONNX 1e-4); casos `t05_h1_zone` sin corregir la desviación; 200 cuartos con mediana < 20 ms. · Evidencia: pruebas en el CI y reporte de rendimiento. · Depende de: T01, T02, T03, T04, T05, T06.
 - [x] **T08 · Rendimiento y límites** — Requisito: NV-23-R08 · Fase: F3 · Aceptación: p95 < 300 ms para 50 cuartos (RNF-14) y < 500 ms para recomendaciones con 500 candidatos en Azure; rate limits con 429; Redis caído 503. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 - [x] **T09 · Minimización y privacidad** — Requisito: NV-23-R09 · Fase: F3 · Aceptación: Prueba de que el cálculo no lee campos personales ni ubicación real; el desglose no expone valores de features ni parámetros de un modelo entrenado; las métricas no guardan ids. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
 - [x] **T10 · Métricas de Smart Match (RF-66)** — Requisito: NV-23-R10 · Fase: F3 · Aceptación: `GET /admin/smart-match/metrics` con rango de fechas (máximo 90 días), totales, promedio y rangos de puntaje por `modelVersion`, retroalimentación y descartes activos; solo rol `admin`; contadores diarios sin ids; una falla al contar no afecta la respuesta al usuario. · Evidencia: pruebas de seguridad y de autorización. · Depende de: T01, T02, T03, T04, T05, T06.
@@ -96,6 +98,6 @@
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA — 1.2.0** |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) BLOCKED por TheHouse-ML; ver `evidence.md`** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

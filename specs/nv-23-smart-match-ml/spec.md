@@ -4,16 +4,16 @@
 | --- | --- |
 | ID | NV-23 |
 | Documento | `spec.md` |
-| Versión | 1.2.0 |
+| Versión | 1.3.0 |
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA — 1.2.0** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) BLOCKED por TheHouse-ML; ver `evidence.md`** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-48 a RF-58, RF-64, RF-65, RF-66 (métricas, desde NV-25 1.1.0), RF-68 (uso sin cuenta) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-13, RNF-14 |
-| Plan | `plan.md` 1.2.0 |
-| Tasks | `task.md` 1.2.0 |
+| Plan | `plan.md` 1.3.0 |
+| Tasks | `task.md` 1.3.0 |
 | Módulo | SmartMatch |
 | Precondición | Constitution 1.2.0 (M-BE-062); NV-11, NV-12, NV-14 y NV-21 desplegadas; `TheHouse-ML` ML-04 T01–T03 en `main` |
 | Relación | Reproduce el modelo base de `TheHouse-ML` ML-04 1.0.0 (`baseline-1.0.0`, esquema 2.0.0) y cargará su ONNX (ML-06); NV-24 explica los resultados; NV-10 borra sus datos con la cuenta; NV-26 incluye sus colecciones |
@@ -21,6 +21,8 @@
 Spec aprobada (1.2.0, M-BE-085); la autorización «EJECUTA» de M-BE-068 cubre T01–T14 en las rutas indicadas.
 
 **Cambio 1.2.0 (2026-11-20):** `TheHouse-ML` aprobó e implementó ML-04 1.0.0 después de NV-23 1.1.0 (`baseline_params.json` `baseline-1.0.0`, `feature_schema.json` **2.0.0** y `baseline_score.py`, merge #25 de `TheHouse-ML`). Para que el backend dé exactamente el mismo puntaje que ML, esta versión: (1) adopta los nombres de factores, las 10 features, las curvas y el **redondeo de ML-04** (cada factor con 1 decimal y el total con `floor(round6(Σ) + 0.5)`, mitad hacia arriba), que reemplazan el redondeo a entero de 1.1.0; (2) adopta las restricciones duras HC01–HC03 de ML-03 (**convivencia estricta** y mascotas como restricción con dato desconocido = no excluye); (3) exige universidad, `budget.max`, `livingWith` y `placeType` para calcular (perfil mínimo de ML) y aplica sus valores por omisión; (4) **cambia el contrato con Mobile**: `matchScore`, `breakdown` con `maxPoints` y `excludedBy` como lista (Mobile aceptó el cambio; valida la versión final de la §6.1); (5) agrega las métricas básicas de Smart Match para el administrador (RF-66, que NV-25 1.1.0 pasó a NV-23, M-BE-075); (6) borra la retroalimentación y los descartes al eliminar la cuenta (NV-10) y (7) suma las colecciones nuevas al script de la base de datos (NV-26). Mientras 1.2.0 no se apruebe sigue vigente 1.1.0 (autorizada, sin código escrito); al aprobarse, la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 de 1.2.0.
+
+**Cambio 1.3.0 (2026-11-25) — PROPUESTO, pendiente de «Apruebo NV-23 1.3.0 y EJECUTA T06 y T07», de la autorización del paquete `Microsoft.ML.OnnxRuntime` 1.31.1 y del permiso para descargar los 7 archivos del release:** `TheHouse-ML` publicó el release inmutable `model-v1.0.0` (modelo `logreg-1.0.0`, ONNX, esquema 2.0.0, commit `59f07bc`) y su guía de integración para .NET (ML-06 T06, M-ML-050). Esta versión fija lo que la 1.2.0 dejaba a ML-06 (§9.1): artefactos versionados en el repositorio en lugar de descargarlos en el build, verificaciones al cargar, `maxPoints` leídos del modelo, inferencia por lotes, casos dorados de los dos modelos en el CI y activación por configuración con respaldo al modelo base. El contrato con Mobile no cambia de forma; cambian los valores de `modelVersion` y `maxPoints` cuando el ONNX está activo.
 
 ## 1. Contexto
 
@@ -177,10 +179,51 @@ Los eventos se procesan en el mismo proceso y de forma idempotente; si una répl
 4. Features (esquema 2.0.0, en su `feature_order`): `distance_km` (distancia publicada de NV-14 desde el centro de la celda aproximada del edificio hasta el campus de la universidad del estudiante), `effective_distance_km` (× 1.0 a pie, 0.5 bici, 0.4 transporte público, 0.25 auto), `price_to_budget`, `services_coverage`, `place_type_match`, `property_type_match`, `pets_compatible`, `distance_ratio` (`distance_km / maxDistanceKm`), `price_below_min` y `extra_services_ratio`, con las fórmulas exactas de `feature_schema.json` 2.0.0.
 5. Modelo base `baseline-1.0.0` (ML-04 §6.2): `budget` Presupuesto (30), `distance` Distancia (25), `essential_services` Servicios esenciales (20), `place_type` Tipo de lugar (10), `property_type` Tipo de inmueble (10), `extras` Extras (5); cada factor vale `peso × curva(feature)`: presupuesto `1 − price_below_min`; distancia 1 hasta `distance_ratio` 0.5, baja lineal a 0 en 1 y 0 después; servicios, tipo de lugar, tipo de inmueble y extras con la identidad. Las features `distance_km`, `effective_distance_km`, `price_to_budget` y `pets_compatible` no puntúan (quedan para el ONNX).
 6. Redondeo (ML-04 §6.3, en `double` como Python): cada factor = `Math.Round(Math.Round(puntos, 6, AwayFromZero), 1, AwayFromZero)`; `matchScore` = `Math.Round(Math.Round(Σ puntos sin redondear, 6, AwayFromZero), AwayFromZero)` acotado a 0–100; nunca `Math.Round` por omisión (mitad al par). Determinista para las mismas preferencias, cuarto y `modelVersion` (RNF-13).
-7. Modelo ONNX: solo se usa si `Enabled`, el hash coincide, el esquema de features coincide y la prueba de arranque con un caso dorado pasa; si algo falla se registra una advertencia y se usa el modelo base, sin error para el usuario. El desglose con ONNX lo define ML-06.
+7. Modelo ONNX: solo se usa si `Enabled`, el hash coincide, el esquema de features coincide y la prueba de arranque con un caso dorado pasa; si algo falla se registra una advertencia y se usa el modelo base, sin error para el usuario. El desglose con ONNX lo define ML-06 y se fija en la §9.1 (1.3.0).
 8. Recomendaciones: candidatos = cuartos publicados de la búsqueda de NV-14 para la universidad del perfil y `maxDistanceKm` resuelto; si hay más de 500 se toman los 500 más cercanos (empate por id); se aplican HC01–HC03, se puntúan, se ordenan (no descartados primero; puntaje sin redondear desc; `roomId` asc) y se paginan.
 9. Los descartes duran 30 días; la retroalimentación guarda la `modelVersion` para evaluar después. Al eliminar la cuenta (NV-10) un participante de `IAccountDeletionParticipant` borra la retroalimentación y los descartes del usuario.
 10. Métricas (RF-66): cada cálculo suma a los contadores del día con `$inc`; si esa escritura falla se registra una advertencia y la respuesta al usuario no cambia. La retroalimentación por versión y los descartes activos se cuentan al pedir las métricas.
+
+## 9.1 Modelo ONNX `logreg-1.0.0` (1.3.0, T06 y T07)
+
+Release de `TheHouse-ML` (verificado el 2026-11-25 con la API de GitHub, sin descargar):
+
+| Dato | Valor |
+| --- | --- |
+| Tag | [`model-v1.0.0`](https://github.com/thehouse-team/TheHouse-ML/releases/tag/model-v1.0.0), publicado el 2026-11-25, commit `59f07bcfe1fa6cf4a0f183b568c56913980175ee`; un release publicado no se modifica |
+| Modelo | `logreg-1.0.0` (regresión logística, **datos sintéticos**), esquema de features `2.0.0`, opset 17, IR 8 |
+| SHA-256 de `model.onnx` (4,380 bytes) | `36c867188232a6cfedd949171121f3273f606ba5057dc5d3eb24cafd672bdcc5` |
+| Archivos | `model.onnx`, `feature_schema.json`, `golden_cases.json` (109 casos), `baseline_golden_cases.json` (81 casos), `model_card.md`, `metrics.json` y `SHA256SUMS` (~935 KB en total) |
+| Guía | `docs/backend-integration.md` de `TheHouse-ML` (commit `7993930`), copiada a `docs/ml/backend-integration.md` como referencia |
+| Modelo base | `baseline_params.json` del mismo commit tiene el SHA-256 `51b663e8…`, **el mismo** recurso `baseline-1.0.0.json` que ya usa el backend (NV-23 1.2.0) |
+
+| Punto | Decisión |
+| --- | --- |
+| Paquete | **`Microsoft.ML.OnnxRuntime` 1.31.1** (Microsoft, MIT, CPU; publicado el 2026-10-28, la versión con la que `TheHouse-ML` validó el modelo en Python; la 1.32.0 tiene menos de dos semanas). Solo en `TheHouse.Infrastructure`. La imagen sigue en Ubuntu `noble` (glibc), compatible con sus librerías nativas |
+| Artefactos | Los 7 archivos del release se **versionan en el repositorio** en `TheHouse.Infrastructure/SmartMatch/model-v1.0.0/`, sin modificarlos; `model.onnx` se copia a la salida del build y queda dentro de la imagen. Reemplaza a «descargar en el build» de la 1.2.0: el release es inmutable, la CI no depende de la red y una prueba falla si cualquier archivo no coincide con `SHA256SUMS` o si `model.onnx` no coincide con el SHA-256 fijado |
+| Configuración | `SmartMatch:Model`: `Enabled` (falso por defecto), `Path` (relativo a la app), `Sha256`, `ModelVersion` (`logreg-1.0.0`) y `FeatureSchemaVersion` (`2.0.0`) en `appsettings.json`: cambiar de versión del modelo es cambiar archivos y hash, sin tocar código |
+| Carga | Una sola `InferenceSession` por proceso, creada al arrancar (singleton) y reutilizada. Orden: SHA-256 del archivo → sesión → metadatos `modelVersion`, `featureSchemaVersion`, `profile` = `full`, `featureOrder` y `factorOrder` iguales a los del backend → `maxPoints` desde `maxPointsRaw` → prueba de arranque con el caso dorado `perfect_100` (`matchScore` 93). Cualquier falla registra una advertencia sin detalles del archivo y deja el modelo base (regla 7); nunca es un error para el usuario |
+| Inferencia | Un lote `[N, 10]` de `double` por consulta (todos los candidatos en una llamada); salidas `factor_points` `[N, 6]` y `raw_total` `[N]` sin redondear; nunca `float`. El puerto `ICompatibilityModel` agrega la puntuación por lote (el modelo base la implementa par por par) |
+| Validación del vector | Antes del ONNX: features finitas, dentro de su `range` y 0/1 en las binarias (guía §6.2). Un vector inválido es un error del backend: se registra y ese par se puntúa con el modelo base |
+| Redondeo | El mismo de la regla 6 (round6 y `AwayFromZero`), más `-0` → `0` en `points` y `matchScore` (M-ML-046) |
+| Respuesta | Contrato §6.1 **sin cambios de forma**. Con el ONNX activo, `modelVersion` = `logreg-1.0.0` y `maxPoints` = 9.6 / 72.6 / 6.7 / 4.9 / 1.7 / 4.5 (de los metadatos; suman 100). Las etiquetas no cambian y los valores de las features siguen internos. NV-24 no cambia: manda sus hechos a GenAI y sus ventajas/desventajas usan la proporción `points / maxPoints` |
+| Ranking | Sin cambios (regla 8): puntaje sin redondear descendente y `roomId` ascendente |
+| Precio | La renta del cuarto ya es un entero en MXN (`Room.Price`, NV-12), así que `price_mxn` no necesita redondeo (guía §17.1). `Property.Price` (`decimal`) no participa en Smart Match |
+| Distancia | Sin cambios (M-BE-085): en producción, la distancia publicada de NV-14. En los casos dorados, `distance_km` se calcula con la haversine de la guía (radio 6,371 km) y las coordenadas de `metadata.campuses`, y el resto del flujo es el código real del backend |
+| Desviación ML-05 T05-H1 | Se reproduce tal cual (`price_below_min` con signo contrario, máximo +0.124 puntos); los casos `t05_h1_zone` lo esperan |
+| Activación | Se despliega con `Enabled` = falso. Con las pruebas en verde y la verificación en Azure, Victor activa `SmartMatch__Model__Enabled=true`; volver a `false` regresa al modelo base sin desplegar. La retroalimentación y las métricas diarias ya guardan la `modelVersion` |
+
+Pruebas (T07):
+
+| Prueba | Criterio |
+| --- | --- |
+| `golden_cases.json` (`logreg-1.0.0`) | 109 casos: features 1e-6, salidas del ONNX 1e-4, `points`, `maxPoints` y `matchScore` **exactos**; excluidos e incompletos con sus listas exactas; los 9 casos de solo vector, directo al ONNX |
+| `baseline_golden_cases.json` (`baseline-1.0.0`) | 81 casos con el modelo base de C#: features, `value` y total 1e-6; `points`, `maxPoints` y `matchScore` exactos (complementa la paridad de 2,000 casos de 1.2.0) |
+| Integridad | Los 7 archivos coinciden con `SHA256SUMS`; un `model.onnx` con otro SHA-256 se rechaza y queda el modelo base |
+| Rendimiento | 200 cuartos (features + inferencia), 10 corridas de calentamiento y 100 medidas: mediana < 20 ms |
+| Respaldo | Archivo ausente, hash distinto, metadatos distintos o prueba de arranque fallida → modelo base y advertencia; la API responde igual |
+
+Avisos: a Mobile, que con el ONNX activo cambian `modelVersion` y los valores de `maxPoints` (misma forma); a `TheHouse-GenAI`, que `maxPoints` no es el peso del factor (guía §15) y que su contrato con NV-24 no cambia.
 
 ## 10. Seguridad
 
@@ -242,7 +285,8 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | --- | --- | --- |
 | Enfoque | Modelo base por reglas en C# desde ahora; modelo ONNX de `TheHouse-ML` cuando se publique (constitution 1.2.0 §6.1) | APROBADO (M-BE-068) |
 | Pesos iniciales | Presupuesto 30, distancia 25, servicios esenciales 20, tipo de lugar 10, tipo de inmueble 10, extras 5 (iguales a ML-04) | APROBADO (M-BE-068) |
-| Distribución del artefacto | Release de `TheHouse-ML` descargado en el build de la imagen y verificado con `SHA256SUMS`; versión y hash fijados en el repositorio | APROBADO (M-BE-068) |
+| Distribución del artefacto | 1.3.0: los 7 archivos del release inmutable `model-v1.0.0` versionados en el repositorio, verificados con `SHA256SUMS` y con el SHA-256 de `model.onnx` fijado en la configuración (antes: descargados en el build) | PROPUESTO 1.3.0 |
+| Modelo ONNX | `logreg-1.0.0` con `Microsoft.ML.OnnxRuntime` 1.31.1, carga verificada, inferencia por lotes, `maxPoints` del modelo y activación por configuración con respaldo al modelo base (§9.1) | PROPUESTO 1.3.0 |
 | Métrica de promoción | NDCG@10, decidida y medida en `TheHouse-ML` (ML-05) | APROBADO (M-BE-068) |
 | Alineación con ML-04 1.0.0 | Nombres de factores, 10 features del esquema 2.0.0, curvas, orden del ranking y redondeo de ML-04 (1 decimal por factor y `floor(round6(Σ) + 0.5)`), en lugar del redondeo a entero de 1.1.0 | APROBADO (M-BE-085) |
 | Convivencia | Regla estricta de ML-03 (HC02) en Smart Match: `women` solo con `women`, `men` solo con `men`, `any` con todos; reemplaza la regla de NV-14 en esta spec (el filtro de búsqueda no cambia) | APROBADO (M-BE-085) |
@@ -292,7 +336,7 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks sin requisito | 0 |
 | Tasks completadas | 12 |
 | Estado documental | **✅ APROBADA — 1.2.0** |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) BLOCKED por TheHouse-ML; ver `evidence.md`** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`** |
 
 ## 18. Aprobación pendiente
 
