@@ -6,14 +6,14 @@
 | Documento | `plan.md` |
 | Versión | 1.3.0 |
 | Fecha | 2026-11-20 |
-| Estado documental | **✅ APROBADA — 1.2.0** |
+| Estado documental | **✅ APROBADA — 1.3.0** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETADA — 1.3.0: 14 de 14 (2026-11-25): PASS WITH WARNINGS; modelo entrenado `logreg-1.0.0` (ONNX) de TheHouse-ML en producción con respaldo a `baseline-1.0.0`; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.3.0 |
 | Tasks | `task.md` 1.3.0 |
 
-**Cambio 1.3.0 (2026-11-25) — PROPUESTO, pendiente de «Apruebo NV-23 1.3.0 y EJECUTA T06 y T07», de la autorización del paquete `Microsoft.ML.OnnxRuntime` 1.31.1 y del permiso para descargar los 7 archivos del release:** `TheHouse-ML` publicó el release inmutable `model-v1.0.0` (modelo `logreg-1.0.0`, ONNX, esquema 2.0.0, commit `59f07bc`) y su guía de integración para .NET (ML-06 T06, M-ML-050). Esta versión fija lo que la 1.2.0 dejaba a ML-06 (§9.1): artefactos versionados en el repositorio en lugar de descargarlos en el build, verificaciones al cargar, `maxPoints` leídos del modelo, inferencia por lotes, casos dorados de los dos modelos en el CI y activación por configuración con respaldo al modelo base. El contrato con Mobile no cambia de forma; cambian los valores de `modelVersion` y `maxPoints` cuando el ONNX está activo.
+**Cambio 1.3.0 (2026-11-25) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo todo»: spec 1.3.0, «EJECUTA» de T06 y T07, paquete `Microsoft.ML.OnnxRuntime` 1.31.1 y descarga de los 7 archivos del release; M-BE-091):** `TheHouse-ML` publicó el release inmutable `model-v1.0.0` (modelo `logreg-1.0.0`, ONNX, esquema 2.0.0, commit `59f07bc`) y su guía de integración para .NET (ML-06 T06, M-ML-050). Esta versión fija lo que la 1.2.0 dejaba a ML-06 (§9.1): artefactos versionados en el repositorio en lugar de descargarlos en el build, verificaciones al cargar, `maxPoints` leídos del modelo, inferencia por lotes, casos dorados de los dos modelos en el CI y activación por configuración con respaldo al modelo base. El contrato con Mobile no cambia de forma; cambian los valores de `modelVersion` y `maxPoints` cuando el ONNX está activo.
 
 Plan preparado para revisión. No crea código, colecciones ni índices hasta la autorización «EJECUTA».
 
@@ -166,4 +166,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **✅ COMPLETADA — 1.3.0: 14 de 14 (2026-11-25): PASS WITH WARNINGS; modelo entrenado `logreg-1.0.0` (ONNX) de TheHouse-ML en producción con respaldo a `baseline-1.0.0`; ver `evidence.md`**.

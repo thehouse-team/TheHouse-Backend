@@ -104,4 +104,60 @@ $0: el mismo contenedor (escala 0–2) y tres colecciones pequeñas en Atlas M0.
 
 ## 7. Resultado
 
-**PASS WITH WARNINGS — 12 de 14.** Advertencias: T08 medido desde el cliente con 11 candidatos. **T06 y T07 siguen BLOCKED** hasta que `TheHouse-ML` publique el ONNX (ML-06) y los casos dorados (ML-04 T05); mientras tanto la paridad provisional de §2 (2,000 casos, bit a bit) cubre el modelo base.
+**PASS WITH WARNINGS — 12 de 14** (estado al 2026-11-24; ver la §9). Advertencias: T08 medido desde el cliente con 11 candidatos. **T06 y T07 siguen BLOCKED** hasta que `TheHouse-ML` publique el ONNX (ML-06) y los casos dorados (ML-04 T05); mientras tanto la paridad provisional de §2 (2,000 casos, bit a bit) cubre el modelo base.
+
+## 8. Modelo ONNX `logreg-1.0.0` de TheHouse-ML (T06 y T07, 1.3.0) — 2026-11-25
+
+Autorización: «Apruebo todo» — Victor Manuel Jose Jose, 2026-11-25: spec 1.3.0, «EJECUTA» de T06 y T07, paquete `Microsoft.ML.OnnxRuntime` 1.31.1 y descarga del release (M-BE-091).
+
+### Release e integridad
+
+| Paso | Resultado |
+| --- | --- |
+| Descarga | `gh release download model-v1.0.0` de `thehouse-team/TheHouse-ML` (commit `59f07bc`) en una carpeta aislada |
+| `SHA256SUMS` | 6/6 OK; `model.onnx` = `36c867188232a6cfedd949171121f3273f606ba5057dc5d3eb24cafd672bdcc5` (fijado en `appsettings.json`); el SHA-256 de `SHA256SUMS` coincide con el digest que publica GitHub |
+| En el repositorio | `TheHouse.Infrastructure/SmartMatch/model-v1.0.0/` con `-text` en `.gitattributes` (el repo normaliza saltos de línea: sin esa regla cambiarían los hashes); los bytes guardados por Git verificados contra los 6 hashes |
+| Modelo base | `baseline_params.json` del mismo commit tiene el SHA-256 `51b663e8…`, el recurso que ya usaba `baseline-1.0.0` |
+
+### Implementación
+
+| Pieza | Detalle |
+| --- | --- |
+| PRs | [#95](https://github.com/thehouse-team/TheHouse-Backend/pull/95) (spec) y [#96](https://github.com/thehouse-team/TheHouse-Backend/pull/96) (código), mezclados; CI en verde (incluida la imagen con Trivy y Dockle) |
+| `OnnxCompatibilityModel` | Hash antes de cargar, una sola `InferenceSession`, metadatos (`modelVersion`, `featureSchemaVersion`, `profile` = `full`, `featureOrder`, `factorOrder`), `maxPoints` desde `maxPointsRaw`, lote `[N, 10]` en `double`, validación del vector (un vector inválido usa el modelo base solo para ese cuarto) y `-0` → `0` |
+| Selección al arrancar | `SmartMatch:Model:Enabled` (falso por defecto); prueba con `perfect_100` (93); cualquier falla deja `baseline-1.0.0` y lo registra; aviso `NV-23: Smart Match con {modelo} ({motivo})` |
+| Servicio | Puntajes y recomendaciones puntúan todos los candidatos en un solo lote |
+| Imagen | El Dockerfile publica solo `linux-x64`: sin RID, ONNX Runtime y SkiaSharp agregaban las librerías nativas de todas las plataformas (722 MB en lugar de 58 MB) |
+| Guía de ML | Copiada en `docs/ml/backend-integration.md` |
+
+### T07 — pruebas (CI y local; suite completa 1,388/1,388)
+
+| Prueba | Resultado |
+| --- | --- |
+| `golden_cases.json` (`logreg-1.0.0`) | **109/109**: 89 puntuados, 9 de solo vector, 6 excluidos y 5 incompletos; diferencia 0 en `points`, `maxPoints` y `matchScore`; features 1e-6 y ONNX 1e-4 |
+| `baseline_golden_cases.json` | **81/81** con el modelo base de C#; diferencia 0 |
+| Desviación ML-05 T05-H1 | Los 4 casos `t05_h1_zone` pasan sin corregirla |
+| Integridad y respaldo | Archivos contra `SHA256SUMS`; archivo ausente, hash, versión o esquema distinto y modelo alterado → modelo base |
+| Rendimiento | 200 cuartos (features + inferencia): mediana < 20 ms |
+
+### T06 — producción
+
+| Paso | Resultado |
+| --- | --- |
+| Despliegue | CD de `05ad851` (19:45 UTC) con el ONNX apagado |
+| Activación | Victor cargó `SmartMatch__Model__Enabled=true` (20:30 UTC); revisión `ca-thehouse-u2--0000016` sana |
+| Arranque | `NV-23: Smart Match con logreg-1.0.0 (onnx).` |
+| Recomendaciones (invitado) | `modelVersion` `logreg-1.0.0`, `featureSchemaVersion` `2.0.0`; puntajes 92, 86, 81, 78 y 76; `maxPoints` 9.6 / 72.6 / 6.7 / 4.9 / 1.7 / 4.5 |
+| Puntajes de 11 cuartos | 8 elegibles (89 a 28) y 3 excluidos por `budget`; con «solo mujeres» los 11 excluidos por `budget` y `living_with` |
+| Explicación (NV-24) | Funciona con el ONNX: puntaje 92, 4 ventajas y 1 desventaja coherentes con el desglose |
+| Application Insights | `POST /api/v1/smart-match/scores` con p95 de 23.7 ms en producción |
+| Apagado | `SmartMatch__Model__Enabled=false` regresa al modelo base sin desplegar |
+
+| Advertencia | Detalle |
+| --- | --- |
+| W1. Datos sintéticos | `logreg-1.0.0` se entrenó con datos sintéticos; la distancia puede aportar hasta 72.6 de 100 puntos. Se corrige con ML-07 (señales reales) en una versión nueva |
+| W2. Avisos | Mobile (cambian `modelVersion` y los valores de `maxPoints`, misma forma) y TheHouse-GenAI (`maxPoints` no es el peso del factor) |
+
+## 9. Resultado 1.3.0
+
+**PASS WITH WARNINGS — 14 de 14.** NV-23 usa en producción el modelo entrenado `logreg-1.0.0` de TheHouse-ML, idéntico a Python en los 190 casos dorados, con respaldo automático al modelo base.

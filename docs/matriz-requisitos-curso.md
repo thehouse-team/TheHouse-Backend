@@ -5,7 +5,7 @@
 | Fuente | «Requerimientos para el desarrollo del proyecto Móvil» v3 (cuatrimestre septiembre–diciembre 2026) |
 | Fecha | 2026-11-20 |
 | Evaluación | 3 y 4 de diciembre de 2026 (último día para registrar calificaciones: 4 de diciembre) |
-| Avance del backend | 304/316 tasks (96 %); 97 % sin las 2 tasks que esperan a TheHouse-ML (NV-23 T06/T07) |
+| Avance del backend | 308/316 tasks (97 %); lo restante es la ventana de dos réplicas del 3 de diciembre (NV-03 T08, T09, T18, T19), la prueba de push con Mobile (NV-20 T05), RESTler (NV-09 T15) y 2 tasks fuera de U2 |
 | URL | https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io |
 
 Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · ➖ fuera del backend (Mobile, Landing o ML/GenAI).
@@ -51,7 +51,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Endpoints eficientes | ✅ | Paginación, índices, caché HTTP, compresión y proyecciones | Tiempo de respuesta en vivo |
 | API o microservicios | ✅ | Monolito modular (constitution §6) más servicios auxiliares (TheHouse-GenAI y TheHouse-ML) | Diagrama de módulos |
 | Imágenes en el CDN de la nube | 🟡 | **Alternativa documentada por costo cero (M-BE-084).** Las fotos se guardan en MongoDB (GridFS) y `GET /api/v1/media/{id}` las sirve con `Cache-Control: public, max-age=31536000, immutable` y `ETag` (NV-13): el teléfono y cualquier proxy las guardan un año y no vuelven a pedirlas. Azure no tiene CDN gratis: el CDN clásico ya no admite perfiles nuevos y Front Door Standard cobra US$35 al mes más uso (ver §8) | `curl -I` de una foto pública: `Cache-Control … immutable` y `ETag`; repetir con `If-None-Match` → 304 |
-| Observabilidad (logs de eventos y errores) | 🟡 | Log Analytics con logs de consola correlacionados (NV-03 T24/T25); trazas y métricas OTel sin exportador (T11/T12 abiertas; diseño con Application Insights en NV-03 1.3.0-u2) | Consulta KQL en Log Analytics |
+| Observabilidad (logs de eventos y errores) | ✅ | Log Analytics con logs de consola (NV-03 T24/T25) y Application Insights con trazas, dependencias, métricas y errores correlacionados por operación, con identidad administrada y sin datos sensibles (NV-03 T11/T12, 2026-11-25) | Consulta KQL en Log Analytics |
 | JWT y Redis distribuido | ✅ | JWT con revocación por `jti` y `sid` en Redis; rate limit, candados y sal en Redis (NV-05, NV-06, NV-10) | Login → token; logout → 401 |
 | API performance: caching, rate limit, middleware, paginación, indexing, serializers, compresión | ✅ | `ETag`/304; rate limit en Redis (429 con `Retry-After`); middlewares de correlación, seguridad, revocación y límites de cuerpo; paginación `page`/`pageSize`; índices por repositorio; System.Text.Json en camelCase; `PublicResponseCompressionMiddleware` | `curl` con `Accept-Encoding: gzip` y 429 |
 | Integración con patrones | ✅ | Puertos y adaptadores (Clean Architecture), circuit breaker y degradación (GenAI), cola de push, fallo cerrado | Código de `Application/Abstractions` |
@@ -67,7 +67,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Aviso de privacidad vinculado a la landing | 🟡 | NV-10 1.2.0: `GET /api/v1/legal` y aceptación registrada | URLs de la landing (`Legal__*`) |
 | Eliminar cuenta | ✅ | NV-10 1.2.0: vista previa y eliminación; prueba real 27/27 | Google Play pide además la URL web |
 | Sesión siempre viva salvo logout | ✅ | NV-10 1.2.0: sesión deslizante de 30 días sin tope | — |
-| Al menos una función de ML y de IA generativa | ✅ | **ML:** NV-23 1.2.0 desplegada (2026-11-24) con el modelo base `baseline-1.0.0` de TheHouse-ML (ML-04), paridad bit a bit en 2,000 casos y prueba real 30/30. **GenAI:** NV-24 1.2.1 desplegada (2026-11-24) y conectada a TheHouse-GenAI por su URL interna con clave de servicio; explicaciones redactadas por TheHouse-GenAI en producción (prueba real 5/5 el 2026-11-25) con plantilla de respaldo (13/13) | Mejora: modelo entrenado ONNX de TheHouse-ML (ML-05/ML-06) |
+| Al menos una función de ML y de IA generativa | ✅ | **ML:** NV-23 1.3.0 en producción (2026-11-25) con el modelo entrenado `logreg-1.0.0` (ONNX, release `model-v1.0.0` de TheHouse-ML), 109/109 casos dorados idénticos a Python y respaldo automático al modelo base `baseline-1.0.0` (81/81). **GenAI:** NV-24 1.2.1 desplegada (2026-11-24) y conectada a TheHouse-GenAI por su URL interna con clave de servicio; explicaciones redactadas por TheHouse-GenAI en producción (prueba real 5/5 el 2026-11-25) con plantilla de respaldo (13/13) | Mejora: modelo con datos reales (ML-07) |
 | Permisos, SQLite y despliegue en Google Play | ➖ | — | Mobile |
 
 ## 6. Landing, GitHub y ML/GenAI (puntos 17–19)
@@ -76,7 +76,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | --- | --- | --- |
 | Landing con enlace a la tienda, aviso de privacidad y Google Analytics | ➖ | Equipo de Landing; el backend solo necesita sus URLs |
 | Una sola cuenta de GitHub | ✅ | Organización `thehouse-team` |
-| ML e IA generativa con las mismas prácticas | 🟡 | TheHouse-GenAI desplegado en `cae-thehouse-u2` (0–1 réplicas, solo HTTPS interno, Gemini en nivel gratuito sin facturación: costo $0 con evidencia del 2026-11-22); TheHouse-ML: modelo base (ML-04) en producción vía NV-23, modelo entrenado pendiente |
+| ML e IA generativa con las mismas prácticas | 🟡 | TheHouse-GenAI desplegado en `cae-thehouse-u2` (0–1 réplicas, solo HTTPS interno, Gemini en nivel gratuito sin facturación: costo $0 con evidencia del 2026-11-22); TheHouse-ML: modelo entrenado `logreg-1.0.0` (ONNX) en producción vía NV-23 desde el 2026-11-25 |
 
 ## 7. Entrega (punto 20)
 
@@ -91,7 +91,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | --- | --- | --- |
 | Imágenes sin CDN de la nube | Medio: el PDF lo pide explícito | **Decidido (M-BE-084): opción A, costo cero.** Se evaluó la opción B (2026-11-20): el CDN clásico de Azure ya no admite perfiles nuevos (retiro el 30 de septiembre de 2027) y Front Door Standard, el CDN vigente, cobra US$35 al mes de base más solicitudes y tráfico; un Front Door temporal para la evaluación costaría unos US$2–3 del crédito, que no cuenta como costo cero (constitución §17). Se defiende con la caché HTTP `immutable` de un año y su demostración con `curl -I` |
 | Dos instancias | Bajo: ventana agendada | 3 de diciembre con «OK PARA APPLY» (NV-03 T08/T09/T19) |
-| ML (NV-23) y GenAI (NV-24) | Bajo: las dos en producción (ML con el modelo base; GenAI redacta las explicaciones, con plantilla si tarda más de 8 s) | GenAI: bajar su latencia; ML: casos dorados y ONNX |
+| ML (NV-23) y GenAI (NV-24) | Bajo: las dos en producción (ML con el modelo entrenado `logreg-1.0.0`; GenAI redacta las explicaciones, con plantilla si tarda más de 8 s) | GenAI: bajar su latencia (fix #22 de su repositorio) |
 | Caché de datos del backend | Bajo | La caché HTTP cumple el punto 9; opcional: caché en Redis para catálogos |
 | Seguridad de Atlas | Bajo | **Hecho (2026-11-25):** la app usa `thehouse-backend` con `readWrite` solo en `thehouse_u2` (NV-03 T07, 7/7). Sin rotación de contraseñas por decisión de Victor: el proyecto de Atlas se eliminará después de la entrega |
 | Trazas y métricas OTel | Bajo | NV-03 T11/T12 con decisión de exportador |

@@ -10,7 +10,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | --- | --- | --- | --- | --- |
 | NV-01 | [Foundation (U2)](nv-01-foundation/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) | 18/19 |
 | NV-02 | [CI y DevSecOps (U2)](nv-02-devsecops/spec.md) | **✅ APROBADA** | **✅ COMPLETADA — PASS WITH WARNINGS (2026-11-05)** | 15/15 |
-| NV-03 | [Scaling Cloud U2](nv-03-scaling-cloud/spec.md) | **✅ APROBADA PARA U2** | **🟡 EJECUCIÓN PARCIAL — 18 de 25 tasks (usuario de mínimo privilegio en Atlas el 2026-11-25); abiertas: T08, T09, T11, T12, T14, T18, T19; 1.3.0-u2 (T11/T12 con Application Insights) PROPUESTA; ver `evidence.md`** | 18/25 |
+| NV-03 | [Scaling Cloud U2](nv-03-scaling-cloud/spec.md) | **✅ APROBADA PARA U2** | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (futura); ver `evidence.md`** | 20/25 |
 | NV-04 | [User Registration (U2)](nv-04-registration/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 11/11 |
 | NV-05 | [Login (U2)](nv-05-login/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 11/11 |
 | NV-06 | [Logout (U2)](nv-06-logout/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 10/10 |
@@ -30,7 +30,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-20 | [Notificaciones](nv-20-notifications/spec.md) | **✅ APROBADA** | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** | 7/8 |
 | NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-19): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
-| NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA — 1.2.0** | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`** | 12/14 |
+| NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA — 1.3.0** | **✅ COMPLETADA — 1.3.0: 14 de 14 (2026-11-25): PASS WITH WARNINGS; modelo entrenado `logreg-1.0.0` (ONNX) de TheHouse-ML en producción con respaldo a `baseline-1.0.0`; ver `evidence.md`** | 14/14 |
 | NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **✅ APROBADA — 1.2.1** | **✅ COMPLETADA — 1.2.1: 11 de 11 (2026-11-25), PASS WITH WARNINGS; explicaciones redactadas por TheHouse-GenAI en producción (prueba real 5/5) con plantilla de respaldo; ver `evidence.md`** | 11/11 |
 | NV-25 | [Estadísticas del arrendador](nv-25-metrics-stats/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T09 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 9/9 |
 | NV-26 | [Script de la base de datos para la entrega](nv-26-database-script/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.0.0 T01–T07 (2026-11-20): PASS, ver `evidence.md`** | 7/7 |

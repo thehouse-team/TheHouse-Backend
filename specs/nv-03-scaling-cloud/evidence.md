@@ -375,3 +375,47 @@ La API estuvo caída unos minutos entre el primer cambio y el reinicio correcto.
 | El usuario administrador anterior | **Aceptado por Victor (2026-11-25):** no se cambia su contraseña; la app ya no lo usa y el proyecto de Atlas se eliminará después de la entrega |
 
 Resultado: **T07 completa**. NV-03 queda en **18 de 25**.
+
+## T11 y T12 — Telemetría con Application Insights (1.3.0-u2, 2026-11-25)
+
+Autorización: «Apruebo, autorizo y EJECUTA» (spec 1.3.0-u2, paquete `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0, T11 y T12) y «Autorizo y OK PARA APPLY» (registro de `Microsoft.Insights` y apply) — Victor Manuel Jose Jose, 2026-11-25 (M-BE-090).
+
+### Implementación y despliegue
+
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#93](https://github.com/thehouse-team/TheHouse-Backend/pull/93) (spec) y [#94](https://github.com/thehouse-team/TheHouse-Backend/pull/94) (código y Terraform), mezclados; CI en verde (pruebas en 3 min 8 s) y 1,191/1,191 en local |
+| Código | Exportador de Azure Monitor para trazas (10 %), métricas (lista permitida de 6) y logs Warning+; credencial de Azure.Core sobre la identidad administrada de la app (`https://monitor.azure.com`), sin `Azure.Identity` ni llaves; sin almacenamiento local ni contadores de rendimiento; apagado por defecto y validado al arrancar |
+| Proveedor de Azure | `Microsoft.Insights` no estaba registrado (`MissingSubscriptionRegistration`, no se creó nada); se registró con autorización y el plan siguió igual |
+| `terraform apply` | 2 recursos creados, 0 cambiados, 0 destruidos: `appi-thehouse-u2` y el rol `Monitoring Metrics Publisher`; plan posterior sin cambios |
+| Verificado en Azure | Autenticación local desactivada, ingestión al workspace `log-thehouse-u2`, 30 días, IP enmascarada, tope de 0.05 GB/día; el rol solo para la identidad de la app |
+| Activación | Después del CD de `0e58fb8` (18:34 UTC), Victor cargó `Observability__AzureMonitorEnabled=true` y la cadena de conexión sin mostrarla (18:35); revisión `ca-thehouse-u2--0000015` sana |
+
+### T11 — trazas, métricas y logs correlacionados (consultas KQL al workspace)
+
+| Revisión | Resultado |
+| --- | --- |
+| `AppRequests` | Peticiones al 10 % con `ItemCount` 10 (16 filas = ~160 peticiones en 40 min), `AppRoleName` `thehouse-backend` y `AppRoleInstance` = réplica |
+| `AppDependencies` | MongoDB (colección y operación), Redis (`redis.rate_limit`) y HTTP a TheHouse-GenAI |
+| Correlación | Una petición de Smart Match con sus 13 dependencias bajo el mismo `OperationId` |
+| `AppMetrics` | Solo las 6 permitidas más las métricas estándar de Application Insights |
+| `AppTraces` / `AppExceptions` | Warning+ con su `operation_Id`: los avisos de NV-24 «no respondió en 8 s» con su `X-Request-ID` y el `TaskCanceledException` correspondiente |
+| Hallazgo | El driver de MongoDB emite 2 dependencias por consulta (operación y comando); se acepta, el volumen es mínimo |
+| Dos réplicas | Se verifica en T19 (ventana del 3 de diciembre) |
+
+### T12 — matriz de telemetría (datos reales)
+
+| Dato | Resultado |
+| --- | --- |
+| Query string | `Redacted` (`?page=Redacted&pageSize=Redacted`) |
+| IP del cliente | `0.0.0.0` (enmascarada) |
+| Propiedades de peticiones | Solo `network.protocol.version`, `thehouse.correlation_id` y propiedades internas `_MS.*` |
+| MongoDB | `db.name`, `db.operation.name` y `db.operation.summary`; sin texto de consultas |
+| Redis | Sin claves (solo `db.system.name`) |
+| Excepciones y logs | Sin cuerpos, tokens, correos ni ids de usuario |
+| Muestreo y cardinalidad | 10 % padre-hijo; 6 métricas; rutas como nombres de operación |
+| Retención | 30 días (workspace y Application Insights) |
+| Consumo (`Usage`, 6 h con pruebas) | `AppMetrics` 0.62 MB, `AppDependencies` 0.275 MB, `AppRequests` 0.032 MB, logs de consola 0.272 MB; máximo 0.71 MB en una hora. Aun con la réplica encendida todo el día serían ~17 MB/día, debajo de los topes de 50 MB (Application Insights) y 100 MB (workspace) |
+| Costo | $0: dentro de los 5 GB/mes gratis del workspace; Application Insights sin cargo propio |
+
+Resultado: **T11 y T12 completas — PASS**. NV-03 queda en **20 de 25**; lo restante es la ventana de dos réplicas (T08, T09, T18, T19) y T14 (futura).
