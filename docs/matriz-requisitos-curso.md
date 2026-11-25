@@ -5,7 +5,7 @@
 | Fuente | «Requerimientos para el desarrollo del proyecto Móvil» v3 (cuatrimestre septiembre–diciembre 2026) |
 | Fecha | 2026-11-20 |
 | Evaluación | 3 y 4 de diciembre de 2026 (último día para registrar calificaciones: 4 de diciembre) |
-| Avance del backend | 303/316 tasks (96 %); 96 % sin las 2 tasks que esperan a TheHouse-ML (NV-23 T06/T07) |
+| Avance del backend | 304/316 tasks (96 %); 97 % sin las 2 tasks que esperan a TheHouse-ML (NV-23 T06/T07) |
 | URL | https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io |
 
 Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · ➖ fuera del backend (Mobile, Landing o ML/GenAI).
@@ -51,7 +51,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Endpoints eficientes | ✅ | Paginación, índices, caché HTTP, compresión y proyecciones | Tiempo de respuesta en vivo |
 | API o microservicios | ✅ | Monolito modular (constitution §6) más servicios auxiliares (TheHouse-GenAI y TheHouse-ML) | Diagrama de módulos |
 | Imágenes en el CDN de la nube | 🟡 | **Alternativa documentada por costo cero (M-BE-084).** Las fotos se guardan en MongoDB (GridFS) y `GET /api/v1/media/{id}` las sirve con `Cache-Control: public, max-age=31536000, immutable` y `ETag` (NV-13): el teléfono y cualquier proxy las guardan un año y no vuelven a pedirlas. Azure no tiene CDN gratis: el CDN clásico ya no admite perfiles nuevos y Front Door Standard cobra US$35 al mes más uso (ver §8) | `curl -I` de una foto pública: `Cache-Control … immutable` y `ETag`; repetir con `If-None-Match` → 304 |
-| Observabilidad (logs de eventos y errores) | 🟡 | Log Analytics con logs de consola correlacionados (NV-03 T24/T25); trazas y métricas OTel sin exportador (T11/T12 abiertas) | Consulta KQL en Log Analytics |
+| Observabilidad (logs de eventos y errores) | 🟡 | Log Analytics con logs de consola correlacionados (NV-03 T24/T25); trazas y métricas OTel sin exportador (T11/T12 abiertas; diseño con Application Insights en NV-03 1.3.0-u2) | Consulta KQL en Log Analytics |
 | JWT y Redis distribuido | ✅ | JWT con revocación por `jti` y `sid` en Redis; rate limit, candados y sal en Redis (NV-05, NV-06, NV-10) | Login → token; logout → 401 |
 | API performance: caching, rate limit, middleware, paginación, indexing, serializers, compresión | ✅ | `ETag`/304; rate limit en Redis (429 con `Retry-After`); middlewares de correlación, seguridad, revocación y límites de cuerpo; paginación `page`/`pageSize`; índices por repositorio; System.Text.Json en camelCase; `PublicResponseCompressionMiddleware` | `curl` con `Accept-Encoding: gzip` y 429 |
 | Integración con patrones | ✅ | Puertos y adaptadores (Clean Architecture), circuit breaker y degradación (GenAI), cola de push, fallo cerrado | Código de `Application/Abstractions` |
