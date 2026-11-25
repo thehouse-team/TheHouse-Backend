@@ -5,7 +5,7 @@
 | Fuente | «Requerimientos para el desarrollo del proyecto Móvil» v3 (cuatrimestre septiembre–diciembre 2026) |
 | Fecha | 2026-11-20 |
 | Evaluación | 3 y 4 de diciembre de 2026 (último día para registrar calificaciones: 4 de diciembre) |
-| Avance del backend | 291/316 tasks (92 %); 96 % sin NV-24 ni las 2 tasks de NV-23 que esperan a TheHouse-ML |
+| Avance del backend | 300/316 tasks (95 %); 97 % sin las 4 tasks que esperan a TheHouse-ML y TheHouse-GenAI (NV-23 T06/T07, NV-24 T08/T11) |
 | URL | https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io |
 
 Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · ➖ fuera del backend (Mobile, Landing o ML/GenAI).
@@ -67,7 +67,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Aviso de privacidad vinculado a la landing | 🟡 | NV-10 1.2.0: `GET /api/v1/legal` y aceptación registrada | URLs de la landing (`Legal__*`) |
 | Eliminar cuenta | ✅ | NV-10 1.2.0: vista previa y eliminación; prueba real 27/27 | Google Play pide además la URL web |
 | Sesión siempre viva salvo logout | ✅ | NV-10 1.2.0: sesión deslizante de 30 días sin tope | — |
-| Al menos una función de ML y de IA generativa | 🟡 | **ML:** NV-23 1.2.0 desplegada (2026-11-24) con el modelo base `baseline-1.0.0` de TheHouse-ML (ML-04), paridad bit a bit en 2,000 casos y prueba real 30/30. **GenAI:** NV-24 1.2.0 aprobada; GenAI ya desplegado en el entorno | NV-24 (explicaciones); modelo entrenado ONNX de TheHouse-ML (ML-05/ML-06) |
+| Al menos una función de ML y de IA generativa | 🟡 | **ML:** NV-23 1.2.0 desplegada (2026-11-24) con el modelo base `baseline-1.0.0` de TheHouse-ML (ML-04), paridad bit a bit en 2,000 casos y prueba real 30/30. **GenAI:** NV-24 1.2.1 desplegada (2026-11-24) y conectada a TheHouse-GenAI por su URL interna con clave de servicio; explicaciones con plantilla en producción (prueba real 13/13) | Que TheHouse-GenAI responda `generated: true` (hoy devuelve su plantilla); modelo entrenado ONNX de TheHouse-ML (ML-05/ML-06) |
 | Permisos, SQLite y despliegue en Google Play | ➖ | — | Mobile |
 
 ## 6. Landing, GitHub y ML/GenAI (puntos 17–19)
@@ -76,7 +76,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | --- | --- | --- |
 | Landing con enlace a la tienda, aviso de privacidad y Google Analytics | ➖ | Equipo de Landing; el backend solo necesita sus URLs |
 | Una sola cuenta de GitHub | ✅ | Organización `thehouse-team` |
-| ML e IA generativa con las mismas prácticas | 🟡 | TheHouse-GenAI desplegado en `cae-thehouse-u2` (pendiente: `minReplicas = 0` y evidencia de costo); TheHouse-ML: modelo base (ML-04) en producción vía NV-23, modelo entrenado pendiente |
+| ML e IA generativa con las mismas prácticas | 🟡 | TheHouse-GenAI desplegado en `cae-thehouse-u2` (0–1 réplicas, solo HTTPS interno, Gemini en nivel gratuito sin facturación: costo $0 con evidencia del 2026-11-22); TheHouse-ML: modelo base (ML-04) en producción vía NV-23, modelo entrenado pendiente |
 
 ## 7. Entrega (punto 20)
 
@@ -91,7 +91,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | --- | --- | --- |
 | Imágenes sin CDN de la nube | Medio: el PDF lo pide explícito | **Decidido (M-BE-084): opción A, costo cero.** Se evaluó la opción B (2026-11-20): el CDN clásico de Azure ya no admite perfiles nuevos (retiro el 30 de septiembre de 2027) y Front Door Standard, el CDN vigente, cobra US$35 al mes de base más solicitudes y tráfico; un Front Door temporal para la evaluación costaría unos US$2–3 del crédito, que no cuenta como costo cero (constitución §17). Se defiende con la caché HTTP `immutable` de un año y su demostración con `curl -I` |
 | Dos instancias | Bajo: ventana agendada | 3 de diciembre con «OK PARA APPLY» (NV-03 T08/T09/T19) |
-| ML (NV-23) y GenAI (NV-24) | Alto: el PDF pide ambas funciones | Seguir con los compañeros; conectar `parse-search` si ML se retrasa |
+| ML (NV-23) y GenAI (NV-24) | Medio: las dos están desplegadas (ML con el modelo base; GenAI con plantilla mientras responde `generated: false`) | GenAI: corregir su `generated: false` (request `d24974e7…`); ML: casos dorados y ONNX |
 | Caché de datos del backend | Bajo | La caché HTTP cumple el punto 9; opcional: caché en Redis para catálogos |
 | Seguridad de Atlas (usuario `atlasAdmin`) | Medio | En curso: usuario `thehouse-backend` con `readWrite` en `thehouse_u2` (NV-03 T07) |
 | Trazas y métricas OTel | Bajo | NV-03 T11/T12 con decisión de exportador |

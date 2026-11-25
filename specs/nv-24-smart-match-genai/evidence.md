@@ -44,3 +44,42 @@ Suite completa en Release (`dotnet build -warnaserror`: 0 advertencias, 0 errore
 1. Merge y CD (GenAI desactivado): prueba HTTP real en Azure con plantilla.
 2. Victor carga la clave como secreto `genai-service-key` y activa `GenAI__Enabled=true` y `GenAI__BaseUrl` (URL interna); prueba real con `generatedBy=genai` de punta a punta con el equipo de GenAI.
 3. Contrato §6.1 a Mobile y cierre de la evidencia.
+
+## 5. Despliegue y prueba real en Azure (T08 parcial) — 2026-11-24
+
+| Paso | Resultado |
+| --- | --- |
+| PRs | [#83](https://github.com/thehouse-team/TheHouse-Backend/pull/83) (1.2.1 e implementación), [#84](https://github.com/thehouse-team/TheHouse-Backend/pull/84) (registro de `generated=false` con el id) y [#85](https://github.com/thehouse-team/TheHouse-Backend/pull/85) (caché por generador), mezclados en `main` |
+| CD | #79 (`ee57b45`), #80 (`2b3c934`) y #81 (`2b2a7f6`): publish, verify-ephemeral, deploy y dast-baseline en verde; despliegues aprobados por un integrante distinto de quien hizo el merge |
+
+### Prueba con plantilla (GenAI desactivado): **13/13 PASS**
+
+`.azure-check/nv24_azure_check.py run` (fuera de git), sobre los cuartos de demostración:
+
+| Bloque | Resultado |
+| --- | --- |
+| Invitado (E1–E10) | Contrato de la §6.1 con `no-store`; `generatedBy: template`, `explanation-1.0.0` y `baseline-1.0.0`; puntaje igual al de NV-23 (95); un solo «%» en el resumen (sin porcentajes por factor); 4 ventajas y 1 desventaja; 422 con `missing`; 404 para un cuarto no publicado y para uno no elegible; 400 por campo extra; 401 sin sesión |
+| Con cuenta (U1–U3) | 422 con el perfil vacío (4 campos); explicación con las preferencias guardadas (405 ms); segunda consulta igual desde la caché (391 ms) |
+
+### Activación de TheHouse-GenAI
+
+| Paso | Resultado |
+| --- | --- |
+| Clave de servicio | Victor la cargó como secreto `genai-service-key` con `Read-Host -AsSecureString` (sin pantalla ni historial); el backend no guarda la clave de métricas de GenAI |
+| Configuración | `GenAI__Enabled=true`, `GenAI__BaseUrl` = URL interna de `ca-thehouse-genai-u2` y `GenAI__ServiceKey=secretref:genai-service-key`; los CD posteriores la conservan (solo cambian la imagen) |
+| Arranque | «NV-24: TheHouse-GenAI activo para las explicaciones» en cada revisión nueva |
+
+### Diagnóstico de la prueba con GenAI (`generatedBy: template` en vez de `genai`)
+
+| Hallazgo | Evidencia | Acción |
+| --- | --- | --- |
+| **Caché de plantillas viejas (backend)** | La primera prueba corrió segundos antes de que la revisión con GenAI recibiera tráfico; esas plantillas se guardaron y se sirvieron 24 h sin llamar a GenAI (respuestas de ~300 ms sin ningún registro) | [#85](https://github.com/thehouse-team/TheHouse-Backend/pull/85): el generador activo forma parte de la llave de caché |
+| **Sin registro de `generated: false` (backend)** | GenAI podía devolver su plantilla sin dejar rastro en el backend | [#84](https://github.com/thehouse-team/TheHouse-Backend/pull/84): registro con `promptVersion` y `X-Request-ID`, sin el texto ni la clave |
+| **Arranque en frío de GenAI** | GenAI estaba en cero réplicas; la primera llamada (17:15:02 UTC) creó su réplica a las 17:15:03, pero tardó más de 8 s: dos llamadas registraron «no respondió en 8 s» (requests `0ceb540e…` y `2e995b32…`) | Comportamiento previsto (RNF-16): plantilla sin guardar en caché; la siguiente consulta reintenta |
+| **GenAI responde `generated: false` (equipo de GenAI)** | Con GenAI ya encendido, respondió en 0.9 s con `generated=false` (`explain_match_v3`; request `d24974e7c5094dd3812c3bf9bf34f0c4`, 17:15:52 UTC). Por la rapidez, no llamó a Gemini | Enviado al equipo de GenAI con el id para revisar sus registros (proveedor, presupuesto, moderación o validación) |
+
+La conexión backend → GenAI funciona por la URL interna y solo HTTPS, con la clave correcta (sin 401) y el contrato correcto (sin 422). Lo que falta para cerrar T08 es que GenAI responda `generated: true` y repetir `.azure-check/nv24_azure_check.py genai`.
+
+## 6. Estado
+
+**9 de 11 — desplegada con plantilla.** NV-24 ya cumple RNF-16 en producción: explica el puntaje de NV-23 con plantilla y usará el texto de GenAI en cuanto responda `generated: true`, sin cambiar el contrato con Mobile. Pendiente: T08 (prueba con `generatedBy: genai` y contrato a Mobile) y T11 (cierre de la evidencia).

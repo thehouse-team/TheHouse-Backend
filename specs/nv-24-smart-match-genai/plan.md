@@ -8,7 +8,7 @@
 | Fecha | 2026-11-24 |
 | Estado documental | **✅ APROBADA — 1.2.1** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-24 («Apruebo NV-24 1.2.1 y EJECUTA»: hosting en Container Apps interno, costo $0 con la evidencia del equipo de GenAI del 2026-11-22 y privacidad del nivel gratuito; «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-24-smart-match-genai/`; la clave de servicio la carga Victor como secreto; sin paquetes nuevos) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.1: 9 de 11 (T01–T07, T09, T10); T08 (despliegue, clave y prueba real con GenAI) y T11 esperan el despliegue; ver `evidence.md`** |
+| Estado de ejecución | **🟡 DESPLEGADA CON PLANTILLA — 1.2.1: 9 de 11 (2026-11-24); GenAI conectado en producción, pero responde `generated: false`: T08 y T11 esperan la corrección del equipo de GenAI; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.1 |
 | Tasks | `task.md` 1.2.1 |
@@ -154,4 +154,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.2.1: 9 de 11 (T01–T07, T09, T10); T08 (despliegue, clave y prueba real con GenAI) y T11 esperan el despliegue; ver `evidence.md`**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 DESPLEGADA CON PLANTILLA — 1.2.1: 9 de 11 (2026-11-24); GenAI conectado en producción, pero responde `generated: false`: T08 y T11 esperan la corrección del equipo de GenAI; ver `evidence.md`**.
