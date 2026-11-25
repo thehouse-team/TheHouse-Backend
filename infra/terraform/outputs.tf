@@ -72,3 +72,8 @@ output "content_safety_identity_client_id" {
   description = "NV-21 1.2.0: set as ContentSafety__IdentityClientId in the Container App (not a secret)."
   value       = azurerm_user_assigned_identity.app.client_id
 }
+
+output "application_insights_name" {
+  description = "NV-03 1.3.0-u2: its connection string goes to Observability__AzureMonitorConnectionString (identifies the resource; local auth is disabled)."
+  value       = azurerm_application_insights.this.name
+}

@@ -1,6 +1,6 @@
 # COST-001 — TheHouse NV-03 / U2
 
-Fecha de revisión: 2026-11-04
+Fecha de revisión: 2026-11-25 (observabilidad: NV-03 1.3.0-u2)
 
 ## Objetivo
 
@@ -20,18 +20,21 @@ Configuración de evaluación:
 - min_replicas = 2
 - max_replicas = 2
 
+Observabilidad (se aprovisiona con topes, NV-03 1.2.0-u2 y 1.3.0-u2):
+
+- Log Analytics Workspace con tope de 0.1 GB/día y 30 días de retención (3.1 GB/mes como máximo, dentro de los 5 GB/mes gratis).
+- Application Insights basado en ese workspace (sin cargo propio), con su propio tope de 0.05 GB/día; sus datos cuentan dentro del tope del workspace.
+
 No se aprovisionan:
 
 - Azure Container Registry
-- Log Analytics Workspace
-- Application Insights
 - VNet personalizada
 - NAT Gateway
 - IP pública dedicada
 - dominio personalizado
 - Key Vault
 
-Los logs del Container Apps Environment permanecen en Streaming Only.
+Los logs del Container Apps Environment van al workspace de Log Analytics (NV-03 T24).
 
 ## Concesión gratuita de Azure Container Apps
 

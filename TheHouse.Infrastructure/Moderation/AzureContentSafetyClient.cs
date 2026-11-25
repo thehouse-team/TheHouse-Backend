@@ -15,10 +15,14 @@ public interface IManagedIdentityTokenSource
 }
 
 // `clientId` elige la identidad asignada por el usuario (Terraform `id-thehouse-u2-app`).
-public sealed class ContainerAppsIdentityTokenSource(HttpClient http, string? identityEndpoint, string? identityHeader, string? clientId, TimeProvider timeProvider)
+// `resource` permite pedir tokens para otro servicio con la misma identidad
+// (NV-03 1.3.0-u2: Application Insights usa https://monitor.azure.com).
+public sealed class ContainerAppsIdentityTokenSource(HttpClient http, string? identityEndpoint, string? identityHeader, string? clientId, TimeProvider timeProvider, string resource = ContainerAppsIdentityTokenSource.Resource)
     : IManagedIdentityTokenSource, IDisposable
 {
     public const string Resource = "https://cognitiveservices.azure.com";
+
+    public const string MonitorResource = "https://monitor.azure.com";
 
     private readonly SemaphoreSlim gate = new(1, 1);
 
@@ -47,7 +51,7 @@ public sealed class ContainerAppsIdentityTokenSource(HttpClient http, string? id
             }
 
             var client = string.IsNullOrEmpty(clientId) ? string.Empty : "&client_id=" + Uri.EscapeDataString(clientId);
-            using var request = new HttpRequestMessage(HttpMethod.Get, $"{identityEndpoint}?api-version=2019-08-01&resource={Uri.EscapeDataString(Resource)}{client}");
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"{identityEndpoint}?api-version=2019-08-01&resource={Uri.EscapeDataString(resource)}{client}");
             request.Headers.Add("X-IDENTITY-HEADER", identityHeader);
             using var response = await http.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
