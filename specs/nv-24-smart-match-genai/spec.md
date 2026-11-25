@@ -8,7 +8,7 @@
 | Fecha | 2026-11-24 |
 | Estado documental | **✅ APROBADA — 1.2.1** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-24 («Apruebo NV-24 1.2.1 y EJECUTA»: hosting en Container Apps interno, costo $0 con la evidencia del equipo de GenAI del 2026-11-22 y privacidad del nivel gratuito; «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-24-smart-match-genai/`; la clave de servicio la carga Victor como secreto; sin paquetes nuevos) |
-| Estado de ejecución | **🟡 DESPLEGADA CON PLANTILLA — 1.2.1: 9 de 11 (2026-11-24); GenAI conectado en producción, pero responde `generated: false`: T08 y T11 esperan la corrección del equipo de GenAI; ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETADA — 1.2.1: 11 de 11 (2026-11-25), PASS WITH WARNINGS; explicaciones redactadas por TheHouse-GenAI en producción (prueba real 5/5) con plantilla de respaldo; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-59, RF-60, RF-61, RF-62, RF-63 (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-15, RNF-16 |
@@ -235,9 +235,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 9 |
+| Tasks completadas | 11 |
 | Estado documental | **✅ APROBADA — 1.2.1** |
-| Estado de ejecución | **🟡 DESPLEGADA CON PLANTILLA — 1.2.1: 9 de 11 (2026-11-24); GenAI conectado en producción, pero responde `generated: false`: T08 y T11 esperan la corrección del equipo de GenAI; ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETADA — 1.2.1: 11 de 11 (2026-11-25), PASS WITH WARNINGS; explicaciones redactadas por TheHouse-GenAI en producción (prueba real 5/5) con plantilla de respaldo; ver `evidence.md`** |
 
 ## 18. Aprobación pendiente
 

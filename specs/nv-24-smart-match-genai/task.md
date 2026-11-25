@@ -8,12 +8,12 @@
 | Fecha | 2026-11-24 |
 | Estado documental | **✅ APROBADA — 1.2.1** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-24 («Apruebo NV-24 1.2.1 y EJECUTA»: hosting en Container Apps interno, costo $0 con la evidencia del equipo de GenAI del 2026-11-22 y privacidad del nivel gratuito; «EJECUTA» de T01–T11; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-24-smart-match-genai/`; la clave de servicio la carga Victor como secreto; sin paquetes nuevos) |
-| Estado de ejecución | **🟡 DESPLEGADA CON PLANTILLA — 1.2.1: 9 de 11 (2026-11-24); GenAI conectado en producción, pero responde `generated: false`: T08 y T11 esperan la corrección del equipo de GenAI; ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETADA — 1.2.1: 11 de 11 (2026-11-25), PASS WITH WARNINGS; explicaciones redactadas por TheHouse-GenAI en producción (prueba real 5/5) con plantilla de respaldo; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.2.1 |
 | Plan | `plan.md` 1.2.1 |
 | Tasks totales | 11 |
-| Tasks completadas | 9 |
+| Tasks completadas | 11 |
 
 ## Reglas de esta lista
 
@@ -41,10 +41,10 @@
 
 ## F4 — Pruebas y evidencia
 
-- [ ] **T08 · Contrato para Mobile y despliegue** — Requisito: NV-24-R08 · Fase: F4 · Aceptación: Contrato §6.1 entregado a Mobile; desplegado por el CD con GenAI desactivado; prueba HTTP real en Azure con plantilla; activar GenAI en Production con la URL, la clave como secreto y la evidencia de costo, y una prueba real adicional con `generatedBy=genai`. · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06, T07.
+- [x] **T08 · Contrato para Mobile y despliegue** — Requisito: NV-24-R08 · Fase: F4 · Aceptación: Contrato §6.1 entregado a Mobile; desplegado por el CD con GenAI desactivado; prueba HTTP real en Azure con plantilla; activar GenAI en Production con la URL, la clave como secreto y la evidencia de costo, y una prueba real adicional con `generatedBy=genai`. · Evidencia: reportes de prueba y `evidence.md`. · Depende de: T01, T02, T03, T04, T05, T06, T07.
 - [x] **T09 · Pruebas unitarias y de integración** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: Casos felices y de error de cada endpoint y regla de negocio, con MongoDB y Redis aislados; ninguna prueba depende de servicios externos de pago. · Evidencia: TRX y cobertura del run de CI. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
 - [x] **T10 · Pruebas de seguridad** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: BOLA entre dos usuarios, asignación masiva, validación de límites, rate limit, fallo cerrado de Redis y ausencia de datos sensibles en respuestas y logs. · Evidencia: TRX de `TheHouse.SecurityTests`. · Depende de: T01, T02, T03, T04, T05, T06, T07, T08.
-- [ ] **T11 · Evidencia y revisión final** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T09, T10.
+- [x] **T11 · Evidencia y revisión final** — Requisito: NV-24-R09 · Fase: F4 · Aceptación: `evidence.md` con commit, comandos, resultados, hallazgos, costo y revisión de coherencia y seguridad; resultado PASS, PASS WITH WARNINGS o BLOCKED. · Evidencia: `evidence.md`. · Depende de: T09, T10.
 
 ## Matriz task → requisito
 
@@ -57,10 +57,10 @@
 | T05 | R05 | F2 | COMPLETA |
 | T06 | R06 | F2 | COMPLETA |
 | T07 | R07 | F3 | COMPLETA |
-| T08 | R08 | F4 | ABIERTA |
+| T08 | R08 | F4 | COMPLETADA |
 | T09 | R09 | F4 | COMPLETA |
 | T10 | R09 | F4 | COMPLETA |
-| T11 | R09 | F4 | ABIERTA |
+| T11 | R09 | F4 | COMPLETADA |
 
 ## Cobertura requisito → task
 
@@ -82,11 +82,11 @@
 | --- | --- |
 | Requisitos | 9 |
 | Tasks | 11 |
-| Tasks abiertas | 2 |
-| Tasks completadas | 9 |
+| Tasks abiertas | 0 |
+| Tasks completadas | 11 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA — 1.2.1** |
-| Estado de ejecución | **🟡 DESPLEGADA CON PLANTILLA — 1.2.1: 9 de 11 (2026-11-24); GenAI conectado en producción, pero responde `generated: false`: T08 y T11 esperan la corrección del equipo de GenAI; ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETADA — 1.2.1: 11 de 11 (2026-11-25), PASS WITH WARNINGS; explicaciones redactadas por TheHouse-GenAI en producción (prueba real 5/5) con plantilla de respaldo; ver `evidence.md`** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.

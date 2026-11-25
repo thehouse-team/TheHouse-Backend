@@ -31,7 +31,7 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 | NV-21 | [Verificación, reportes y moderación](nv-21-verification-moderation/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.2.0 T01–T10 (2026-11-19): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-22 | [Búsqueda de compañero de vivienda](nv-22-roommates/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T10 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 10/10 |
 | NV-23 | [Smart Match — compatibilidad con el modelo de TheHouse-ML](nv-23-smart-match-ml/spec.md) | **✅ APROBADA — 1.2.0** | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) BLOCKED por TheHouse-ML; ver `evidence.md`** | 12/14 |
-| NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **✅ APROBADA — 1.2.1** | **🟡 DESPLEGADA CON PLANTILLA — 1.2.1: 9 de 11 (2026-11-24); GenAI conectado en producción, pero responde `generated: false`: T08 y T11 esperan la corrección del equipo de GenAI; ver `evidence.md`** | 9/11 |
+| NV-24 | [Smart Match — explicaciones con TheHouse-GenAI](nv-24-smart-match-genai/spec.md) | **✅ APROBADA — 1.2.1** | **✅ COMPLETADA — 1.2.1: 11 de 11 (2026-11-25), PASS WITH WARNINGS; explicaciones redactadas por TheHouse-GenAI en producción (prueba real 5/5) con plantilla de respaldo; ver `evidence.md`** | 11/11 |
 | NV-25 | [Estadísticas del arrendador](nv-25-metrics-stats/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.1.0 T01–T09 (2026-11-17): PASS WITH WARNINGS, ver `evidence.md`** | 9/9 |
 | NV-26 | [Script de la base de datos para la entrega](nv-26-database-script/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.0.0 T01–T07 (2026-11-20): PASS, ver `evidence.md`** | 7/7 |
 
