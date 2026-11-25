@@ -4,7 +4,7 @@
 | --- | --- |
 | ID | NV-09 |
 | Documento | `spec.md` |
-| Versión | 1.1.0-u2 |
+| Versión | 1.1.1-u2 |
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
@@ -16,6 +16,8 @@
 | Relación | Consume el resultado de la CI de NV-02. Aporta la evidencia que falta en NV-03 (T14, T19, T22 y T25). El roadmap funcional de M-BE-023 se recorre a partir de NV-10 (M-BE-049) |
 
 **Cambio 1.1.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-09-R17 (no desplegar cambios que solo tocan documentación) y la task T20. T13 y T18 se ejecutan en este ciclo (T13 ya autorizada; T18 requiere su autorización propia).
+
+**Cambio 1.1.1-u2 (2026-11-24) — NV-09-R17 corregida, M-BE-087 (autorizado por Victor: «Arreglar regla del CD»):** el CD comparaba solo el commit contra su padre. El 2026-11-23 el CD del merge de NV-23 quedó en cola detrás de un CD antiguo sin aprobar y se canceló; el siguiente merge solo cambiaba documentación y el CD omitió el despliegue, así que el código de NV-23 no llegó a Azure hasta un CD manual. Ahora el job `deploy` guarda, solo si todo salió bien, el commit realmente desplegado en el artefacto `deployed-sha` (90 días), y `resolve` compara contra ese commit; sin registro verificable, publica.
 
 Esta spec define la entrega continua para revisión humana. No autoriza crear workflows, identidades ni roles, cambiar Terraform, configurar GitHub, publicar, desplegar ni ejecutar seeds: la ejecución requiere la autorización humana «EJECUTA», y cualquier `terraform apply` requiere además «OK PARA APPLY».
 
@@ -143,7 +145,7 @@ Reglas comunes:
 | NV-09-R14 | Seed controlado en producción | El catálogo de universidades y propiedades se carga una sola vez en producción con `--allow-production-seed`, autorización explícita y evidencia sin datos sensibles. | F6 | T18 |
 | NV-09-R15 | Registro y trazabilidad | Cada despliegue deja commit, digest, firma, aprobador, revisión y resultados en el resumen y en `deployment-record.json`; `VERSIONING.md` se actualiza por pull request; la evidencia se enlaza a NV-03 T14, T19, T22 y T25. | F6 | T17, T19 |
 | NV-09-R16 | Costo $0 y evidencia | Todos los componentes con costo $0 demostrado; `evidence.md` con runs, hallazgos, excepciones y revisión de seguridad y coherencia. | F6 | T19 |
-| NV-09-R17 | Omitir despliegues de solo documentación | Si los archivos cambiados respecto al commit anterior de `main` son únicamente `specs/`, `*.md`, `.opencode/` o `docs/`, `cd.yml` termina sin publicar ni desplegar y lo registra en el resumen; cualquier otro archivo mantiene el flujo completo; la ejecución manual siempre despliega. | F2 | T20 |
+| NV-09-R17 | Omitir despliegues de solo documentación | Si los archivos cambiados respecto al último commit desplegado con éxito (artefacto `deployed-sha` del job `deploy`; sin registro verificable se publica) son únicamente `specs/`, `*.md`, `.opencode/` o `docs/`, `cd.yml` termina sin publicar ni desplegar y lo registra en el resumen; cualquier otro archivo mantiene el flujo completo; la ejecución manual siempre despliega. | F2 | T20 |
 
 ### Requisitos recibidos de NV-02 1.0.0-borrador
 

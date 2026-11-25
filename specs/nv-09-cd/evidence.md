@@ -345,3 +345,14 @@ La espera de aprobación humana (de `verify-ephemeral` a `deploy`) tuvo mediana 
 - spec, plan, task, README y esta evidencia indican 18 de 20 tasks; los requisitos R15 y R16 quedan cubiertos; R13 sigue abierto con T15 y T16.
 
 **Resultado de NV-09 al 2026-11-17: ✅ PASS WITH WARNINGS** (warnings: T15 y T16 abiertas, ventana de dos réplicas de NV-03 pendiente y H-04).
+
+## Corrección de NV-09-R17 (1.1.1-u2, 2026-11-24, M-BE-087)
+
+| Punto | Detalle |
+| --- | --- |
+| Problema | El CD del merge de NV-23 (`f73beb1`) quedó en cola detrás de un CD del 2026-11-20 que nunca se aprobó ni rechazó, y se canceló; el CD siguiente (`6ee59bf`, solo documentación respecto a su padre) omitió el despliegue. NV-23 llegó a Azure con un CD manual (#77) |
+| Causa | `resolve` comparaba el commit solo con su padre (`HEAD^1`) |
+| Corrección | `deploy` sube, solo con éxito, el artefacto `deployed-sha` (commit realmente desplegado, 90 días); `resolve` (permiso `actions: read`, historial completo) compara contra ese commit. Sin artefacto, con un id no numérico (error de la API), sin commit válido o si no es ancestro, publica |
+| Por qué no la API de deployments | Su `sha` es el HEAD de `main` cuando terminó la CI, no necesariamente el commit desplegado cuando hay varios merges seguidos |
+| Simulación local (historia real, `gh` falso) | `2ea1cea`→`6ee59bf` publica (el caso del error); `6ee59bf`→`727465e` omite (solo documentación); `2b3c934`→`2b2a7f6` publica; sin registro, registro inválido o commit no ancestro: publica |
+| Primer uso | El CD de este cambio publica (cambia el workflow) y deja el primer `deployed-sha` |

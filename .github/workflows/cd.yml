@@ -50,6 +50,8 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+      # NV-09-R17 1.2.0: leer el artefacto `deployed-sha` del último despliegue.
+      actions: read
     # workflow_run: solo un CI exitoso por push a main de este repositorio.
     if: >-
       github.event_name == 'workflow_dispatch' ||
@@ -62,13 +64,14 @@ jobs:
       sha: ${{ steps.resolve.outputs.sha }}
       digest: ${{ steps.resolve.outputs.digest }}
     steps:
-      # NV-09-R17: el commit y su padre bastan para saber qué cambió.
+      # NV-09-R17 1.2.0: historial completo para comparar contra el último
+      # commit desplegado con éxito, no solo contra el padre.
       - name: Checkout del commit de main
         if: github.event_name == 'workflow_run'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Resolver qué se publica y despliega
@@ -80,6 +83,8 @@ jobs:
           CURRENT_SHA: ${{ github.sha }}
           RUN_SHA: ${{ github.event.workflow_run.head_sha }}
           INPUT_DIGEST: ${{ inputs.image_digest }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
@@ -101,16 +106,34 @@ jobs:
             echo "sha=$CURRENT_SHA" >> "$GITHUB_OUTPUT"
           else
             echo "sha=$RUN_SHA" >> "$GITHUB_OUTPUT"
-            # NV-09-R17: si solo cambió documentación respecto al commit
-            # anterior de main, no se publica ni se despliega.
-            changed="$(git diff --name-only HEAD^1 HEAD)"
+            # NV-09-R17 1.2.0: si solo cambió documentación respecto al último
+            # commit desplegado con éxito (artefacto `deployed-sha` que deja el
+            # job deploy), no se publica ni se despliega. Comparar solo con el
+            # padre omitía código que nunca se desplegó (CD cancelado en cola
+            # seguido de un merge de docs, 2026-11-23). Sin registro verificable
+            # se publica, que es la opción segura.
+            base=""
+            artifact="$(gh api "repos/$REPOSITORY/actions/artifacts?name=deployed-sha&per_page=1" \
+              --jq '.artifacts[0] | select(.expired == false) | .id' 2>/dev/null || true)"
+            # Solo un id numérico: ante un error, `gh api` imprime el JSON del error.
+            if printf '%s' "$artifact" | grep -Eq '^[0-9]+$'               && gh api "repos/$REPOSITORY/actions/artifacts/$artifact/zip" > deployed-sha.zip 2>/dev/null; then
+              base="$(unzip -p deployed-sha.zip deployed-sha.txt 2>/dev/null | tr -d '[:space:]' || true)"
+            fi
+            changed=""
+            if printf '%s' "$base" | grep -Eq '^[0-9a-f]{40}$' && git cat-file -e "${base}^{commit}" 2>/dev/null \
+              && git merge-base --is-ancestor "$base" HEAD; then
+              echo "Último commit desplegado con éxito: ${base:0:7}"
+              changed="$(git diff --name-only "$base" HEAD)"
+            else
+              echo "Sin registro verificable del último despliegue; se publica."
+            fi
             code="$(echo "$changed" | grep -Ev '^(specs/|docs/|\.opencode/)|\.md$' | grep -v '^$' || true)"
             if [ -n "$changed" ] && [ -z "$code" ]; then
               echo "mode=skip" >> "$GITHUB_OUTPUT"
               {
                 echo "### Despliegue omitido"
                 echo
-                echo "El commit \`${RUN_SHA:0:7}\` solo cambia documentación (NV-09-R17); no se publica ni se despliega."
+                echo "Desde el último despliegue (\`${base:0:7}\`) hasta \`${RUN_SHA:0:7}\` solo cambió documentación (NV-09-R17); no se publica ni se despliega."
                 echo
                 echo "$changed" | sed 's/^/- `/; s/$/`/'
               } >> "$GITHUB_STEP_SUMMARY"
@@ -484,6 +507,24 @@ jobs:
             Healthy:*) ;;
             *) echo "::warning::Estado no concluyente ($health / $running); el smoke en producción ya pasó." ;;
           esac
+
+      # NV-09-R17 1.2.0: commit realmente desplegado (no el HEAD de main al
+      # terminar la CI), para que el siguiente CD sepa qué cambió desde aquí.
+      - name: Registrar el commit desplegado
+        if: success()
+        shell: bash
+        env:
+          DEPLOYED_SHA: ${{ needs.resolve.outputs.sha }}
+        run: echo "$DEPLOYED_SHA" > deployed-sha.txt
+
+      - name: Subir el commit desplegado
+        if: success()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: deployed-sha
+          path: deployed-sha.txt
+          retention-days: 90
+          if-no-files-found: error
 
       - name: Rollback a la imagen anterior (T13)
         id: rollback
