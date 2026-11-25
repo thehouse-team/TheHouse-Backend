@@ -371,7 +371,7 @@ La API estuvo caída unos minutos entre el primer cambio y el reinicio correcto.
 | --- | --- |
 | Lista de acceso de Atlas `0.0.0.0/0` | Aceptado: la Container App sale por un rango amplio de IPs de Azure (407 posibles); la protección es usuario de mínimo privilegio, contraseña larga y TLS |
 | Atlas M0 sin respaldos | Aceptado por costo $0; mitigación: el esquema y los catálogos se recrean con `scripts/db/` (NV-26) |
-| La contraseña de `thehouse-backend` quedó escrita en una conversación | **Pendiente:** rotarla en Atlas y volver a cargar `mongodb-uri` |
-| El usuario administrador anterior | **Pendiente:** que el responsable de Atlas cambie su contraseña (la app ya no lo usa) |
+| La contraseña de `thehouse-backend` quedó escrita en una conversación | **Aceptado por Victor (2026-11-25):** no se rota; el proyecto de Atlas se eliminará después de la entrega (evaluación del 3 y 4 de diciembre). Mitigación: el usuario solo tiene `readWrite` en `thehouse_u2` |
+| El usuario administrador anterior | **Aceptado por Victor (2026-11-25):** no se cambia su contraseña; la app ya no lo usa y el proyecto de Atlas se eliminará después de la entrega |
 
 Resultado: **T07 completa**. NV-03 queda en **18 de 25**.

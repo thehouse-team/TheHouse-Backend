@@ -812,4 +812,4 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** EJECUTADO — Victor, 2026-11-25 («Autorizo cambiar Mongo»); verificación 7/7.
 - **Fecha:** 2026-11-25.
 - **Aprobador:** Victor Manuel Jose Jose.
-- **Impacto:** sin cambios de código; pendiente rotar la contraseña de `thehouse-backend` (quedó escrita en una conversación) y la del administrador anterior.
+- **Impacto:** sin cambios de código. Riesgo aceptado por Victor (2026-11-25): no se rotan la contraseña de `thehouse-backend` (quedó escrita en una conversación) ni la del administrador anterior, porque el proyecto de Atlas se eliminará después de la entrega.
