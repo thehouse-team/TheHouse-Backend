@@ -6,9 +6,9 @@
 | Documento | `spec.md` |
 | Versión | 1.3.0 |
 | Fecha | 2026-11-20 |
-| Estado documental | **✅ APROBADA — 1.2.0** |
+| Estado documental | **✅ APROBADA — 1.3.0** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-20 («Apruebo NV-23 1.2.0»: decisiones de la §13; Mobile aceptó el cambio de contrato §6.1; la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 con las mismas rutas: `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas, `scripts/db/` (regenerado por la prueba de NV-26) y `specs/nv-23-smart-match-ml/`; la T06 requiere además autorización que nombre `Microsoft.ML.OnnxRuntime`; sin comandos en Production) |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETADA — 1.3.0: 14 de 14 (2026-11-25): PASS WITH WARNINGS; modelo entrenado `logreg-1.0.0` (ONNX) de TheHouse-ML en producción con respaldo a `baseline-1.0.0`; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RF-48 a RF-58, RF-64, RF-65, RF-66 (métricas, desde NV-25 1.1.0), RF-68 (uso sin cuenta) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-11, RNF-12, RNF-13, RNF-14 |
@@ -22,7 +22,7 @@ Spec aprobada (1.2.0, M-BE-085); la autorización «EJECUTA» de M-BE-068 cubre 
 
 **Cambio 1.2.0 (2026-11-20):** `TheHouse-ML` aprobó e implementó ML-04 1.0.0 después de NV-23 1.1.0 (`baseline_params.json` `baseline-1.0.0`, `feature_schema.json` **2.0.0** y `baseline_score.py`, merge #25 de `TheHouse-ML`). Para que el backend dé exactamente el mismo puntaje que ML, esta versión: (1) adopta los nombres de factores, las 10 features, las curvas y el **redondeo de ML-04** (cada factor con 1 decimal y el total con `floor(round6(Σ) + 0.5)`, mitad hacia arriba), que reemplazan el redondeo a entero de 1.1.0; (2) adopta las restricciones duras HC01–HC03 de ML-03 (**convivencia estricta** y mascotas como restricción con dato desconocido = no excluye); (3) exige universidad, `budget.max`, `livingWith` y `placeType` para calcular (perfil mínimo de ML) y aplica sus valores por omisión; (4) **cambia el contrato con Mobile**: `matchScore`, `breakdown` con `maxPoints` y `excludedBy` como lista (Mobile aceptó el cambio; valida la versión final de la §6.1); (5) agrega las métricas básicas de Smart Match para el administrador (RF-66, que NV-25 1.1.0 pasó a NV-23, M-BE-075); (6) borra la retroalimentación y los descartes al eliminar la cuenta (NV-10) y (7) suma las colecciones nuevas al script de la base de datos (NV-26). Mientras 1.2.0 no se apruebe sigue vigente 1.1.0 (autorizada, sin código escrito); al aprobarse, la autorización «EJECUTA» de M-BE-068 pasa a T01–T14 de 1.2.0.
 
-**Cambio 1.3.0 (2026-11-25) — PROPUESTO, pendiente de «Apruebo NV-23 1.3.0 y EJECUTA T06 y T07», de la autorización del paquete `Microsoft.ML.OnnxRuntime` 1.31.1 y del permiso para descargar los 7 archivos del release:** `TheHouse-ML` publicó el release inmutable `model-v1.0.0` (modelo `logreg-1.0.0`, ONNX, esquema 2.0.0, commit `59f07bc`) y su guía de integración para .NET (ML-06 T06, M-ML-050). Esta versión fija lo que la 1.2.0 dejaba a ML-06 (§9.1): artefactos versionados en el repositorio en lugar de descargarlos en el build, verificaciones al cargar, `maxPoints` leídos del modelo, inferencia por lotes, casos dorados de los dos modelos en el CI y activación por configuración con respaldo al modelo base. El contrato con Mobile no cambia de forma; cambian los valores de `modelVersion` y `maxPoints` cuando el ONNX está activo.
+**Cambio 1.3.0 (2026-11-25) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo todo»: spec 1.3.0, «EJECUTA» de T06 y T07, paquete `Microsoft.ML.OnnxRuntime` 1.31.1 y descarga de los 7 archivos del release; M-BE-091):** `TheHouse-ML` publicó el release inmutable `model-v1.0.0` (modelo `logreg-1.0.0`, ONNX, esquema 2.0.0, commit `59f07bc`) y su guía de integración para .NET (ML-06 T06, M-ML-050). Esta versión fija lo que la 1.2.0 dejaba a ML-06 (§9.1): artefactos versionados en el repositorio en lugar de descargarlos en el build, verificaciones al cargar, `maxPoints` leídos del modelo, inferencia por lotes, casos dorados de los dos modelos en el CI y activación por configuración con respaldo al modelo base. El contrato con Mobile no cambia de forma; cambian los valores de `modelVersion` y `maxPoints` cuando el ONNX está activo.
 
 ## 1. Contexto
 
@@ -285,8 +285,8 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | --- | --- | --- |
 | Enfoque | Modelo base por reglas en C# desde ahora; modelo ONNX de `TheHouse-ML` cuando se publique (constitution 1.2.0 §6.1) | APROBADO (M-BE-068) |
 | Pesos iniciales | Presupuesto 30, distancia 25, servicios esenciales 20, tipo de lugar 10, tipo de inmueble 10, extras 5 (iguales a ML-04) | APROBADO (M-BE-068) |
-| Distribución del artefacto | 1.3.0: los 7 archivos del release inmutable `model-v1.0.0` versionados en el repositorio, verificados con `SHA256SUMS` y con el SHA-256 de `model.onnx` fijado en la configuración (antes: descargados en el build) | PROPUESTO 1.3.0 |
-| Modelo ONNX | `logreg-1.0.0` con `Microsoft.ML.OnnxRuntime` 1.31.1, carga verificada, inferencia por lotes, `maxPoints` del modelo y activación por configuración con respaldo al modelo base (§9.1) | PROPUESTO 1.3.0 |
+| Distribución del artefacto | 1.3.0: los 7 archivos del release inmutable `model-v1.0.0` versionados en el repositorio, verificados con `SHA256SUMS` y con el SHA-256 de `model.onnx` fijado en la configuración (antes: descargados en el build) | APROBADO (M-BE-091) |
+| Modelo ONNX | `logreg-1.0.0` con `Microsoft.ML.OnnxRuntime` 1.31.1, carga verificada, inferencia por lotes, `maxPoints` del modelo y activación por configuración con respaldo al modelo base (§9.1) | APROBADO (M-BE-091) |
 | Métrica de promoción | NDCG@10, decidida y medida en `TheHouse-ML` (ML-05) | APROBADO (M-BE-068) |
 | Alineación con ML-04 1.0.0 | Nombres de factores, 10 features del esquema 2.0.0, curvas, orden del ranking y redondeo de ML-04 (1 decimal por factor y `floor(round6(Σ) + 0.5)`), en lugar del redondeo a entero de 1.1.0 | APROBADO (M-BE-085) |
 | Convivencia | Regla estricta de ML-03 (HC02) en Smart Match: `women` solo con `women`, `men` solo con `men`, `any` con todos; reemplaza la regla de NV-14 en esta spec (el filtro de búsqueda no cambia) | APROBADO (M-BE-085) |
@@ -334,9 +334,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 14 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 12 |
-| Estado documental | **✅ APROBADA — 1.2.0** |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 12 de 14 (2026-11-24): PASS WITH WARNINGS; T06 (ONNX) y T07 (casos dorados) desbloqueadas por el release `model-v1.0.0`; 1.3.0 PROPUESTA; ver `evidence.md`** |
+| Tasks completadas | 14 |
+| Estado documental | **✅ APROBADA — 1.3.0** |
+| Estado de ejecución | **✅ COMPLETADA — 1.3.0: 14 de 14 (2026-11-25): PASS WITH WARNINGS; modelo entrenado `logreg-1.0.0` (ONNX) de TheHouse-ML en producción con respaldo a `baseline-1.0.0`; ver `evidence.md`** |
 
 ## 18. Aprobación pendiente
 

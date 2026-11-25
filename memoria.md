@@ -822,3 +822,21 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-25.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** workflow nuevo `cd-extended.yml` (manual, semanal y en PR de sus archivos; `contents: read`, sin secretos), script `.github/perf/k6-backend.js` y comando `seed-demo` en `ephemeral_env.sh`; costo $0 (repositorio público).
+
+## M-BE-090 — NV-03 T11/T12: telemetría con Application Insights e identidad administrada
+
+- **ID:** M-BE-090
+- **Decisión:** exportar las trazas (10 %), una lista permitida de 6 métricas y los logs Warning+ de OpenTelemetry a Application Insights `appi-thehouse-u2` basado en el workspace existente (tope propio de 0.05 GB/día, 30 días, autenticación local desactivada), con `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0 y la identidad administrada de la app (rol `Monitoring Metrics Publisher` solo sobre ese recurso), sin llaves ni `Azure.Identity`. Se descartan la distro de Azure Monitor y el agente administrado de Container Apps.
+- **Estado:** EJECUTADO — Victor, 2026-11-25 («Apruebo, autorizo y EJECUTA»; «Autorizo y OK PARA APPLY» para registrar `Microsoft.Insights` y aplicar). Verificación real: correlación por operación, sin datos sensibles y consumo de ~0.7 MB/h con la réplica activa.
+- **Fecha:** 2026-11-25.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** paquete nuevo en `TheHouse`; `infra/terraform/application_insights.tf`; variables `Observability__AzureMonitorEnabled` y `Observability__AzureMonitorConnectionString` en la Container App; costo $0.
+
+## M-BE-091 — NV-23 1.3.0: modelo ONNX `logreg-1.0.0` de TheHouse-ML en producción
+
+- **ID:** M-BE-091
+- **Decisión:** integrar el release inmutable `model-v1.0.0` de `TheHouse-ML` con `Microsoft.ML.OnnxRuntime` 1.31.1: los 7 archivos versionados en el repositorio byte por byte (`-text`) y verificados con `SHA256SUMS` y el SHA-256 fijado en la configuración (en lugar de descargarlos en el build); una sola sesión con metadatos verificados, `maxPoints` del modelo, inferencia por lotes y respaldo automático a `baseline-1.0.0`; activación por configuración. El Dockerfile publica solo `linux-x64`.
+- **Estado:** EJECUTADO — Victor, 2026-11-25 («Apruebo todo»); 109/109 y 81/81 casos dorados con diferencia 0; activado en producción (revisión `ca-thehouse-u2--0000016`).
+- **Fecha:** 2026-11-25.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** paquete nuevo en `TheHouse.Infrastructure`; `SmartMatch:Model` en `appsettings.json`; variable `SmartMatch__Model__Enabled=true` en la Container App; avisos a Mobile (`modelVersion` y `maxPoints`) y a TheHouse-GenAI.
