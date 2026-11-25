@@ -334,3 +334,44 @@ Los recursos parciales de los dos primeros intentos (grupo, identidades, rol per
 En el entorno `cae-thehouse-u2` existe además la app `ca-thehouse-genai-u2`, que no creó este Terraform (por su nombre, del equipo de GenAI). Queda fuera del state del backend y no se tocó; se aclara con ese equipo, porque su guía de integración menciona Azure App Service.
 
 Resultado: **T20 y T21 completas**; el costo de T21 quedó confirmado en **0.00 USD** el 2026-11-24. NV-03 queda en **17 de 25**.
+
+## T07 — MongoDB con usuario de mínimo privilegio (2026-11-25)
+
+Autorización: «Autorizo cambiar Mongo» — Victor Manuel Jose Jose, 2026-11-25 (M-BE-088).
+
+### Antes y después
+
+| Punto | Antes | Después |
+| --- | --- | --- |
+| Usuario de la app | `skinnyisaiaxel_db_user` con `atlasAdmin` (administrador de todo el proyecto de Atlas) | `thehouse-backend` (SCRAM) con **`readWrite@thehouse_u2`**: solo lee y escribe en la base de la app |
+| Secreto | `mongodb-uri` en la Container App | El mismo secreto con la cadena del usuario nuevo, cargado por Victor con `Read-Host -AsSecureString` (sin pantalla ni historial de la consola) |
+| Alcance | — | `readWrite` incluye crear índices y GridFS, que la app usa; no puede crear usuarios, cambiar la red ni borrar otras bases |
+
+### Verificación (`.azure-check/nv03_t07_check.py`, fuera de git): **7/7 PASS**
+
+| Paso | Resultado |
+| --- | --- |
+| `/health/ready` (MongoDB y Redis) | 200 |
+| Lectura | 10 universidades y 12 propiedades |
+| Escritura | Registro (`users`), inicio de sesión (`refresh_tokens`), preferencias (`user_preferences`) y eliminación de la cuenta de prueba (borra y anonimiza) |
+
+### Incidente durante el cambio
+
+| Hora | Qué pasó |
+| --- | --- |
+| 1.º intento | Se cargó solo la contraseña (16 caracteres) como `mongodb-uri`: la API no pudo conectarse a MongoDB y dejó de responder |
+| 2.º intento | La cadena se armó con el host de ejemplo y la cadena completa en el lugar de la contraseña; además `az` (archivo `.cmd` en Windows) cortó el valor en el `&` |
+| 3.º intento | Cadena completa sin parámetros (`mongodb+srv://thehouse-backend:…@thehouse-u2.….mongodb.net/`): forma verificada sin revelar el valor, `/health/ready` 200 y verificación 7/7 |
+
+La API estuvo caída unos minutos entre el primer cambio y el reinicio correcto. Lecciones: verificar la forma del secreto antes de reiniciar (longitud, esquema, usuario y host, sin mostrarlo) y no pasar `&` en argumentos de `az` en PowerShell.
+
+### Riesgos aceptados y pendientes
+
+| Riesgo | Estado |
+| --- | --- |
+| Lista de acceso de Atlas `0.0.0.0/0` | Aceptado: la Container App sale por un rango amplio de IPs de Azure (407 posibles); la protección es usuario de mínimo privilegio, contraseña larga y TLS |
+| Atlas M0 sin respaldos | Aceptado por costo $0; mitigación: el esquema y los catálogos se recrean con `scripts/db/` (NV-26) |
+| La contraseña de `thehouse-backend` quedó escrita en una conversación | **Pendiente:** rotarla en Atlas y volver a cargar `mongodb-uri` |
+| El usuario administrador anterior | **Pendiente:** que el responsable de Atlas cambie su contraseña (la app ya no lo usa) |
+
+Resultado: **T07 completa**. NV-03 queda en **18 de 25**.

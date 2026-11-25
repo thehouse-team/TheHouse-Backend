@@ -5,7 +5,7 @@
 | Fuente | «Requerimientos para el desarrollo del proyecto Móvil» v3 (cuatrimestre septiembre–diciembre 2026) |
 | Fecha | 2026-11-20 |
 | Evaluación | 3 y 4 de diciembre de 2026 (último día para registrar calificaciones: 4 de diciembre) |
-| Avance del backend | 300/316 tasks (95 %); 97 % sin las 4 tasks que esperan a TheHouse-ML y TheHouse-GenAI (NV-23 T06/T07, NV-24 T08/T11) |
+| Avance del backend | 301/316 tasks (95 %); 97 % sin las 4 tasks que esperan a TheHouse-ML y TheHouse-GenAI (NV-23 T06/T07, NV-24 T08/T11) |
 | URL | https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io |
 
 Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · ➖ fuera del backend (Mobile, Landing o ML/GenAI).
@@ -93,7 +93,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Dos instancias | Bajo: ventana agendada | 3 de diciembre con «OK PARA APPLY» (NV-03 T08/T09/T19) |
 | ML (NV-23) y GenAI (NV-24) | Medio: las dos están desplegadas (ML con el modelo base; GenAI con plantilla mientras responde `generated: false`) | GenAI: corregir su `generated: false` (request `d24974e7…`); ML: casos dorados y ONNX |
 | Caché de datos del backend | Bajo | La caché HTTP cumple el punto 9; opcional: caché en Redis para catálogos |
-| Seguridad de Atlas (usuario `atlasAdmin`) | Medio | En curso: usuario `thehouse-backend` con `readWrite` en `thehouse_u2` (NV-03 T07) |
+| Seguridad de Atlas | Bajo | **Hecho (2026-11-25):** la app usa `thehouse-backend` con `readWrite` solo en `thehouse_u2` (NV-03 T07, 7/7). Pendiente: rotar su contraseña y la del administrador anterior |
 | Trazas y métricas OTel | Bajo | NV-03 T11/T12 con decisión de exportador |
 
 ## 9. Guion de demostración del backend
