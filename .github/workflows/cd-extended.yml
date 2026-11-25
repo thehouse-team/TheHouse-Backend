@@ -1,0 +1,117 @@
+# NV-09 1.2.0-u2 — Pruebas extendidas (NV-09-R13), informativas.
+#
+# T16: prueba de performance con k6 contra el mismo entorno efímero que
+# `verify-ephemeral` del CD (MongoDB y Redis como services, API en Testing con
+# los límites de peticiones de producción). Nunca toca producción: sin
+# secretos, sin Azure y sin GHCR; la imagen se construye en el runner.
+#
+# Corre a mano, cada domingo y en los pull requests que cambian sus propios
+# archivos (para probar el workflow antes del merge).
+name: CD extendido
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 0"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cd-extended.yml"
+      - ".github/perf/**"
+      - ".github/scripts/ephemeral_env.sh"
+
+permissions: {}
+
+concurrency:
+  group: cd-extended-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  K6_IMAGE: "grafana/k6:2.3.0"
+  LOCAL_IMAGE: "thehouse-backend:perf"
+
+jobs:
+  performance:
+    name: performance (k6)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    services:
+      mongo:
+        # Igual que verify-ephemeral: MongoDB 8.0+ no arranca en el kernel del runner.
+        image: mongo:7.0.45
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7.4.12
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Construir la imagen (sin publicar)
+        run: docker build --pull -t "$LOCAL_IMAGE" .
+
+      - name: Llave JWT efímera
+        shell: bash
+        run: |
+          set -euo pipefail
+          key="$(openssl rand -base64 48 | tr -d '\n')"
+          echo "::add-mask::$key"
+          echo "JWT_SIGNING_KEY=$key" >> "$GITHUB_ENV"
+
+      - name: Seeds (universidades, propiedades, colonias y cuartos de demostración)
+        run: |
+          bash .github/scripts/ephemeral_env.sh seed "$LOCAL_IMAGE"
+          bash .github/scripts/ephemeral_env.sh seed-demo "$LOCAL_IMAGE"
+
+      - name: Levantar API efímera (límites de producción)
+        run: bash .github/scripts/ephemeral_env.sh start "$LOCAL_IMAGE" smoke
+
+      - name: Prueba de performance (k6)
+        shell: bash
+        run: |
+          set +e
+          mkdir -p perf && chmod 777 perf
+          docker run --rm --network host \
+            -v "$PWD/.github/perf:/scripts:ro" -v "$PWD/perf:/out:rw" \
+            -e BASE_URL=http://127.0.0.1:8080 -e OUT_DIR=/out \
+            "$K6_IMAGE" run --quiet /scripts/k6-backend.js
+          code=$?
+          if [ -f perf/perf-report.md ]; then
+            cat perf/perf-report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "$code" -ne 0 ]; then
+            echo "::error::k6 terminó con código $code (99 = errores sobre 5 %; otro = fallo del script o del entorno)."
+          fi
+          exit "$code"
+
+      - name: Logs de la API ante fallo
+        if: failure()
+        run: bash .github/scripts/ephemeral_env.sh logs
+
+      - name: Detener API
+        if: always()
+        run: bash .github/scripts/ephemeral_env.sh stop
+
+      - name: Subir reportes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: performance
+          path: |
+            perf/perf-report.md
+            perf/perf-summary.json
+          retention-days: 14
+          if-no-files-found: warn

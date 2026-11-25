@@ -9,6 +9,7 @@
 # Uso:
 #   ephemeral_env.sh start IMAGEN [smoke|scan]
 #   ephemeral_env.sh seed  IMAGEN
+#   ephemeral_env.sh seed-demo IMAGEN   (NV-09 T16: colonias y cuartos de demostración)
 #   ephemeral_env.sh logs
 #   ephemeral_env.sh stop
 set -euo pipefail
@@ -79,6 +80,14 @@ case "$cmd" in
       -e UniversitySeed__Enabled=true \
       -e PropertySeed__Enabled=true \
       "$image" --seed-universities --seed-properties
+    ;;
+  seed-demo)
+    # NV-09 T16 (1.2.0-u2): solo en la base efímera de cd-extended.yml, para
+    # que la prueba de performance busque y abra cuartos reales. Requiere el
+    # seed de universidades (`seed`) antes.
+    image="${2:?imagen requerida}"
+    common_env
+    docker run --rm --network host "${ENV_ARGS[@]}"       -e PlaceSeed__Enabled=true       -e DemoRoomSeed__Enabled=true       "$image" --seed-places --seed-demo-rooms
     ;;
   logs)
     docker logs --tail 120 "$NAME" || true

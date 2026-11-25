@@ -356,3 +356,36 @@ La espera de aprobación humana (de `verify-ephemeral` a `deploy`) tuvo mediana 
 | Por qué no la API de deployments | Su `sha` es el HEAD de `main` cuando terminó la CI, no necesariamente el commit desplegado cuando hay varios merges seguidos |
 | Simulación local (historia real, `gh` falso) | `2ea1cea`→`6ee59bf` publica (el caso del error); `6ee59bf`→`727465e` omite (solo documentación); `2b3c934`→`2b2a7f6` publica; sin registro, registro inválido o commit no ancestro: publica |
 | Primer uso | El CD de este cambio publica (cambia el workflow) y deja el primer `deployed-sha` |
+
+## T16 — Performance con k6 (1.2.0-u2, 2026-11-25)
+
+Autorización: «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-25, sobre la propuesta del PR [#90](https://github.com/thehouse-team/TheHouse-Backend/pull/90) (M-BE-089).
+
+| Punto | Detalle |
+| --- | --- |
+| Archivos | `.github/workflows/cd-extended.yml`, `.github/perf/k6-backend.js` y el comando `seed-demo` de `.github/scripts/ephemeral_env.sh` (los comandos existentes no cambian) |
+| Herramienta | `grafana/k6:2.3.0` (imagen oficial, AGPL-3.0, sin modificar ni distribuir); NBomber descartado por licencia |
+| Entorno | Imagen construida en el runner desde el commit; MongoDB 7.0.45 y Redis 7.4.12 como services; API en `Testing` con los límites de peticiones de producción; seeds de universidades, propiedades, colonias y 12 cuartos de demostración |
+| Seguridad | `contents: read`; sin secretos, sin Azure y sin GHCR; llave JWT aleatoria por run y enmascarada; cuentas de prueba con contraseñas aleatorias que no salen del script; el reporte no tiene correos, contraseñas ni tokens |
+| Disparadores | Manual, semanal (domingo 09:00 UTC) y en los PR que cambian sus archivos (un workflow nuevo no se puede lanzar a mano hasta estar en `main`) |
+
+### Primera ejecución: [run 45558364271](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/45558364271) — **en verde**
+
+| Escenario | Tasa | Peticiones | p50 (ms) | p95 (ms) | p99 (ms) | Máx. (ms) | Errores | 429 | Presupuesto p95 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `catalogo` (universidades y propiedades) | 10/s | 3,930 | 2.5 | 4.1 | 6.2 | 29.9 | 0.00 % | 0 | < 200 ms ✅ |
+| `busqueda` (cuartos cerca de la UTTT) | 8/s | 1,575 | 4.9 | 7.8 | 11.1 | 18.3 | 0.00 % | 0 | < 500 ms ✅ |
+| `smart_match` (recomendaciones de invitado) | 4/s | 795 | 7.1 | 11.1 | 14.4 | 122.7 | 0.00 % | 0 | < 800 ms ✅ |
+| `sesion` (login, perfil y detalle) | 2/s | 1,212 | 4.7 | 65.9 | 78.0 | 130.7 | 0.00 % | 0 | < 1,000 ms ✅ |
+
+Total: 7,715 peticiones (7,512 de los escenarios más 200 registros y las consultas iniciales de `setup()`); 0.00 % de errores; 0 iteraciones descartadas; ningún 429 con los límites de producción y clientes simulados en `198.18.0.0/15`.
+
+### Lectura
+
+- La API sostiene ~24 peticiones/s mezcladas con p95 de un solo dígito en lecturas y Smart Match; la sesión es la más lenta por el hash de la contraseña en el login (p95 66 ms).
+- Los presupuestos propuestos tienen mucho margen. Siguen **informativos** (NV-09-R13): con 3 ejecuciones se propondrán umbrales obligatorios más ajustados a la evidencia.
+- Es un runner compartido de GitHub en la misma máquina que MongoDB y Redis: sirve para detectar regresiones entre versiones, no como capacidad de Azure (NV-09-RK11).
+
+Constitución 1.2.1 aprobada el 2026-11-25 («Apruebo 1.2.1») y aplicada en la §25 (k6 en lugar de NBomber).
+
+**Resultado: PASS — T16 completa.** NV-09 queda en **19 de 20** (pendiente T15, RESTler).

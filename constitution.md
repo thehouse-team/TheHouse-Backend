@@ -2,13 +2,15 @@
 
 | Campo | Valor |
 | --- | --- |
-| Versión | 1.2.0 |
-| Fecha | 2026-11-10 |
-| Estado | **✅ APROBADA — VIGENTE** (sustituye a la versión 1.1.0) |
-| Aprobación humana | Victor Manuel Jose Jose, responsable del backend (M-BE-040) — 2026-11-10 («Apruebo 1.2.0») |
-| Decisión | M-BE-062 |
+| Versión | 1.2.1 |
+| Fecha | 2026-11-25 |
+| Estado | **✅ APROBADA — VIGENTE** (sustituye a la versión 1.2.0) |
+| Aprobación humana | Victor Manuel Jose Jose, responsable del backend (M-BE-040) — 2026-11-25 («Apruebo 1.2.1»); 1.2.0 aprobada el 2026-11-10 («Apruebo 1.2.0») |
+| Decisión | M-BE-089 (1.2.1); M-BE-062 (1.2.0) |
 
 Autoridad: máxima norma del Backend dentro de las instrucciones humanas y políticas del entorno.
+
+**Cambios 1.2.1 (2026-11-25):** §25: la herramienta de performance pasa a ser **k6** (NV-09 T16, en uso) en lugar de NBomber, que requiere licencia para uso por una organización (M-BE-089). Sin otros cambios.
 
 **Cambios 1.2.0 (2026-11-10):** reconoce los dos proyectos separados que pidió el profesor sin romper el monolito modular: `TheHouse-ML` como **satélite de artefacto** (no se despliega; entrega un modelo ONNX que el backend carga en proceso) y `TheHouse-GenAI` como **servicio auxiliar** (se despliega aparte, solo lo llama el backend y su ausencia no rompe ninguna función). Agrega §6.1, precisa §15, §17 y §30 y actualiza §2. Las demás reglas no cambian. Detalle en M-BE-062.
 
@@ -164,7 +166,7 @@ OpenTelemetry es la tecnología prevista para trazas y métricas, con logs estru
 
 `TheHouse.UnitTests` verifica reglas de Domain/Application; `TheHouse.IntegrationTests`, composición, HTTP y adaptadores en el entorno `Testing` (M-BE-042); `TheHouse.SecurityTests`, abuso, autorización y controles defensivos.
 
-Herramientas en uso: Stryker.NET (mutación, NV-02), OWASP ZAP (DAST, NV-09). Previstas: Contract Testing con PactNet, Performance con NBomber (sujeto a su licencia) y REST Fuzzing con RESTler. Ninguna suite vacía o no ejecutada representa un control satisfecho.
+Herramientas en uso: Stryker.NET (mutación, NV-02), OWASP ZAP (DAST, NV-09) y k6 (performance, NV-09; sustituye a NBomber, que requiere licencia para uso por una organización, M-BE-089). Previstas: Contract Testing con PactNet y REST Fuzzing con RESTler. Ninguna suite vacía o no ejecutada representa un control satisfecho.
 
 ## 26. DevSecOps
 
