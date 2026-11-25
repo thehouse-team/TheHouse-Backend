@@ -9,12 +9,16 @@ COPY TheHouse.Application/TheHouse.Application.csproj TheHouse.Application/
 COPY TheHouse.Domain/TheHouse.Domain.csproj TheHouse.Domain/
 COPY TheHouse.Infrastructure/TheHouse.Infrastructure.csproj TheHouse.Infrastructure/
 
-RUN dotnet restore TheHouse/TheHouse.csproj
+# NV-23 1.3.0: solo linux-x64. Sin RID, ONNX Runtime y SkiaSharp publican sus
+# librerías nativas de todas las plataformas (722 MB en lugar de 58 MB).
+RUN dotnet restore TheHouse/TheHouse.csproj --runtime linux-x64
 
 COPY . .
 
 RUN dotnet publish TheHouse/TheHouse.csproj \
     --configuration Release \
+    --runtime linux-x64 \
+    --self-contained false \
     --output /app/publish \
     --no-restore \
     /p:UseAppHost=false

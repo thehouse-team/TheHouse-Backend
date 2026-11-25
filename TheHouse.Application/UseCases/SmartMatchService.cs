@@ -44,8 +44,8 @@ public sealed class SmartMatchService(
         var buildingIds = found.Values.Select(room => room.BuildingId).Distinct(StringComparer.Ordinal).ToArray();
         var owners = (await buildings.GetManyAsync(buildingIds, cancellationToken)).ToDictionary(building => building.Id, StringComparer.Ordinal);
 
-        var items = new List<SmartMatchScoreItem>(ids.Count);
-        var scored = new List<SmartMatchScore>();
+        var items = new List<SmartMatchScoreItem?>(ids.Count);
+        var pending = new List<(int Index, string Id, SmartMatchFeatures Features)>();
         var evaluated = 0;
         foreach (var id in ids)
         {
@@ -71,13 +71,20 @@ public sealed class SmartMatchService(
                 continue;
             }
 
-            var score = model.Score(SmartMatchRules.Features(student, candidate));
-            scored.Add(score);
-            items.Add(new SmartMatchScoreItem(id, true, [], score.MatchScore, Breakdown(score), score.ModelVersion, score.FeatureSchemaVersion));
+            // Se puntúan todos juntos al final (un solo lote para el ONNX).
+            pending.Add((items.Count, id, SmartMatchRules.Features(student, candidate)));
+            items.Add(null);
+        }
+
+        var scored = model.ScoreMany([.. pending.Select(entry => entry.Features)]);
+        for (var index = 0; index < pending.Count; index++)
+        {
+            var score = scored[index];
+            items[pending[index].Index] = new SmartMatchScoreItem(pending[index].Id, true, [], score.MatchScore, Breakdown(score), score.ModelVersion, score.FeatureSchemaVersion);
         }
 
         await RecordAsync(scoreRequest: true, guest: userId is null, evaluated, scored, cancellationToken);
-        return new SmartMatchScoresResponse(items);
+        return new SmartMatchScoresResponse([.. items.Select(item => item!)]);
     }
 
     public async Task<SmartMatchRecommendationsResponse> RecommendationsAsync(string userId, int page, int pageSize, CancellationToken cancellationToken)
@@ -216,7 +223,7 @@ public sealed class SmartMatchService(
             .Take(SmartMatchRules.MaximumCandidates)
             .ToArray();
 
-        var ranked = new List<(RoomSearchItem Item, SmartMatchScore Score, bool Dismissed)>();
+        var eligible = new List<(RoomSearchItem Item, SmartMatchFeatures Features)>();
         foreach (var candidate in candidates)
         {
             var item = candidate.Item;
@@ -226,8 +233,12 @@ public sealed class SmartMatchService(
                 continue;
             }
 
-            ranked.Add((item, model.Score(SmartMatchRules.Features(student, room)), dismissed.Contains(item.Id)));
+            eligible.Add((item, SmartMatchRules.Features(student, room)));
         }
+
+        // Un solo lote [N, 10] para todos los candidatos (NV-23 1.3.0).
+        var scores = model.ScoreMany([.. eligible.Select(entry => entry.Features)]);
+        var ranked = eligible.Select((entry, index) => (entry.Item, Score: scores[index], Dismissed: dismissed.Contains(entry.Item.Id))).ToList();
 
         // No descartados primero; puntaje sin redondear desc; `roomId` asc (ML-04 §6.3).
         var ordered = ranked

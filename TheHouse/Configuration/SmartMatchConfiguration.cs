@@ -1,3 +1,4 @@
+using Microsoft.ML.OnnxRuntime;
 using MongoDB.Driver;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Abstractions.SmartMatch;
@@ -5,6 +6,7 @@ using TheHouse.Application.Common;
 using TheHouse.Application.UseCases;
 using TheHouse.Infrastructure.GenAi;
 using TheHouse.Infrastructure.Persistence.Mongo;
+using TheHouse.Infrastructure.SmartMatch;
 
 namespace TheHouse.Configuration;
 
@@ -14,7 +16,18 @@ public static class SmartMatchConfiguration
 {
     public static void AddSmartMatch(this WebApplicationBuilder builder)
     {
-        builder.Services.AddSingleton<ICompatibilityModel, BaselineCompatibilityModel>();
+        // NV-23 1.3.0: ONNX `logreg-1.0.0` si está activado y pasa todas las
+        // verificaciones; si no, el modelo base (sin error para el usuario).
+        var modelOptions = builder.Configuration.GetSection("SmartMatch:Model").Get<SmartMatchModelOptions>() ?? new SmartMatchModelOptions();
+        builder.Services.AddSingleton<BaselineCompatibilityModel>();
+        builder.Services.AddSingleton<SmartMatchModelSelection>(provider => SmartMatchModelSelection.Create(
+            modelOptions,
+            provider.GetRequiredService<BaselineCompatibilityModel>(),
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger("TheHouse.SmartMatch")));
+        builder.Services.AddSingleton<ICompatibilityModel>(provider => provider.GetRequiredService<SmartMatchModelSelection>().Model);
+        builder.Services.AddHostedService(provider => new SmartMatchModelNotice(
+            provider.GetRequiredService<SmartMatchModelSelection>(),
+            provider.GetRequiredService<ILogger<SmartMatchModelNotice>>()));
         builder.Services.AddSingleton<SmartMatchService>();
         builder.Services.AddSingleton<ISmartMatchStatsSink, LoggingSmartMatchStatsSink>();
         builder.Services.AddSingleton<ISmartMatchRepository>(provider =>
@@ -101,4 +114,80 @@ public sealed class LoggingSmartMatchStatsSink(ISmartMatchRepository repository,
             logger.LogWarning("NV-23: no se actualizaron las métricas de Smart Match ({Reason}).", exception.GetType().Name);
         }
     }
+}
+
+public sealed class SmartMatchModelOptions
+{
+    public bool Enabled { get; init; }
+
+    public string Path { get; init; } = "SmartMatch/model-v1.0.0/model.onnx";
+
+    public string Sha256 { get; init; } = string.Empty;
+
+    public string ModelVersion { get; init; } = string.Empty;
+
+    public string FeatureSchemaVersion { get; init; } = SmartMatchRules.FeatureSchemaVersion;
+}
+
+// Modelo elegido al arrancar y el motivo, para el aviso y las pruebas.
+public sealed class SmartMatchModelSelection(ICompatibilityModel model, string reason)
+{
+    // Caso dorado `perfect_100` de `golden_cases.json` (logreg-1.0.0): 93.
+    public static readonly SmartMatchFeatures StartupCase = new(0, 0, 0.75, 1, 1, 1, 1, 0, 0, 1);
+
+    public const int StartupExpectedScore = 93;
+
+    public ICompatibilityModel Model { get; } = model;
+
+    public string Reason { get; } = reason;
+
+    public static SmartMatchModelSelection Create(SmartMatchModelOptions options, BaselineCompatibilityModel baseline, ILogger logger)
+    {
+        if (!options.Enabled)
+        {
+            return new(baseline, "disabled");
+        }
+
+        try
+        {
+            var path = System.IO.Path.IsPathRooted(options.Path) ? options.Path : System.IO.Path.Combine(AppContext.BaseDirectory, options.Path);
+            var onnx = new OnnxCompatibilityModel(
+                File.ReadAllBytes(path),
+                options.Sha256,
+                options.ModelVersion,
+                options.FeatureSchemaVersion,
+                baseline.Labels,
+                baseline,
+                reason => logger.LogError("NV-23: vector de features inválido ({Reason}); ese cuarto usa el modelo base.", reason));
+            if (onnx.Score(StartupCase).MatchScore != StartupExpectedScore)
+            {
+                onnx.Dispose();
+                return Fallback(baseline, logger, "startup-case");
+            }
+
+            return new(onnx, "onnx");
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException or OnnxRuntimeException or System.Text.Json.JsonException or KeyNotFoundException)
+        {
+            // Sin la ruta ni el contenido del archivo en el registro.
+            return Fallback(baseline, logger, exception.GetType().Name);
+        }
+    }
+
+    private static SmartMatchModelSelection Fallback(BaselineCompatibilityModel baseline, ILogger logger, string reason)
+    {
+        logger.LogWarning("NV-23: el modelo ONNX no pasó las verificaciones ({Reason}); se usa el modelo base.", reason);
+        return new(baseline, reason);
+    }
+}
+
+public sealed class SmartMatchModelNotice(SmartMatchModelSelection selection, ILogger<SmartMatchModelNotice> logger) : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("NV-23: Smart Match con {ModelVersion} ({Reason}).", selection.Model.ModelVersion, selection.Reason);
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

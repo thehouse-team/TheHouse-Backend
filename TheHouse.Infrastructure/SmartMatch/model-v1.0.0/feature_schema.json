@@ -1,0 +1,396 @@
+{
+  "metadata": {
+    "schema_version": "2.0.0",
+    "spec": "ML-04 1.0.0",
+    "nv11_source": {
+      "repository": "TheHouse-Backend",
+      "commit": "b7d7595",
+      "verified_commit": "ea10a4c",
+      "verified_on": "2026-11-19",
+      "snapshot": "data/seed/nv11_catalogs.json",
+      "verified_by": "César Yael López Trujillo, revisión del código del backend en ea10a4c (2026-11-19)"
+    },
+    "generated_by": "ML-03 T01 (ML-03-R01); escrito a mano y validado por thehouse_ml.features. 1.1.0: ML-03 T02 (ML-03-R02). 2.0.0: ML-04 T02 (ML-04-R02)",
+    "synthetic_training_data": true,
+    "decision": "M-ML-022; 1.1.0: M-ML-023; 2.0.0: M-ML-029",
+    "changelog": [
+      {"version": "1.0.0", "decision": "M-ML-022", "change": "Versión inicial (T01)."},
+      {"version": "1.1.0", "decision": "M-ML-023", "change": "Ampliación compatible (T02): distance_km y effective_distance_km sin límite superior, con training_range [0, 30] del catálogo sintético; price_to_budget = price_mxn / max(budget.max, 1), sin límite superior, con training_range [0, 1] (pares que pasan HC01); los rangos SUPUESTOS del cuarto no se validan en la entrada."},
+      {"version": "2.0.0", "decision": "M-ML-029", "change": "Versión mayor (ML-04 T02): agrega al final de feature_order distance_ratio, price_below_min y extra_services_ratio; las 7 features anteriores conservan nombre, fórmula, rango y posición. Motivo: cambia las entradas del ONNX y lo que calcula NV-23, así que el backend debe actualizar su spec (constitution §2.4 y §18)."}
+    ],
+    "versioning": "Obligan a una versión mayor (constitution §18): un cambio en NV-11 (catálogos, rangos o nulables), incluidos los catálogos del cuarto (spec ML-03 §7 regla 1), y agregar, quitar o reordenar features del par en feature_order, porque cambia las entradas del ONNX y lo que calcula NV-23 (spec ML-04 §6.1). Ampliar un rango sin cambiar fórmulas ni orden es una versión menor (1.1.0, M-ML-023)."
+  },
+  "currency": "MXN",
+  "catalogs": {
+    "nv11": {
+      "essentialServices": [
+        "wifi",
+        "water",
+        "electricity",
+        "gas",
+        "hot_water",
+        "laundry",
+        "kitchen",
+        "furnished",
+        "parking",
+        "security",
+        "cleaning"
+      ],
+      "livingWith": ["women", "men", "any"],
+      "placeType": ["room", "room_private_bath", "studio", "shared"],
+      "transport": ["walk", "bike", "public", "car"],
+      "propertyTypes": ["house", "apartment", "student_residence"]
+    },
+    "ml": {
+      "university_code": [
+        "UTTT",
+        "UAEH-ESTE",
+        "UAEH-ESTL",
+        "UAEH-ESAT",
+        "ITSOEH",
+        "TESJI",
+        "UMB-JILO",
+        "UMB-VDC",
+        "UCAN",
+        "UNE-TULA"
+      ]
+    }
+  },
+  "universities": {
+    "source": "data/universities.csv (ML-02 T07, M-ML-017)",
+    "unverified_codes": ["TESJI", "UMB-VDC", "UCAN"],
+    "note": "Los códigos con final_status = seed_sin_verificar entran marcados (seed_verified = false); sus distancias son orientativas (spec ML-03 §7 regla 4)."
+  },
+  "student": {
+    "source": "NV-11 (perfil de búsqueda del estudiante)",
+    "constraints": ["budget.min <= budget.max"],
+    "fields": [
+      {
+        "name": "budget.min",
+        "type": "integer",
+        "unit": "MXN mensuales",
+        "range": {"min": 0, "max": 50000},
+        "nullable": true,
+        "required_for_scoring": false,
+        "missing": {"action": "default", "value": 0, "description": "budget.min nulo → 0 (sin piso de presupuesto)."},
+        "description": "Presupuesto mínimo mensual."
+      },
+      {
+        "name": "budget.max",
+        "type": "integer",
+        "unit": "MXN mensuales",
+        "range": {"min": 0, "max": 50000},
+        "nullable": true,
+        "required_for_scoring": true,
+        "missing": {"action": "reject", "value": null, "description": "Quick setup: budget.max nulo → no se calcula el puntaje (perfil incompleto)."},
+        "description": "Presupuesto máximo mensual; restricción dura HC01."
+      },
+      {
+        "name": "maxDistanceKm",
+        "type": "number",
+        "unit": "km",
+        "range": {"min": 0.5, "max": 30},
+        "nullable": true,
+        "required_for_scoring": false,
+        "missing": {"action": "default", "value": 30, "description": "maxDistanceKm nulo → 30 (máximo de NV-11)."},
+        "description": "Distancia máxima aceptada al campus."
+      },
+      {
+        "name": "essentialServices",
+        "type": "category_set",
+        "catalog": "essentialServices",
+        "nullable": true,
+        "required_for_scoring": false,
+        "missing": {"action": "default", "value": [], "description": "essentialServices nulo → conjunto vacío (no exige servicios)."},
+        "description": "Servicios que el estudiante considera esenciales (multi-hot)."
+      },
+      {
+        "name": "livingWith",
+        "type": "category",
+        "catalog": "livingWith",
+        "nullable": true,
+        "required_for_scoring": true,
+        "missing": {"action": "reject", "value": null, "description": "Quick setup: livingWith nulo → no se calcula el puntaje (perfil incompleto)."},
+        "description": "Con quién quiere vivir; restricción dura HC02. No se infiere el género del estudiante (constitution §11)."
+      },
+      {
+        "name": "placeType",
+        "type": "category",
+        "catalog": "placeType",
+        "nullable": true,
+        "required_for_scoring": true,
+        "missing": {"action": "reject", "value": null, "description": "Quick setup: placeType nulo → no se calcula el puntaje (perfil incompleto)."},
+        "description": "Tipo de lugar buscado."
+      },
+      {
+        "name": "pets",
+        "type": "boolean",
+        "nullable": true,
+        "required_for_scoring": false,
+        "missing": {"action": "default", "value": false, "description": "pets nulo → false (no lleva mascota)."},
+        "description": "El estudiante vive con mascota; restricción dura HC03."
+      },
+      {
+        "name": "transport",
+        "type": "category",
+        "catalog": "transport",
+        "nullable": true,
+        "required_for_scoring": false,
+        "missing": {"action": "default", "value": "public", "description": "transport nulo → \"public\"."},
+        "description": "Medio de transporte habitual al campus."
+      },
+      {
+        "name": "propertyTypes",
+        "type": "category_set",
+        "catalog": "propertyTypes",
+        "nullable": true,
+        "required_for_scoring": false,
+        "missing": {"action": "accept_all", "value": null, "description": "propertyTypes nulo o vacío → acepta todos los tipos de inmueble."},
+        "description": "Tipos de inmueble aceptados."
+      },
+      {
+        "name": "university_code",
+        "type": "category",
+        "catalog": "university_code",
+        "nullable": false,
+        "required_for_scoring": true,
+        "description": "Universidad del estudiante; da las coordenadas del campus (data/universities.csv: final_lat, final_lon)."
+      }
+    ]
+  },
+  "room": {
+    "source": "Cuarto publicado (Property del backend; NV-12 para los campos faltantes)",
+    "fields": [
+      {
+        "name": "price_mxn",
+        "type": "integer",
+        "unit": "MXN mensuales (jul-2024)",
+        "range": {"min": 0, "max": 50000},
+        "nullable": false,
+        "backend_status": "present",
+        "backend_field": "Price",
+        "backend_type": "decimal",
+        "description": "Renta mensual; mismo rango que el presupuesto de NV-11. Se redondea a entero desde Property.Price (decimal)."
+      },
+      {
+        "name": "lat",
+        "type": "number",
+        "unit": "grados WGS84",
+        "range": {"min": -90, "max": 90},
+        "nullable": false,
+        "backend_status": "missing_in_property",
+        "description": "Latitud del cuarto."
+      },
+      {
+        "name": "lon",
+        "type": "number",
+        "unit": "grados WGS84",
+        "range": {"min": -180, "max": 180},
+        "nullable": false,
+        "backend_status": "missing_in_property",
+        "description": "Longitud del cuarto."
+      },
+      {
+        "name": "services",
+        "type": "category_set",
+        "catalog": "essentialServices",
+        "nullable": false,
+        "backend_status": "missing_in_property",
+        "description": "Servicios incluidos, con el mismo catálogo que essentialServices (Property no los tiene como catálogo). Lista vacía = sin servicios."
+      },
+      {
+        "name": "placeType",
+        "type": "category",
+        "catalog": "placeType",
+        "nullable": false,
+        "backend_status": "missing_in_property",
+        "description": "Tipo de lugar que se ofrece."
+      },
+      {
+        "name": "propertyType",
+        "type": "category",
+        "catalog": "propertyTypes",
+        "nullable": false,
+        "backend_status": "missing_in_property",
+        "description": "Tipo de inmueble."
+      },
+      {
+        "name": "pets_allowed",
+        "type": "boolean",
+        "nullable": false,
+        "backend_status": "missing_in_property",
+        "description": "El cuarto admite mascotas."
+      },
+      {
+        "name": "livingWith",
+        "type": "category",
+        "catalog": "livingWith",
+        "nullable": false,
+        "backend_status": "missing_in_property",
+        "description": "Quién vive ahí (política de convivencia que declara el cuarto)."
+      },
+      {
+        "name": "bedrooms",
+        "type": "integer",
+        "range": {"min": 1, "max": 10},
+        "nullable": false,
+        "backend_status": "present",
+        "backend_field": "Bedrooms",
+        "backend_type": "int",
+        "range_basis": "SUPUESTO documentado para el catálogo sintético (M-ML-022); en la entrada solo se valida el tipo y que no sea negativo (M-ML-023)",
+        "description": "Recámaras del inmueble; rango 1–10 SUPUESTO: cubre cuartos, departamentos y casas compartidas."
+      },
+      {
+        "name": "bathrooms",
+        "type": "integer",
+        "range": {"min": 1, "max": 6},
+        "nullable": false,
+        "backend_status": "present",
+        "backend_field": "Bathrooms",
+        "backend_type": "int",
+        "range_basis": "SUPUESTO documentado para el catálogo sintético (M-ML-022); en la entrada solo se valida el tipo y que no sea negativo (M-ML-023)",
+        "description": "Baños del inmueble (enteros, sin medios baños); rango 1–6 SUPUESTO."
+      },
+      {
+        "name": "area_m2",
+        "type": "number",
+        "unit": "m²",
+        "range": {"min": 6, "max": 400},
+        "nullable": false,
+        "backend_status": "present",
+        "backend_field": "AreaM2",
+        "backend_type": "double",
+        "range_basis": "SUPUESTO documentado para el catálogo sintético (M-ML-022); en la entrada solo se valida el tipo y que no sea negativo (M-ML-023)",
+        "description": "Superficie; rango 6–400 m² SUPUESTO: de un cuarto mínimo a una casa compartida grande."
+      },
+      {
+        "name": "university_code",
+        "type": "category",
+        "catalog": "university_code",
+        "nullable": false,
+        "backend_status": "present",
+        "backend_field": "UniversityId",
+        "description": "Universidad a la que se asocia el cuarto (el backend guarda UniversityId; se traduce al código de data/universities.csv)."
+      },
+      {
+        "name": "synthetic",
+        "type": "boolean",
+        "nullable": false,
+        "backend_status": "ml_only",
+        "description": "Marca de cuarto sintético (constitution §8); solo existe en TheHouse-ML y no es entrada del modelo."
+      }
+    ]
+  },
+  "pair_features": [
+    {
+      "name": "distance_km",
+      "type": "number",
+      "unit": "km",
+      "range": {"min": 0, "max": null},
+      "training_range": [0, 30],
+      "depends_on": ["student.university_code", "room.lat", "room.lon"],
+      "formula": "haversine(campus(student.university_code), (room.lat, room.lon)) con radio medio de 6371 km (el mismo de thehouse_ml.universities.haversine_m). Sin límite superior: la distancia no es restricción dura y no se recorta (M-ML-023); training_range [0, 30] es el dominio del catálogo sintético (cuartos a ≤ 30 km del campus)."
+    },
+    {
+      "name": "effective_distance_km",
+      "type": "number",
+      "unit": "km",
+      "range": {"min": 0, "max": null},
+      "training_range": [0, 30],
+      "depends_on": ["distance_km", "student.transport"],
+      "formula": "distance_km × factor(student.transport); factores: walk 1.0, bike 0.5, public 0.4, car 0.25 (transport nulo → public). Sin límite superior (M-ML-023); training_range [0, 30] es el dominio del catálogo sintético.",
+      "parameters_status": "APROBADO (spec ML-03 §10; M-ML-022)",
+      "parameters": {"transport_factors": {"walk": 1.0, "bike": 0.5, "public": 0.4, "car": 0.25}}
+    },
+    {
+      "name": "price_to_budget",
+      "type": "number",
+      "range": {"min": 0, "max": null},
+      "training_range": [0, 1],
+      "depends_on": ["room.price_mxn", "student.budget.max"],
+      "formula": "room.price_mxn / max(student.budget.max, 1), una sola fórmula sin casos especiales (M-ML-023): con budget.max = 0 y renta 0 vale 0; con budget.max = 0 y renta positiva vale la renta (par excluido por HC01). Sin límite superior: los pares que no pasan HC01 dan valores > 1 sin recorte; training_range [0, 1] es el dominio de los pares que pasan HC01."
+    },
+    {
+      "name": "services_coverage",
+      "type": "number",
+      "range": {"min": 0, "max": 1},
+      "depends_on": ["student.essentialServices", "room.services"],
+      "formula": "|student.essentialServices ∩ room.services| / |student.essentialServices|; si essentialServices está vacío o nulo vale 1."
+    },
+    {
+      "name": "place_type_match",
+      "type": "integer",
+      "range": {"min": 0, "max": 1},
+      "depends_on": ["student.placeType", "room.placeType"],
+      "formula": "1 si student.placeType = room.placeType; 0 en otro caso."
+    },
+    {
+      "name": "property_type_match",
+      "type": "integer",
+      "range": {"min": 0, "max": 1},
+      "depends_on": ["student.propertyTypes", "room.propertyType"],
+      "formula": "1 si student.propertyTypes es nulo o vacío, o si room.propertyType ∈ student.propertyTypes; 0 en otro caso."
+    },
+    {
+      "name": "pets_compatible",
+      "type": "integer",
+      "range": {"min": 0, "max": 1},
+      "depends_on": ["student.pets", "room.pets_allowed"],
+      "formula": "1 si student.pets = false (nulo → false) o room.pets_allowed = true; 0 en otro caso. Vale 1 en todo par que pasa HC03."
+    },
+    {
+      "name": "distance_ratio",
+      "type": "number",
+      "range": {"min": 0, "max": null},
+      "training_range": [0, 60],
+      "depends_on": ["distance_km", "student.maxDistanceKm"],
+      "formula": "distance_km / student.maxDistanceKm resuelto (maxDistanceKm nulo → 30, M-ML-022). Usa la distancia real, no la efectiva: maxDistanceKm ya refleja el transporte que eligió el estudiante. maxDistanceKm ≥ 0.5 en NV-11, así que no hay división entre cero. Sin límite superior: la distancia no es restricción dura y no se recorta (M-ML-023); 1 = justo en maxDistanceKm. training_range [0, 60] = cota del catálogo sintético (cuartos a ≤ 30 km entre el mínimo de maxDistanceKm, 0.5); máximo observado en pairs.parquet 59.797 (ML-04 T02)."
+    },
+    {
+      "name": "price_below_min",
+      "type": "number",
+      "range": {"min": 0, "max": 1},
+      "depends_on": ["room.price_mxn", "student.budget.min"],
+      "formula": "(student.budget.min − room.price_mxn) / student.budget.min si budget.min resuelto > 0 y room.price_mxn < budget.min; 0 en otro caso (budget.min nulo → 0, M-ML-022). Proporción del mínimo que la renta queda por debajo: 0 si la renta está en [budget.min, budget.max] o por encima; 1 si la renta es 0 con budget.min > 0."
+    },
+    {
+      "name": "extra_services_ratio",
+      "type": "number",
+      "range": {"min": 0, "max": 1},
+      "depends_on": ["student.essentialServices", "room.services"],
+      "formula": "|room.services − student.essentialServices| / (|catálogo essentialServices| − |student.essentialServices|), es decir, servicios del cuarto que el estudiante no pidió entre los servicios del catálogo (11) que no pidió; 0 si pidió los 11. essentialServices nulo → conjunto vacío (denominador 11)."
+    }
+  ],
+  "hard_constraints": [
+    {
+      "id": "HC01_budget",
+      "description": "La renta supera el presupuesto máximo del estudiante.",
+      "excludes_when": "room.price_mxn > student.budget.max",
+      "fields": ["room.price_mxn", "student.budget.max"]
+    },
+    {
+      "id": "HC02_living_with",
+      "description": "Convivencia incompatible: el estudiante women solo acepta cuartos women, men solo cuartos men y any acepta todos (spec ML-03 §7 regla 3).",
+      "excludes_when": "student.livingWith != \"any\" and room.livingWith != student.livingWith",
+      "fields": ["student.livingWith", "room.livingWith"]
+    },
+    {
+      "id": "HC03_pets",
+      "description": "El estudiante lleva mascota y el cuarto no la admite.",
+      "excludes_when": "student.pets = true and room.pets_allowed = false",
+      "fields": ["student.pets", "room.pets_allowed"]
+    }
+  ],
+  "feature_order": [
+    "distance_km",
+    "effective_distance_km",
+    "price_to_budget",
+    "services_coverage",
+    "place_type_match",
+    "property_type_match",
+    "pets_compatible",
+    "distance_ratio",
+    "price_below_min",
+    "extra_services_ratio"
+  ]
+}

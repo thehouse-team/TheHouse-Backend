@@ -72,6 +72,10 @@ public interface ICompatibilityModel
     string FeatureSchemaVersion { get; }
 
     SmartMatchScore Score(SmartMatchFeatures features);
+
+    // NV-23 1.3.0: todos los candidatos de una consulta en una sola llamada
+    // (el ONNX recibe un lote [N, 10]); el modelo base puntúa par por par.
+    IReadOnlyList<SmartMatchScore> ScoreMany(IReadOnlyList<SmartMatchFeatures> features) => [.. features.Select(Score)];
 }
 
 public static class SmartMatchRules
@@ -101,6 +105,15 @@ public static class SmartMatchRules
     public const string Unavailable = "unavailable";
 
     public const string ProfileIncomplete = "smart_match_profile_incomplete";
+
+    // Orden de los factores del desglose (ML-04 y `factorOrder` de ML-06).
+    public static readonly string[] FactorOrder = ["budget", "distance", "essential_services", "place_type", "property_type", "extras"];
+
+    // Features binarias del esquema 2.0.0 (0 o 1).
+    private static readonly HashSet<int> BinaryFeatures = [4, 5, 6];
+
+    // Features acotadas a [0, 1] en el esquema 2.0.0 (`range`).
+    private static readonly HashSet<int> UnitFeatures = [3, 8, 9];
 
     // ML-03: factores de distancia efectiva por medio de transporte.
     private static readonly IReadOnlyDictionary<string, double> TransportFactors = new Dictionary<string, double>(StringComparer.Ordinal)
@@ -242,6 +255,36 @@ public static class SmartMatchRules
     // decimales para absorber el error de punto flotante. Nunca ToEven.
     public static double RoundHalfUp(double value, int decimals) =>
         Math.Round(Math.Round(value, 6, MidpointRounding.AwayFromZero), decimals, MidpointRounding.AwayFromZero);
+
+    // Puntos de un factor con 1 decimal; `-0` se escribe como `0` (M-ML-046:
+    // el ONNX puede devolver -2.45e-16 en un factor que está en su mínimo).
+    public static double FactorPoints(double raw)
+    {
+        var points = RoundHalfUp(raw, 1);
+        return points == 0 ? 0.0 : points;
+    }
+
+    // `matchScore` = floor(round6(Σ) + 0.5), acotado a 0–100.
+    public static int MatchScore(double rawTotal) => (int)Math.Clamp(RoundHalfUp(rawTotal, 0), 0, 100);
+
+    // Guía de ML-06 §6.2: el vector debe ser finito, dentro de su `range` y
+    // con 0 o 1 en las binarias antes de llegar al ONNX.
+    public static bool IsValid(SmartMatchFeatures features)
+    {
+        var vector = features.ToVector();
+        for (var index = 0; index < vector.Count; index++)
+        {
+            var value = vector[index];
+            if (!double.IsFinite(value) || value < 0 ||
+                (UnitFeatures.Contains(index) && value > 1) ||
+                (BinaryFeatures.Contains(index) && value is not (0 or 1)))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 // `baseline-1.0.0`: pesos, curvas y redondeo leídos del recurso copiado de
@@ -294,13 +337,16 @@ public sealed class BaselineCompatibilityModel : ICompatibilityModel
 
     public string Sha256 { get; }
 
+    // Etiquetas en español por factor; el ONNX usa las mismas (mismos factores).
+    public IReadOnlyDictionary<string, string> Labels => factors.ToDictionary(factor => factor.Id, factor => factor.Label, StringComparer.Ordinal);
+
     public SmartMatchScore Score(SmartMatchFeatures features)
     {
         var breakdown = factors.Select(factor =>
         {
             var value = features[factor.Feature];
             var raw = factor.Weight * Curve(factor.Points, value);
-            return new SmartMatchFactor(factor.Id, factor.Label, factor.Feature, value, raw, SmartMatchRules.RoundHalfUp(raw, 1), factor.Weight);
+            return new SmartMatchFactor(factor.Id, factor.Label, factor.Feature, value, raw, SmartMatchRules.FactorPoints(raw), factor.Weight);
         }).ToArray();
         // Suma de izquierda a derecha en el orden de la configuración, como ML.
         var total = 0.0;
@@ -309,8 +355,7 @@ public sealed class BaselineCompatibilityModel : ICompatibilityModel
             total += item.RawPoints;
         }
 
-        var score = (int)Math.Clamp(SmartMatchRules.RoundHalfUp(total, 0), 0, 100);
-        return new SmartMatchScore(ModelVersion, FeatureSchemaVersion, score, total, breakdown);
+        return new SmartMatchScore(ModelVersion, FeatureSchemaVersion, SmartMatchRules.MatchScore(total), total, breakdown);
     }
 
     // Lineal por tramos con extremos constantes (`curve_semantics`).
