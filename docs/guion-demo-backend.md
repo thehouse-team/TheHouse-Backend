@@ -26,13 +26,13 @@ curl.exe -s -o NUL -w "%{http_code} -> %{redirect_url}`n" ("http://" + $U.Substr
 
 Debe verse: `HTTP/1.1 200` y la redirección `301` de `http://` a `https://`. Mencionar: Azure Container Apps (eastus2), MongoDB Atlas M0 y Upstash Redis.
 
-## 2. Dos instancias y balanceo (puntos 13 y 15) — solo el 3 de diciembre
+## 2. Dos instancias y balanceo (puntos 13 y 15) — ventana abierta desde el 2 de diciembre
 
 ```powershell
 az containerapp replica list -n ca-thehouse-u2 -g rg-thehouse-u2 --query "[].{name:name, state:properties.runningState}" -o table
 ```
 
-Debe verse: 2 réplicas `Running` (ventana de NV-03 T08/T09/T18/T19 con «OK PARA APPLY»). Explicar: sin estado en memoria para la seguridad (JWT, revocación y límites en Redis), probes `/health/live` y `/health/ready`, sin sesiones fijas.
+Debe verse: 2 réplicas `Running`. La ventana se abre el 2 de diciembre en la mañana con «OK PARA APPLY» (cabe en la concesión gratuita de diciembre) y se cierra al terminar la evaluación. Evidencia ya registrada el 2026-11-26 (NV-03 T08/T09/T18/T19): 18/18, balanceo entre las dos réplicas en Application Insights y reinicio con tráfico sin caídas (225/225). Explicar: sin estado en memoria para la seguridad (JWT, revocación y límites en Redis), probes `/health/live` y `/health/ready`, sin sesiones fijas.
 
 ## 3. Cuenta: registro, sesión y revocación (punto 15)
 

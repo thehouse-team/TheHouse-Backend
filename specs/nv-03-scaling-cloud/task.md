@@ -8,13 +8,13 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
+| Estado de ejecución | **✅ EJECUTADA PARA U2 — 25 de 25 tasks (ventana de dos réplicas el 2026-11-26: 18/18, balanceo y reinicio sin caídas); ver `evidence.md`** |
 | Spec | `spec.md` 1.4.0-u2 |
 | Plan | `plan.md` 1.4.0-u2 |
 | Tasks totales | 25 |
 | Tasks U2 | 25 |
 | Tasks futuras (no U2) | 0 |
-| Tasks completadas | 21 (T01–T07, T10–T17, T20–T25; ver `evidence.md`) |
+| Tasks completadas | 25 (T01–T25; ver `evidence.md`) |
 
 **Cambio 1.3.0-u2 (2026-11-25) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo, autorizo y EJECUTA»: spec, paquete `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0 y T11/T12; «Autorizo y OK PARA APPLY» para registrar `Microsoft.Insights` y aplicar; M-BE-090):** define cómo se cierran T11 y T12 (§7.2): las trazas y métricas de OpenTelemetry que la API ya produce se exportan a Application Insights basado en el mismo workspace de Log Analytics (tope de 0.1 GB/día), con la identidad administrada de la app y sin llaves. T11 deja de depender de T08: se implementa y verifica con una réplica, y la correlación entre dos réplicas se demuestra en la ventana del 3 de diciembre (T19).
 
@@ -47,8 +47,8 @@
 
 ## F3 — Réplicas, balanceo y TLS
 
-- [ ] **T08 · Modelo de dos réplicas** — Requisito: NV-03-R02 · Fase: F3 · **Alcance: U2** · Aceptación: misma imagen/configuración, salud independiente, reemplazo sin afinidad de sesión. · Evidencia: topología y revisión. · Depende de: T01, T02.
-- [ ] **T09 · Load balancing y health checks** — Requisito: NV-03-R03 · Fase: F3 · **Alcance: U2** · Aceptación: Container Apps distribuye tráfico, usa `/health/live` y `/health/ready`, retira réplicas no listas y no usa sticky sessions. · Evidencia: configuración y pruebas. · Depende de: T08.
+- [x] **T08 · Modelo de dos réplicas** — Requisito: NV-03-R02 · Fase: F3 · **Alcance: U2** · Aceptación: misma imagen/configuración, salud independiente, reemplazo sin afinidad de sesión. · Evidencia: topología y revisión. · Depende de: T01, T02.
+- [x] **T09 · Load balancing y health checks** — Requisito: NV-03-R03 · Fase: F3 · **Alcance: U2** · Aceptación: Container Apps distribuye tráfico, usa `/health/live` y `/health/ready`, retira réplicas no listas y no usa sticky sessions. · Evidencia: configuración y pruebas. · Depende de: T08.
 - [x] **T10 · TLS, HSTS y confianza en proxy** — Requisito: NV-03-R06 · Fase: F3 · **Alcance: U2** · Aceptación: certificado válido, terminación, renovación, HSTS y validación de certificados habilitada. · Evidencia: configuración y análisis TLS. · Depende de: T08.
 
 ## F4 — Observabilidad, imagen y GHCR
@@ -69,8 +69,8 @@
 
 ## F6 — Creación, verificación, apagado y destrucción
 
-- [ ] **T18 · Plan y creación de infraestructura** — Requisitos: NV-03-R11, NV-03-R02, NV-03-R03, NV-03-R04, NV-03-R05, NV-03-R06, NV-03-R09 · Fase: F6 · **Alcance: U2** · Aceptación: plan aprobado con dos réplicas, HTTPS, Redis, MongoDB y observabilidad; apply solo tras `OK PARA APPLY`; inventario y costo inicial. · Evidencia: plan revisado, inventario y respuestas. · Depende de: T09, T10, T11, T15, T17, T22.
-- [ ] **T19 · Verificación de despliegue, escalado, fallos y TLS** — Requisitos: NV-03-R01, NV-03-R02, NV-03-R03, NV-03-R04, NV-03-R05, NV-03-R06, NV-03-R07 · Fase: F6 · **Alcance: U2** · Aceptación: smoke tests de 7 endpoints, health, rate limit 429, logout/reuso, réplicas >= 2, TLS y fallos Redis/MongoDB verificados. · Evidencia: reportes de prueba. · Depende de: T18.
+- [x] **T18 · Plan y creación de infraestructura** — Requisitos: NV-03-R11, NV-03-R02, NV-03-R03, NV-03-R04, NV-03-R05, NV-03-R06, NV-03-R09 · Fase: F6 · **Alcance: U2** · Aceptación: plan aprobado con dos réplicas, HTTPS, Redis, MongoDB y observabilidad; apply solo tras `OK PARA APPLY`; inventario y costo inicial. · Evidencia: plan revisado, inventario y respuestas. · Depende de: T09, T10, T11, T15, T17, T22.
+- [x] **T19 · Verificación de despliegue, escalado, fallos y TLS** — Requisitos: NV-03-R01, NV-03-R02, NV-03-R03, NV-03-R04, NV-03-R05, NV-03-R06, NV-03-R07 · Fase: F6 · **Alcance: U2** · Aceptación: smoke tests de 7 endpoints, health, rate limit 429, logout/reuso, réplicas >= 2, TLS y fallos Redis/MongoDB verificados. · Evidencia: reportes de prueba. · Depende de: T18.
 - [x] **T20 · Destrucción y verificación de recursos residuales** — Requisitos: NV-03-R12, NV-03-R13, NV-03-R09 · Fase: F6 · **Alcance: U2** · Aceptación: inventario vacío o justificado, sin recursos facturables y con evidencia posterior; destroy solo con autorización humana. · Evidencia: plan de destrucción, inventario y facturación. · Depende de: T18, T19.
 - [x] **T21 · Atestación de costo observado** — Requisito: NV-03-R13 · Fase: F6 · **Alcance: U2** · Aceptación: costo del ciclo de vida reportado con evidencia; si Azure no refleja datos, se registra PENDIENTE DE REFLEJO; cualquier duda se reporta BLOCKED. · Evidencia: informe final y revisión. · Depende de: T20.
 - [x] **T23 · Scale-to-zero y apagado operativo** — Requisitos: NV-03-R12, NV-03-R13 · Fase: F6 · **Alcance: U2** · Aceptación: reducción de `min replicas` a 0 con nombres reales, sin destruir datos ni recursos externos; comando exacto documentado. · Evidencia: comando, salida y estado. · Depende de: T18, T19.
@@ -86,8 +86,8 @@
 | T05 | R01, R04 | F2 | U2 | COMPLETADA |
 | T06 | R05 | F2 | U2 | COMPLETADA |
 | T07 | R05 | F2 | U2 | COMPLETADA |
-| T08 | R02 | F3 | U2 | ABIERTA |
-| T09 | R03 | F3 | U2 | ABIERTA |
+| T08 | R02 | F3 | U2 | COMPLETADA |
+| T09 | R03 | F3 | U2 | COMPLETADA |
 | T10 | R06 | F3 | U2 | COMPLETADA |
 | T11 | R07 | F4 | U2 | COMPLETADA |
 | T12 | R07, R13 | F4 | U2 | COMPLETADA |
@@ -96,8 +96,8 @@
 | T15 | R09 | F5 | U2 | COMPLETADA |
 | T16 | R10 | F5 | U2 | COMPLETADA |
 | T17 | R10, R13 | F5 | U2 | COMPLETADA |
-| T18 | R11, R02, R03, R04, R05, R06, R09 | F6 | U2 | ABIERTA |
-| T19 | R01, R02, R03, R04, R05, R06, R07 | F6 | U2 | ABIERTA |
+| T18 | R11, R02, R03, R04, R05, R06, R09 | F6 | U2 | COMPLETADA |
+| T19 | R01, R02, R03, R04, R05, R06, R07 | F6 | U2 | COMPLETADA |
 | T20 | R12, R13, R09 | F6 | U2 | COMPLETADA |
 | T21 | R13 | F6 | U2 | COMPLETADA |
 | T22 | R08, R14 | F4 | U2 | COMPLETADA |
@@ -133,11 +133,11 @@
 | Tasks | 25 |
 | Tasks U2 | 25 |
 | Tasks futuras (no U2) | 0 |
-| Tasks abiertas | 4 |
-| Tasks completadas | 21 |
+| Tasks abiertas | 0 |
+| Tasks completadas | 25 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
+| Estado de ejecución | **✅ EJECUTADA PARA U2 — 25 de 25 tasks (ventana de dos réplicas el 2026-11-26: 18/18, balanceo y reinicio sin caídas); ver `evidence.md`** |
 
 Ninguna task puede ejecutarse hasta la aprobación de Fase B con versiones, IDs, rutas, proveedor, servicios y restricciones explícitas. `terraform apply` y `terraform destroy` requieren confirmación humana separada.

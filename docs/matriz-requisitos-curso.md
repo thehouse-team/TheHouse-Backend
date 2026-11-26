@@ -5,7 +5,7 @@
 | Fuente | «Requerimientos para el desarrollo del proyecto Móvil» v3 (cuatrimestre septiembre–diciembre 2026) |
 | Fecha | 2026-11-20 |
 | Evaluación | 3 y 4 de diciembre de 2026 (último día para registrar calificaciones: 4 de diciembre) |
-| Avance del backend | 311/320 tasks (97 %); lo restante es la ventana de dos réplicas del 3 de diciembre (NV-03 T08, T09, T18, T19), la prueba de push con Mobile (NV-20 T05) y los 6 avisos nuevos de NV-20 1.3.0 (T09–T12, propuesta) |
+| Avance del backend | 315/320 tasks (98 %); lo restante es la prueba de push con Mobile (NV-20 T05) y los 6 avisos nuevos de NV-20 1.3.0 (T09–T12, esperan la validación de Mobile) |
 | URL | https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io |
 
 Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · ➖ fuera del backend (Mobile, Landing o ML/GenAI).
@@ -30,7 +30,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Requisito | Estado | Evidencia | Cómo demostrarlo |
 | --- | --- | --- | --- |
 | Todos los servicios en la nube (BD externa permitida) | ✅ | Azure (cómputo, logs, Content Safety); Atlas y Upstash como servicios externos | Portal de Azure |
-| Load balancer o similar | 🟡 | Ingress de Container Apps (balanceo administrado, probes `/health/live` y `/health/ready`, sin sesiones fijas). **Dos réplicas: ventana del 3 de diciembre** (NV-03 T08/T09/T19) | `az containerapp replica list` con 2 réplicas |
+| Load balancer o similar | ✅ | Ingress de Container Apps (balanceo administrado, probes `/health/live` y `/health/ready`, sin sesiones fijas). **Demostrado con dos réplicas el 2026-11-26**: las dos atendieron el mismo endpoint y un reinicio con tráfico no perdió ninguna de 225 peticiones (NV-03 T08/T09/T19) | `az containerapp replica list` con 2 réplicas |
 | IaC con Terraform para crear y eliminar | ✅ | `infra/terraform/` y `LIFECYCLE.md`: crear (4), verificar y destruir (4) demostrado el 2026-11-19 (NV-03 T20) | `terraform plan` y `LIFECYCLE.md` |
 | Salida por SSL/HTTPS | ✅ | TLS 1.3 con certificado administrado por Azure, HTTP→301 y HSTS de 30 días (NV-03 T10) | `curl -I http://…` → 301 |
 
@@ -45,7 +45,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 
 | Requisito | Estado | Evidencia | Cómo demostrarlo |
 | --- | --- | --- | --- |
-| Escalable, al menos 2 instancias | 🟡 | Sin estado local de seguridad (NV-03 T01–T05); escala 0–2. **Dos réplicas fijas el 3 de diciembre con «OK PARA APPLY»** | 2 réplicas Healthy |
+| Escalable, al menos 2 instancias | ✅ | Sin estado local de seguridad (NV-03 T01–T05); escala 0–2. **Dos réplicas fijas verificadas el 2026-11-26** (token, revocación y límites compartidos entre réplicas, 18/18); se reabren el 2 de diciembre para la evaluación | 2 réplicas Healthy |
 | Solo AWS, Azure o GCP, con costo cero | ✅ | Azure; Cost Management 0.00 USD (1 al 19 de noviembre); presupuesto de 1 USD con alertas | Cost Management |
 | Todas las funciones de la API en la nube | ✅ | 122 rutas en Container Apps | `/openapi` en el entorno efímero o la lista de rutas |
 | Endpoints eficientes | ✅ | Paginación, índices, caché HTTP, compresión y proyecciones | Tiempo de respuesta en vivo |
@@ -90,7 +90,7 @@ Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · 
 | Brecha | Riesgo en la evaluación | Propuesta |
 | --- | --- | --- |
 | Imágenes sin CDN de la nube | Medio: el PDF lo pide explícito | **Decidido (M-BE-084): opción A, costo cero.** Se evaluó la opción B (2026-11-20): el CDN clásico de Azure ya no admite perfiles nuevos (retiro el 30 de septiembre de 2027) y Front Door Standard, el CDN vigente, cobra US$35 al mes de base más solicitudes y tráfico; un Front Door temporal para la evaluación costaría unos US$2–3 del crédito, que no cuenta como costo cero (constitución §17). Se defiende con la caché HTTP `immutable` de un año y su demostración con `curl -I` |
-| Dos instancias | Bajo: ventana agendada | 3 de diciembre con «OK PARA APPLY» (NV-03 T08/T09/T19) |
+| Dos instancias | Bajo: verificadas el 2026-11-26 | Reabrir el 2 de diciembre en la mañana con «OK PARA APPLY» para mostrarlas en vivo |
 | ML (NV-23) y GenAI (NV-24) | Bajo: las dos en producción (ML con el modelo entrenado `logreg-1.0.0`; GenAI redacta las explicaciones, con plantilla si tarda más de 8 s) | GenAI: bajar su latencia (fix #22 de su repositorio) |
 | Caché de datos del backend | Bajo | La caché HTTP cumple el punto 9; opcional: caché en Redis para catálogos |
 | Seguridad de Atlas | Bajo | **Hecho (2026-11-25):** la app usa `thehouse-backend` con `readWrite` solo en `thehouse_u2` (NV-03 T07, 7/7). Sin rotación de contraseñas por decisión de Victor: el proyecto de Atlas se eliminará después de la entrega |
