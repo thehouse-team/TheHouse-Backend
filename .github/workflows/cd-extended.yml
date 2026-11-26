@@ -205,6 +205,19 @@ jobs:
           cp .github/fuzz/restler_token.py "$work/"
           chmod -R 777 "$work"
 
+      - name: Probar el token de los usuarios de prueba
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$(python3 .github/fuzz/restler_token.py)"
+          rm -f .github/fuzz/.fuzz-users.json
+          header="$(echo "$out" | sed -n 2p)"
+          echo "::add-mask::${header#Authorization: Bearer }"
+          echo "Metadatos: $(echo "$out" | sed -n 1p)"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -H "$header" http://127.0.0.1:8081/api/v1/users/me)
+          echo "GET /api/v1/users/me con el token: HTTP $code"
+          test "$code" = 200
+
       - name: RESTler compile
         run: |
           docker run --rm --network host -v "$FUZZ_WORK:/work" -w /work restler:9.3.1 \
@@ -255,7 +268,7 @@ jobs:
           cat restler-report.md >> "$GITHUB_STEP_SUMMARY"
           mkdir -p restler-results
           cd "$FUZZ_WORK"
-          find Test FuzzLean -type f \( -name 'testing_summary.json' -o -path '*bug_buckets*' -o -name 'runSummary.json' \) 2>/dev/null \
+          find Compile Test FuzzLean -type f \( -name 'testing_summary.json' -o -path '*bug_buckets*' -o -name 'runSummary.json' -o -path '*/logs/*' -o -name 'engine_settings.json' -o -name 'config.json' \) 2>/dev/null \
             | while read -r f; do mkdir -p "$GITHUB_WORKSPACE/restler-results/$(dirname "$f")"; cp "$f" "$GITHUB_WORKSPACE/restler-results/$f"; done || true
 
       - name: Logs de la API ante fallo
