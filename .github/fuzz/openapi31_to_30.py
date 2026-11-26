@@ -4,7 +4,11 @@ RESTler v9 entiende OpenAPI 3.0. ASP.NET Core 10 publica 3.1, donde los
 nulos y los números que también aceptan texto se escriben como listas de
 tipos. La API no cambia: solo se traduce el documento para el fuzzer.
 
-  python3 openapi31_to_30.py entrada.json salida.json http://127.0.0.1:8081
+  python3 openapi31_to_30.py entrada.json salida.json http://127.0.0.1:8081 ["POST /ruta" ...]
+
+Las operaciones que se pasan al final se quitan del documento: son las que
+cierran la sesión del propio fuzzer (logout y eliminar la cuenta); sus casos
+los cubren las pruebas de integración, las de seguridad y ZAP.
 """
 import json
 import sys
@@ -60,6 +64,14 @@ def main():
     source, target, server = sys.argv[1], sys.argv[2], sys.argv[3]
     with open(source, encoding="utf-8") as handle:
         document = json.load(handle)
+    for excluded in sys.argv[4:]:
+        method, path = excluded.split(" ", 1)
+        operations = document.get("paths", {}).get(path, {})
+        if operations.pop(method.lower(), None) is None:
+            sys.exit(f"No existe la operación a excluir: {excluded}")
+        if not any(key in operations for key in ("get", "post", "put", "patch", "delete")):
+            document["paths"].pop(path)
+        print(f"Excluida del fuzzing: {excluded}")
     converted = convert(document)
     converted["openapi"] = "3.0.3"
     converted["servers"] = [{"url": server}]

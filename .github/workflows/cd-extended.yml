@@ -201,7 +201,7 @@ jobs:
           mkdir -p "$work"
           echo "FUZZ_WORK=$work" >> "$GITHUB_ENV"
           curl -fsS http://127.0.0.1:8081/openapi/v1.json -o "$work/openapi31.json"
-          python3 .github/fuzz/openapi31_to_30.py "$work/openapi31.json" "$work/openapi30.json" http://127.0.0.1:8081
+          python3 .github/fuzz/openapi31_to_30.py "$work/openapi31.json" "$work/openapi30.json" http://127.0.0.1:8081             "POST /api/v1/auth/logout" "POST /api/v1/users/me/deletion"
           cp .github/fuzz/restler_token.py "$work/"
           chmod -R 777 "$work"
 
@@ -243,12 +243,12 @@ jobs:
         shell: bash
         run: |
           set +e
-          timeout 1200 docker run --rm --network host -v "$FUZZ_WORK:/work" -w /work restler:9.3.1 \
+          timeout 1500 docker run --rm --network host -v "$FUZZ_WORK:/work" -w /work restler:9.3.1 \
             dotnet /RESTler/restler/Restler.dll fuzz-lean \
               --grammar_file /work/Compile/grammar.py --dictionary_file /work/Compile/dict.json \
               --settings /work/Compile/engine_settings.json --no_ssl \
               --target_ip 127.0.0.1 --target_port 8081 \
-              --token_refresh_command "python3 /work/restler_token.py" --token_refresh_interval 300
+              --token_refresh_command "python3 /work/restler_token.py" --token_refresh_interval 300               --time_budget 0.33
           code=$?
           if [ "$code" -eq 124 ]; then
             echo "::warning::fuzz-lean llegó al límite de 20 minutos; el reporte usa lo que alcanzó a correr."
