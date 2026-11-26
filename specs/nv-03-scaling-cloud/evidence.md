@@ -419,3 +419,33 @@ Autorización: «Apruebo, autorizo y EJECUTA» (spec 1.3.0-u2, paquete `Azure.Mo
 | Costo | $0: dentro de los 5 GB/mes gratis del workspace; Application Insights sin cargo propio |
 
 Resultado: **T11 y T12 completas — PASS**. NV-03 queda en **20 de 25**; lo restante es la ventana de dos réplicas (T08, T09, T18, T19) y T14 (futura).
+
+## T14 — Registro de entrega de la imagen (1.4.0-u2, 2026-11-26)
+
+Autorización: «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-26, sobre la propuesta del PR [#100](https://github.com/thehouse-team/TheHouse-Backend/pull/100) (M-BE-092).
+
+| Dato | Valor |
+| --- | --- |
+| Imagen en producción | `ghcr.io/thehouse-team/thehouse-backend@sha256:ab7e22f089fbde25f866590d141be11ced110e66bdf80afccceeea6e38420980` (revisión `ca-thehouse-u2--0000018`) |
+| Commit | `05ad85188b0030bb29fa75ba91eb1dfcb770bccf` (NV-23 1.3.0) |
+| CD que la publicó | [run 45687182712](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/45687182712); `deployment-record.json` con el mismo digest, imagen anterior e identidad de la firma |
+| CI del commit | [run 45686436694](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/45686436694) |
+
+| Control | Resultado |
+| --- | --- |
+| Digest | ✅ «Validar digest» (`sha256:` de 64 hex) y `imagetools inspect` |
+| SBOM | ✅ CycloneDX 1.7 de la imagen publicada, **161 componentes** (artefacto `publish`) |
+| Trivy | ✅ Sobre el digest publicado: **0 vulnerabilidades** (Ubuntu 24.04, `TheHouse.deps.json` y runtime de ASP.NET Core) |
+| Dockle | ✅ CI `container-security` del mismo commit, más «La imagen corre como usuario no root» |
+| Cosign | ✅ Firma keyless y atestación del SBOM en `publish`, verificadas en `publish` y otra vez en `deploy` antes de desplegar |
+
+Para repetir la verificación (Cosign 3.x):
+
+```bash
+IMG=ghcr.io/thehouse-team/thehouse-backend@sha256:ab7e22f089fbde25f866590d141be11ced110e66bdf80afccceeea6e38420980
+ID=https://github.com/thehouse-team/TheHouse-Backend/.github/workflows/cd.yml@refs/heads/main
+cosign verify "$IMG" --certificate-identity "$ID" --certificate-oidc-issuer https://token.actions.githubusercontent.com
+cosign verify-attestation "$IMG" --type cyclonedx --certificate-identity "$ID" --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+Resultado: **PASS — T14 completa** (sin cambios de código ni de Terraform). NV-03 queda en **21 de 25**; lo restante es la ventana de dos réplicas.

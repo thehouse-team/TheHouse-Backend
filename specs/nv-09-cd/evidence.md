@@ -389,3 +389,49 @@ Total: 7,715 peticiones (7,512 de los escenarios más 200 registros y las consul
 Constitución 1.2.1 aprobada el 2026-11-25 («Apruebo 1.2.1») y aplicada en la §25 (k6 en lugar de NBomber).
 
 **Resultado: PASS — T16 completa.** NV-09 queda en **19 de 20** (pendiente T15, RESTler).
+
+## T15 — Fuzzing con RESTler (1.3.0-u2, 2026-11-26)
+
+Autorización: «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-26, sobre la propuesta del PR [#100](https://github.com/thehouse-team/TheHouse-Backend/pull/100) (M-BE-092).
+
+| Pieza | Detalle |
+| --- | --- |
+| Job | `fuzzing` en `cd-extended.yml` (`contents: read`, sin secretos), en paralelo con `performance` |
+| RESTler | `v9.3.1`, commit `eaacd92733771d35e90acfb2040fe37d4e5d09b1` verificado y construido en el runner (30–40 s) |
+| OpenAPI | La API publica 3.1.1; `.github/fuzz/openapi31_to_30.py` lo traduce a 3.0.3 (332 listas de tipos y 22 `oneOf` con `null`) sin cambiar la API |
+| Usuarios | Dos usuarios de prueba (`restler_token.py`); un paso previo comprueba el token contra `GET /users/me` (200) sin mostrarlo |
+| Proxy | nginx `1.28.0-alpine` en `127.0.0.1:8081` con `X-Forwarded-Proto: https` |
+
+### Ejecuciones
+
+| Run | Resultado | Lectura |
+| --- | --- | --- |
+| [45872591044](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/45872591044) | Cobertura 7/133; 180 respuestas 401 | RESTler probó `POST /auth/logout` con su propio token y la API revocó la sesión (comportamiento correcto de NV-06); todo lo posterior salió 401. También intentó `POST /users/me/deletion` sin éxito (contraseñas de fuzzing) |
+| [45875771535](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/45875771535) | Diagnóstico (cancelado tras el modo test) | El token funciona (`/users/me` 200) y RESTler lo envía (`_OMITTED_AUTH_TOKEN_`): la causa era el logout |
+| **[45876314599](https://github.com/thehouse-team/TheHouse-Backend/actions/runs/45876314599)** | **En verde** | Con logout y eliminación de cuenta excluidos |
+
+### Resultado de la ejecución final
+
+| Dato | Valor |
+| --- | --- |
+| Peticiones | ~1,770: 230 en modo `test` y ~1,540 en `fuzz-lean` (20 min) |
+| **Errores 500 (*bug buckets*)** | **0** en los dos modos |
+| Cobertura del modo `test` | 25 de 131 operaciones con respuesta válida |
+| Respuestas de `fuzz-lean` | 400: 744 · 403: 231 · 429: 288 · 401: 118 · 415: 110 · 404: 26 · 414: 14 · 413: 8 · 405: 2 · 200: 2 |
+
+### Triage
+
+| Hallazgo | Decisión |
+| --- | --- |
+| Ningún 500 | Sin bugs que corregir |
+| 400, 413, 414 y 415 | Esperados: datos alterados, cuerpo o URL demasiado grandes y tipo de contenido equivocado se rechazan antes de llegar a la lógica |
+| 403 | Esperados: rutas de arrendador y de staff con usuarios sin esos roles (la autorización funciona) |
+| 401 | Esperados: `POST /auth/refresh` con tokens de refresco inventados y combinaciones de `fuzz-lean` sin encabezado |
+| 429 | Esperados: los límites por endpoint y por usuario siguen activos en el perfil `scan`; RESTler espera y reintenta, por eso `fuzz-lean` avanza lento |
+
+| Advertencia | Detalle | Mejora posible |
+| --- | --- | --- |
+| W1. Cobertura válida baja (25/131) | Los ids que inventa RESTler no son ObjectId (400) y los usuarios de prueba no tienen perfil de arrendador ni rol de staff (403) | Diccionario de RESTler con ids reales de los seeds y usuarios con perfil de arrendador y rol de staff en el entorno efímero |
+| W2. Límites de peticiones | 288 respuestas 429 en `fuzz-lean` | Variar la IP de cliente por petición en el proxy, como en la prueba de k6 |
+
+Resultado: **PASS WITH WARNINGS — T15 completa.** NV-09 queda en **20 de 20**.

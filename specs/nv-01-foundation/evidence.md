@@ -256,3 +256,26 @@ Correcciones autorizadas por Victor Manuel Jose Jose el 2026-11-05 en la rama `f
 - `SecurityHeadersTests` (6 casos): health 200, listado 200, 400, 404, 304 con `If-None-Match` y Problem Details 400/401. Suite completa 486/486.
 - Producción (revisión `c0c8b477-9-1`): `x-content-type-options: nosniff` en `/health/ready`.
 - ZAP baseline del CD run `42348699940`: «PASS: X-Content-Type-Options Header Missing [10021]»; 0 High, 0 Medium. Hallazgo H-01 de NV-09 cerrado.
+
+## T13 — Fronteras del monolito modular (1.3.0-u2, 2026-11-26)
+
+Autorización: «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-26, sobre la propuesta del PR [#100](https://github.com/thehouse-team/TheHouse-Backend/pull/100) (M-BE-092).
+
+| Pieza | Detalle |
+| --- | --- |
+| Pruebas | `TheHouse.IntegrationTests/ArchitectureTests.cs`: 7 pruebas (R1–R6 y la coincidencia con el documento), por reflexión y con la base de datos de registro de NV-26; sin paquetes nuevos |
+| Mapa | `docs/arquitectura/modulos.md`: 16 módulos con sus specs, colecciones y componentes, y las dependencias entre módulos |
+| Datos reales | 29 repositorios de MongoDB y 35 colecciones: **cada colección la pide un solo repositorio**; 60 componentes de `Application/UseCases` asignados |
+
+| Regla | Resultado |
+| --- | --- |
+| R1. Referencias entre proyectos (constitución §7) | ✅ Domain → ninguna; Application → Domain; Infrastructure → Application y Domain; host → las tres |
+| R2. Núcleo sin infraestructura | ✅ Domain y Application no referencian ningún paquete |
+| R3. Un dueño por colección | ✅ 35 colecciones, cada una con un solo módulo (igual al esquema de NV-26) |
+| R4. Sin ciclos entre módulos | ✅ 8 dependencias de servicio a servicio, todas documentadas, sin ciclos |
+| R5. Endpoints sin infraestructura | ✅ Ningún tipo de `TheHouse.Http` usa tipos de `TheHouse.Infrastructure` |
+| R6. Todo asignado | ✅ Ningún repositorio, servicio ni colección sin módulo |
+
+Decisión registrada: `ReviewModerationService` (ocultar reseñas) pertenece a **Moderation**, que usa el puerto de Reviews; en Reviews formaría un ciclo. El código ya cumplía las fronteras: no hubo que cambiarlo.
+
+Resultado: **PASS — T13 completa.** NV-01 queda en **19 de 19**.

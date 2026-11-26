@@ -4,20 +4,22 @@
 | --- | --- |
 | ID | NV-01 |
 | Documento | `spec.md` |
-| Versión | 1.2.0-u2 |
+| Versión | 1.3.0-u2 |
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26) |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RNF-01, RNF-05, RNF-06, RNF-08, RNF-10 (transversales) (`Requerimientos_TheHouse_v2`) |
-| Plan | `plan.md` 1.2.0-u2 |
-| Tasks | `task.md` 1.2.0-u2 |
+| Plan | `plan.md` 1.3.0-u2 |
+| Tasks | `task.md` 1.3.0-u2 |
 | Precondición | Bootstrap técnico existente (M-BE-001); M-BE-027; M-BE-028 |
 | Relación | Habilita NV-04 a NV-08 y NV-03 U2, sin autorización transitiva |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
 
 **Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-01-R14 (encabezados de seguridad HTTP; hallazgo H-01 de NV-09: falta `X-Content-Type-Options: nosniff`) y la task T19. Las tasks 1.1.0-u2 no cambian.
+
+**Cambio 1.3.0-u2 (2026-11-26) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-26 («Apruebo y EJECUTA», respuesta a la propuesta del PR #100; M-BE-092):** T13 (fronteras del monolito modular) pasa de «Futuro» a **U2** a petición del responsable. Las reglas se comprueban con pruebas de arquitectura por reflexión y con la base de datos de registro que ya usa NV-26, sin paquetes nuevos, más un mapa de módulos en `docs/arquitectura/modulos.md` (§6.2).
 
 Este documento está aprobado documentalmente para la Entrega Unidad 2. La aprobación documental **no autoriza implementación**: conforme a M-BE-027, la ejecución requiere una autorización humana posterior de Fase B con SPEC ACTIVA, PLAN ACTIVO, TASK ACTIVA y ESTADO AUTORIZADO. NV-01 sigue siendo Foundation y no contiene endpoints de negocio.
 
@@ -91,6 +93,21 @@ NV-01 puede preparar infraestructura técnica. NV-01 **no implementa** Register,
 | NV-01-R12 | Manejo global de excepciones | Un middleware o mecanismo único clasifica errores conocidos y desconocidos, respeta cancelación y timeouts, registra con correlación y no filtra detalles internos al cliente. | F2 | T12, T17, T18 |
 | NV-01-R13 | Límites del monolito modular | Los módulos declaran contratos públicos, no acceden a internals de otro módulo y no crean ciclos; las reglas de dependencia son comprobables mediante pruebas de arquitectura y documentación. | F5 | T13 |
 | NV-01-R14 | Encabezados de seguridad HTTP | Toda respuesta, incluidos errores, health y 304, incluye `X-Content-Type-Options: nosniff`; se agrega en un único middleware al inicio del pipeline sin alterar contratos ni encabezados existentes; prueba de integración que lo verifica en respuestas 200, 4xx y 304. | F6 | T19 |
+
+## 6.2 Fronteras del monolito modular (1.3.0-u2, T13)
+
+Hoy no existe ninguna prueba de arquitectura: las reglas de la constitución (§6 y §7) solo se cumplen por revisión. T13 las vuelve comprobables en el CI, sin paquetes nuevos (reflexión de .NET y la base de datos de registro de NV-26, que intercepta las colecciones que pide cada repositorio).
+
+| Regla | Cómo se prueba |
+| --- | --- |
+| R1. Referencias entre proyectos (constitución §7) | `GetReferencedAssemblies()`: `Domain` no referencia proyectos internos; `Application` solo `Domain`; `Infrastructure` solo `Application` y `Domain`; el host las tres |
+| R2. Núcleo sin infraestructura | `Domain` y `Application` no referencian `MongoDB.*`, `StackExchange.Redis`, `Microsoft.ML.OnnxRuntime`, `Azure.*`, `SkiaSharp`, `FirebaseAdmin` ni `Microsoft.AspNetCore.*` |
+| R3. Cada colección tiene un solo módulo dueño (constitución §6) | Cada repositorio de MongoDB se construye contra la base de registro; el mapa repositorio → módulo vive en la prueba y en `docs/arquitectura/modulos.md`. Falla si una colección la piden repositorios de dos módulos, salvo las excepciones documentadas (por ejemplo, la eliminación de cuenta de NV-10, que usa los participantes de cada módulo) |
+| R4. Sin ciclos entre módulos | Grafo módulo → módulo a partir de los constructores de los servicios de `Application/UseCases` (dependencias de servicios y puertos de otro módulo); debe ser acíclico |
+| R5. Los endpoints no contienen lógica de infraestructura | Los tipos de `TheHouse.Http` no usan tipos de `TheHouse.Infrastructure` en campos, constructores ni parámetros (la composición vive en `TheHouse.Configuration`) |
+| R6. Sin módulos nuevos sin spec | El mapa de módulos de la prueba debe cubrir todos los repositorios y servicios; uno nuevo sin módulo asignado falla hasta que su spec lo agregue |
+
+Mapa de módulos (`docs/arquitectura/modulos.md`): cada módulo con sus casos de uso, sus colecciones, sus puertos públicos y las specs NV que lo definen. Si una regla falla con el código actual, se corrige el código o se registra una excepción justificada en el mapa (con su decisión en `memoria.md`); nunca se debilita la prueba en silencio.
 
 ## 7. Decisiones y restricciones aplicables
 
@@ -178,11 +195,11 @@ La evidencia futura debe incluir comando reproducible, versión, resultado y art
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 18 |
+| Tasks completadas | 19 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26) |
 
-Cada fila de la tabla del apartado 6 enlaza un requisito con una fase principal y una o más tasks. El detalle de aceptación y evidencia por task está en `task.md`; la secuencia y las puertas están en `plan.md`. R13/T13 se conserva como trabajo futuro y **no forma parte de U2**; por eso no bloquea el cierre de las tasks U2.
+Cada fila de la tabla del apartado 6 enlaza un requisito con una fase principal y una o más tasks. El detalle de aceptación y evidencia por task está en `task.md`; la secuencia y las puertas están en `plan.md`. R13/T13 pasa a U2 en 1.3.0-u2 (§6.2).
 
 ## 14. Aprobación documental y ejecución
 

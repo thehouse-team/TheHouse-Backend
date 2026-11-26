@@ -4,17 +4,19 @@
 | --- | --- |
 | ID | NV-01 |
 | Documento | `plan.md` |
-| Versión | 1.2.0-u2 |
+| Versión | 1.3.0-u2 |
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida) |
-| Spec | `spec.md` 1.2.0-u2 |
-| Tasks | `task.md` 1.2.0-u2 |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26) |
+| Spec | `spec.md` 1.3.0-u2 |
+| Tasks | `task.md` 1.3.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
 
 **Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-01-R14 (encabezados de seguridad HTTP; hallazgo H-01 de NV-09: falta `X-Content-Type-Options: nosniff`) y la task T19. Las tasks 1.1.0-u2 no cambian.
+
+**Cambio 1.3.0-u2 (2026-11-26) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-26 («Apruebo y EJECUTA», respuesta a la propuesta del PR #100; M-BE-092):** T13 (fronteras del monolito modular) pasa de «Futuro» a **U2** a petición del responsable. Las reglas se comprueban con pruebas de arquitectura por reflexión y con la base de datos de registro que ya usa NV-26, sin paquetes nuevos, más un mapa de módulos en `docs/arquitectura/modulos.md` (§6.2).
 
 Este plan está aprobado documentalmente para U2. No se ejecuta ahora, no se marca ninguna task y no se modifica ningún proyecto. Cualquier inicio requiere autorización humana de Fase B y autorización explícita de rutas.
 
@@ -44,7 +46,7 @@ T09, T10, T11, T12, T14, T15, T16, T17, T18
 Task no U2:
 
 ```text
-T13 — límites modulares; se conserva para una revisión futura.
+T13 — límites modulares; pasa a U2 en 1.3.0-u2 (pruebas de arquitectura, spec §6.2).
 ```
 
 Las boundaries de MongoDB, Redis y JWT se resuelven en T01, T02 y T07 sin abrir conexiones, crear repositorios ni emitir tokens.
@@ -57,7 +59,7 @@ Las boundaries de MongoDB, Redis y JWT se resuelven en T01, T02 y T07 sin abrir 
 | F2 | Errores, validación y excepciones | R03, R04, R12 | T03, T04, T12 | Contrato de error y validación coherente |
 | F3 | Contrato y evolución | R05, R06 | T05, T06 | Versión y OpenAPI verificables |
 | F4 | Operación y protección | R07, R08, R09, R10 | T07, T08, T09, T10 | Salud, correlación, compresión y límites |
-| F5 | Salida y límites modulares | R11, R13 | T11 (U2), T13 (futura) | Paginación U2; fronteras futuras |
+| F5 | Salida y límites modulares | R11, R13 | T11, T13 (U2 desde 1.3.0-u2) | Paginación U2; pruebas de fronteras modulares |
 | F6 | Verificación y evidencia | R01–R12 | T14, T15, T16, T17, T18 | Evidencia integrada y revisión final |
 
 ## 4. Detalle de fases
@@ -159,7 +161,7 @@ Las boundaries de MongoDB, Redis y JWT se resuelven en T01, T02 y T07 sin abrir 
 
 **Requisitos:** NV-01-R11, NV-01-R13.
 
-**Tasks U2:** T11. **Task futura:** T13.
+**Tasks U2:** T11 y T13 (1.3.0-u2).
 
 **Entregables U2:**
 
@@ -180,7 +182,7 @@ Las boundaries de MongoDB, Redis y JWT se resuelven en T01, T02 y T07 sin abrir 
 
 ### F6 — Verificación y evidencia
 
-**Requisitos U2:** NV-01-R01 a NV-01-R12. R13/T13 queda como trabajo futuro y no forma parte de U2.
+**Requisitos U2:** NV-01-R01 a NV-01-R12. R13/T13 pasa a U2 en 1.3.0-u2.
 
 **Tasks:** T14, T15, T16, T17, T18.
 
@@ -228,7 +230,7 @@ Dependencias internas:
 - T15 depende de T07, T08, T09 y T10.
 - T16 depende de T04 y T11.
 - T17 depende de T02, T03, T08, T10 y T12.
-- T18 depende de T01 a T12 y T14 a T17; no depende de T13, que es futuro.
+- T18 depende de T01 a T12 y T14 a T17; no depende de T13 (agregada a U2 después del cierre).
 
 Una dependencia no autoriza la ejecución de la task de la que se depende. Cada task requiere su propia autorización dentro del alcance U2.
 
@@ -308,4 +310,4 @@ Este plan no autoriza:
 - Iniciar NV-02, NV-03, NV-04, NV-05, NV-06, NV-07 o NV-08.
 - Seleccionar o provisionar servicios cloud.
 
-Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (T13 excluida).
+Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26).

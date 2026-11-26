@@ -4,19 +4,21 @@
 | --- | --- |
 | ID | NV-03 |
 | Documento | `task.md` |
-| Versión | 1.3.0-u2 |
+| Versión | 1.4.0-u2 |
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (futura); ver `evidence.md`** |
-| Spec | `spec.md` 1.3.0-u2 |
-| Plan | `plan.md` 1.3.0-u2 |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
+| Spec | `spec.md` 1.4.0-u2 |
+| Plan | `plan.md` 1.4.0-u2 |
 | Tasks totales | 25 |
-| Tasks U2 | 24 |
-| Tasks futuras (no U2) | 1 |
-| Tasks completadas | 20 (T01–T07, T10–T13, T15–T17, T20–T25; ver `evidence.md`) |
+| Tasks U2 | 25 |
+| Tasks futuras (no U2) | 0 |
+| Tasks completadas | 21 (T01–T07, T10–T17, T20–T25; ver `evidence.md`) |
 
 **Cambio 1.3.0-u2 (2026-11-25) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo, autorizo y EJECUTA»: spec, paquete `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0 y T11/T12; «Autorizo y OK PARA APPLY» para registrar `Microsoft.Insights` y aplicar; M-BE-090):** define cómo se cierran T11 y T12 (§7.2): las trazas y métricas de OpenTelemetry que la API ya produce se exportan a Application Insights basado en el mismo workspace de Log Analytics (tope de 0.1 GB/día), con la identidad administrada de la app y sin llaves. T11 deja de depender de T08: se implementa y verifica con una réplica, y la correlación entre dos réplicas se demuestra en la ventana del 3 de diciembre (T19).
+
+**Cambio 1.4.0-u2 (2026-11-26) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-26 («Apruebo y EJECUTA», respuesta a la propuesta del PR #100; M-BE-092):** T14 (entrega de la imagen a NV-02) pasa de «Futuro» a **U2**. El CD de NV-09 ya produce todo lo que pide (digest, SBOM CycloneDX de la imagen, Trivy sobre el digest, firma y atestación con Cosign, y Dockle en la CI); T14 se cierra con el registro de la entrega y su verificación (§7.3).
 
 ## Reglas de esta lista
 
@@ -54,7 +56,7 @@
 - [x] **T11 · Instrumentación OpenTelemetry** — Requisito: NV-03-R07 · Fase: F4 · **Alcance: U2** · Aceptación (1.3.0-u2, §7.2): Application Insights `appi-thehouse-u2` basado en el workspace, con `local_authentication_disabled` y el rol `Monitoring Metrics Publisher` para la identidad de la app (Terraform, con «OK PARA APPLY»); exportador `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0 con identidad administrada y sin almacenamiento local; solicitudes, dependencias MongoDB, Redis y HTTP, métricas en lista permitida y logs Warning+ correlacionados por `operation_Id`; pruebas de configuración en verde; datos reales en Azure. La correlación entre dos réplicas se verifica en T19. · Evidencia: configuración, consultas KQL y trazas. · Depende de: T24.
 - [x] **T12 · Cardinalidad, PII, retención y costo de telemetría** — Requisitos: NV-03-R07, NV-03-R13 · Fase: F4 · **Alcance: U2** · Aceptación (1.3.0-u2, §7.2): muestreo, lista de métricas, topes (0.1 GB/día del workspace y 0.05 GB/día de Application Insights) y retención de 30 días verificados; revisión de datos sensibles con datos reales (sin cuerpos, encabezados, query string, texto de consultas, claves de Redis, ids de usuario ni IP); `Usage` por tipo de dato y Cost Management en 0.00 USD. · Evidencia: matriz de telemetría, consultas y costo. · Depende de: T11.
 - [x] **T13 · Imagen Docker multi-stage y no root** — Requisito: NV-03-R08 · Fase: F4 · **Alcance: U2** · Aceptación: base fijada, usuario no root, sin secretos, healthcheck y configuración para dos réplicas. · Evidencia: Dockerfile, `.dockerignore` y revisión. · Depende de: T01.
-- [ ] **T14 · Handoff de imagen a NV-02** — Requisito: NV-03-R08 · Fase: F4 · **Alcance: Futuro (no U2)** · Aceptación: digest, SBOM y contexto entregados para Trivy, Dockle y Cosign. · Evidencia: registro de handoff. · Depende de: T13 y NV-02.
+- [x] **T14 · Handoff de imagen a NV-02** — Requisito: NV-03-R08 · Fase: F4 · **Alcance: U2 (1.4.0-u2)** · Aceptación (§7.3): registro de entrega de la imagen en producción con commit, digest, SBOM CycloneDX, Trivy, Dockle y firma y atestación de Cosign verificadas, con los comandos para repetir la verificación. · Evidencia: registro de handoff en `evidence.md`. · Depende de: T13 y NV-09.
 - [x] **T22 · Publicación GHCR y VERSIONING.md** — Requisitos: NV-03-R08, NV-03-R14 · Fase: F4 · **Alcance: U2** · Aceptación: imagen publicada en `ghcr.io` con tag/commit, sin token impreso; `VERSIONING.md` registra versión, fecha, imagen, tag, commit, entorno, URL y estado. · Evidencia: digest, tag, registro y revisión. · Depende de: T13.
 - [x] **T24 · Log Analytics con tope diario en Terraform** — Requisitos: NV-03-R15, NV-03-R07, NV-03-R13 · Fase: F4 · **Alcance: U2 (1.2.0-u2)** · Aceptación: `azurerm_log_analytics_workspace` con SKU `PerGB2018`, `daily_quota_gb = 0.1`, `retention_in_days = 30` y etiquetas; el entorno de Container Apps envía sus logs a ese workspace; `terraform plan` sin reemplazo del entorno ni de la app (si lo propone: BLOCKED y opción B); apply solo con `OK PARA APPLY`. · Evidencia: diff, plan revisado y salida del apply. · Depende de: T15, T16 y autorización «EJECUTA».
 - [x] **T25 · Evidencia de observabilidad y costo** — Requisitos: NV-03-R15, NV-03-R13 · Fase: F4 · **Alcance: U2 (1.2.0-u2)** · Aceptación: consulta KQL de errores y eventos con registros reales del backend; logs sin PII, tokens ni cadenas de conexión; uso de ingestión y Cost Management registrados con fecha; `evidence.md` actualizado. · Evidencia: consulta, salida sanitizada y costo. · Depende de: T24.
@@ -90,7 +92,7 @@
 | T11 | R07 | F4 | U2 | COMPLETADA |
 | T12 | R07, R13 | F4 | U2 | COMPLETADA |
 | T13 | R08 | F4 | U2 | COMPLETADA |
-| T14 | R08 | F4 | Futuro | ABIERTA |
+| T14 | R08 | F4 | U2 | COMPLETADA |
 | T15 | R09 | F5 | U2 | COMPLETADA |
 | T16 | R10 | F5 | U2 | COMPLETADA |
 | T17 | R10, R13 | F5 | U2 | COMPLETADA |
@@ -129,13 +131,13 @@
 | --- | --- |
 | Requisitos | 15 |
 | Tasks | 25 |
-| Tasks U2 | 24 |
-| Tasks futuras (no U2) | 1 |
-| Tasks abiertas | 5 |
-| Tasks completadas | 20 |
+| Tasks U2 | 25 |
+| Tasks futuras (no U2) | 0 |
+| Tasks abiertas | 4 |
+| Tasks completadas | 21 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (futura); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
 
 Ninguna task puede ejecutarse hasta la aprobación de Fase B con versiones, IDs, rutas, proveedor, servicios y restricciones explícitas. `terraform apply` y `terraform destroy` requieren confirmación humana separada.

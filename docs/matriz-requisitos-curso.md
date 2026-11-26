@@ -5,7 +5,7 @@
 | Fuente | «Requerimientos para el desarrollo del proyecto Móvil» v3 (cuatrimestre septiembre–diciembre 2026) |
 | Fecha | 2026-11-20 |
 | Evaluación | 3 y 4 de diciembre de 2026 (último día para registrar calificaciones: 4 de diciembre) |
-| Avance del backend | 308/316 tasks (97 %); lo restante es la ventana de dos réplicas del 3 de diciembre (NV-03 T08, T09, T18, T19), la prueba de push con Mobile (NV-20 T05), RESTler (NV-09 T15) y 2 tasks fuera de U2 |
+| Avance del backend | 311/316 tasks (98 %); lo restante es la ventana de dos réplicas del 3 de diciembre (NV-03 T08, T09, T18, T19) y la prueba de push con Mobile (NV-20 T05) |
 | URL | https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerapps.io |
 
 Estados: ✅ cumplido y desplegado · 🟡 parcial o con fecha · ❌ brecha · ➖ fuera del backend (Mobile, Landing o ML/GenAI).
