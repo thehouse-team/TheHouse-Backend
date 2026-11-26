@@ -123,9 +123,32 @@ Ejemplo de resumen de GenAI (sin datos personales): «… coincide un 76% con tu
 
 | Advertencia | Detalle | Acción |
 | --- | --- | --- |
-| W1. Latencia de GenAI | 1 de 4 consultas con la réplica despierta pasó de 8 s y otra tardó 5.2 s; el usuario recibe la plantilla | Enviado al equipo de GenAI con el X-Request-ID `nv24-retest-04896c17c33f`; sugerido un timeout propio por debajo de 7 s |
+| W1. Latencia de GenAI | 1 de 4 consultas con la réplica despierta pasó de 8 s y otra tardó 5.2 s; el usuario recibe la plantilla | **Resuelta el 2026-11-26** (§9): fix de latencia de TheHouse-GenAI (#22 de su repositorio, revisión `ca-thehouse-genai-u2--0000010`); 6/6 con `genai` |
 | W2. Arranque en frío | GenAI escala a cero: la primera consulta tras 5 min sin uso cae en la plantilla | Aceptado por costo $0 (RNF-16) |
 | W3. Título neutral redundante | `NeutralTitle` produce «Departamento completo en departamento» cuando el lugar y el inmueble son departamento; GenAI lo repite | Cosmético; parche opcional de NV-24 |
 | W4. Contrato a Mobile | La §6.1 no cambió; Mobile ya consume `generatedBy` | Victor confirma con Mobile que ya puede mostrar el texto de GenAI |
 
 **Resultado: PASS WITH WARNINGS — NV-24 completa (11 de 11).**
+
+## 9. Advertencia W1 resuelta (2026-11-26)
+
+TheHouse-GenAI desplegó su fix de latencia para NV-24 (PR #22 de su repositorio, commit `89e7f8c`, revisión `ca-thehouse-genai-u2--0000010`, 2026-11-26 17:50 UTC). Prueba repetida con `.azure-check/nv24_genai_retest.py` (fuera de git), ahora con un presupuesto distinto en cada corrida para no usar la caché de 24 h, y con el cuarto que antes daba timeout repetido al final. El backend ya usaba el modelo `logreg-1.0.0` (NV-23 1.3.0).
+
+| # | Cuarto | Resultado | Latencia | X-Request-ID |
+| --- | --- | --- | --- | --- |
+| Despertar | — | `template` (arranque en frío de GenAI, previsto) | 8,342 ms | `nv24-wake-663dbaee4c73` |
+| 1 | Departamento completo cerca de la UTTT | `genai` | 7,344 ms | `nv24-retest-16ebf50e9dda` |
+| 2 | **Estudio en Tula (el que daba timeout)** | `genai` | **1,108 ms** | `nv24-retest-4ab8f0739b5f` |
+| 3 | Cuarto con baño privado | `genai` | 970 ms | `nv24-retest-c406c4e6db15` |
+| 4 | Cuarto con baño compartido (9.8 km) | `genai` | 1,079 ms | `nv24-retest-ca5516be45d7` |
+| 5 y 6 | Estudio en Tula (repetido) | `genai` desde la caché | 209 y 316 ms | `nv24-retest-d5f439451a58`, `nv24-retest-6c26cd198525` |
+
+**6 de 6 con `generated: true`.** Los resúmenes citan el puntaje del modelo entrenado (81, 86, 78 y 75 %), el precio y la distancia, sin datos personales.
+
+| Observación | Detalle |
+| --- | --- |
+| Primera consulta después de despertar | 7.3 s, debajo del límite de 8 s pero con poco margen; las siguientes, ~1 s. Si GenAI vuelve a pasar de 8 s, la app responde con la plantilla (RNF-16) |
+| W3 sigue | El título neutral «Departamento completo en departamento» se repite en el resumen 1 (cosmético) |
+
+Resultado: **W1 resuelta.** NV-24 sigue en 11 de 11, PASS WITH WARNINGS por W2 (arranque en frío), W3 (título) y W4 (confirmación con Mobile).
+
