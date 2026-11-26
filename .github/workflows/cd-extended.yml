@@ -1,4 +1,7 @@
-# NV-09 1.2.0-u2 — Pruebas extendidas (NV-09-R13), informativas.
+# NV-09 1.3.0-u2 — Pruebas extendidas (NV-09-R13), informativas.
+#
+# T15: fuzzing con RESTler (job `fuzzing`): RESTler v9.3.1 fijado por commit y
+# construido en el runner, contra la API efímera con dos usuarios de prueba.
 #
 # T16: prueba de performance con k6 contra el mismo entorno efímero que
 # `verify-ephemeral` del CD (MongoDB y Redis como services, API en Testing con
@@ -19,6 +22,7 @@ on:
     paths:
       - ".github/workflows/cd-extended.yml"
       - ".github/perf/**"
+      - ".github/fuzz/**"
       - ".github/scripts/ephemeral_env.sh"
 
 permissions: {}
@@ -29,6 +33,9 @@ concurrency:
 
 env:
   K6_IMAGE: "grafana/k6:2.3.0"
+  NGINX_IMAGE: "nginx:1.28.0-alpine"
+  RESTLER_REPO: "https://github.com/microsoft/restler-fuzzer.git"
+  RESTLER_COMMIT: "eaacd92733771d35e90acfb2040fe37d4e5d09b1" # v9.3.1
   LOCAL_IMAGE: "thehouse-backend:perf"
 
 jobs:
@@ -113,5 +120,161 @@ jobs:
           path: |
             perf/perf-report.md
             perf/perf-summary.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  fuzzing:
+    name: fuzzing (RESTler)
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    permissions:
+      contents: read
+    services:
+      mongo:
+        # Igual que verify-ephemeral: MongoDB 8.0+ no arranca en el kernel del runner.
+        image: mongo:7.0.45
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7.4.12
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      FUZZ_IMAGE: "thehouse-backend:fuzz"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Construir la imagen (sin publicar)
+        run: docker build --pull -t "$FUZZ_IMAGE" .
+
+      - name: Construir RESTler v9.3.1 (fijado por commit)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init -q restler-src
+          git -C restler-src remote add origin "$RESTLER_REPO"
+          git -C restler-src fetch -q --depth 1 origin "$RESTLER_COMMIT"
+          git -C restler-src checkout -q --detach FETCH_HEAD
+          test "$(git -C restler-src rev-parse HEAD)" = "$RESTLER_COMMIT"
+          docker build -q -t restler:9.3.1 restler-src
+
+      - name: Llave JWT efímera
+        shell: bash
+        run: |
+          set -euo pipefail
+          key="$(openssl rand -base64 48 | tr -d '\n')"
+          echo "::add-mask::$key"
+          echo "JWT_SIGNING_KEY=$key" >> "$GITHUB_ENV"
+
+      - name: Seeds (universidades, propiedades, colonias y cuartos de demostración)
+        run: |
+          bash .github/scripts/ephemeral_env.sh seed "$FUZZ_IMAGE"
+          bash .github/scripts/ephemeral_env.sh seed-demo "$FUZZ_IMAGE"
+
+      - name: Levantar API efímera (perfil scan) y proxy
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash .github/scripts/ephemeral_env.sh start "$FUZZ_IMAGE" scan
+          docker run -d --name fuzz-proxy --network host \
+            -v "$PWD/.github/fuzz/nginx.conf:/etc/nginx/nginx.conf:ro" "$NGINX_IMAGE" >/dev/null
+          for i in $(seq 1 30); do
+            curl -fsS --max-time 2 http://127.0.0.1:8081/health/ready >/dev/null 2>&1 && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8081/health/ready >/dev/null
+
+      - name: OpenAPI 3.1 a 3.0 para RESTler
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/restler"
+          mkdir -p "$work"
+          echo "FUZZ_WORK=$work" >> "$GITHUB_ENV"
+          curl -fsS http://127.0.0.1:8081/openapi/v1.json -o "$work/openapi31.json"
+          python3 .github/fuzz/openapi31_to_30.py "$work/openapi31.json" "$work/openapi30.json" http://127.0.0.1:8081
+          cp .github/fuzz/restler_token.py "$work/"
+          chmod -R 777 "$work"
+
+      - name: RESTler compile
+        run: |
+          docker run --rm --network host -v "$FUZZ_WORK:/work" -w /work restler:9.3.1 \
+            dotnet /RESTler/restler/Restler.dll compile --api_spec /work/openapi30.json
+
+      - name: RESTler test (cobertura)
+        shell: bash
+        run: |
+          set +e
+          timeout 900 docker run --rm --network host -v "$FUZZ_WORK:/work" -w /work restler:9.3.1 \
+            dotnet /RESTler/restler/Restler.dll test \
+              --grammar_file /work/Compile/grammar.py --dictionary_file /work/Compile/dict.json \
+              --settings /work/Compile/engine_settings.json --no_ssl \
+              --target_ip 127.0.0.1 --target_port 8081 \
+              --token_refresh_command "python3 /work/restler_token.py" --token_refresh_interval 300
+          code=$?
+          if ! find "$FUZZ_WORK/Test" -name testing_summary.json | grep -q .; then
+            echo "::error::RESTler test no produjo resultados (código $code)."
+            exit 1
+          fi
+
+      - name: RESTler fuzz-lean (20 minutos como máximo)
+        shell: bash
+        run: |
+          set +e
+          timeout 1200 docker run --rm --network host -v "$FUZZ_WORK:/work" -w /work restler:9.3.1 \
+            dotnet /RESTler/restler/Restler.dll fuzz-lean \
+              --grammar_file /work/Compile/grammar.py --dictionary_file /work/Compile/dict.json \
+              --settings /work/Compile/engine_settings.json --no_ssl \
+              --target_ip 127.0.0.1 --target_port 8081 \
+              --token_refresh_command "python3 /work/restler_token.py" --token_refresh_interval 300
+          code=$?
+          if [ "$code" -eq 124 ]; then
+            echo "::warning::fuzz-lean llegó al límite de 20 minutos; el reporte usa lo que alcanzó a correr."
+          fi
+          exit 0
+
+      - name: Reporte (sin tokens)
+        if: always() && env.FUZZ_WORK != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo chown -R "$(id -u):$(id -g)" "$FUZZ_WORK" || true
+          rm -f "$FUZZ_WORK/.fuzz-users.json"
+          find "$FUZZ_WORK" -type f \( -name '*.txt' -o -name '*.json' -o -name '*.log' \) \
+            -exec sed -i -E 's/Bearer [A-Za-z0-9._-]+/Bearer <oculto>/g' {} +
+          python3 .github/fuzz/restler_report.py "$FUZZ_WORK" restler-report.md
+          cat restler-report.md >> "$GITHUB_STEP_SUMMARY"
+          mkdir -p restler-results
+          cd "$FUZZ_WORK"
+          find Test FuzzLean -type f \( -name 'testing_summary.json' -o -path '*bug_buckets*' -o -name 'runSummary.json' \) 2>/dev/null \
+            | while read -r f; do mkdir -p "$GITHUB_WORKSPACE/restler-results/$(dirname "$f")"; cp "$f" "$GITHUB_WORKSPACE/restler-results/$f"; done || true
+
+      - name: Logs de la API ante fallo
+        if: failure()
+        run: bash .github/scripts/ephemeral_env.sh logs
+
+      - name: Detener API y proxy
+        if: always()
+        run: |
+          bash .github/scripts/ephemeral_env.sh stop
+          docker rm -f fuzz-proxy >/dev/null 2>&1 || true
+
+      - name: Subir reportes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fuzzing
+          path: |
+            restler-report.md
+            restler-results/
           retention-days: 14
           if-no-files-found: warn
