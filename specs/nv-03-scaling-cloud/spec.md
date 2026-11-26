@@ -4,15 +4,15 @@
 | --- | --- |
 | ID | NV-03 |
 | Documento | `spec.md` |
-| Versión | 1.3.0-u2 |
+| Versión | 1.4.0-u2 |
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (futura); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (U2 desde 1.4.0-u2, PROPUESTA); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RNF-05, RNF-06, RNF-08 (transversales) (`Requerimientos_TheHouse_v2`) |
-| Plan | `plan.md` 1.3.0-u2 |
-| Tasks | `task.md` 1.3.0-u2 |
+| Plan | `plan.md` 1.4.0-u2 |
+| Tasks | `task.md` 1.4.0-u2 |
 | Precondición | NV-01 U2 y specs funcionales U2 aprobadas documentalmente; M-BE-028; COST-001 |
 | Relación | No autoriza NV-01, NV-02 ni specs funcionales por transitividad |
 | Reemplaza | `1.0.0-borrador`; el historial permanece en Git |
@@ -22,6 +22,8 @@ Este documento está aprobado documentalmente para la Entrega Unidad 2. No autor
 **Cambio 1.2.0-u2 (2026-11-05):** agrega NV-03-R15 (observabilidad persistente a costo $0) y las tasks T24 y T25. Aprobación documental: Victor Manuel Jose Jose, 2026-11-05 (M-BE-047). T24 y T25 quedan **⛔ NO EJECUTAR** hasta la autorización humana «EJECUTA»; `terraform apply` sigue requiriendo `OK PARA APPLY`.
 
 **Cambio 1.3.0-u2 (2026-11-25) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo, autorizo y EJECUTA»: spec, paquete `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0 y T11/T12; «Autorizo y OK PARA APPLY» para registrar `Microsoft.Insights` y aplicar; M-BE-090):** define cómo se cierran T11 y T12 (§7.2): las trazas y métricas de OpenTelemetry que la API ya produce se exportan a Application Insights basado en el mismo workspace de Log Analytics (tope de 0.1 GB/día), con la identidad administrada de la app y sin llaves. T11 deja de depender de T08: se implementa y verifica con una réplica, y la correlación entre dos réplicas se demuestra en la ventana del 3 de diciembre (T19).
+
+**Cambio 1.4.0-u2 (2026-11-26) — PROPUESTO, pendiente de «Apruebo NV-01 1.3.0-u2, NV-03 1.4.0-u2 y NV-09 1.3.0-u2 y EJECUTA NV-01 T13, NV-03 T14 y NV-09 T15»:** T14 (entrega de la imagen a NV-02) pasa de «Futuro» a **U2**. El CD de NV-09 ya produce todo lo que pide (digest, SBOM CycloneDX de la imagen, Trivy sobre el digest, firma y atestación con Cosign, y Dockle en la CI); T14 se cierra con el registro de la entrega y su verificación (§7.3).
 
 ## 1. Contexto
 
@@ -175,6 +177,18 @@ Costo (T12): Application Insights basado en workspace no tiene cargo propio; su 
 
 Evidencia: consultas KQL documentadas en `evidence.md` (solicitudes con sus dependencias por `operation_Id`, errores con su traza, latencia p95 por ruta y réplica, y `Usage` por tipo de dato).
 
+## 7.3 Entrega de la imagen (1.4.0-u2, T14)
+
+| Lo que pide T14 | Dónde ya ocurre | Evidencia para cerrar |
+| --- | --- | --- |
+| Digest inmutable | `cd.yml` → `publish`: la imagen se publica en GHCR y se identifica por `sha256:` | Digest de la imagen en producción (revisión activa de `ca-thehouse-u2`) igual al del registro del CD |
+| SBOM | `publish`: SBOM CycloneDX de la imagen publicada | Artefacto del CD y su número de componentes |
+| Trivy | `publish`: Trivy sobre el digest publicado (además del escaneo de la CI) | Paso en verde del CD que publicó la imagen activa |
+| Dockle | CI `container-security` sobre el mismo Dockerfile | Paso en verde de la CI del mismo commit |
+| Cosign | `publish`: firma keyless y atestación del SBOM; `deploy` verifica la firma antes de desplegar | Paso de verificación en verde y comando reproducible `cosign verify` / `cosign verify-attestation` con la identidad de `cd.yml` en `main` |
+
+Registro de entrega: tabla en `evidence.md` con commit, digest, run del CD, resultado de cada control y los comandos para verificarlo de nuevo. Sin cambios de código ni de Terraform.
+
 ## 8. Decisiones y restricciones aplicables
 
 - M-BE-007: MongoDB con `MongoDB.Driver`, encapsulado en Infrastructure.
@@ -263,7 +277,7 @@ Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran late
 | Tasks sin requisito | 0 |
 | Tasks completadas | 20 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (futura); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (U2 desde 1.4.0-u2, PROPUESTA); ver `evidence.md`** |
 
 ## 14. Aprobación documental y ejecución
 

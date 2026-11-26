@@ -4,13 +4,13 @@
 | --- | --- |
 | ID | NV-09 |
 | Documento | `task.md` |
-| Versión | 1.2.0-u2 |
+| Versión | 1.3.0-u2 |
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 pendiente** |
-| Spec | `spec.md` 1.2.0-u2 |
-| Plan | `plan.md` 1.2.0-u2 |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 (RESTler) con diseño 1.3.0-u2 PROPUESTO** |
+| Spec | `spec.md` 1.3.0-u2 |
+| Plan | `plan.md` 1.3.0-u2 |
 | Tasks totales | 20 |
 | Tasks completadas | 19 |
 
@@ -19,6 +19,8 @@
 **Cambio 1.1.1-u2 (2026-11-24) — NV-09-R17 corregida, M-BE-087 (autorizado por Victor: «Arreglar regla del CD»):** el CD comparaba solo el commit contra su padre. El 2026-11-23 el CD del merge de NV-23 quedó en cola detrás de un CD antiguo sin aprobar y se canceló; el siguiente merge solo cambiaba documentación y el CD omitió el despliegue, así que el código de NV-23 no llegó a Azure hasta un CD manual. Ahora el job `deploy` guarda, solo si todo salió bien, el commit realmente desplegado en el artefacto `deployed-sha` (90 días), y `resolve` compara contra ese commit; sin registro verificable, publica.
 
 **Cambio 1.2.0-u2 (2026-11-24) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo y EJECUTA», respuesta a la propuesta del PR #90); constitución 1.2.1 aprobada el 2026-11-25 («Apruebo 1.2.1»):** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
+
+**Cambio 1.3.0-u2 (2026-11-26) — PROPUESTO, pendiente de «Apruebo NV-01 1.3.0-u2, NV-03 1.4.0-u2 y NV-09 1.3.0-u2 y EJECUTA NV-01 T13, NV-03 T14 y NV-09 T15»:** fija el diseño de T15 (fuzzing con RESTler) en `cd-extended.yml` (§6.2): RESTler `v9.3.1` compilado desde su código fuente fijado por commit, contra el entorno efímero, con usuario de prueba, modos *test* y *fuzz-lean*, tiempo acotado y triage de cada error 500.
 
 ## Reglas de esta lista
 
@@ -57,7 +59,7 @@
 
 ## F5 — Pruebas extendidas
 
-- [ ] **T15 · Fuzzing con RESTler** — Requisito: NV-09-R13 · Fase: F5 · Aceptación: `cd-extended.yml` (manual y semanal) compila RESTler `v9.3.1` y lo ejecuta en *test* y *fuzz-lean* contra el entorno efímero; bugs triageados. · Evidencia: reporte y triage. · Depende de: T09.
+- [ ] **T15 · Fuzzing con RESTler** — Requisito: NV-09-R13 · Fase: F5 · Aceptación (1.3.0-u2, §6.2): job `fuzzing` en `cd-extended.yml` con RESTler `v9.3.1` (commit `eaacd92`) construido en el runner, contra la API efímera con usuario de prueba; modos *test* y *fuzz-lean*; reporte con cobertura, códigos y *bug buckets*; cada 500 triageado en `evidence.md`; una ejecución real en verde. · Evidencia: run, reporte y triage. · Depende de: T09.
 - [x] **T16 · Performance con k6** — Requisito: NV-09-R13 · Fase: F5 · Aceptación (1.2.0-u2): `cd-extended.yml` (manual y semanal, `contents: read`, sin secretos) construye la imagen, levanta el entorno efímero con los límites de producción y los seeds de demostración, y ejecuta `.github/perf/k6-backend.js` con `grafana/k6:2.3.0`: escenarios `catalogo`, `busqueda`, `smart_match` y `sesion` (§6.1); p50/p95/p99, errores, 429 e iteraciones descartadas en `perf-report.md`; sin secretos en el reporte; una ejecución real en verde con su reporte; presupuesto p95 propuesto con evidencia; constitución 1.2.1 y M-BE-089 registradas. · Evidencia: run de GitHub Actions, reporte y decisión. · Depende de: T09.
 
 ## F6 — Primer despliegue, seed y evidencia
@@ -125,6 +127,6 @@
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 pendiente** |
+| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 (RESTler) con diseño 1.3.0-u2 PROPUESTO** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
