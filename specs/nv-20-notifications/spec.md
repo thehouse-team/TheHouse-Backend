@@ -4,16 +4,16 @@
 | --- | --- |
 | ID | NV-20 |
 | Documento | `spec.md` |
-| Versión | 1.2.0-borrador |
+| Versión | 1.3.0 |
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0 (6 avisos nuevos) PROPUESTA** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | Requisito del curso §16 (notificaciones push de los procesos principales); RF-75 (bandeja) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-02, RNF-09 |
-| Plan | `plan.md` 1.2.0-borrador |
-| Tasks | `task.md` 1.2.0-borrador |
+| Plan | `plan.md` 1.3.0 |
+| Tasks | `task.md` 1.3.0 |
 | Módulo | Notifications |
 | Precondición | NV-20 1.1.0 desplegada; proyecto de Firebase de la app Android (Mobile) y su cuenta de servicio |
 | Relación | Agrega un canal al puerto `INotificationSink` de NV-20; los eventos siguen naciendo en Messaging (NV-16, incluido el chat de compañero de NV-22), Visits (NV-17), Rentals (NV-18) y Moderation (NV-21); NV-10 1.2.0 borra los dispositivos al eliminar la cuenta |
@@ -21,6 +21,8 @@
 Spec funcional en borrador para revisión humana. No autoriza código, paquetes, índices, colecciones, workflows ni cambios en Azure: la ejecución requiere aprobación documental y la autorización «EJECUTA» con versión, tasks y rutas.
 
 **Cambio 1.2.0-borrador (2026-11-17):** la versión 1.1.0 (bandeja en la app, M-BE-071) quedó completa y desplegada (ver `evidence.md`). El curso pide **notificaciones push para los procesos principales** (§16 Móvil), así que esta versión agrega el canal push con **Firebase Cloud Messaging (FCM)** sobre la misma bandeja: cada notificación que ya se guarda en la bandeja también se envía al teléfono. La app registra su token de FCM por instalación y lo borra al cerrar sesión. El envío es posterior a guardar y nunca deshace la acción principal; la bandeja sigue siendo la fuente de verdad. No se agregan correo ni SMS. Requiere una decisión M-BE nueva (proveedor FCM y un secreto nuevo) que reemplaza la parte «sin push» de M-BE-071.
+
+**Cambio 1.3.0 (2026-11-26) — PROPUESTO, pendiente de la validación de Mobile del §6.1 y de «Apruebo NV-20 1.3.0 y EJECUTA T09–T12»:** la revisión de los servicios encontró hechos importantes que hoy no avisan a nadie: el estudiante no se entera de que tiene un convenio por aceptar ni de que se canceló, y el arrendador no se entera de que recibió una reseña. Esta versión agrega **6 tipos** a la bandeja (y por lo tanto al push, regla 1): `agreement_proposed`, `agreement_cancelled`, `review_received`, `review_hidden`, `favorite_unavailable` y `report_resolved` (§9.1), con dos destinos nuevos para Mobile (`room` y `none`). Sin endpoints nuevos, sin colecciones nuevas, sin paquetes y sin costo. Los recordatorios de visita quedan fuera: requieren un proceso programado que corra aunque la API esté en cero réplicas (Container Apps Job y Terraform).
 
 ## 1. Contexto
 
@@ -123,6 +125,16 @@ DEPLOYED URL https://ca-thehouse-u2.grayisland-cb722b5f.eastus2.azurecontainerap
 TESTS        CI de main (run 44457497605): 1027/1027 (unitarias 395, integración 484, seguridad 148); prueba HTTP real de dispositivos en Azure 14/14 (2026-11-19); push en teléfono real pendiente con Mobile
 ```
 
+### Cambio del contrato en 1.3.0 (requiere validación de Mobile)
+
+```text
+NUEVOS TIPOS   agreement_proposed, agreement_cancelled, review_received, review_hidden, favorite_unavailable, report_resolved
+NUEVOS DESTINOS targetKind = "room" (targetId = id del cuarto → GET /rooms/{id}) | "none" (abrir la bandeja)
+SIN CAMBIOS    GET /users/me/notifications, unread-count, read, read-all, devices; forma del item y del push
+PUSH           data { notificationId, type, category, targetKind, targetId }; prioridad alta solo para agreement_proposed (además de las de 1.2.0)
+COMPATIBILIDAD tipo o targetKind desconocido → abrir la bandeja (no fallar)
+```
+
 ## 7. Módulo, datos propios e integración
 
 Módulo **Notifications** del monolito modular (constitution §6): es propietario exclusivo de sus casos de uso y de sus colecciones; otros módulos solo acceden a ellas por contratos (puertos de Application) o eventos de dominio en proceso. Sin dependencias circulares entre módulos.
@@ -150,6 +162,30 @@ Los eventos se procesan en el mismo proceso y de forma idempotente; si una répl
 4. La app borra su dispositivo antes del logout; si no lo hace, el siguiente usuario que registre el mismo token en ese teléfono se queda con él. La eliminación de cuenta (NV-10 1.2.0) borra todos los dispositivos del usuario mediante `IAccountDeletionParticipant`.
 5. Mensajes agrupados por conversación: un push por mensaje nuevo, con `collapseKey` por conversación para que Android muestre solo el último.
 6. Con dos réplicas cada notificación se envía una sola vez, porque la envía la réplica que la guardó.
+
+## 9.1 Avisos nuevos (1.3.0, T09–T12)
+
+Se guardan en la bandeja y salen como push con las mismas reglas de 1.2.0: nunca al actor, sin contenido privado, en español y con los nombres solo de pila (RNF-02).
+
+| Tipo | Quién lo recibe | Cuándo | Categoría | `targetKind` / `targetId` | Prioridad Android | Título | Cuerpo |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `agreement_proposed` | Estudiante | El arrendador crea el convenio (`POST /landlord/agreements`, NV-18) | `requests` | `rental` / id del convenio | Alta | Convenio por aceptar | «{Arrendador} preparó el convenio de {cuarto}. Pídele el código de cierre para aceptarlo.» |
+| `agreement_cancelled` | Estudiante | El arrendador cancela un convenio pendiente (`POST /landlord/agreements/{id}/cancel`) | `requests` | `rental` / id del convenio | Normal | Convenio cancelado | «{Arrendador} canceló el convenio de {cuarto}.» |
+| `review_received` | Arrendador dueño del cuarto | Un estudiante publica una reseña (NV-19) | `system` | `room` / id del cuarto | Normal | Nueva reseña | «{Estudiante} dejó una reseña de {cuarto}.» |
+| `review_hidden` | Autor de la reseña | El staff oculta su reseña (NV-21, `POST /admin/reviews/{id}/hide`) | `system` | `room` / id del cuarto | Normal | Reseña ocultada | «Tu reseña de {cuarto} se ocultó porque no cumple las reglas de la comunidad.» |
+| `favorite_unavailable` | Cada usuario que tiene el cuarto en favoritos (máximo 200 por hecho) | El cuarto deja de estar publicado: rentado (NV-18), pausado o eliminado por el arrendador (NV-12) o su edificio suspendido (NV-21) | `system` | `room` / id del cuarto | Normal | Favorito no disponible | «{Cuarto} ya no está disponible.» |
+| `report_resolved` | Quien hizo el reporte | El staff resuelve el reporte (NV-21) | `system` | `none` / id del reporte | Normal | Reporte revisado | «Revisamos tu reporte. Gracias por ayudarnos a cuidar la comunidad.» |
+
+Reglas:
+
+1. **Sin datos de más:** `review_hidden` y `report_resolved` no dicen el motivo de la moderación ni la sanción; `review_received` no incluye la calificación ni el texto.
+2. **Una vez por hecho** (`DedupeKey`): convenio y reseña por id; `favorite_unavailable` por cuarto, usuario y día (si el cuarto se pausa y se reactiva varias veces el mismo día, avisa una vez); `report_resolved` por reporte.
+3. **`favorite_unavailable`** usa un método nuevo del puerto de favoritos (`IFavoriteRepository`, NV-15) para obtener a quién avisar, con tope de 200 destinatarios por hecho. El arrendador que hizo el cambio nunca recibe el aviso.
+4. **Destinos nuevos para Mobile:** `room` abre el detalle del cuarto (`GET /rooms/{id}`); `none` solo abre la bandeja. Un tipo o destino que la app no conozca debe abrir la bandeja (compatibilidad hacia adelante).
+5. **Arquitectura (NV-01-R13):** los módulos que disparan los avisos (Rentals, Reviews, Listings y Moderation) usan el puerto `INotificationSink` y el puerto de favoritos; no aparecen dependencias nuevas de servicio a servicio entre módulos.
+6. La eliminación de cuenta (NV-10) ya borra la bandeja y los dispositivos del usuario; nada cambia.
+
+Fuera de alcance (versión futura): recordatorios de visita 24 h y 2 h antes (proceso programado aunque la API esté en cero réplicas: Container Apps Job con Terraform), resumen semanal de cuartos compatibles (Smart Match) y aviso de suspensión de cuenta (al suspender se borran los dispositivos: el push no llegaría).
 
 ## 10. Seguridad
 
@@ -196,6 +232,10 @@ Formato `application/problem+json` con `type`, `title`, `status`, `detail`, `ins
 | NV-20-R04 | Privacidad, seguridad y límites | Sin contenido privado en push, sin tokens en logs ni respuestas, BOLA, rate limit, secreto solo en la Container App. | F3 | T04 |
 | NV-20-R05 | Contrato para Mobile y despliegue | Contrato §6.1 entregado a Mobile; secreto cargado por Victor; desplegado por el CD; prueba real en Azure con un teléfono: solicitud, mensaje y visita llegan como push. | F4 | T05 |
 | NV-20-R06 | Pruebas, seguridad y evidencia | Pruebas unitarias del dominio, de integración de cada endpoint (casos felices, validación, 401, 404 ajeno, 429 y 503) y de seguridad (BOLA, asignación masiva, fuga de datos); `evidence.md` con comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T06, T07, T08 |
+| NV-20-R07 | Avisos de convenio | `agreement_proposed` al crear un convenio y `agreement_cancelled` al cancelarlo, al estudiante, con destino `rental` (§9.1). | F5 | T09 |
+| NV-20-R08 | Avisos de reseñas | `review_received` al arrendador y `review_hidden` al autor, sin calificación, texto ni motivo de moderación (§9.1). | F5 | T10 |
+| NV-20-R09 | Avisos de favoritos y reportes | `favorite_unavailable` a quienes tienen el cuarto en favoritos (tope de 200, una vez por día) y `report_resolved` a quien reportó, sin la sanción (§9.1). | F5 | T11 |
+| NV-20-R10 | Contrato 1.3.0 para Mobile y despliegue | Destinos `room` y `none`, compatibilidad con tipos desconocidos; contrato validado por Mobile; desplegado por el CD y prueba real en Azure de cada aviso. | F5 | T12 |
 
 ## 13. Decisiones pendientes
 
@@ -236,14 +276,14 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 
 | Métrica | Valor |
 | --- | --- |
-| Requisitos | 6 |
-| Fases del plan | 4 |
-| Tasks | 8 |
+| Requisitos | 10 |
+| Fases del plan | 5 |
+| Tasks | 12 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 7 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile** |
+| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0 (6 avisos nuevos) PROPUESTA** |
 
 ## 18. Aprobación pendiente
 
