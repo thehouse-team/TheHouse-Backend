@@ -840,3 +840,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-25.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** paquete nuevo en `TheHouse.Infrastructure`; `SmartMatch:Model` en `appsettings.json`; variable `SmartMatch__Model__Enabled=true` en la Container App; avisos a Mobile (`modelVersion` y `maxPoints`) y a TheHouse-GenAI.
+
+## M-BE-092 — NV-01 T13, NV-03 T14 y NV-09 T15 en U2
+
+- **ID:** M-BE-092
+- **Decisión:** (1) NV-01 T13 pasa a U2: las fronteras del monolito modular se comprueban con pruebas de arquitectura por reflexión y con la base de registro de NV-26 (sin paquetes nuevos) y con el mapa `docs/arquitectura/modulos.md`; `ReviewModerationService` pertenece a Moderation. (2) NV-03 T14 pasa a U2 y se cierra con el registro de entrega de la imagen que ya produce el CD de NV-09. (3) NV-09 T15 usa RESTler `v9.3.1` fijado por commit y construido en el runner, con el OpenAPI 3.1 traducido a 3.0, un proxy nginx que declara HTTPS, dos usuarios de prueba y la exclusión de `POST /auth/logout` y `POST /users/me/deletion`, que cierran la sesión del propio fuzzer.
+- **Estado:** EJECUTADO — Victor, 2026-11-26 («Apruebo y EJECUTA», PR #100). T13: 7/7 pruebas; T14: PASS; T15: ~1,770 peticiones sin errores 500 (PASS WITH WARNINGS por cobertura válida baja).
+- **Fecha:** 2026-11-26.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** `TheHouse.IntegrationTests/ArchitectureTests.cs`, `docs/arquitectura/modulos.md`, `.github/fuzz/` y el job `fuzzing` de `cd-extended.yml`; sin cambios en la API, sin secretos y sin costo.

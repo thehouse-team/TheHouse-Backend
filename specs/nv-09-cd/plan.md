@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 (RESTler) con diseño 1.3.0-u2 PROPUESTO** |
+| Estado de ejecución | **✅ CD EN PRODUCCIÓN — 20 de 20 tasks (T15 con RESTler el 2026-11-26: PASS WITH WARNINGS)** |
 | Spec | `spec.md` 1.3.0-u2 |
 | Tasks | `task.md` 1.3.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -19,7 +19,7 @@
 
 **Cambio 1.2.0-u2 (2026-11-24) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo y EJECUTA», respuesta a la propuesta del PR #90); constitución 1.2.1 aprobada el 2026-11-25 («Apruebo 1.2.1»):** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
 
-**Cambio 1.3.0-u2 (2026-11-26) — PROPUESTO, pendiente de «Apruebo NV-01 1.3.0-u2, NV-03 1.4.0-u2 y NV-09 1.3.0-u2 y EJECUTA NV-01 T13, NV-03 T14 y NV-09 T15»:** fija el diseño de T15 (fuzzing con RESTler) en `cd-extended.yml` (§6.2): RESTler `v9.3.1` compilado desde su código fuente fijado por commit, contra el entorno efímero, con usuario de prueba, modos *test* y *fuzz-lean*, tiempo acotado y triage de cada error 500.
+**Cambio 1.3.0-u2 (2026-11-26) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-26 («Apruebo y EJECUTA», respuesta a la propuesta del PR #100; M-BE-092):** fija el diseño de T15 (fuzzing con RESTler) en `cd-extended.yml` (§6.2): RESTler `v9.3.1` compilado desde su código fuente fijado por commit, contra el entorno efímero, con usuario de prueba, modos *test* y *fuzz-lean*, tiempo acotado y triage de cada error 500.
 
 Plan preparado para revisión. No crea workflows, identidades ni roles, no cambia Terraform ni la configuración de GitHub, y no publica ni despliega hasta la autorización «EJECUTA».
 

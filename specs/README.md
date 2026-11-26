@@ -8,15 +8,15 @@ Orden de bloques del proyecto (M-BE-027 y regla del equipo): base (NV-01) → in
 
 | ID | Spec | Estado documental | Estado de ejecución | Tasks |
 | --- | --- | --- | --- | --- |
-| NV-01 | [Foundation (U2)](nv-01-foundation/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (18 de 19); 1.3.0-u2 (T13 en U2) PROPUESTA | 18/19 |
+| NV-01 | [Foundation (U2)](nv-01-foundation/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26) | 19/19 |
 | NV-02 | [CI y DevSecOps (U2)](nv-02-devsecops/spec.md) | **✅ APROBADA** | **✅ COMPLETADA — PASS WITH WARNINGS (2026-11-05)** | 15/15 |
-| NV-03 | [Scaling Cloud U2](nv-03-scaling-cloud/spec.md) | **✅ APROBADA PARA U2** | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (U2 desde 1.4.0-u2, PROPUESTA); ver `evidence.md`** | 20/25 |
+| NV-03 | [Scaling Cloud U2](nv-03-scaling-cloud/spec.md) | **✅ APROBADA PARA U2** | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** | 21/25 |
 | NV-04 | [User Registration (U2)](nv-04-registration/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 11/11 |
 | NV-05 | [Login (U2)](nv-05-login/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 11/11 |
 | NV-06 | [Logout (U2)](nv-06-logout/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** | 10/10 |
 | NV-07 | [Property Core (U2)](nv-07-property-core/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 13/13 |
 | NV-08 | [University Catalog (U2)](nv-08-university-catalog/spec.md) | **✅ APROBADA PARA U2** | **✅ EJECUTADA Y VALIDADA; DESPLEGADA EN AZURE POR EL CD (run `42180858665`, 2026-11-06)** | 14/14 |
-| NV-09 | [Entrega continua (CD) U2](nv-09-cd/spec.md) | **✅ APROBADA** | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 (RESTler) con diseño 1.3.0-u2 PROPUESTO** | 19/20 |
+| NV-09 | [Entrega continua (CD) U2](nv-09-cd/spec.md) | **✅ APROBADA** | **✅ CD EN PRODUCCIÓN — 20 de 20 tasks (T15 con RESTler el 2026-11-26: PASS WITH WARNINGS)** | 20/20 |
 | NV-10 | [Sesión: refresh token y cuenta propia](nv-10-account-session/spec.md) | **✅ APROBADA** | **✅ COMPLETA — 1.2.0 T01–T09 (2026-11-18): PASS WITH WARNINGS, ver `evidence.md`** | 9/9 |
 | NV-11 | [Perfil, universidad y preferencias](nv-11-profile-preferences/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T11 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 11/11 |
 | NV-12 | [Arrendador, edificios y cuartos](nv-12-landlord-buildings-rooms/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T13 (2026-11-07): PASS WITH WARNINGS, ver `evidence.md`** | 13/13 |

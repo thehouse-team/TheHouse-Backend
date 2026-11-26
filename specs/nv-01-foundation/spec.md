@@ -8,7 +8,7 @@
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (18 de 19); 1.3.0-u2 (T13 en U2) PROPUESTA |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26) |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RNF-01, RNF-05, RNF-06, RNF-08, RNF-10 (transversales) (`Requerimientos_TheHouse_v2`) |
 | Plan | `plan.md` 1.3.0-u2 |
@@ -19,7 +19,7 @@
 
 **Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-01-R14 (encabezados de seguridad HTTP; hallazgo H-01 de NV-09: falta `X-Content-Type-Options: nosniff`) y la task T19. Las tasks 1.1.0-u2 no cambian.
 
-**Cambio 1.3.0-u2 (2026-11-26) — PROPUESTO, pendiente de «Apruebo NV-01 1.3.0-u2, NV-03 1.4.0-u2 y NV-09 1.3.0-u2 y EJECUTA NV-01 T13, NV-03 T14 y NV-09 T15»:** T13 (fronteras del monolito modular) pasa de «Futuro» a **U2** a petición del responsable. Las reglas se comprueban con pruebas de arquitectura por reflexión y con la base de datos de registro que ya usa NV-26, sin paquetes nuevos, más un mapa de módulos en `docs/arquitectura/modulos.md` (§6.2).
+**Cambio 1.3.0-u2 (2026-11-26) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-26 («Apruebo y EJECUTA», respuesta a la propuesta del PR #100; M-BE-092):** T13 (fronteras del monolito modular) pasa de «Futuro» a **U2** a petición del responsable. Las reglas se comprueban con pruebas de arquitectura por reflexión y con la base de datos de registro que ya usa NV-26, sin paquetes nuevos, más un mapa de módulos en `docs/arquitectura/modulos.md` (§6.2).
 
 Este documento está aprobado documentalmente para la Entrega Unidad 2. La aprobación documental **no autoriza implementación**: conforme a M-BE-027, la ejecución requiere una autorización humana posterior de Fase B con SPEC ACTIVA, PLAN ACTIVO, TASK ACTIVA y ESTADO AUTORIZADO. NV-01 sigue siendo Foundation y no contiene endpoints de negocio.
 
@@ -195,9 +195,9 @@ La evidencia futura debe incluir comando reproducible, versión, resultado y art
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 18 |
+| Tasks completadas | 19 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (18 de 19); 1.3.0-u2 (T13 en U2) PROPUESTA |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26) |
 
 Cada fila de la tabla del apartado 6 enlaza un requisito con una fase principal y una o más tasks. El detalle de aceptación y evidencia por task está en `task.md`; la secuencia y las puertas están en `plan.md`. R13/T13 pasa a U2 en 1.3.0-u2 (§6.2).
 

@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (U2 desde 1.4.0-u2, PROPUESTA); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RNF-05, RNF-06, RNF-08 (transversales) (`Requerimientos_TheHouse_v2`) |
 | Plan | `plan.md` 1.4.0-u2 |
@@ -23,7 +23,7 @@ Este documento está aprobado documentalmente para la Entrega Unidad 2. No autor
 
 **Cambio 1.3.0-u2 (2026-11-25) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo, autorizo y EJECUTA»: spec, paquete `Azure.Monitor.OpenTelemetry.Exporter` 1.10.0 y T11/T12; «Autorizo y OK PARA APPLY» para registrar `Microsoft.Insights` y aplicar; M-BE-090):** define cómo se cierran T11 y T12 (§7.2): las trazas y métricas de OpenTelemetry que la API ya produce se exportan a Application Insights basado en el mismo workspace de Log Analytics (tope de 0.1 GB/día), con la identidad administrada de la app y sin llaves. T11 deja de depender de T08: se implementa y verifica con una réplica, y la correlación entre dos réplicas se demuestra en la ventana del 3 de diciembre (T19).
 
-**Cambio 1.4.0-u2 (2026-11-26) — PROPUESTO, pendiente de «Apruebo NV-01 1.3.0-u2, NV-03 1.4.0-u2 y NV-09 1.3.0-u2 y EJECUTA NV-01 T13, NV-03 T14 y NV-09 T15»:** T14 (entrega de la imagen a NV-02) pasa de «Futuro» a **U2**. El CD de NV-09 ya produce todo lo que pide (digest, SBOM CycloneDX de la imagen, Trivy sobre el digest, firma y atestación con Cosign, y Dockle en la CI); T14 se cierra con el registro de la entrega y su verificación (§7.3).
+**Cambio 1.4.0-u2 (2026-11-26) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-26 («Apruebo y EJECUTA», respuesta a la propuesta del PR #100; M-BE-092):** T14 (entrega de la imagen a NV-02) pasa de «Futuro» a **U2**. El CD de NV-09 ya produce todo lo que pide (digest, SBOM CycloneDX de la imagen, Trivy sobre el digest, firma y atestación con Cosign, y Dockle en la CI); T14 se cierra con el registro de la entrega y su verificación (§7.3).
 
 ## 1. Contexto
 
@@ -275,9 +275,9 @@ Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran late
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 20 |
+| Tasks completadas | 21 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 20 de 25 tasks (telemetría con Application Insights el 2026-11-25); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre) y T14 (U2 desde 1.4.0-u2, PROPUESTA); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
 
 ## 14. Aprobación documental y ejecución
 

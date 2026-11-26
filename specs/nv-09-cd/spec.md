@@ -8,7 +8,7 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-05 («EJECUTA» T01–T14; decisiones de la §7 aceptadas) |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 (RESTler) con diseño 1.3.0-u2 PROPUESTO** |
+| Estado de ejecución | **✅ CD EN PRODUCCIÓN — 20 de 20 tasks (T15 con RESTler el 2026-11-26: PASS WITH WARNINGS)** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.3.0-u2 |
 | Tasks | `task.md` 1.3.0-u2 |
@@ -21,7 +21,7 @@
 
 **Cambio 1.2.0-u2 (2026-11-24) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-25 («Apruebo y EJECUTA», respuesta a la propuesta del PR #90); constitución 1.2.1 aprobada el 2026-11-25 («Apruebo 1.2.1»):** T16 se ejecuta con **k6 2.3.0** en lugar de NBomber. NBomber es gratuito solo para uso personal y su uso por una organización requiere licencia (§1, hallazgo 5); no hay excepción académica publicada, así que NBomber queda descartado (no BLOCKED) por una decisión formal (M-BE-089, propuesta). k6 es open source (AGPL-3.0) y se usa sin modificarlo ni distribuirlo, desde su imagen oficial en el runner: sin proyecto nuevo, sin paquetes NuGet y sin acciones protegidas de `AGENTS.md`. El diseño está en la §6.1. T15 (RESTler) no cambia en esta versión.
 
-**Cambio 1.3.0-u2 (2026-11-26) — PROPUESTO, pendiente de «Apruebo NV-01 1.3.0-u2, NV-03 1.4.0-u2 y NV-09 1.3.0-u2 y EJECUTA NV-01 T13, NV-03 T14 y NV-09 T15»:** fija el diseño de T15 (fuzzing con RESTler) en `cd-extended.yml` (§6.2): RESTler `v9.3.1` compilado desde su código fuente fijado por commit, contra el entorno efímero, con usuario de prueba, modos *test* y *fuzz-lean*, tiempo acotado y triage de cada error 500.
+**Cambio 1.3.0-u2 (2026-11-26) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-26 («Apruebo y EJECUTA», respuesta a la propuesta del PR #100; M-BE-092):** fija el diseño de T15 (fuzzing con RESTler) en `cd-extended.yml` (§6.2): RESTler `v9.3.1` compilado desde su código fuente fijado por commit, contra el entorno efímero, con usuario de prueba, modos *test* y *fuzz-lean*, tiempo acotado y triage de cada error 500.
 
 Esta spec define la entrega continua para revisión humana. No autoriza crear workflows, identidades ni roles, cambiar Terraform, configurar GitHub, publicar, desplegar ni ejecutar seeds: la ejecución requiere la autorización humana «EJECUTA», y cualquier `terraform apply` requiere además «OK PARA APPLY».
 
@@ -155,6 +155,7 @@ Cambio a la constitución (1.2.0 → **1.2.1**, aprobado el 2026-11-25 con «Apr
 | Herramienta | RESTler (Microsoft, MIT) etiqueta `v9.3.1`, **fijado por commit** `eaacd92733771d35e90acfb2040fe37d4e5d09b1` (última etiqueta, 2025-01-30). No tiene imagen oficial: el job clona ese commit y construye su `Dockerfile` en el runner (NV-09-RK09). El código de RESTler solo corre dentro del contenedor, contra la API efímera |
 | Entorno | La misma API efímera de `performance` (imagen construida en el runner, MongoDB y Redis como services, `Testing`), con el perfil `scan` de ZAP (límites globales holgados; los límites por endpoint siguen) y los seeds de demostración |
 | Especificación | `GET /openapi/v1.json` de la API efímera (`Testing` expone OpenAPI); `restler compile` genera la gramática |
+| Exclusiones y proxy (ajuste de la ejecución) | `POST /auth/logout` y `POST /users/me/deletion` se quitan del documento: cierran la sesión del propio fuzzer (la primera ejecución lo demostró: todo lo posterior salía 401). Sus casos los cubren las pruebas de integración, las de seguridad y ZAP. Un nginx local (`.github/fuzz/nginx.conf`) agrega `X-Forwarded-Proto: https` como el ingress de Azure, y `fuzz-lean` usa `--time_budget 0.33` |
 | Autenticación | Script `.github/fuzz/restler_token.py`: registra un usuario de prueba con contraseña aleatoria y entrega `Authorization: Bearer …` a RESTler con `--token_refresh_command` (renovado antes de que venza); el token nunca se escribe en el reporte |
 | Modos | `test` (una petición válida por operación: cobertura) y luego `fuzz-lean` (mutaciones por parámetro), con presupuesto de tiempo de 20 minutos |
 | Resultados | Cobertura (operaciones con respuesta 2xx), conteo de respuestas por código y *bug buckets* (500 y fallas de recursos) en `restler-report.md` (resumen del job) y el artefacto `fuzzing` de 14 días, sin tokens ni contraseñas |
@@ -265,9 +266,9 @@ Si algún componente no puede demostrarse $0, la task correspondiente queda **BL
 | Tasks | 20 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 19 |
+| Tasks completadas | 20 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 CD EN PRODUCCIÓN — 19 de 20 tasks (T16 cerrada el 2026-11-25 con k6: PASS); T15 (RESTler) con diseño 1.3.0-u2 PROPUESTO** |
+| Estado de ejecución | **✅ CD EN PRODUCCIÓN — 20 de 20 tasks (T15 con RESTler el 2026-11-26: PASS WITH WARNINGS)** |
 
 ## 14. Aprobación pendiente
 

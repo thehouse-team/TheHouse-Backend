@@ -8,7 +8,7 @@
 | Fecha | 2026-11-02 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (18 de 19); 1.3.0-u2 (T13 en U2) PROPUESTA |
+| Estado de ejecución | **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26) |
 | Spec | `spec.md` 1.3.0-u2 |
 | Tasks | `task.md` 1.3.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -16,7 +16,7 @@
 
 **Cambio 1.2.0-u2 (2026-11-07) — APROBADO Y AUTORIZADO por Victor Manuel Jose Jose el 2026-11-07 («okey si esta bien una vez que quedo esto me dices», respuesta al paquete propuesto: aprobación documental, «EJECUTA» de NV-08 T14, NV-07 T13, NV-01 T19, NV-09 T13, T18 y T20, NV-03 T08, T18 y T19, y autorización del seed en producción; `terraform apply` sigue requiriendo «OK PARA APPLY»):** agrega NV-01-R14 (encabezados de seguridad HTTP; hallazgo H-01 de NV-09: falta `X-Content-Type-Options: nosniff`) y la task T19. Las tasks 1.1.0-u2 no cambian.
 
-**Cambio 1.3.0-u2 (2026-11-26) — PROPUESTO, pendiente de «Apruebo NV-01 1.3.0-u2, NV-03 1.4.0-u2 y NV-09 1.3.0-u2 y EJECUTA NV-01 T13, NV-03 T14 y NV-09 T15»:** T13 (fronteras del monolito modular) pasa de «Futuro» a **U2** a petición del responsable. Las reglas se comprueban con pruebas de arquitectura por reflexión y con la base de datos de registro que ya usa NV-26, sin paquetes nuevos, más un mapa de módulos en `docs/arquitectura/modulos.md` (§6.2).
+**Cambio 1.3.0-u2 (2026-11-26) — APROBADO Y EJECUTADO por Victor Manuel Jose Jose el 2026-11-26 («Apruebo y EJECUTA», respuesta a la propuesta del PR #100; M-BE-092):** T13 (fronteras del monolito modular) pasa de «Futuro» a **U2** a petición del responsable. Las reglas se comprueban con pruebas de arquitectura por reflexión y con la base de datos de registro que ya usa NV-26, sin paquetes nuevos, más un mapa de módulos en `docs/arquitectura/modulos.md` (§6.2).
 
 Este plan está aprobado documentalmente para U2. No se ejecuta ahora, no se marca ninguna task y no se modifica ningún proyecto. Cualquier inicio requiere autorización humana de Fase B y autorización explícita de rutas.
 
@@ -310,4 +310,4 @@ Este plan no autoriza:
 - Iniciar NV-02, NV-03, NV-04, NV-05, NV-06, NV-07 o NV-08.
 - Seleccionar o provisionar servicios cloud.
 
-Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** (18 de 19); 1.3.0-u2 (T13 en U2) PROPUESTA.
+Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **✅ EJECUTADA, VALIDADA Y CERRADA PARA U2** — 19 de 19 (T13 el 2026-11-26).
