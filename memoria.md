@@ -858,3 +858,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-26.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** NV-03 25/25; costo $0; pendiente reabrir la ventana el 2 de diciembre con su propio «OK PARA APPLY».
+
+## M-BE-094 — Datos de prueba para Mobile en el backend productivo
+
+- **ID:** M-BE-094
+- **Decisión:** cargar datos sintéticos en producción para que Mobile termine de validar. Son 8 cuentas `@example.com`, 10 edificios `[PRUEBA Mobile]` cerca de 6 universidades, 26 cuartos con 3–4 ilustraciones generadas, documentos de prueba y flujos de solicitud, mensajes, visitas, convenio y renta. La carga usa la API pública con un script local (`.azure-check/mobile_testdata.py`, fuera de git), sin cambiar contratos ni código. Para aprobar los edificios se dio el rol `reviewer` temporal a una cuenta de prueba con `--grant-role` y se retiró con `--revoke-role` al terminar.
+- **Estado:** EJECUTADO — Victor, 2026-11-27 («Autorizo ambos»: datos de prueba en producción y rol temporal). Rol asignado y retirado (bitácora con actor `cli`); `verify` 93/93 PASS. Evidencia en `docs/mobile/datos-prueba-mobile.md`.
+- **Fecha:** 2026-11-27.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** los 10 edificios de prueba se ven en la búsqueda pública hasta la limpieza. Costo $0, dentro del cupo F0 de Content Safety y con ~5 MB en Atlas. Credenciales solo en un archivo local, compartidas a Mobile por canal privado. **Pendiente:** limpieza con la fase `cleanup` (renta, convenio y las 8 cuentas) cuando Mobile termine.
