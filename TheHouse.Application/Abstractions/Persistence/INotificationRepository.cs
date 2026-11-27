@@ -30,6 +30,10 @@ public interface INotificationRepository
 
     Task MarkReadByKeyAsync(string userId, string dedupeKey, DateTimeOffset now, CancellationToken cancellationToken);
 
+    // NV-20 1.3.0: true si el usuario ya tiene una notificación con ese
+    // `dedupeKey`, leída o no.
+    Task<bool> ExistsAsync(string userId, string dedupeKey, CancellationToken cancellationToken);
+
     // NV-10 1.2.0: borra la bandeja del usuario.
     Task DeleteAllAsync(string userId, CancellationToken cancellationToken);
 }

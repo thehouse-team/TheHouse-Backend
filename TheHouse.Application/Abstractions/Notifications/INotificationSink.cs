@@ -13,7 +13,9 @@ public interface INotificationSink
 }
 
 // Hecho que se notifica. `RecipientId` sale del recurso, nunca del cliente;
-// los ids de actor y cuarto solo sirven para armar el texto.
+// los ids de actor y cuarto solo sirven para armar el texto. NV-20 1.3.0:
+// con `Once`, si ya existe una notificación con ese `DedupeKey` (leída o no)
+// no se crea otra (`favorite_unavailable`: una vez por cuarto, usuario y día).
 public sealed record NotificationEvent(
     string Type,
     string RecipientId,
@@ -23,4 +25,5 @@ public sealed record NotificationEvent(
     string? BuildingId = null,
     string? StudentId = null,
     string? LandlordId = null,
-    DateTimeOffset? At = null);
+    DateTimeOffset? At = null,
+    bool Once = false);

@@ -1,4 +1,5 @@
 using TheHouse.Application.Abstractions.Media;
+using TheHouse.Application.Abstractions.Notifications;
 using System.Globalization;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
@@ -15,7 +16,9 @@ public sealed class RoomService(
     LandlordService landlords,
     IRoomRepository rooms,
     TimeProvider timeProvider,
-    IMediaPort? media = null)
+    IMediaPort? media = null,
+    INotificationSink? notifications = null,
+    IFavoriteRepository? favorites = null)
 {
     public async Task<GeneratedRoomsResponse> GenerateAsync(string userId, string? buildingId, GenerateRoomsRequest request, CancellationToken cancellationToken)
     {
@@ -155,6 +158,9 @@ public sealed class RoomService(
         {
             await media.DeleteRoomAsync(room.Id, cancellationToken);
         }
+
+        // NV-20 1.3.0: quien lo tenía en favoritos se entera (nunca el arrendador).
+        await FavoriteNotices.NotifyUnavailableAsync(favorites, notifications, room.Id, [userId], timeProvider.GetUtcNow(), cancellationToken);
     }
 
     public async Task<RoomResponse> DuplicateAsync(string userId, string? roomId, CancellationToken cancellationToken)
@@ -215,8 +221,12 @@ public sealed class RoomService(
         return ToResponse(updated);
     }
 
-    public Task<RoomResponse> PauseAsync(string userId, string? roomId, CancellationToken cancellationToken) =>
-        TransitionAsync(userId, roomId, (room, now) => room.Pause(now), cancellationToken);
+    public async Task<RoomResponse> PauseAsync(string userId, string? roomId, CancellationToken cancellationToken)
+    {
+        var paused = await TransitionAsync(userId, roomId, (room, now) => room.Pause(now), cancellationToken);
+        await FavoriteNotices.NotifyUnavailableAsync(favorites, notifications, paused.Id, [userId], timeProvider.GetUtcNow(), cancellationToken);
+        return paused;
+    }
 
     public Task<RoomResponse> ResumeAsync(string userId, string? roomId, CancellationToken cancellationToken) =>
         TransitionAsync(userId, roomId, (room, now) => room.Resume(now), cancellationToken);

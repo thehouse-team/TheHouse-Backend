@@ -7,13 +7,13 @@
 | Versión | 1.3.0 |
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0 (6 avisos nuevos) PROPUESTA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production); 1.3.0: Victor Manuel Jose Jose — 2026-11-27 («Apruebo y EJECUTA» de T09–T12, después de la validación del §6.1 por el responsable de Mobile; mismas rutas, sin paquetes, colecciones ni índices nuevos) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: 7 de 8 tasks (2026-11-19), T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0: T09–T11 implementadas (2026-11-27), T12 espera el despliegue y la prueba en Azure; 10 de 12 tasks** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.3.0 |
 | Tasks | `task.md` 1.3.0 |
 
-**Cambio 1.3.0 (2026-11-26) — PROPUESTO, pendiente de la validación de Mobile del §6.1 y de «Apruebo NV-20 1.3.0 y EJECUTA T09–T12»:** la revisión de los servicios encontró hechos importantes que hoy no avisan a nadie: el estudiante no se entera de que tiene un convenio por aceptar ni de que se canceló, y el arrendador no se entera de que recibió una reseña. Esta versión agrega **6 tipos** a la bandeja (y por lo tanto al push, regla 1): `agreement_proposed`, `agreement_cancelled`, `review_received`, `review_hidden`, `favorite_unavailable` y `report_resolved` (§9.1), con dos destinos nuevos para Mobile (`room` y `none`). Sin endpoints nuevos, sin colecciones nuevas, sin paquetes y sin costo. Los recordatorios de visita quedan fuera: requieren un proceso programado que corra aunque la API esté en cero réplicas (Container Apps Job y Terraform).
+**Cambio 1.3.0 (2026-11-26) — APROBADO el 2026-11-27: Mobile validó el §6.1 (destinos `room` y `none`, tipo o destino desconocido → bandeja, mismo resolver para bandeja y push) y Victor dio «Apruebo y EJECUTA» para T09–T12:** la revisión de los servicios encontró hechos importantes que hoy no avisan a nadie: el estudiante no se entera de que tiene un convenio por aceptar ni de que se canceló, y el arrendador no se entera de que recibió una reseña. Esta versión agrega **6 tipos** a la bandeja (y por lo tanto al push, regla 1): `agreement_proposed`, `agreement_cancelled`, `review_received`, `review_hidden`, `favorite_unavailable` y `report_resolved` (§9.1), con dos destinos nuevos para Mobile (`room` y `none`). Sin endpoints nuevos, sin colecciones nuevas, sin paquetes y sin costo. Los recordatorios de visita quedan fuera: requieren un proceso programado que corra aunque la API esté en cero réplicas (Container Apps Job y Terraform).
 
 Plan preparado para revisión. No crea código, colecciones ni índices hasta la autorización «EJECUTA».
 
@@ -162,4 +162,4 @@ F4 Pruebas y evidencia
 
 ## 10. No ejecución
 
-Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0 (6 avisos nuevos) PROPUESTA**.
+Este plan no autoriza código, paquetes, colecciones, índices, workflows ni cambios en Azure. Estado de ejecución: **🟡 EN EJECUCIÓN — 1.2.0: 7 de 8 tasks (2026-11-19), T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0: T09–T11 implementadas (2026-11-27), T12 espera el despliegue y la prueba en Azure; 10 de 12 tasks**.

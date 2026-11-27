@@ -265,7 +265,9 @@ public sealed class ModerationService(
     IRefreshTokenStore refreshTokens,
     SessionService sessions,
     TimeProvider timeProvider,
-    INotificationSink? notifications = null)
+    INotificationSink? notifications = null,
+    IRoomRepository? rooms = null,
+    IFavoriteRepository? favorites = null)
 {
     public const string SuspendedReason = "suspended";
 
@@ -303,7 +305,10 @@ public sealed class ModerationService(
         foreach (var building in (await buildings.ListAllByOwnerAsync(userId, cancellationToken)).Where(building => building.Status == BuildingStatus.Verified))
         {
             var suspended = building.Suspend(now) with { Version = building.Version + 1 };
-            await buildings.ReplaceAsync(suspended, building.Version, cancellationToken);
+            if (await buildings.ReplaceAsync(suspended, building.Version, cancellationToken))
+            {
+                await NotifyFavoritesAsync(suspended, actorId, cancellationToken);
+            }
         }
 
         await staff.AuditAsync(actorId, "user.suspended", "user", userId, reason, cancellationToken);
@@ -352,7 +357,38 @@ public sealed class ModerationService(
                 cancellationToken);
         }
 
+        if (changed.Status == BuildingStatus.Suspended)
+        {
+            await NotifyFavoritesAsync(changed, actorId, cancellationToken);
+        }
+
         return ListingRules.BuildingStatusText(changed.Status);
+    }
+
+    // NV-20 1.3.0: los cuartos publicados de un edificio suspendido dejan de
+    // verse; avisa a quien los tenía en favoritos (nunca al dueño ni al staff).
+    private async Task NotifyFavoritesAsync(Building building, string actorId, CancellationToken cancellationToken)
+    {
+        if (rooms is null || favorites is null || notifications is null)
+        {
+            return;
+        }
+
+        IReadOnlyList<Room> published;
+        try
+        {
+            published = (await rooms.ListAllByBuildingAsync(building.Id, cancellationToken)).Where(room => room.Status == RoomStatus.Available).ToArray();
+        }
+        catch (DependencyUnavailableException)
+        {
+            return;
+        }
+
+        var now = timeProvider.GetUtcNow();
+        foreach (var room in published)
+        {
+            await FavoriteNotices.NotifyUnavailableAsync(favorites, notifications, room.Id, [building.OwnerId, actorId], now, cancellationToken);
+        }
     }
 }
 
@@ -367,7 +403,8 @@ public sealed class ReportService(
     TimeProvider timeProvider,
     IReviewRepository? reviews = null,
     ReviewModerationService? reviewModeration = null,
-    IContentModerator? moderator = null)
+    IContentModerator? moderator = null,
+    INotificationSink? notifications = null)
 {
     public async Task<ReportCreatedResponse> CreateAsync(string userId, CreateReportRequest request, CancellationToken cancellationToken)
     {
@@ -471,6 +508,15 @@ public sealed class ReportService(
         }
 
         await staff.AuditAsync(userId, "report." + status, "report", report.Id, reason, cancellationToken);
+
+        // NV-20 1.3.0: quien reportó se entera de que se revisó, sin la sanción.
+        if (notifications is not null && report.ReporterId != userId)
+        {
+            await notifications.NotifyAsync(
+                new NotificationEvent(NotificationTypes.ReportResolved, report.ReporterId, report.Id, $"{NotificationTypes.ReportResolved}:{report.Id}"),
+                cancellationToken);
+        }
+
         return ToResponse(report with { Status = status, Resolution = action, ResolvedAt = now });
     }
 

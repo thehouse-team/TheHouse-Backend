@@ -40,9 +40,18 @@ public static class NotificationTemplates
             NotificationTypes.BuildingRejected => ("Edificio no aprobado", $"{place} no fue aprobado."),
             NotificationTypes.BuildingSuspended => ("Edificio suspendido", $"{place} fue suspendido y no aparece en la búsqueda."),
             NotificationTypes.BuildingUnsuspended => ("Edificio reactivado", $"{place} vuelve a estar publicado."),
+            NotificationTypes.AgreementProposed => ("Convenio por aceptar", $"{actor} preparó el convenio de {place}. Pídele el código de cierre para aceptarlo."),
+            NotificationTypes.AgreementCancelled => ("Convenio cancelado", $"{actor} canceló el convenio de {place}."),
+            NotificationTypes.ReviewReceived => ("Nueva reseña", $"{actor} dejó una reseña de {place}."),
+            NotificationTypes.ReviewHidden => ("Reseña ocultada", $"Tu reseña de {place} se ocultó porque no cumple las reglas de la comunidad."),
+            NotificationTypes.FavoriteUnavailable => ("Favorito no disponible", $"{Capitalize(place)} ya no está disponible."),
+            NotificationTypes.ReportResolved => ("Reporte revisado", "Revisamos tu reporte. Gracias por ayudarnos a cuidar la comunidad."),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown notification type."),
         };
     }
+
+    private static string Capitalize(string value) =>
+        value.Length == 0 ? value : char.ToUpper(value[0], System.Globalization.CultureInfo.InvariantCulture) + value[1..];
 
     private static DateTimeOffset Local(DateTimeOffset value) => TimeZoneInfo.ConvertTime(value, VisitSchedulePolicy.MexicoCity);
 
@@ -74,6 +83,11 @@ public sealed class NotificationPublisher(
         }
 
         if (string.IsNullOrEmpty(notification.RecipientId))
+        {
+            return;
+        }
+
+        if (notification.Once && await notifications.ExistsAsync(notification.RecipientId, notification.DedupeKey, cancellationToken))
         {
             return;
         }

@@ -82,6 +82,17 @@ public sealed class MongoFavoriteRepository(IMongoDatabase database) : IFavorite
             return (IReadOnlyList<Favorite>)documents.Select(Map).ToArray();
         });
 
+    public Task<IReadOnlyList<string>> ListUserIdsByRoomAsync(string roomId, int limit, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () =>
+        {
+            var users = await Collection
+                .Find(document => document.RoomId == roomId)
+                .Project(document => document.UserId)
+                .Limit(limit)
+                .ToListAsync(cancellationToken);
+            return (IReadOnlyList<string>)users;
+        });
+
     public Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken) =>
         MongoCalls.Run(async () =>
         {

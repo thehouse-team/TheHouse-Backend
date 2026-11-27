@@ -20,6 +20,7 @@ public static class PushRules
         NotificationTypes.VisitConfirmed,
         NotificationTypes.VisitCancelled,
         NotificationTypes.RequestAccepted,
+        NotificationTypes.AgreementProposed,
     };
 
     public static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(2);

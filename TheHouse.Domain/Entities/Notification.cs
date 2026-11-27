@@ -26,6 +26,11 @@ public static class NotificationTargets
     public const string Rental = "rental";
 
     public const string Building = "building";
+
+    // NV-20 1.3.0: `room` abre el detalle del cuarto; `none` solo la bandeja.
+    public const string Room = "room";
+
+    public const string None = "none";
 }
 
 // NV-20: catálogo cerrado de tipos con su categoría y su destino.
@@ -63,6 +68,19 @@ public static class NotificationTypes
 
     public const string BuildingUnsuspended = "building_unsuspended";
 
+    // NV-20 1.3.0 (§9.1).
+    public const string AgreementProposed = "agreement_proposed";
+
+    public const string AgreementCancelled = "agreement_cancelled";
+
+    public const string ReviewReceived = "review_received";
+
+    public const string ReviewHidden = "review_hidden";
+
+    public const string FavoriteUnavailable = "favorite_unavailable";
+
+    public const string ReportResolved = "report_resolved";
+
     public static readonly IReadOnlyDictionary<string, (string Category, string TargetKind)> Catalog =
         new Dictionary<string, (string, string)>(StringComparer.Ordinal)
         {
@@ -82,6 +100,12 @@ public static class NotificationTypes
             [BuildingRejected] = (NotificationCategories.System, NotificationTargets.Building),
             [BuildingSuspended] = (NotificationCategories.System, NotificationTargets.Building),
             [BuildingUnsuspended] = (NotificationCategories.System, NotificationTargets.Building),
+            [AgreementProposed] = (NotificationCategories.Requests, NotificationTargets.Rental),
+            [AgreementCancelled] = (NotificationCategories.Requests, NotificationTargets.Rental),
+            [ReviewReceived] = (NotificationCategories.System, NotificationTargets.Room),
+            [ReviewHidden] = (NotificationCategories.System, NotificationTargets.Room),
+            [FavoriteUnavailable] = (NotificationCategories.System, NotificationTargets.Room),
+            [ReportResolved] = (NotificationCategories.System, NotificationTargets.None),
         };
 }
 

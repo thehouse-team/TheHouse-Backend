@@ -7,15 +7,15 @@
 | Versión | 1.3.0 |
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0 (6 avisos nuevos) PROPUESTA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production); 1.3.0: Victor Manuel Jose Jose — 2026-11-27 («Apruebo y EJECUTA» de T09–T12, después de la validación del §6.1 por el responsable de Mobile; mismas rutas, sin paquetes, colecciones ni índices nuevos) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: 7 de 8 tasks (2026-11-19), T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0: T09–T11 implementadas (2026-11-27), T12 espera el despliegue y la prueba en Azure; 10 de 12 tasks** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.3.0 |
 | Plan | `plan.md` 1.3.0 |
 | Tasks totales | 12 |
-| Tasks completadas | 7 |
+| Tasks completadas | 10 |
 
-**Cambio 1.3.0 (2026-11-26) — PROPUESTO, pendiente de la validación de Mobile del §6.1 y de «Apruebo NV-20 1.3.0 y EJECUTA T09–T12»:** la revisión de los servicios encontró hechos importantes que hoy no avisan a nadie: el estudiante no se entera de que tiene un convenio por aceptar ni de que se canceló, y el arrendador no se entera de que recibió una reseña. Esta versión agrega **6 tipos** a la bandeja (y por lo tanto al push, regla 1): `agreement_proposed`, `agreement_cancelled`, `review_received`, `review_hidden`, `favorite_unavailable` y `report_resolved` (§9.1), con dos destinos nuevos para Mobile (`room` y `none`). Sin endpoints nuevos, sin colecciones nuevas, sin paquetes y sin costo. Los recordatorios de visita quedan fuera: requieren un proceso programado que corra aunque la API esté en cero réplicas (Container Apps Job y Terraform).
+**Cambio 1.3.0 (2026-11-26) — APROBADO el 2026-11-27: Mobile validó el §6.1 (destinos `room` y `none`, tipo o destino desconocido → bandeja, mismo resolver para bandeja y push) y Victor dio «Apruebo y EJECUTA» para T09–T12:** la revisión de los servicios encontró hechos importantes que hoy no avisan a nadie: el estudiante no se entera de que tiene un convenio por aceptar ni de que se canceló, y el arrendador no se entera de que recibió una reseña. Esta versión agrega **6 tipos** a la bandeja (y por lo tanto al push, regla 1): `agreement_proposed`, `agreement_cancelled`, `review_received`, `review_hidden`, `favorite_unavailable` y `report_resolved` (§9.1), con dos destinos nuevos para Mobile (`room` y `none`). Sin endpoints nuevos, sin colecciones nuevas, sin paquetes y sin costo. Los recordatorios de visita quedan fuera: requieren un proceso programado que corra aunque la API esté en cero réplicas (Container Apps Job y Terraform).
 
 ## Reglas de esta lista
 
@@ -47,9 +47,9 @@
 
 ## F5 — Avisos nuevos (1.3.0)
 
-- [ ] **T09 · Avisos de convenio** — Requisito: NV-20-R07 · Fase: F5 · Aceptación: `agreement_proposed` y `agreement_cancelled` en el catálogo, con sus textos y destino `rental`; se publican desde `AgreementService` al crear y al cancelar; nunca al arrendador; una vez por convenio; pruebas de integración. · Evidencia: pruebas. · Depende de: T02.
-- [ ] **T10 · Avisos de reseñas** — Requisito: NV-20-R08 · Fase: F5 · Aceptación: `review_received` al dueño del cuarto al publicar una reseña y `review_hidden` al autor al ocultarla; sin calificación, texto ni motivo; destino `room`; pruebas de integración y de privacidad. · Evidencia: pruebas. · Depende de: T02.
-- [ ] **T11 · Avisos de favoritos y reportes** — Requisito: NV-20-R09 · Fase: F5 · Aceptación: `favorite_unavailable` a quienes tienen el cuarto en favoritos cuando se renta, pausa, elimina o se suspende su edificio (tope de 200, una vez por cuarto, usuario y día, nunca al arrendador); `report_resolved` a quien reportó sin la sanción; pruebas de integración y de las reglas de arquitectura. · Evidencia: pruebas. · Depende de: T02.
+- [x] **T09 · Avisos de convenio** — Requisito: NV-20-R07 · Fase: F5 · Aceptación: `agreement_proposed` y `agreement_cancelled` en el catálogo, con sus textos y destino `rental`; se publican desde `AgreementService` al crear y al cancelar; nunca al arrendador; una vez por convenio; pruebas de integración. · Evidencia: pruebas. · Depende de: T02.
+- [x] **T10 · Avisos de reseñas** — Requisito: NV-20-R08 · Fase: F5 · Aceptación: `review_received` al dueño del cuarto al publicar una reseña y `review_hidden` al autor al ocultarla; sin calificación, texto ni motivo; destino `room`; pruebas de integración y de privacidad. · Evidencia: pruebas. · Depende de: T02.
+- [x] **T11 · Avisos de favoritos y reportes** — Requisito: NV-20-R09 · Fase: F5 · Aceptación: `favorite_unavailable` a quienes tienen el cuarto en favoritos cuando se renta, pausa, elimina o se suspende su edificio (tope de 200, una vez por cuarto, usuario y día, nunca al arrendador); `report_resolved` a quien reportó sin la sanción; pruebas de integración y de las reglas de arquitectura. · Evidencia: pruebas. · Depende de: T02.
 - [ ] **T12 · Contrato 1.3.0 para Mobile y despliegue** — Requisito: NV-20-R10 · Fase: F5 · Aceptación: §6.1 validado por Mobile (destinos `room` y `none`, tipos desconocidos → bandeja); desplegado por el CD; prueba real en Azure de los 6 avisos con cuentas de prueba; evidencia y revisión final. · Evidencia: `evidence.md`. · Depende de: T09, T10, T11.
 
 ## Matriz task → requisito
@@ -64,9 +64,9 @@
 | T06 | R06 | F4 | COMPLETA |
 | T07 | R06 | F4 | COMPLETA |
 | T08 | R06 | F4 | COMPLETA |
-| T09 | R07 | F5 | ABIERTA |
-| T10 | R08 | F5 | ABIERTA |
-| T11 | R09 | F5 | ABIERTA |
+| T09 | R07 | F5 | COMPLETA |
+| T10 | R08 | F5 | COMPLETA |
+| T11 | R09 | F5 | COMPLETA |
 | T12 | R10 | F5 | ABIERTA |
 
 ## Cobertura requisito → task
@@ -90,11 +90,11 @@
 | --- | --- |
 | Requisitos | 10 |
 | Tasks | 12 |
-| Tasks abiertas | 5 |
-| Tasks completadas | 7 |
+| Tasks abiertas | 2 |
+| Tasks completadas | 10 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0 (6 avisos nuevos) PROPUESTA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: 7 de 8 tasks (2026-11-19), T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0: T09–T11 implementadas (2026-11-27), T12 espera el despliegue y la prueba en Azure; 10 de 12 tasks** |
 
 Ninguna task puede ejecutarse sin la autorización humana «EJECUTA» con versión, tasks y rutas.
