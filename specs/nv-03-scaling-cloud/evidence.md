@@ -449,3 +449,64 @@ cosign verify-attestation "$IMG" --type cyclonedx --certificate-identity "$ID" -
 ```
 
 Resultado: **PASS — T14 completa** (sin cambios de código ni de Terraform). NV-03 queda en **21 de 25**; lo restante es la ventana de dos réplicas.
+
+## T08, T09, T18 y T19 — Ventana de dos réplicas (2026-11-26)
+
+La ventana se adelantó del 3 de diciembre al 2026-11-26 a pedido de Victor («quiero avanzarle en esto para pasar a evaluar más antes»). Autorizaciones: «OK PARA APPLY» para abrirla y «OK PARA APPLY» para cerrarla — Victor Manuel Jose Jose, 2026-11-26.
+
+### Costo antes de abrir
+
+| Dato | Valor |
+| --- | --- |
+| Cost Management de `rg-thehouse-u2`, mes en curso | **0.00 USD** (Container Apps no aparece: todo dentro de la concesión gratuita) |
+| Consumo de la ventana | 2 réplicas × 0.25 vCPU y 0.5 GiB: ~1,800 vCPU-s y ~3,600 GiB-s por hora (1 % de la concesión mensual de 180,000 vCPU-s y 360,000 GiB-s) |
+
+### T18 — plan y apply
+
+| Paso | Resultado |
+| --- | --- |
+| Plan | `terraform plan -var evaluation_mode=true -var min_replicas=2 -var max_replicas=2 -out=nv03-ventana.tfplan` (sin tocar `terraform.tfvars`; la regla del modo de evaluación exige exactamente 2 y 2): `min_replicas` 0 → 2, **0 to add, 1 to change, 0 to destroy**; imagen, secretos y variables sin cambios (`ignore_changes`) |
+| Apply | 21:55:13–21:55:43 UTC: **0 added, 1 changed, 0 destroyed** |
+| Inventario | Revisión `ca-thehouse-u2--0000019`, imagen `sha256:6265f41928f7…` (CD de `780b7be`), `min=2`, `max=2`, sin sesiones fijas, sin HTTP inseguro, probes de arranque, vida y lista |
+
+### T08 — modelo de dos réplicas
+
+| Verificación | Resultado |
+| --- | --- |
+| Réplicas | ✅ 2 `Running` (`…846fbf4555-47sj5` y `…846fbf4555-cxhbz`, 21:55:29), las dos `ready`, 0 reinicios, misma imagen y configuración |
+| Arranque de cada réplica | ✅ «NV-23: Smart Match con logreg-1.0.0 (onnx).» y «NV-24: TheHouse-GenAI activo» en las dos |
+| Revisión | ✅ `Healthy`; `/api/v1/legal` con las URLs de `thehouse-app.netlify.app` |
+
+### T09 — balanceo y health checks
+
+| Verificación | Resultado |
+| --- | --- |
+| Tráfico | 200 peticiones públicas (universidades, propiedades, búsqueda de cuartos y de universidades), 21:57–21:59 UTC: **200/200 con 200** |
+| Reparto (Application Insights, `AppRoleInstance`) | ✅ Las dos réplicas atendieron: ~100 `…cxhbz` y ~60 `…47sj5` en la muestra; el mismo endpoint (`/universities`, `/rooms/search`, `/universities/search`) en las dos: **sin sesiones fijas** |
+| Health checks | ✅ Probes de vida y lista configuradas; las pruebas automáticas demuestran que `/health/ready` responde 503 si MongoDB o Redis no están disponibles mientras `/health/live` sigue en 200 (`HealthAndRateLimitTests`), así que Container Apps retira una réplica no lista sin reiniciarla |
+
+### T19 — despliegue, escalado, fallos y TLS
+
+| Verificación | Resultado |
+| --- | --- |
+| Reinicio con tráfico | `az containerapp revision restart` (22:01:24 UTC) con `/health/live` en bucle: **225/225 con 200**; Container Apps reemplazó las réplicas una por una (`…8h95s` a las 22:01:28 y `…kklth` a las 22:02:06): **sin caídas** |
+| `.azure-check/nv03_window_check.py` (fuera de git), corrido por Victor | **18/18 PASS** |
+| Salud, HTTPS y TLS | `/health/ready` y `/health/live` 200; `http://` → 301 a `https://`; **TLSv1.3**, certificado de Microsoft que vence el 2027-02-12 |
+| Smoke | 7/7 endpoints públicos en 200 (universidades, detalle, propiedades, búsqueda de cuartos y colonias, legal y Smart Match) |
+| Sesión entre réplicas | Registro 201 y login 200; **20 peticiones con el mismo token: 200×20**; Application Insights registró `GET /users/me` 200 en `…8h95s` y en `…kklth` |
+| Revocación entre réplicas | Logout 204; **20 peticiones con el token revocado: 401×20** (también registrado en `…kklth`) |
+| Límite compartido | 5 logins fallidos y el sexto **429** (contador en Redis, no por réplica) |
+| Fallos de Redis y MongoDB | No se provocan en producción. Cubiertos por las pruebas automáticas: lista no preparada (503) con vida en 200 y módulos que fallan cerrados (`Fails_closed_when_redis_or_mongo_are_down` en favoritos y mensajería, `Fails_closed_when_lock_or_storage_are_down` en visitas) |
+| Limpieza | Cuenta de prueba eliminada (204) |
+
+### Regreso a la configuración normal
+
+| Paso | Resultado |
+| --- | --- |
+| Costo de dejarla abierta 5 días | Evaluado a pedido de Victor: noviembre llevaba ~55.5 horas-réplica (backend 46.2 y GenAI 9.3), así que con 2 réplicas quedaban ~72 h gratis en el mes contra ~98 h hasta el 1 de diciembre: se pasaría ~26 h (≈ 0.40–1.10 USD) y rompería COST-001. Decisión de Victor: regresar ahora y **reabrir el 2 de diciembre** para la evaluación del 3 y 4 (cabe en la concesión de diciembre) |
+| Plan | `terraform plan -out=nv03-regreso.tfplan` con los valores de `terraform.tfvars`: `min_replicas` 2 → 0, **0 to add, 1 to change, 0 to destroy** |
+| Apply | 22:27:57–22:28:24 UTC: **0 added, 1 changed, 0 destroyed**; revisión `ca-thehouse-u2--0000020` con `min` 0 y `max` 2; `/health/ready` 200 y `/api/v1/legal` correcto |
+| Control | `terraform plan` posterior: ningún cambio de recursos (solo el valor de salida con el nombre de la revisión) |
+| Duración de la ventana | 21:55–22:28 UTC (~33 minutos con 2 réplicas fijas) |
+
+Resultado: **T08, T09, T18 y T19 completas — PASS.** NV-03 queda en **25 de 25**. La ventana se repite el 2 de diciembre en la mañana (con su propio «OK PARA APPLY») para mostrar las dos réplicas en vivo el 3 y 4 de diciembre.

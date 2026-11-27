@@ -849,3 +849,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Fecha:** 2026-11-26.
 - **Aprobador:** Victor Manuel Jose Jose.
 - **Impacto:** `TheHouse.IntegrationTests/ArchitectureTests.cs`, `docs/arquitectura/modulos.md`, `.github/fuzz/` y el job `fuzzing` de `cd-extended.yml`; sin cambios en la API, sin secretos y sin costo.
+
+## M-BE-093 — NV-03: ventana de dos réplicas adelantada al 2026-11-26
+
+- **ID:** M-BE-093
+- **Decisión:** adelantar la ventana de dos réplicas (T08, T09, T18 y T19) del 3 de diciembre al 2026-11-26 para cerrar NV-03, con `-var evaluation_mode=true -var min_replicas=2 -var max_replicas=2` sin tocar `terraform.tfvars`, y regresar a escala 0–2 el mismo día. Mantenerla 5 días se descartó: pasaría ~26 h de la concesión gratuita de noviembre (COST-001). Se reabre el 2 de diciembre para la evaluación, dentro de la concesión de diciembre.
+- **Estado:** EJECUTADO — Victor, 2026-11-26 («OK PARA APPLY» para abrir y «OK PARA APPLY» para cerrar; «Regresar y reabrir el 2»). Verificación: 2 réplicas sanas, balanceo en las dos, reinicio sin caídas (225/225) y 18/18 con cuenta de prueba.
+- **Fecha:** 2026-11-26.
+- **Aprobador:** Victor Manuel Jose Jose.
+- **Impacto:** NV-03 25/25; costo $0; pendiente reabrir la ventana el 2 de diciembre con su propio «OK PARA APPLY».
