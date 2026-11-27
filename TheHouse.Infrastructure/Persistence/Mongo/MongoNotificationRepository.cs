@@ -195,6 +195,9 @@ public sealed class MongoNotificationRepository(IMongoDatabase database) : INoti
             return Collection.UpdateManyAsync(filter, Read(now), cancellationToken: cancellationToken);
         });
 
+    public Task<bool> ExistsAsync(string userId, string dedupeKey, CancellationToken cancellationToken) =>
+        MongoCalls.Run(async () => await Collection.Find(item => item.UserId == userId && item.DedupeKey == dedupeKey).AnyAsync(cancellationToken));
+
     public Task MarkReadByKeyAsync(string userId, string dedupeKey, DateTimeOffset now, CancellationToken cancellationToken) =>
         MongoCalls.Run(() => Collection.UpdateManyAsync(
             item => item.UserId == userId && item.DedupeKey == dedupeKey && item.Unread,
@@ -288,6 +291,8 @@ public sealed class UnavailableNotificationRepository : INotificationRepository
     public Task<bool> MarkReadAsync(string userId, string id, DateTimeOffset now, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task MarkAllReadAsync(string userId, string? category, DateTimeOffset now, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
+
+    public Task<bool> ExistsAsync(string userId, string dedupeKey, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 
     public Task DeleteAllAsync(string userId, CancellationToken cancellationToken) => throw new DependencyUnavailableException();
 

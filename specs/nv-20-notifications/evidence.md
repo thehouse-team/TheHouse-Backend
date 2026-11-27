@@ -4,13 +4,63 @@
 | --- | --- |
 | ID | NV-20 |
 | Documento | `evidence.md` |
-| Versión | 1.2.0 (1.1.0 completa, ver «Historial 1.1.0») |
-| Fecha | 2026-11-18 |
-| Autorización | 1.2.0: «Ya lo validó, apruebo y EJECUTA NV-20» — Victor Manuel Jose Jose, 2026-11-18: tasks T01–T08 (M-BE-078), con el contrato §6.1 validado antes por Mobile. 1.1.0: «Apruebo y EJECUTA», 2026-11-12 (M-BE-071) |
-| Rama | 1.2.0: `feat/nv-20-push-fcm` → PR #65, merge `7c24535`. 1.1.0: `feat/nv-20-notifications` (PR #46) |
-| Resultado | **🟡 PASS WITH WARNINGS (1.2.0), 7/8** — CI 1027/1027, desplegado en `ca-thehouse-u2--c7c24535-60-2` con el secreto de Firebase, prueba HTTP real de dispositivos 14/14; T05 espera el push en un teléfono real. 1.1.0: ✅ PASS WITH WARNINGS (25/25 en Azure) |
+| Versión | 1.3.0 (1.2.0 y 1.1.0 abajo) |
+| Fecha | 2026-11-27 |
+| Autorización | 1.3.0: «Apruebo y EJECUTA» — Victor Manuel Jose Jose, 2026-11-27: T09–T12, con el §6.1 de 1.3.0 validado antes por Mobile. 1.2.0: «Ya lo validó, apruebo y EJECUTA NV-20» — Victor Manuel Jose Jose, 2026-11-18: tasks T01–T08 (M-BE-078), con el contrato §6.1 validado antes por Mobile. 1.1.0: «Apruebo y EJECUTA», 2026-11-12 (M-BE-071) |
+| Rama | 1.3.0: `feat/nv-20-avisos-1-3-0`. 1.2.0: `feat/nv-20-push-fcm` → PR #65, merge `7c24535`. 1.1.0: `feat/nv-20-notifications` (PR #46) |
+| Resultado | **1.3.0: T09–T11 PASS en local (1,401/1,401); T12 pendiente del despliegue.** **🟡 PASS WITH WARNINGS (1.2.0), 7/8** — CI 1027/1027, desplegado en `ca-thehouse-u2--c7c24535-60-2` con el secreto de Firebase, prueba HTTP real de dispositivos 14/14; T05 espera el push en un teléfono real. 1.1.0: ✅ PASS WITH WARNINGS (25/25 en Azure) |
 
 No se leyeron ni mostraron `appsettings.Development.json`, `terraform.tfvars` ni `terraform.tfstate`.
+
+## 1.3.0 — Avisos nuevos (T09–T11)
+
+Autorización: Mobile validó el §6.1 de 1.3.0 el 2026-11-27 (`targetKind=room` abre el detalle con `GET /rooms/{targetId}`, `none` abre la bandeja, tipo o destino desconocido → bandeja sin peticiones, el mismo resolver para bandeja y push) y Victor dio «Apruebo y EJECUTA» para T09–T12 el mismo día. Rama `feat/nv-20-avisos-1-3-0`. Sin endpoints, colecciones, índices ni paquetes nuevos; costo $0.
+
+### Cambios por capa
+
+| Capa | Archivos | Cambio |
+| --- | --- | --- |
+| Domain | `Entities/Notification.cs` | 6 tipos nuevos en el catálogo (22 en total) y destinos `room` y `none` |
+| Application (puertos) | `INotificationSink.cs`, `INotificationRepository.cs`, `IFavoriteRepository.cs` | `NotificationEvent.Once`; `ExistsAsync` (aviso ya creado, leído o no); `ListUserIdsByRoomAsync` (quién tiene el cuarto en favoritos, con tope) |
+| Application (casos de uso) | `NotificationServices.cs`, `PushServices.cs`, `FavoriteNotices.cs` (nuevo, estático) | Textos de §9.1; `Once` evita repetir el aviso; `agreement_proposed` con prioridad alta en Android; `FavoriteNotices` arma `favorite_unavailable` (tope 200, nunca a los excluidos, una vez por cuarto, usuario y día en hora de Ciudad de México) |
+| Rentals | `RentalServices.cs` | `agreement_proposed` al crear el convenio, `agreement_cancelled` al cancelarlo (al estudiante) y `favorite_unavailable` al rentarse el cuarto (sin el arrendador ni el estudiante que lo rentó) |
+| Reviews / Moderation | `ReviewServices.cs` | `review_received` al dueño al publicar (sin calificación ni texto); `review_hidden` al autor al ocultarla (sin motivo; volver a mostrarla no avisa) |
+| Listings | `RoomService.cs` | `favorite_unavailable` al pausar o eliminar un cuarto (nunca al arrendador) |
+| Moderation | `ModerationServices.cs` | `favorite_unavailable` por cada cuarto publicado al suspender un edificio, también cuando se suspende la cuenta del dueño (nunca al dueño ni al staff); `report_resolved` a quien reportó al resolver o descartar el reporte (sin la acción ni el motivo) |
+| Infrastructure | `MongoNotificationRepository.cs`, `MongoFavoriteRepository.cs`, `UnavailableFavoriteVisitRepositories.cs` | Las dos consultas nuevas; las versiones «no disponible» fallan cerrado |
+| Pruebas | `NotificationsV13HttpTests.cs` (nuevo), `NotificationTests.cs`, dobles de prueba | 6 pruebas de integración nuevas; el catálogo pasa de 16 a 22 |
+
+### Pruebas (local, 2026-11-27)
+
+| Comando | Resultado |
+| --- | --- |
+| `dotnet build TheHouse.slnx -c Release -warnaserror` | 0 advertencias, 0 errores |
+| `dotnet test TheHouse.slnx -c Release` | **1,401/1,401**: unitarias 459, integración 760 (incluye las 7 de arquitectura de NV-01-R13), seguridad 182 |
+
+| Prueba nueva | Qué demuestra |
+| --- | --- |
+| `Agreement_rental_and_review_notify_the_other_party` | `agreement_proposed` al estudiante con destino `rental`, sin el código de cierre y con prioridad alta; al rentarse, `favorite_unavailable` solo a quien lo tenía en favoritos (no al estudiante que lo rentó ni al arrendador); `review_received` al dueño sin el texto; `review_hidden` al autor sin el motivo y sin aviso al volver a mostrarla |
+| `Cancelled_agreement_notifies_the_student_once` | `agreement_cancelled` al estudiante; una segunda cancelación responde 409 y no repite el aviso |
+| `Favorite_unavailable_on_pause_delete_and_suspension_once_per_day` | Pausa, eliminación y suspensión del edificio avisan; leer el aviso, reactivar y volver a pausar el mismo día no repite; el arrendador nunca lo recibe |
+| `Resolved_report_notifies_the_reporter_without_the_sanction` | `report_resolved` con destino `none` y el id del reporte, sin la acción (`suspend_building`) ni el motivo |
+| `Favorites_failure_does_not_break_the_action` | Si los favoritos no responden, pausar sigue en 200 y no se crea el aviso |
+| `Catalog_has_the_new_types_and_targets` | Categorías y destinos de los 6 tipos; tope de 200 |
+
+### Seguridad y coherencia
+
+- **Destinatarios del servidor:** cada destinatario sale del recurso (convenio, reseña, reporte o favoritos), nunca del cliente. Nunca se avisa al actor: arrendador, estudiante que renta, autor que publica o staff que modera.
+- **Sin datos de más (RNF-02):** sin calificación, texto, motivo de moderación ni sanción. Los nombres van solo de pila, y si el estudiante no tiene nombre en su perfil sale «Un estudiante».
+- **Arquitectura (NV-01-R13):** los módulos que avisan usan solo puertos (`INotificationSink`, `IFavoriteRepository`, `IRoomRepository`). `FavoriteNotices` es estático, así que no es un componente con dependencias. La prueba R4 sigue con las mismas 8 aristas entre módulos.
+- **Mejor esfuerzo:** el aviso no deshace la acción. El adaptador del sink ya atrapa sus errores, y si los favoritos fallan (`DependencyUnavailableException`) la acción sigue.
+- **Carga acotada:** hasta 200 avisos por cuarto, y se crean en la misma petición. Al suspender un edificio grande es el caso más pesado: está limitado por el máximo de 200 cuartos por edificio, solo lo puede hacer el staff y es poco frecuente en el piloto.
+- **Consultas sin índice nuevo:** `favorites` por `roomId` (como la consulta de NV-25) y `notifications` por `userId` y `dedupeKey`. Las dos colecciones son chicas en el piloto.
+
+### Pendiente (T12)
+
+1. Isai mezcla el PR.
+2. El CD despliega y Victor aprueba.
+3. Prueba HTTP real en Azure de los 6 avisos con cuentas de prueba.
+4. Prueba conjunta con Mobile (bandeja y push). Con ella también se cierra T05.
 
 ## 1.2.0 — Notificaciones push con Firebase Cloud Messaging
 

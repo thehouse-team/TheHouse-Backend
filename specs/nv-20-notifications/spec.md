@@ -7,8 +7,8 @@
 | Versión | 1.3.0 |
 | Fecha | 2026-11-17 |
 | Estado documental | **✅ APROBADA** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production) |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0 (6 avisos nuevos) PROPUESTA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-18 («Apruebo y EJECUTA»: aprobación de 1.2.0 con las decisiones de la §13, validación previa del contrato §6.1 por el responsable de Mobile, y «EJECUTA» de T01–T08; rutas `TheHouse/`, `TheHouse.Application/`, `TheHouse.Domain/`, `TheHouse.Infrastructure/`, los tres proyectos de pruebas y `specs/nv-20-notifications/`; sin comandos en Production); 1.3.0: Victor Manuel Jose Jose — 2026-11-27 («Apruebo y EJECUTA» de T09–T12, después de la validación del §6.1 por el responsable de Mobile; mismas rutas, sin paquetes, colecciones ni índices nuevos) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: 7 de 8 tasks (2026-11-19), T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0: T09–T11 implementadas (2026-11-27), T12 espera el despliegue y la prueba en Azure; 10 de 12 tasks** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | Requisito del curso §16 (notificaciones push de los procesos principales); RF-75 (bandeja) (`Requerimientos_TheHouse_v2`) |
 | No funcionales | RNF-01, RNF-02, RNF-09 |
@@ -22,7 +22,7 @@ Spec funcional en borrador para revisión humana. No autoriza código, paquetes,
 
 **Cambio 1.2.0-borrador (2026-11-17):** la versión 1.1.0 (bandeja en la app, M-BE-071) quedó completa y desplegada (ver `evidence.md`). El curso pide **notificaciones push para los procesos principales** (§16 Móvil), así que esta versión agrega el canal push con **Firebase Cloud Messaging (FCM)** sobre la misma bandeja: cada notificación que ya se guarda en la bandeja también se envía al teléfono. La app registra su token de FCM por instalación y lo borra al cerrar sesión. El envío es posterior a guardar y nunca deshace la acción principal; la bandeja sigue siendo la fuente de verdad. No se agregan correo ni SMS. Requiere una decisión M-BE nueva (proveedor FCM y un secreto nuevo) que reemplaza la parte «sin push» de M-BE-071.
 
-**Cambio 1.3.0 (2026-11-26) — PROPUESTO, pendiente de la validación de Mobile del §6.1 y de «Apruebo NV-20 1.3.0 y EJECUTA T09–T12»:** la revisión de los servicios encontró hechos importantes que hoy no avisan a nadie: el estudiante no se entera de que tiene un convenio por aceptar ni de que se canceló, y el arrendador no se entera de que recibió una reseña. Esta versión agrega **6 tipos** a la bandeja (y por lo tanto al push, regla 1): `agreement_proposed`, `agreement_cancelled`, `review_received`, `review_hidden`, `favorite_unavailable` y `report_resolved` (§9.1), con dos destinos nuevos para Mobile (`room` y `none`). Sin endpoints nuevos, sin colecciones nuevas, sin paquetes y sin costo. Los recordatorios de visita quedan fuera: requieren un proceso programado que corra aunque la API esté en cero réplicas (Container Apps Job y Terraform).
+**Cambio 1.3.0 (2026-11-26) — APROBADO el 2026-11-27: Mobile validó el §6.1 (destinos `room` y `none`, tipo o destino desconocido → bandeja, mismo resolver para bandeja y push) y Victor dio «Apruebo y EJECUTA» para T09–T12:** la revisión de los servicios encontró hechos importantes que hoy no avisan a nadie: el estudiante no se entera de que tiene un convenio por aceptar ni de que se canceló, y el arrendador no se entera de que recibió una reseña. Esta versión agrega **6 tipos** a la bandeja (y por lo tanto al push, regla 1): `agreement_proposed`, `agreement_cancelled`, `review_received`, `review_hidden`, `favorite_unavailable` y `report_resolved` (§9.1), con dos destinos nuevos para Mobile (`room` y `none`). Sin endpoints nuevos, sin colecciones nuevas, sin paquetes y sin costo. Los recordatorios de visita quedan fuera: requieren un proceso programado que corra aunque la API esté en cero réplicas (Container Apps Job y Terraform).
 
 ## 1. Contexto
 
@@ -281,9 +281,9 @@ Un plan gratuito, un crédito o una alerta de presupuesto no prueban por sí sol
 | Tasks | 12 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 7 |
+| Tasks completadas | 10 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 DESPLEGADA — 1.2.0: 7 de 8 tasks (2026-11-19); T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0 (6 avisos nuevos) PROPUESTA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — 1.2.0: 7 de 8 tasks (2026-11-19), T05 espera la prueba del push en un teléfono real con Mobile; 1.3.0: T09–T11 implementadas (2026-11-27), T12 espera el despliegue y la prueba en Azure; 10 de 12 tasks** |
 
 ## 18. Aprobación pendiente
 

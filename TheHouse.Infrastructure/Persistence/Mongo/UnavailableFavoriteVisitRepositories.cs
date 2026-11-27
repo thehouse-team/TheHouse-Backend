@@ -19,6 +19,8 @@ public sealed class UnavailableFavoriteRepository : IFavoriteRepository
 
     public Task<IReadOnlyList<Favorite>> ListByRoomsAsync(IReadOnlyCollection<string> roomIds, CancellationToken cancellationToken) => Fail<IReadOnlyList<Favorite>>();
 
+    public Task<IReadOnlyList<string>> ListUserIdsByRoomAsync(string roomId, int limit, CancellationToken cancellationToken) => Fail<IReadOnlyList<string>>();
+
     public Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken) => Fail<MigrationCounts>();
 
     private static Task<T> Fail<T>() => throw new DependencyUnavailableException();

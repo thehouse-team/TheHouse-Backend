@@ -23,9 +23,10 @@ public sealed class NotificationTests
     // --- Catálogo y textos -------------------------------------------
 
     [Fact]
-    public void Catalog_has_sixteen_types_in_three_categories()
+    public void Catalog_has_twenty_two_types_in_three_categories()
     {
-        Assert.Equal(16, NotificationTypes.Catalog.Count);
+        // NV-20 1.3.0: 16 de 1.2.0 + 6 avisos nuevos (§9.1).
+        Assert.Equal(22, NotificationTypes.Catalog.Count);
         Assert.All(NotificationTypes.Catalog.Values, entry => Assert.Contains(entry.Category, NotificationCategories.All));
         Assert.Equal(NotificationCategories.Visits, NotificationTypes.Catalog[NotificationTypes.VisitConfirmed].Category);
         Assert.Equal(NotificationTargets.Conversation, NotificationTypes.Catalog[NotificationTypes.MessageReceived].TargetKind);

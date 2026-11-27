@@ -21,6 +21,10 @@ public interface IFavoriteRepository
     // NV-25: favoritos actuales de esos cuartos (máximo 5000), para contarlos.
     Task<IReadOnlyList<Favorite>> ListByRoomsAsync(IReadOnlyCollection<string> roomIds, CancellationToken cancellationToken);
 
+    // NV-20 1.3.0: usuarios que tienen ese cuarto en favoritos (máximo `limit`),
+    // para el aviso `favorite_unavailable`.
+    Task<IReadOnlyList<string>> ListUserIdsByRoomAsync(string roomId, int limit, CancellationToken cancellationToken);
+
     // Migración: asigna `roomId` a los favoritos que solo tienen `propertyId`.
     Task<MigrationCounts> MigrateLegacyAsync(IReadOnlyDictionary<string, string> roomByProperty, CancellationToken cancellationToken);
 }

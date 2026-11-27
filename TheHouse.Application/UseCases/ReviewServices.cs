@@ -1,4 +1,5 @@
 using TheHouse.Application.Abstractions.Moderation;
+using TheHouse.Application.Abstractions.Notifications;
 using TheHouse.Application.Abstractions.Persistence;
 using TheHouse.Application.Common;
 using TheHouse.Application.Contracts.Moderation;
@@ -86,7 +87,8 @@ public sealed class RoomReviewService(
     IBuildingRepository buildings,
     IProfileRepository profiles,
     TimeProvider timeProvider,
-    IContentModerator? moderator = null)
+    IContentModerator? moderator = null,
+    INotificationSink? notifications = null)
 {
     public async Task<ReviewEligibilityResponse> EligibilityAsync(string userId, string? roomId, CancellationToken cancellationToken)
     {
@@ -131,6 +133,15 @@ public sealed class RoomReviewService(
                 UpdatedAt = now,
             },
             cancellationToken) ?? throw new ConflictException("review_exists");
+
+        // NV-20 1.3.0: el dueño del cuarto se entera, sin calificación ni texto.
+        if (notifications is not null && created.OwnerId != userId)
+        {
+            await notifications.NotifyAsync(
+                new NotificationEvent(NotificationTypes.ReviewReceived, created.OwnerId, created.RoomId, $"{NotificationTypes.ReviewReceived}:{created.Id}", RoomId: created.RoomId, StudentId: userId),
+                cancellationToken);
+        }
+
         return await ToResponseAsync(created, room, cancellationToken);
     }
 
@@ -264,7 +275,11 @@ public sealed class RoomReviewService(
 
 // NV-19 en NV-21: ocultar o volver a mostrar una reseña (rol `admin`), con
 // motivo y bitácora. El módulo Moderation usa el puerto de Reviews.
-public sealed class ReviewModerationService(StaffService staff, IReviewRepository reviews, TimeProvider timeProvider)
+public sealed class ReviewModerationService(
+    StaffService staff,
+    IReviewRepository reviews,
+    TimeProvider timeProvider,
+    INotificationSink? notifications = null)
 {
     public Task<ReviewStatusResponse> HideAsync(string actorId, string? id, ReasonRequest request, CancellationToken cancellationToken) =>
         ChangeAsync(actorId, id, request, (review, now) => review.Hide(now), "review.hidden", cancellationToken);
@@ -290,6 +305,16 @@ public sealed class ReviewModerationService(StaffService staff, IReviewRepositor
         }
 
         await staff.AuditAsync(actorId, action, "review", review.Id, reason, cancellationToken);
+
+        // NV-20 1.3.0: el autor se entera de que su reseña se ocultó, sin el
+        // motivo de la moderación.
+        if (notifications is not null && changed.Status == ReviewStatus.Hidden && review.Status != ReviewStatus.Hidden && changed.AuthorId != actorId)
+        {
+            await notifications.NotifyAsync(
+                new NotificationEvent(NotificationTypes.ReviewHidden, changed.AuthorId, changed.RoomId, $"{NotificationTypes.ReviewHidden}:{changed.Id}", RoomId: changed.RoomId),
+                cancellationToken);
+        }
+
         return new ReviewStatusResponse(changed.Id, changed.Status.ToString().ToLowerInvariant());
     }
 }

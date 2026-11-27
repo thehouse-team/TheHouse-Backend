@@ -97,6 +97,15 @@ public sealed class InMemoryNotificationRepository : INotificationRepository
     public Task MarkAllReadAsync(string userId, string? category, DateTimeOffset now, CancellationToken cancellationToken) =>
         MarkWhere(item => item.UserId == userId && (category is null || item.Category == category), now, cancellationToken);
 
+    public Task<bool> ExistsAsync(string userId, string dedupeKey, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult(Items.Any(item => item.UserId == userId && item.DedupeKey == dedupeKey));
+        }
+    }
+
     public Task MarkReadByKeyAsync(string userId, string dedupeKey, DateTimeOffset now, CancellationToken cancellationToken) =>
         MarkWhere(item => item.UserId == userId && item.DedupeKey == dedupeKey, now, cancellationToken);
 

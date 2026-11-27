@@ -165,7 +165,8 @@ public sealed class AgreementService(
     IVisitRepository visits,
     IUserLock userLock,
     TimeProvider timeProvider,
-    INotificationSink? notifications = null)
+    INotificationSink? notifications = null,
+    IFavoriteRepository? favorites = null)
 {
     private static readonly TimeSpan LockTtl = TimeSpan.FromSeconds(10);
 
@@ -211,6 +212,11 @@ public sealed class AgreementService(
         };
 
         var created = await agreements.CreateAsync(agreement, cancellationToken) ?? throw new ConflictException("agreement_open");
+
+        // NV-20 1.3.0: el estudiante se entera de que tiene un convenio por aceptar.
+        await NotifyAsync(
+            new NotificationEvent(NotificationTypes.AgreementProposed, created.StudentId, created.Id, $"{NotificationTypes.AgreementProposed}:{created.Id}", RoomId: created.RoomId, LandlordId: created.OwnerId),
+            cancellationToken);
         return await ToLandlordResponseAsync(created, room, building, new ClosingCodeResponse(qrToken, backupCode, created.Code!.ExpiresAt), cancellationToken);
     }
 
@@ -263,6 +269,9 @@ public sealed class AgreementService(
         var agreement = await LoadOwnedAsync(ownerId, id, cancellationToken);
         var cancelled = agreement.Cancel(timeProvider.GetUtcNow());
         await SaveAsync(agreement, cancelled, cancellationToken);
+        await NotifyAsync(
+            new NotificationEvent(NotificationTypes.AgreementCancelled, cancelled.StudentId, cancelled.Id, $"{NotificationTypes.AgreementCancelled}:{cancelled.Id}", RoomId: cancelled.RoomId, LandlordId: cancelled.OwnerId),
+            cancellationToken);
         return await ToLandlordResponseAsync(cancelled, null, cancellationToken);
     }
 
@@ -355,6 +364,11 @@ public sealed class AgreementService(
             new NotificationEvent(NotificationTypes.AgreementActivated, activated.OwnerId, activated.Id, $"{NotificationTypes.AgreementActivated}:{activated.Id}", RoomId: activated.RoomId, StudentId: activated.StudentId),
             cancellationToken);
         var effectsPending = !await ApplyRentedEffectsAsync(activated, cancellationToken);
+
+        // NV-20 1.3.0: el cuarto rentado deja de estar publicado; ni el
+        // arrendador ni el estudiante que lo rentó reciben el aviso.
+        await FavoriteNotices.NotifyUnavailableAsync(
+            favorites, notifications, activated.RoomId, [activated.OwnerId, activated.StudentId], timeProvider.GetUtcNow(), cancellationToken);
         return (await ToRentalAsync(activated, cancellationToken), effectsPending);
     }
 

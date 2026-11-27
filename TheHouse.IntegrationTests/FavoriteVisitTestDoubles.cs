@@ -70,6 +70,15 @@ public sealed class InMemoryFavoriteRepository : IFavoriteRepository
         }
     }
 
+    public Task<IReadOnlyList<string>> ListUserIdsByRoomAsync(string roomId, int limit, CancellationToken cancellationToken)
+    {
+        Guard(cancellationToken);
+        lock (gate)
+        {
+            return Task.FromResult<IReadOnlyList<string>>(Items.Where(item => item.RoomId == roomId).Select(item => item.UserId).Take(limit).ToList());
+        }
+    }
+
     public Task<IReadOnlyList<Favorite>> ListAllAsync(string userId, CancellationToken cancellationToken)
     {
         Guard(cancellationToken);
