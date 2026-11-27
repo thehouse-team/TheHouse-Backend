@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
+| Estado de ejecución | **✅ EJECUTADA PARA U2 — 25 de 25 tasks (ventana de dos réplicas el 2026-11-26: 18/18, balanceo y reinicio sin caídas); ver `evidence.md`** |
 | Spec | `spec.md` 1.4.0-u2 |
 | Tasks | `task.md` 1.4.0-u2 |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
@@ -358,4 +358,4 @@ Este plan no autoriza:
 - Ejecutar NV-02 o declarar sus controles.
 - Afirmar costo $0 sin evidencia.
 
-Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`**.
+Estado documental: **✅ APROBADA PARA U2**. Estado de ejecución: **✅ EJECUTADA PARA U2 — 25 de 25 tasks (ventana de dos réplicas el 2026-11-26: 18/18, balanceo y reinicio sin caídas); ver `evidence.md`**.

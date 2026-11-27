@@ -8,7 +8,7 @@
 | Fecha | 2026-11-05 |
 | Estado documental | **✅ APROBADA PARA U2** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-02 |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
+| Estado de ejecución | **✅ EJECUTADA PARA U2 — 25 de 25 tasks (ventana de dos réplicas el 2026-11-26: 18/18, balanceo y reinicio sin caídas); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Requerimientos de origen | RNF-05, RNF-06, RNF-08 (transversales) (`Requerimientos_TheHouse_v2`) |
 | Plan | `plan.md` 1.4.0-u2 |
@@ -275,9 +275,9 @@ Ninguna de estas pruebas se ejecuta en esta fase documental. No se declaran late
 | Tasks futuras (no U2) | 1 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 21 |
+| Tasks completadas | 25 |
 | Estado documental | **✅ APROBADA PARA U2** |
-| Estado de ejecución | **🟡 EJECUCIÓN PARCIAL — 21 de 25 tasks (entrega de la imagen el 2026-11-26); abiertas: T08, T09, T18 y T19 (ventana de dos réplicas del 3 de diciembre); ver `evidence.md`** |
+| Estado de ejecución | **✅ EJECUTADA PARA U2 — 25 de 25 tasks (ventana de dos réplicas el 2026-11-26: 18/18, balanceo y reinicio sin caídas); ver `evidence.md`** |
 
 ## 14. Aprobación documental y ejecución
 
